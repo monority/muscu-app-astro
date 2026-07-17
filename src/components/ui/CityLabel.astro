@@ -1,0 +1,33 @@
+---
+type Props = {
+  city?: string;
+  label?: string;
+};
+
+const { city = "Paris", label = "Ville" } = Astro.props as Props;
+---
+
+<p class="city-label" aria-label={`${label} : ${city}`}>
+  <span>{label}</span>
+  <strong>{city}</strong>
+</p>
+
+<style>
+  .city-label {
+    display: inline-grid;
+    gap: 0.2rem;
+    color: var(--muted);
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+
+  .city-label span {
+    color: hsl(0 0% 100% / 0.46);
+  }
+
+  .city-label strong {
+    color: var(--text);
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,31 @@
+---
+type Props = {
+  as?: keyof HTMLElementTagNameMap;
+  tone?: 'default' | 'soft';
+  padded?: boolean;
+  class?: string;
+};
+
+const { as = 'div', tone = 'default', padded = true, class: className = '' } = Astro.props as Props;
+const Tag = as;
+---
+
+<Tag class={`ui-surface ui-surface-${tone} ${padded ? 'ui-surface-padded' : ''} ${className}`.trim()}>
+  <slot />
+</Tag>
+
+<style>
+  .ui-surface {
+    border-radius: 1.2rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .ui-surface-soft {
+    background: var(--surface);
+  }
+
+  .ui-surface-padded {
+    padding: 1.6rem;
+  }
+</style>

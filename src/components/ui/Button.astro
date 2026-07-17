@@ -1,0 +1,150 @@
+---
+type Props = {
+  href?: string;
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md";
+  fullWidth?: boolean;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  external?: boolean;
+  class?: string;
+};
+
+const {
+  href,
+  variant = "primary",
+  size = "md",
+  fullWidth = false,
+  type = "button",
+  disabled = false,
+  external = false,
+  class: className = "",
+} = Astro.props as Props;
+
+const isLink = typeof href === "string" && href.length > 0;
+const Tag = isLink ? "a" : "button";
+const rel = external ? "noreferrer noopener" : undefined;
+const target = external ? "_blank" : undefined;
+---
+
+<Tag
+  class={`ui-button ui-button-${variant} ui-button-${size} ${fullWidth ? "ui-button-full" : ""} ${className}`.trim()}
+  href={isLink ? href : undefined}
+  type={isLink ? undefined : type}
+  disabled={!isLink ? disabled : undefined}
+  aria-disabled={isLink && disabled ? "true" : undefined}
+  rel={rel}
+  target={target}
+>
+  <slot />
+</Tag>
+
+<style>
+  .ui-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: max(3.8rem, 2vw);
+    padding-inline: 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    text-decoration: none;
+    font: inherit;
+    font-size: 1.4rem;
+    letter-spacing: 0;
+    cursor: pointer;
+    transition:
+      background-color var(--motion-fast),
+      border-color var(--motion-fast),
+      color var(--motion-fast),
+      box-shadow var(--motion-fast),
+      transform var(--motion-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-button:hover {
+    outline: none;
+    transform: translateY(-1px);
+  }
+
+  .ui-button:active {
+    transform: translateY(0);
+  }
+
+  .ui-button:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .ui-button-primary {
+    border-color: hsl(0 84% 62% / 0.45);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    box-shadow: var(--shadow-1);
+  }
+
+  .ui-button-primary:hover {
+    border-color: hsl(0 84% 68% / 0.7);
+    background: hsl(0 84% 57%);
+    box-shadow: var(--shadow-2);
+  }
+
+  .ui-button-primary:active {
+    box-shadow:
+      inset 0 1px 2px hsl(0 0% 0% / 0.3),
+      0 1px 2px hsl(0 0% 0% / 0.2);
+  }
+
+  .ui-button-secondary {
+    border-color: hsl(0 0% 100% / 0.1);
+    background: hsl(0 0% 100% / 0.035);
+    color: var(--text);
+    box-shadow: var(--shadow-1);
+  }
+
+  .ui-button-secondary:hover {
+    border-color: hsl(0 0% 100% / 0.16);
+    background: hsl(0 0% 100% / 0.055);
+    box-shadow: var(--shadow-2);
+  }
+
+  .ui-button-ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--text);
+  }
+
+  .ui-button-ghost:hover {
+    background: hsl(0 0% 100% / 0.06);
+  }
+
+  .ui-button-sm {
+    min-height: 3.4rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 1.3rem;
+  }
+
+  .ui-button-full {
+    width: 100%;
+  }
+
+  .ui-button:disabled,
+  .ui-button[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .ui-button[aria-disabled="true"] {
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-button {
+      transition: none;
+    }
+  }
+</style>

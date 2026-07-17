@@ -1,0 +1,74 @@
+---
+type Props = {
+  label?: string;
+  locale?: string;
+  timeZone?: string;
+};
+
+const {
+  label = "Heure locale",
+  locale = "fr-FR",
+  timeZone = "Europe/Paris",
+} = Astro.props as Props;
+---
+
+<p
+  class="live-clock"
+  data-live-clock
+  data-locale={locale}
+  data-time-zone={timeZone}
+  aria-live="polite"
+>
+  <span>{label}</span>
+  <time datetime="">--:--:--</time>
+</p>
+
+<script>
+  const clocks = document.querySelectorAll("[data-live-clock]");
+
+  const updateClock = (clock: Element) => {
+    const locale = clock.getAttribute("data-locale") || "fr-FR";
+    const timeZone = clock.getAttribute("data-time-zone") || "Europe/Paris";
+    const time = clock.querySelector("time");
+
+    if (!time) return;
+
+    const now = new Date();
+    const value = new Intl.DateTimeFormat(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZone,
+    }).format(now);
+
+    time.textContent = value;
+    time.setAttribute("datetime", now.toISOString());
+  };
+
+  clocks.forEach((clock) => {
+    updateClock(clock);
+    window.setInterval(() => updateClock(clock), 1000);
+  });
+</script>
+
+<style>
+  .live-clock {
+    display: inline-grid;
+    gap: 0.2rem;
+    color: var(--muted);
+    font-size: 1.2rem;
+    line-height: 1.2;
+    text-align: right;
+  }
+
+  .live-clock span {
+    color: hsl(0 0% 100% / 0.46);
+  }
+
+  .live-clock time {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+</style>

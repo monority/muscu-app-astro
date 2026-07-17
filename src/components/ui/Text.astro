@@ -1,0 +1,48 @@
+---
+type Props = {
+  as?: 'p' | 'span' | 'div';
+  size?: 'sm' | 'md' | 'lg';
+  tone?: 'default' | 'muted' | 'soft';
+  class?: string;
+};
+
+const { as = 'p', size = 'md', tone = 'muted', class: className = '' } = Astro.props as Props;
+const Tag = as;
+---
+
+<Tag class={`ui-text ui-text-${size} ui-text-${tone} ${className}`.trim()}>
+  <slot />
+</Tag>
+
+<style>
+  .ui-text {
+    margin: 0;
+    line-height: 1.55;
+    text-wrap: pretty;
+    font-family: inherit;
+  }
+
+  .ui-text-sm {
+    font-size: 1.4rem;
+  }
+
+  .ui-text-md {
+    font-size: 1.5rem;
+  }
+
+  .ui-text-lg {
+    font-size: 1.6rem;
+  }
+
+  .ui-text-default {
+    color: var(--text);
+  }
+
+  .ui-text-muted {
+    color: var(--muted);
+  }
+
+  .ui-text-soft {
+    color: color-mix(in srgb, var(--muted) 82%, transparent);
+  }
+</style>
