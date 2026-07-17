@@ -1,8 +1,8 @@
 ---
+import Topbar from "../components/landing/Topbar.astro";
+import LandingStatus from "../components/landing/LandingStatus.astro";
 import Button from "../components/ui/Button.astro";
-import CityLabel from "../components/ui/CityLabel.astro";
 import Container from "../components/ui/Container.astro";
-import LiveClock from "../components/ui/LiveClock.astro";
 import Title from "../components/ui/Title.astro";
 import "../styles/index.css";
 ---
@@ -18,7 +18,7 @@ import "../styles/index.css";
     <meta name="theme-color" content="#050505" />
     <meta
       name="description"
-      content="Muscu App, une base clean et simple pour suivre une séance de musculation."
+      content="Muscu App aide à suivre une séance: séries, charges, repos et historique local."
     />
     <title>Muscu App</title>
   </head>
@@ -26,24 +26,7 @@ import "../styles/index.css";
     <main class="page-shell">
       <Container size="md">
         <div class="page-frame">
-          <header class="topbar" aria-label="Muscu App">
-            <div class="topbar-pill">
-              <span class="topbar-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                  <path d="M4 12h4M16 12h4M8 8v8M16 8v8"></path>
-                </svg>
-              </span>
-
-              <span class="topbar-brand">Muscu App</span>
-
-              <span class="topbar-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                  <path d="M12 7v5l3 2"></path>
-                  <circle cx="12" cy="12" r="8"></circle>
-                </svg>
-              </span>
-            </div>
-          </header>
+          <Topbar />
 
           <section class="hero-card" aria-labelledby="home-title">
             <p class="hero-kicker">Suivi de séance local</p>
@@ -53,8 +36,8 @@ import "../styles/index.css";
             </Title>
 
             <p class="hero-copy">
-              Exercice en cours, charges, répétitions, repos et historique restent
-              au même endroit, lisibles pendant l'entraînement.
+              Garde l'exercice actif, les charges, les répétitions et le repos sous
+              les yeux. L'historique reste local, prêt pour la prochaine série.
             </p>
 
             <div class="actions">
@@ -63,16 +46,13 @@ import "../styles/index.css";
             </div>
 
             <div class="hero-meta" aria-label="Repères rapides">
-              <span>Exercice suivant</span>
+              <span>Développé couché</span>
               <span>Repos 01:30</span>
-              <span>Historique local</span>
+              <span>Dernière série 8 x 72,5</span>
             </div>
           </section>
 
-          <footer class="landing-status" aria-label="Contexte actuel">
-            <CityLabel city="Paris" />
-            <LiveClock />
-          </footer>
+          <LandingStatus city="Paris" />
 
           <div class="home-anchor" id="session" aria-hidden="true"></div>
           <div class="home-anchor" id="actions" aria-hidden="true"></div>
@@ -92,84 +72,31 @@ import "../styles/index.css";
   .page-frame {
     display: grid;
     min-height: calc(100svh - 4.4rem);
-    gap: 1.4rem;
+    gap: 1.2rem;
     grid-template-rows: auto auto auto;
     align-content: center;
-  }
-
-  .topbar {
-    display: flex;
-    justify-content: center;
-  }
-
-  .topbar-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    min-height: 4.1rem;
-    padding: 0.55rem 1.1rem 0.55rem 0.7rem;
-    border: 1px solid hsl(0 0% 100% / 0.08);
-    border-radius: 999px;
-    background:
-      linear-gradient(180deg, hsl(0 0% 100% / 0.04), hsl(0 0% 100% / 0.01)),
-      hsl(0 0% 100% / 0.015);
-    box-shadow: 0 12px 28px hsl(0 0% 0% / 0.2);
-    backdrop-filter: blur(10px);
-  }
-
-  .topbar-brand {
-    color: var(--text);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .topbar-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    flex: none;
-    border-radius: 999px;
-    border: 1px solid hsl(0 0% 100% / 0.08);
-    background: hsl(0 0% 100% / 0.02);
-    color: var(--muted);
-  }
-
-  .topbar-icon svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.7;
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
 
   .hero-card {
     position: relative;
     display: grid;
     justify-items: center;
-    gap: 1.5rem;
+    gap: 1.35rem;
     width: min(100%, 64rem);
     margin-inline: auto;
-    padding: clamp(2.2rem, 2.8vw, 3.2rem);
+    padding: clamp(2.2rem, 3vw, 3.6rem);
     border: 1px solid var(--border);
-    border-radius: 1.8rem;
-    background:
-      linear-gradient(180deg, hsl(0 0% 100% / 0.02), transparent 45%),
-      linear-gradient(180deg, var(--surface-2), var(--surface));
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    box-shadow: var(--shadow-2);
   }
 
   .hero-card::after {
     content: "";
     position: absolute;
-    inset: 1rem;
-    border-radius: 1.2rem;
+    inset: 0.9rem;
     border: 1px solid hsl(0 0% 100% / 0.03);
+    border-radius: 1.2rem;
     pointer-events: none;
   }
 
@@ -183,17 +110,16 @@ import "../styles/index.css";
   }
 
   .hero-title {
-    max-width: 14ch;
+    max-width: 15ch;
   }
 
   .hero-copy {
-    margin: 0;
-    max-width: 48ch;
+    max-width: 52ch;
     color: var(--muted);
     font-size: 1.5rem;
     line-height: 1.55;
-    text-wrap: pretty;
     text-align: center;
+    text-wrap: pretty;
   }
 
   .actions {
@@ -202,16 +128,6 @@ import "../styles/index.css";
     justify-content: center;
     gap: 1rem;
     width: min(100%, 43rem);
-  }
-
-  .landing-status {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 1.6rem;
-    width: min(100%, 64rem);
-    margin-inline: auto;
-    padding: 0.2rem 0.2rem 0;
   }
 
   .hero-meta {
@@ -225,12 +141,12 @@ import "../styles/index.css";
   .hero-meta span {
     display: inline-flex;
     align-items: center;
-    min-height: 3rem;
-    padding: 0.5rem 1.1rem;
+    min-height: 3.2rem;
+    padding: 0.55rem 1rem;
     border: 1px solid hsl(0 0% 100% / 0.08);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: hsl(0 0% 100% / 0.02);
-    color: var(--muted);
+    color: hsl(0 0% 100% / 0.68);
     font-size: 1.2rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -251,16 +167,16 @@ import "../styles/index.css";
 
     .page-frame {
       min-height: calc(100svh - 3.6rem);
-      gap: 1.2rem;
+      gap: 1rem;
     }
 
     .hero-card {
-      gap: 1.3rem;
-      padding: 1.8rem;
+      gap: 1.2rem;
+      padding: 1.8rem 1.4rem;
     }
 
     .hero-copy {
-      max-width: 30ch;
+      max-width: 32ch;
       font-size: 1.4rem;
     }
 
@@ -269,27 +185,17 @@ import "../styles/index.css";
       grid-template-columns: 1fr;
       width: 100%;
     }
-
-    .landing-status {
-      width: 100%;
-      align-items: start;
-    }
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .topbar,
     .hero-card {
-      animation: rise 0.45s ease-out both;
-    }
-
-    .hero-card {
-      animation-delay: 0.05s;
+      animation: rise 0.35s ease-out both;
     }
 
     @keyframes rise {
       from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
       }
       to {
         opacity: 1;
