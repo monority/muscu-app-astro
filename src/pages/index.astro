@@ -1,210 +1,102 @@
 ---
-import Topbar from "../components/landing/Topbar.astro";
-import LandingStatus from "../components/landing/LandingStatus.astro";
-import Button from "../components/ui/Button.astro";
-import Container from "../components/ui/Container.astro";
-import Title from "../components/ui/Title.astro";
-import "../styles/index.css";
+export const prerender = false;
+
+import AppLayout from "../layouts/AppLayout.astro";
 ---
 
-<!doctype html>
-<html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#050505" />
-    <meta
-      name="description"
-      content="Muscu App aide à suivre une séance: séries, charges, repos et historique local."
-    />
-    <title>Muscu App</title>
-  </head>
-  <body>
-    <main class="page-shell">
-      <Container size="md">
-        <div class="page-frame">
-          <Topbar />
+<AppLayout title="Accueil" activeNav="home">
+  <section class="dash">
+    <h1 class="dash-title">Tableau de bord</h1>
 
-          <section class="hero-card" aria-labelledby="home-title">
-            <div class="hero-indicator">
-              <span class="hero-indicator-dot" aria-hidden="true"></span>
-              <span class="hero-indicator-label">Prêt à l'entraînement</span>
-            </div>
-
-            <p class="hero-kicker">Carnet d'entraînement</p>
-
-            <Title as="h1" align="center" class="hero-title" id="home-title">
-              Chaque série, chaque charge, chaque répétition.
-            </Title>
-
-            <p class="hero-copy">
-              Un carnet sobre et précis, sans compte ni cloud. Ta progression en
-              local, à portée de clic.
-            </p>
-
-            <div class="actions">
-              <Button href="#session">Ouvrir la séance</Button>
-              <Button href="#actions" variant="secondary"
-                >Voir l'historique</Button
-              >
-            </div>
-
-            <div class="hero-meta" aria-label="Repères rapides">
-              <span data-meta="exercise">—</span>
-              <span data-meta="rest">Repos —</span>
-              <span data-meta="last-set">Aucune série</span>
-            </div>
-          </section>
-
-          <LandingStatus city="Paris" />
-
-          <div class="home-anchor" id="session" aria-hidden="true"></div>
-          <div class="home-anchor" id="actions" aria-hidden="true"></div>
+    <div class="dash-cards">
+      <div class="dash-card" data-active-session>
+        <div class="dash-card-header">
+          <span class="dash-card-dot" aria-hidden="true"></span>
+          <span class="dash-card-label">Séance en cours</span>
         </div>
-      </Container>
-    </main>
-    <script is:inline>
-      document.addEventListener("DOMContentLoaded", () => {
-        const exercise = localStorage.getItem("muscu-last-exercise");
-        const rest = localStorage.getItem("muscu-last-rest");
-        const lastSet = localStorage.getItem("muscu-last-set");
-        if (exercise) {
-          const el = document.querySelector("[data-meta='exercise']");
-          if (el) el.textContent = exercise;
-        }
-        if (rest) {
-          const el = document.querySelector("[data-meta='rest']");
-          if (el) el.textContent = "Repos " + rest;
-        }
-        if (lastSet) {
-          const el = document.querySelector("[data-meta='last-set']");
-          if (el) el.textContent = "Dernière série " + lastSet;
-        }
+        <p class="dash-card-stat">
+          <span data-active-exercise>—</span>
+        </p>
+        <p class="dash-card-meta">
+          <span data-active-sets>0</span> série(s) ·
+          <span data-active-volume>0</span> kg
+        </p>
+        <a href="/session" class="dash-card-cta" data-start-session>
+          Continuer la séance
+        </a>
+      </div>
 
-        const card = document.querySelector(".hero-card");
-        if (card) {
-          card.addEventListener("mousemove", (e) => {
-            const rect = card.getBoundingClientRect();
-            card.style.setProperty(
-              "--mx",
-              ((e.clientX - rect.left) / rect.width) * 100 + "%",
-            );
-            card.style.setProperty(
-              "--my",
-              ((e.clientY - rect.top) / rect.height) * 100 + "%",
-            );
-          });
-          card.addEventListener("mouseleave", () => {
-            card.style.setProperty("--mx", "50%");
-            card.style.setProperty("--my", "0%");
-          });
-        }
-      });
-    </script>
-  </body>
-</html>
+      <div class="dash-card dash-card-empty hidden" data-no-session>
+        <p class="dash-card-stat">Aucune séance active</p>
+        <p class="dash-card-meta">Prêt à commencer ?</p>
+        <a href="/session" class="dash-card-cta" data-start-session>
+          Nouvelle séance
+        </a>
+      </div>
+
+      <div class="dash-card dash-card-secondary">
+        <span class="dash-card-label">Dernières séances</span>
+        <ul class="dash-recent" data-recent-list>
+          <li class="dash-recent-empty">Aucune séance terminée</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</AppLayout>
+
+<script>
+  import "../scripts/dashboard";
+</script>
 
 <style>
-  .page-shell {
-    position: relative;
-    z-index: 1;
-    padding: 1.2rem 0 3.2rem;
+  .dash {
+    display: grid;
+    gap: 2rem;
   }
 
-  .page-frame {
-    display: grid;
-    min-height: calc(100svh - 4.4rem);
-    gap: 2rem;
-    grid-template-rows: auto auto auto;
-    align-content: center;
+  .dash-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
   }
 
-  .hero-card {
-    position: relative;
+  .dash-cards {
     display: grid;
-    justify-items: center;
-    gap: 2rem;
-    width: min(100%, 64rem);
-    margin-inline: auto;
-    padding: clamp(2.8rem, 4vw, 5rem);
+    gap: 1.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
+  }
+
+  .dash-card {
+    display: grid;
+    gap: 0.8rem;
+    padding: 2rem;
     border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     background: var(--surface);
-    box-shadow:
-      0 2px 8px hsl(0 0% 0% / 0.4),
-      0 8px 32px hsl(0 84% 60% / 0.06);
-    transition:
-      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.35s ease;
   }
 
-  .hero-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background:
-      radial-gradient(
-        ellipse 65% 35% at 50% 0%,
-        hsl(0 84% 60% / 0.06),
-        transparent 70%
-      ),
-      radial-gradient(
-        circle 220px at var(--mx, 50%) var(--my, 0%),
-        hsl(0 0% 100% / 0.025),
-        transparent
-      );
-  }
-
-  @media (hover: hover) {
-    .hero-card:hover {
-      transform: translateY(-3px);
-      box-shadow:
-        0 4px 12px hsl(0 0% 0% / 0.44),
-        0 12px 48px hsl(0 84% 60% / 0.09);
-    }
-  }
-
-  @supports (backdrop-filter: blur(1px)) {
-    .hero-card {
-      background: hsl(0 0% 0% / 0.25);
-      backdrop-filter: blur(14px);
-    }
-  }
-  @supports (-webkit-backdrop-filter: blur(1px)) {
-    .hero-card {
-      -webkit-backdrop-filter: blur(14px);
-    }
-  }
-
-  .hero-card::after {
-    content: "";
-    position: absolute;
-    inset: 0.8rem;
-    border: 1px solid hsl(0 0% 100% / 0.04);
-    border-radius: calc(var(--radius-xl) - 0.8rem);
-    pointer-events: none;
-  }
-
-  .hero-indicator {
+  .dash-card-header {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.6rem;
   }
 
-  .hero-indicator-dot {
-    width: 0.6rem;
-    height: 0.6rem;
+  .dash-card-dot {
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 50%;
     background: var(--accent);
-    animation: breathe 2s ease-in-out infinite;
+    animation: pulse 2s ease-in-out infinite;
   }
 
-  .hero-indicator-label {
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .dash-card-label {
     color: hsl(0 0% 100% / 0.4);
     font-size: 1rem;
     font-weight: 600;
@@ -212,152 +104,67 @@ import "../styles/index.css";
     text-transform: uppercase;
   }
 
-  @keyframes breathe {
-    0% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.5;
-      transform: scale(1.35);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .hero-kicker {
+  .dash-card-stat {
     margin: 0;
-    color: var(--accent);
-    font-size: 0.85rem;
+    font-size: 2.4rem;
     font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    font-family: var(--font-display);
+    color: var(--text);
   }
 
-  :global(.hero-title) :global(.ui-title-heading) {
-    font-size: clamp(3.4rem, 5vw, 6.2rem);
-    letter-spacing: -0.04em;
-    max-width: 18ch;
-  }
-
-  .hero-copy {
-    max-width: 58ch;
+  .dash-card-meta {
+    margin: 0;
     color: var(--muted);
-    font-size: 1.6rem;
-    line-height: 1.55;
-    text-align: center;
-    text-wrap: pretty;
+    font-size: 1.3rem;
   }
 
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.4rem;
-    width: min(100%, 43rem);
-  }
-
-  .hero-meta {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.2rem;
-    padding-top: 0.8rem;
-  }
-
-  .hero-meta span {
+  .dash-card-cta {
     display: inline-flex;
     align-items: center;
-    min-height: 3.2rem;
-    padding: 0.55rem 1rem;
-    border: 1px solid hsl(0 0% 100% / 0.08);
-    border-radius: var(--radius-pill);
-    background: hsl(0 0% 100% / 0.02);
-    color: hsl(0 0% 100% / 0.68);
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    justify-content: center;
+    min-height: 3.8rem;
+    padding: 0.6rem 1.6rem;
+    border: 1px solid hsl(0 84% 62% / 0.45);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 0.4rem;
   }
 
-  .home-anchor {
-    position: relative;
-    height: 1px;
-    margin-top: -1px;
-    overflow: hidden;
+  .dash-card-cta:hover {
+    background: hsl(0 84% 58%);
   }
 
-  @media (max-width: 640px) {
-    .page-shell {
-      padding-top: 0.9rem;
-    }
-
-    .page-frame {
-      min-height: calc(100svh - 3.6rem);
-      gap: 1rem;
-    }
-
-    .hero-card {
-      gap: 1.6rem;
-      padding: 1.8rem 1.6rem;
-    }
-
-    :global(.hero-title) :global(.ui-title-heading) {
-      font-size: clamp(2.4rem, 7vw, 3.4rem);
-      max-width: 20ch;
-    }
-
-    .hero-copy {
-      max-width: 38ch;
-      font-size: 1.4rem;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      width: 100%;
-    }
-
-    .hero-meta span {
-      font-size: 1.1rem;
-    }
+  .dash-card-secondary {
+    background: transparent;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-card > * {
-      animation: rise 0.45s ease-out both;
-    }
+  .dash-recent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-    .hero-card > :nth-child(1) {
-      animation-delay: 0ms;
-    }
-    .hero-card > :nth-child(2) {
-      animation-delay: 80ms;
-    }
-    .hero-card > :nth-child(3) {
-      animation-delay: 160ms;
-    }
-    .hero-card > :nth-child(4) {
-      animation-delay: 240ms;
-    }
-    .hero-card > :nth-child(5) {
-      animation-delay: 320ms;
-    }
-    .hero-card > :nth-child(6) {
-      animation-delay: 400ms;
-    }
+  .dash-recent li {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 1.3rem;
+    color: var(--muted);
+  }
 
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+  .dash-recent-empty {
+    color: var(--muted);
+    font-size: 1.3rem;
+  }
+
+  .hidden {
+    display: none !important;
   }
 </style>

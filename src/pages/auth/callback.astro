@@ -1,0 +1,23 @@
+---
+export const prerender = false;
+
+import { createServerSupabase } from "../../lib/supabase-server";
+
+const supabase = createServerSupabase(Astro);
+const { data } = await supabase.auth.exchangeCodeForSession(Astro.url.searchParams.get("code") ?? "");
+if (data.session) {
+  return Astro.redirect("/");
+}
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Authentification… — Muscu App</title>
+  </head>
+  <body style="display:grid;place-items:center;min-height:100vh;background:#050505;color:#f6f6f6;font-family:system-ui;">
+    <p>Authentification…</p>
+  </body>
+</html>

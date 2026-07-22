@@ -1,0 +1,184 @@
+---
+export const prerender = false;
+
+import AppLayout from "../layouts/AppLayout.astro";
+import SessionHeader from "../components/session/SessionHeader.astro";
+import ExercisePicker from "../components/session/ExercisePicker.astro";
+import SetForm from "../components/session/SetForm.astro";
+import SetHistory from "../components/session/SetHistory.astro";
+---
+
+<AppLayout title="Séance" activeNav="session">
+  <div class="session-body" data-session-body>
+    <div class="session-start" data-session-start>
+      <button class="session-start-btn" type="button" data-session-create>
+        Nouvelle séance
+      </button>
+    </div>
+
+    <div class="session-track" data-session-track hidden>
+      <SessionHeader />
+
+      <div class="session-card">
+        <ExercisePicker />
+      </div>
+
+      <div class="session-card" data-rest-timer-container hidden>
+        <div class="rest-timer" data-rest-timer>
+          <span class="rest-timer-label">Repos</span>
+          <div class="rest-timer-display" data-rest-display>00:00</div>
+          <div class="rest-timer-bar">
+            <div class="rest-timer-bar-inner" data-rest-bar style="width:100%"></div>
+          </div>
+          <button class="rest-timer-skip" type="button" data-rest-skip>Passer</button>
+        </div>
+      </div>
+
+      <div class="session-card" data-form-container>
+        <SetForm />
+      </div>
+
+      <div class="session-card">
+        <SetHistory />
+      </div>
+
+      <button class="session-end" type="button" data-session-end hidden>
+        Terminer la séance
+      </button>
+    </div>
+  </div>
+</AppLayout>
+
+<script>
+  import "../scripts/session-page";
+</script>
+
+<style>
+  .session-body {
+    display: grid;
+    gap: 1.6rem;
+  }
+
+  .session-track {
+    display: grid;
+    gap: 1.6rem;
+  }
+
+  .session-card {
+    padding: 1.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .session-start {
+    display: grid;
+    justify-items: center;
+    padding: 3.2rem 2rem;
+  }
+
+  .session-start-btn {
+    min-height: 4.4rem;
+    padding: 1rem 2.4rem;
+    border: 1px solid hsl(0 84% 62% / 0.45);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .session-start-btn:hover {
+    background: hsl(0 84% 58%);
+  }
+
+  .session-end {
+    width: 100%;
+    min-height: 4.4rem;
+    padding: 1rem;
+    border: 1px solid hsl(0 0% 100% / 0.1);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: hsl(0 0% 100% / 0.5);
+    font: inherit;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .session-end:hover {
+    color: var(--accent);
+    border-color: hsl(0 84% 60% / 0.3);
+  }
+
+  .rest-timer {
+    display: grid;
+    gap: 0.6rem;
+    text-align: center;
+  }
+
+  .rest-timer-label {
+    color: hsl(0 0% 100% / 0.4);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .rest-timer-display {
+    font-size: 3.2rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rest-timer-display.urgent {
+    color: var(--accent);
+    animation: timerPulse 0.5s ease-in-out infinite;
+  }
+
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .rest-timer-bar {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: hsl(0 0% 100% / 0.08);
+    overflow: hidden;
+  }
+
+  .rest-timer-bar-inner {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent-2);
+    transition: width 0.3s linear;
+  }
+
+  .rest-timer-bar-inner.urgent {
+    background: var(--accent);
+  }
+
+  .rest-timer-skip {
+    min-height: 3.2rem;
+    padding: 0.4rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  .rest-timer-skip:hover {
+    color: var(--text);
+    border-color: hsl(0 0% 100% / 0.2);
+  }
+</style>

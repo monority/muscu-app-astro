@@ -1,0 +1,152 @@
+---
+export const prerender = false;
+
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Timer" activeNav="timer">
+  <div class="timer-page">
+    <h1 class="timer-title">Timer</h1>
+
+    <div class="timer-presets">
+      {[60, 90, 120, 180].map((s) => (
+        <button class="timer-preset" type="button" data-preset={s}>
+          {s / 60 >= 1 ? `${s / 60} min` : `${s}s`}
+        </button>
+      ))}
+      <input class="timer-preset timer-preset-custom" type="number" data-preset-custom placeholder="Custom" min="5" />
+    </div>
+
+    <div class="timer-display" data-timer-display>00:00</div>
+    <div class="timer-bar">
+      <div class="timer-bar-fill" data-timer-bar style="width:100%"></div>
+    </div>
+
+    <div class="timer-actions">
+      <button class="timer-btn" type="button" data-timer-start>Démarrer</button>
+      <button class="timer-btn timer-btn-ghost" type="button" data-timer-stop hidden>Stop</button>
+    </div>
+  </div>
+</AppLayout>
+
+<script>
+  import "../scripts/timer-page";
+</script>
+
+<style>
+  .timer-page {
+    display: grid;
+    justify-items: center;
+    gap: 2rem;
+    padding-top: 2rem;
+  }
+
+  .timer-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+  }
+
+  .timer-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+  }
+
+  .timer-preset {
+    min-height: 3.6rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+  }
+
+  .timer-preset:hover,
+  .timer-preset[data-active] {
+    border-color: var(--accent);
+    color: var(--text);
+    background: hsl(0 84% 60% / 0.08);
+  }
+
+  .timer-preset-custom {
+    width: 8rem;
+    text-align: center;
+  }
+
+  .timer-display {
+    font-size: 6rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+
+  .timer-display.urgent {
+    color: var(--accent);
+    animation: timerPulse 0.5s ease-in-out infinite;
+  }
+
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .timer-bar {
+    width: min(100%, 32rem);
+    height: 6px;
+    border-radius: 3px;
+    background: hsl(0 0% 100% / 0.08);
+    overflow: hidden;
+  }
+
+  .timer-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent-2);
+    transition: width 0.3s linear;
+  }
+
+  .timer-bar-fill.urgent {
+    background: var(--accent);
+  }
+
+  .timer-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .timer-btn {
+    min-height: 4.4rem;
+    padding: 1rem 2.4rem;
+    border: 1px solid hsl(0 84% 62% / 0.45);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .timer-btn:hover {
+    background: hsl(0 84% 58%);
+  }
+
+  .timer-btn-ghost {
+    border-color: var(--border);
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .timer-btn-ghost:hover {
+    color: var(--text);
+    background: hsl(0 0% 100% / 0.04);
+  }
+</style>

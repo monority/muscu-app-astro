@@ -1,0 +1,131 @@
+---
+---
+
+<div class="set-form">
+  <div class="set-form-fields">
+    <div class="set-form-field">
+      <label for="set-weight">Charge (kg)</label>
+      <input
+        id="set-weight"
+        class="set-form-input"
+        type="text"
+        inputmode="decimal"
+        placeholder="0"
+        data-set-weight
+      />
+    </div>
+    <div class="set-form-field">
+      <label for="set-reps">Répétitions</label>
+      <input
+        id="set-reps"
+        class="set-form-input"
+        type="text"
+        inputmode="numeric"
+        placeholder="0"
+        data-set-reps
+      />
+    </div>
+    <div class="set-form-field set-form-field-note">
+      <label for="set-notes">Note</label>
+      <input
+        id="set-notes"
+        class="set-form-input"
+        type="text"
+        placeholder="Optionnelle"
+        data-set-notes
+      />
+    </div>
+  </div>
+  <button class="set-form-submit" type="button" data-set-submit disabled>
+    Enregistrer la série
+  </button>
+</div>
+
+<style>
+  .set-form {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  .set-form-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .set-form-field-note {
+    grid-column: 1 / -1;
+  }
+
+  .set-form-field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .set-form-field label {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .set-form-input {
+    width: 100%;
+    min-height: 4.4rem;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+  }
+
+  .set-form-input:focus {
+    border-color: var(--accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .set-form-input::placeholder {
+    color: hsl(0 0% 100% / 0.2);
+  }
+
+  .set-form-submit {
+    width: 100%;
+    min-height: 4.8rem;
+    padding: 1rem;
+    border: 1px solid hsl(0 84% 62% / 0.45);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .set-form-submit:hover:not(:disabled) {
+    background: hsl(0 84% 58%);
+  }
+
+  .set-form-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 500px) {
+    .set-form-fields {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .set-form-field-note {
+      grid-column: auto;
+    }
+  }
+</style>

@@ -1,0 +1,76 @@
+---
+---
+
+<div class="set-history">
+  <p class="set-history-title">Historique des séries</p>
+  <div class="set-history-empty">
+    <p>Aucune série enregistrée. Commence par sélectionner un exercice.</p>
+  </div>
+  <ol class="set-history-list" data-set-history hidden></ol>
+</div>
+
+<style>
+  .set-history {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .set-history-title {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .set-history-empty {
+    padding: 2rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    text-align: center;
+  }
+
+  .set-history-empty p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.3rem;
+  }
+
+  .set-history-list {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .set-history-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .set-history-list .set-number {
+    color: var(--muted);
+    font-size: 1.2rem;
+    font-weight: 700;
+    min-width: 2.4rem;
+  }
+
+  .set-history-list .set-detail {
+    color: var(--text);
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .set-history-list .set-rest {
+    color: var(--muted);
+    font-size: 1.2rem;
+  }
+</style>

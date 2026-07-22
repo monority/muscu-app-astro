@@ -1,0 +1,104 @@
+---
+---
+
+<div class="exercise-picker">
+  <label class="exercise-picker-label" for="exercise-search">Exercice</label>
+  <div class="exercise-picker-control">
+    <input
+      id="exercise-search"
+      class="exercise-picker-input"
+      type="search"
+      placeholder="Chercher un exercice…"
+      autocomplete="off"
+      data-exercise-search
+    />
+    <ul class="exercise-picker-results" data-exercise-results hidden></ul>
+  </div>
+  <p class="exercise-picker-selected" data-exercise-selected hidden>
+    ✓ <span data-exercise-name></span>
+  </p>
+</div>
+
+<style>
+  .exercise-picker {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .exercise-picker-label {
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .exercise-picker-control {
+    position: relative;
+  }
+
+  .exercise-picker-input {
+    width: 100%;
+    min-height: 4.4rem;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.6rem;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .exercise-picker-input:focus {
+    border-color: var(--accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .exercise-picker-input::placeholder {
+    color: hsl(0 0% 100% / 0.25);
+  }
+
+  .exercise-picker-results {
+    position: absolute;
+    z-index: 10;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-3);
+    overflow: hidden;
+  }
+
+  .exercise-picker-results li {
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    font-size: 1.4rem;
+    color: var(--text);
+  }
+
+  .exercise-picker-results li:hover,
+  .exercise-picker-results li[aria-selected="true"] {
+    background: hsl(0 84% 60% / 0.1);
+  }
+
+  .exercise-picker-results li[data-create] {
+    color: var(--accent);
+    font-weight: 600;
+    border-top: 1px solid var(--border);
+  }
+
+  .exercise-picker-selected {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    color: var(--text);
+    font-size: 1.4rem;
+  }
+</style>

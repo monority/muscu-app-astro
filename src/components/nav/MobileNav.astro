@@ -1,0 +1,194 @@
+---
+import { icons } from "./icons";
+import NavItem from "./NavItem.astro";
+import type { User } from "@supabase/supabase-js";
+
+type Props = {
+  activeNav: string;
+  user: User | null;
+};
+const { activeNav, user } = Astro.props;
+
+const navItems = [
+  { href: "/", icon: "home" as const, label: "Accueil", key: "home" },
+  { href: "/session", icon: "dumbbell" as const, label: "Séance", key: "session" },
+  { href: "/timer", icon: "clock" as const, label: "Timer", key: "timer" },
+  { href: "/exercices", icon: "list" as const, label: "Exercices", key: "exercices" },
+];
+---
+
+<button class="mobile-toggle" data-mobile-toggle aria-label="Menu" type="button">
+  <span set:html={icons.menu} />
+</button>
+
+<aside class="mobile-overlay" data-mobile-overlay aria-label="Navigation">
+  <div class="mobile-panel">
+    <button class="mobile-close" data-mobile-close aria-label="Fermer" type="button">
+      <span set:html={icons.close} />
+    </button>
+
+    <div class="mobile-brand">
+      <span class="mobile-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 12h4M16 12h4M8 8v8M16 8v8"/>
+        </svg>
+      </span>
+      <span>Muscu App</span>
+    </div>
+
+    <ul class="mobile-nav">
+      {navItems.map((item) => (
+        <NavItem href={item.href} icon={item.icon} label={item.label} active={activeNav === item.key} />
+      ))}
+    </ul>
+
+    {user && (
+      <div class="mobile-footer">
+        <span class="mobile-email">{user.email}</span>
+        <a href="/logout" class="mobile-logout">Déconnexion</a>
+      </div>
+    )}
+  </div>
+</aside>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>("[data-mobile-toggle]")!;
+  const overlay = document.querySelector<HTMLElement>("[data-mobile-overlay]")!;
+  const close = document.querySelector<HTMLButtonElement>("[data-mobile-close]")!;
+
+  toggle?.addEventListener("click", () => overlay.classList.toggle("open"));
+  close?.addEventListener("click", () => overlay.classList.remove("open"));
+  overlay?.addEventListener("click", (e) => {
+    if (e.target === overlay) overlay.classList.remove("open");
+  });
+  overlay?.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => overlay.classList.remove("open"))
+  );
+</script>
+
+<style>
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    z-index: 50;
+    top: 0.8rem;
+    left: 0.8rem;
+    width: 4rem;
+    height: 4rem;
+    padding: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .mobile-toggle svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: hsl(0 0% 0% / 0.6);
+  }
+
+  .mobile-overlay.open {
+    display: block;
+  }
+
+  .mobile-panel {
+    width: 28rem;
+    height: 100%;
+    padding: 1.6rem;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .mobile-close {
+    align-self: end;
+    width: 3.2rem;
+    height: 3.2rem;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .mobile-close svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-left: 0.4rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .mobile-logo {
+    width: 2.4rem;
+    height: 2.4rem;
+    color: var(--accent);
+  }
+
+  .mobile-logo svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.2rem 0.4rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .mobile-email {
+    font-size: 1.1rem;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-logout {
+    font-size: 1.1rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .mobile-logout:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-toggle {
+      display: block;
+    }
+  }
+</style>

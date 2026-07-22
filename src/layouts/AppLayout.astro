@@ -1,0 +1,57 @@
+---
+import Sidebar from "../components/nav/Sidebar.astro";
+import MobileNav from "../components/nav/MobileNav.astro";
+import { ClientRouter } from "astro:transitions";
+import "../styles/index.css";
+
+type Props = {
+  title: string;
+  activeNav: string;
+};
+
+const { title, activeNav } = Astro.props;
+const user = Astro.locals.user;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050505" />
+    <title>{title} — Muscu App</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <Sidebar activeNav={activeNav} user={user} />
+    <MobileNav activeNav={activeNav} user={user} />
+    <main class="app-main">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    display: grid;
+    grid-template-columns: 24rem 1fr;
+    min-height: 100svh;
+    background: var(--color-bg);
+  }
+
+  .app-main {
+    padding: 2rem 2.4rem;
+    overflow-y: auto;
+    min-height: 100svh;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      grid-template-columns: 1fr;
+    }
+
+    .app-main {
+      padding: 1.6rem 1.6rem 1.6rem 5.6rem;
+    }
+  }
+</style>

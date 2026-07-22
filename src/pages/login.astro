@@ -1,0 +1,162 @@
+---
+export const prerender = false;
+
+import { createServerSupabase } from "../lib/supabase-server";
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const email = formData.get("email")?.toString();
+  const action = formData.get("action")?.toString();
+
+  if (email && action === "magic-link") {
+    const supabase = createServerSupabase(Astro);
+    const redirectUrl = new URL("/auth/callback", Astro.url.origin).toString();
+    await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl } });
+  }
+
+  if (email && action === "password-login") {
+    const password = formData.get("password")?.toString();
+    if (password) {
+      const supabase = createServerSupabase(Astro);
+      await supabase.auth.signInWithPassword({ email, password });
+    }
+  }
+}
+
+const user = Astro.locals.user;
+if (user) return Astro.redirect("/");
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050505" />
+    <title>Connexion — Muscu App</title>
+    <link rel="stylesheet" href="/src/styles/index.css" />
+  </head>
+  <body class="auth-body">
+    <main class="auth-card">
+      <h1 class="auth-title">Muscu App</h1>
+      <p class="auth-subtitle">Connecte-toi pour continuer</p>
+
+      <form class="auth-form" method="post">
+        <label class="auth-label" for="email">Email</label>
+        <input class="auth-input" type="email" name="email" id="email" required autocomplete="email" />
+
+        <div class="auth-actions">
+          <button class="auth-btn" type="submit" name="action" value="magic-link">
+            Envoyer un lien magique
+          </button>
+        </div>
+      </form>
+
+      <details class="auth-details">
+        <summary class="auth-summary">Mot de passe</summary>
+        <form class="auth-form" method="post" style="margin-top:1rem">
+          <label class="auth-label" for="pw-email">Email</label>
+          <input class="auth-input" type="email" name="email" id="pw-email" required />
+
+          <label class="auth-label" for="password">Mot de passe</label>
+          <input class="auth-input" type="password" name="password" id="password" required />
+
+          <button class="auth-btn" type="submit" name="action" value="password-login">Se connecter</button>
+        </form>
+      </details>
+    </main>
+  </body>
+</html>
+
+<style>
+  .auth-body {
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    background: var(--bg);
+    margin: 0;
+  }
+
+  .auth-card {
+    width: min(100%, 36rem);
+    padding: 2.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .auth-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+    text-align: center;
+  }
+
+  .auth-subtitle {
+    margin: 0.5rem 0 2rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .auth-form {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .auth-label {
+    font-size: 1.2rem;
+    color: var(--muted);
+  }
+
+  .auth-input {
+    min-height: 4rem;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.4rem;
+  }
+
+  .auth-input:focus {
+    border-color: var(--accent);
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+
+  .auth-actions {
+    margin-top: 0.4rem;
+  }
+
+  .auth-btn {
+    width: 100%;
+    min-height: 4.4rem;
+    border: 1px solid hsl(0 84% 62% / 0.45);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .auth-btn:hover {
+    background: hsl(0 84% 58%);
+  }
+
+  .auth-details {
+    margin-top: 1.6rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.2rem;
+  }
+
+  .auth-summary {
+    font-size: 1.2rem;
+    color: var(--muted);
+    cursor: pointer;
+  }
+</style>
