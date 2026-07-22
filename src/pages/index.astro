@@ -37,12 +37,12 @@ import "../styles/index.css";
             <p class="hero-kicker">Carnet d'entraînement</p>
 
             <Title as="h1" align="center" class="hero-title" id="home-title">
-              Chaque série.<br />Chaque charge.<br />Chaque répétition.
+              Chaque série, chaque charge, chaque répétition.
             </Title>
 
             <p class="hero-copy">
-              Un carnet sobre et précis. Aucun compte, aucun cloud, juste
-              l'essentiel&nbsp;— ta progression en local, à portée de clic.
+              Un carnet sobre et précis, sans compte ni cloud. Ta progression en
+              local, à portée de clic.
             </p>
 
             <div class="actions">
@@ -53,9 +53,9 @@ import "../styles/index.css";
             </div>
 
             <div class="hero-meta" aria-label="Repères rapides">
-              <span data-meta="exercise">Développé couché</span>
-              <span data-meta="rest">Repos 01:30</span>
-              <span data-meta="last-set">Dernière série 8 x 72,5</span>
+              <span data-meta="exercise">—</span>
+              <span data-meta="rest">Repos —</span>
+              <span data-meta="last-set">Aucune série</span>
             </div>
           </section>
 
@@ -71,15 +71,18 @@ import "../styles/index.css";
         const exercise = localStorage.getItem("muscu-last-exercise");
         const rest = localStorage.getItem("muscu-last-rest");
         const lastSet = localStorage.getItem("muscu-last-set");
-        if (exercise)
-          document.querySelector("[data-meta='exercise']").textContent =
-            exercise;
-        if (rest)
-          document.querySelector("[data-meta='rest']").textContent =
-            "Repos " + rest;
-        if (lastSet)
-          document.querySelector("[data-meta='last-set']").textContent =
-            "Dernière série " + lastSet;
+        if (exercise) {
+          const el = document.querySelector("[data-meta='exercise']");
+          if (el) el.textContent = exercise;
+        }
+        if (rest) {
+          const el = document.querySelector("[data-meta='rest']");
+          if (el) el.textContent = "Repos " + rest;
+        }
+        if (lastSet) {
+          const el = document.querySelector("[data-meta='last-set']");
+          if (el) el.textContent = "Dernière série " + lastSet;
+        }
 
         const card = document.querySelector(".hero-card");
         if (card) {
@@ -131,9 +134,8 @@ import "../styles/index.css";
     border-radius: var(--radius-xl);
     background: var(--surface);
     box-shadow:
-      0 2px 4px hsl(0 0% 0% / 0.3),
-      0 10px 28px hsl(0 0% 0% / 0.25),
-      0 30px 60px hsl(0 0% 0% / 0.18);
+      0 2px 8px hsl(0 0% 0% / 0.4),
+      0 8px 32px hsl(0 84% 60% / 0.06);
     transition:
       transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.35s ease;
@@ -160,10 +162,10 @@ import "../styles/index.css";
 
   @media (hover: hover) {
     .hero-card:hover {
+      transform: translateY(-3px);
       box-shadow:
-        0 4px 8px hsl(0 0% 0% / 0.32),
-        0 14px 40px hsl(0 0% 0% / 0.28),
-        0 40px 80px hsl(0 0% 0% / 0.22);
+        0 4px 12px hsl(0 0% 0% / 0.44),
+        0 12px 48px hsl(0 84% 60% / 0.09);
     }
   }
 
@@ -171,6 +173,10 @@ import "../styles/index.css";
     .hero-card {
       background: hsl(0 0% 0% / 0.25);
       backdrop-filter: blur(14px);
+    }
+  }
+  @supports (-webkit-backdrop-filter: blur(1px)) {
+    .hero-card {
       -webkit-backdrop-filter: blur(14px);
     }
   }
@@ -180,7 +186,7 @@ import "../styles/index.css";
     position: absolute;
     inset: 0.8rem;
     border: 1px solid hsl(0 0% 100% / 0.04);
-    border-radius: 1.1rem;
+    border-radius: calc(var(--radius-xl) - 0.8rem);
     pointer-events: none;
   }
 
@@ -230,13 +236,10 @@ import "../styles/index.css";
     text-transform: uppercase;
   }
 
-  .hero-title {
-    max-width: 15ch;
-  }
-
-  .hero-title :global(.ui-title-heading) {
-    font-size: clamp(3.8rem, 5.5vw, 6.8rem);
+  :global(.hero-title) :global(.ui-title-heading) {
+    font-size: clamp(3.4rem, 5vw, 6.2rem);
     letter-spacing: -0.04em;
+    max-width: 18ch;
   }
 
   .hero-copy {
@@ -301,12 +304,13 @@ import "../styles/index.css";
       padding: 1.8rem 1.6rem;
     }
 
-    .hero-title :global(.ui-title-heading) {
-      font-size: clamp(2.8rem, 8vw, 3.8rem);
+    :global(.hero-title) :global(.ui-title-heading) {
+      font-size: clamp(2.4rem, 7vw, 3.4rem);
+      max-width: 20ch;
     }
 
     .hero-copy {
-      max-width: 28ch;
+      max-width: 38ch;
       font-size: 1.4rem;
     }
 
@@ -340,6 +344,9 @@ import "../styles/index.css";
     }
     .hero-card > :nth-child(5) {
       animation-delay: 320ms;
+    }
+    .hero-card > :nth-child(6) {
+      animation-delay: 400ms;
     }
 
     @keyframes rise {
