@@ -1,3 +1,5 @@
+import { playAlarm } from "./timer-alarm";
+
 export class RestTimer {
   private el: HTMLElement;
   private displayEl: HTMLElement;
@@ -7,6 +9,7 @@ export class RestTimer {
   private startTime = 0;
   private rafId = 0;
   private _running = false;
+  private _muted = false;
   onComplete?: () => void;
 
   constructor(container: HTMLElement) {
@@ -16,6 +19,9 @@ export class RestTimer {
     this.skipEl = container.querySelector("[data-rest-skip]")!;
     this.skipEl.addEventListener("click", () => this.stop());
   }
+
+  set muted(v: boolean) { this._muted = v; }
+  get muted() { return this._muted; }
 
   get running() {
     return this._running;
@@ -63,6 +69,7 @@ export class RestTimer {
       this._running = false;
       this.displayEl.textContent = "00:00";
       this.barEl.style.width = "0%";
+      if (!this._muted) playAlarm(400);
       this.onComplete?.();
     } else {
       this.rafId = requestAnimationFrame(this.tick);

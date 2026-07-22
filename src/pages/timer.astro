@@ -5,26 +5,56 @@ import AppLayout from "../layouts/AppLayout.astro";
 ---
 
 <AppLayout title="Timer" activeNav="timer">
-  <div class="timer-page">
-    <h1 class="timer-title">Timer</h1>
+  <div class="tm-page">
+    <div class="tm-tabs" data-tm-tabs>
+      <button class="tm-tab tm-tab-active" type="button" data-tm-mode="countdown">Minuteur</button>
+      <button class="tm-tab" type="button" data-tm-mode="stopwatch">Chronomètre</button>
+    </div>
 
-    <div class="timer-presets">
-      {[60, 90, 120, 180].map((s) => (
-        <button class="timer-preset" type="button" data-preset={s}>
-          {s / 60 >= 1 ? `${s / 60} min` : `${s}s`}
+    <div class="tm-presets" data-tm-countdown-controls>
+      {[30, 60, 90, 120, 180, 300].map((s) => (
+        <button class="tm-preset" type="button" data-tm-preset={s}>
+          {s >= 60 ? `${s / 60} min` : `${s}s`}
         </button>
       ))}
-      <input class="timer-preset timer-preset-custom" type="number" data-preset-custom placeholder="Custom" min="5" />
+      <input class="tm-preset tm-preset-custom" type="number" data-tm-custom placeholder="Custom" min="1" />
     </div>
 
-    <div class="timer-display" data-timer-display>00:00</div>
-    <div class="timer-bar">
-      <div class="timer-bar-fill" data-timer-bar style="width:100%"></div>
+    <div class="tm-display-wrap">
+      <svg class="tm-ring" viewBox="0 0 200 200" data-tm-ring>
+        <circle class="tm-ring-bg" cx="100" cy="100" r="88" />
+        <circle class="tm-ring-fg" cx="100" cy="100" r="88" data-tm-ring-fg />
+      </svg>
+      <div class="tm-display" data-tm-display>00:00</div>
     </div>
 
-    <div class="timer-actions">
-      <button class="timer-btn" type="button" data-timer-start>Démarrer</button>
-      <button class="timer-btn timer-btn-ghost" type="button" data-timer-stop hidden>Stop</button>
+    <div class="tm-info" data-tm-info hidden></div>
+
+    <div class="tm-actions">
+      <button class="tm-btn tm-btn-primary" type="button" data-tm-start>Démarrer</button>
+      <button class="tm-btn tm-btn-ghost" type="button" data-tm-pause hidden>Pause</button>
+      <button class="tm-btn tm-btn-ghost" type="button" data-tm-reset hidden>Reset</button>
+    </div>
+
+    <div class="tm-options">
+      <label class="tm-opt">
+        <input type="checkbox" data-tm-repeat />
+        <span>Répéter</span>
+      </label>
+      <label class="tm-opt">
+        <input type="checkbox" data-tm-mute />
+        <span>Silencieux</span>
+      </label>
+    </div>
+
+    <div class="tm-bar" data-tm-bar hidden>
+      <div class="tm-bar-fill" data-tm-bar-fill></div>
+    </div>
+
+    <div class="tm-laps hidden" data-tm-laps>
+      <h2 class="tm-laps-title">Tours</h2>
+      <ul class="tm-lap-list" data-tm-lap-list></ul>
+      <button class="tm-btn tm-btn-ghost tm-btn-sm" type="button" data-tm-lap hidden>Tour</button>
     </div>
   </div>
 </AppLayout>
@@ -34,119 +64,317 @@ import AppLayout from "../layouts/AppLayout.astro";
 </script>
 
 <style>
-  .timer-page {
+  .tm-page {
     display: grid;
     justify-items: center;
-    gap: 2rem;
-    padding-top: 2rem;
+    gap: var(--gap-section);
+    padding-top: 1rem;
   }
 
-  .timer-title {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .timer-presets {
+  .tm-tabs {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
   }
 
-  .timer-preset {
-    min-height: 3.6rem;
-    padding: 0.6rem 1.4rem;
-    border: 1px solid var(--border);
+  .tm-tab {
+    min-height: 3.4rem;
+    padding: 0.4rem 1.8rem;
+    border: none;
     border-radius: var(--radius-pill);
     background: transparent;
     color: var(--muted);
     font: inherit;
     font-size: 1.3rem;
+    font-weight: 600;
     cursor: pointer;
   }
 
-  .timer-preset:hover,
-  .timer-preset[data-active] {
+  .tm-tab-active {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  .tm-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+  }
+
+  .tm-preset {
+    min-height: 3.4rem;
+    padding: 0.4rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  .tm-preset:hover,
+  .tm-preset[data-active] {
     border-color: var(--accent);
     color: var(--text);
     background: hsl(0 84% 60% / 0.08);
   }
 
-  .timer-preset-custom {
+  .tm-preset-custom {
     width: 8rem;
     text-align: center;
   }
 
-  .timer-display {
-    font-size: 6rem;
+  .tm-display-wrap {
+    position: relative;
+    width: clamp(16rem, 30vw, 22rem);
+    height: clamp(16rem, 30vw, 22rem);
+    display: grid;
+    place-items: center;
+  }
+
+  .tm-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .tm-ring-bg {
+    fill: none;
+    stroke: hsl(0 0% 100% / 0.06);
+    stroke-width: 4;
+  }
+
+  .tm-ring-fg {
+    fill: none;
+    stroke: var(--accent-2);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 553;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.2s linear, stroke 0.3s;
+  }
+
+  .tm-ring-fg.urgent {
+    stroke: var(--accent);
+  }
+
+  .tm-ring-fg.stopwatch {
+    stroke: var(--accent-success, #3BF080);
+  }
+
+  .tm-display {
+    font-size: var(--text-display);
     font-weight: 700;
     font-family: var(--font-display);
     font-variant-numeric: tabular-nums;
     color: var(--text);
+    z-index: 1;
   }
 
-  .timer-display.urgent {
+  .tm-display.urgent {
     color: var(--accent);
-    animation: timerPulse 0.5s ease-in-out infinite;
+    animation: pulse 0.5s ease-in-out infinite;
   }
 
-  @keyframes timerPulse {
+  .tm-display.completed {
+    color: var(--accent-success, #3BF080);
+  }
+
+  @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50% { opacity: 0.4; }
   }
 
-  .timer-bar {
-    width: min(100%, 32rem);
-    height: 6px;
-    border-radius: 3px;
-    background: hsl(0 0% 100% / 0.08);
-    overflow: hidden;
+  .tm-info {
+    font-size: 1.2rem;
+    color: var(--muted);
+    min-height: 1.8rem;
   }
 
-  .timer-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: var(--accent-2);
-    transition: width 0.3s linear;
-  }
-
-  .timer-bar-fill.urgent {
-    background: var(--accent);
-  }
-
-  .timer-actions {
+  .tm-actions {
     display: flex;
-    gap: 1rem;
+    gap: 0.8rem;
   }
 
-  .timer-btn {
-    min-height: 4.4rem;
-    padding: 1rem 2.4rem;
-    border: 1px solid hsl(0 84% 62% / 0.45);
+  .tm-btn {
+    min-height: 4.2rem;
+    padding: 0.8rem 2rem;
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
+    background: transparent;
+    color: var(--text);
     font: inherit;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     cursor: pointer;
   }
 
-  .timer-btn:hover {
+  .tm-btn-primary {
+    border-color: hsl(0 84% 62% / 0.45);
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  .tm-btn-primary:hover {
     background: hsl(0 84% 58%);
   }
 
-  .timer-btn-ghost {
-    border-color: var(--border);
-    background: transparent;
+  .tm-btn-ghost {
     color: var(--muted);
   }
 
-  .timer-btn-ghost:hover {
+  .tm-btn-ghost:hover {
     color: var(--text);
     background: hsl(0 0% 100% / 0.04);
+  }
+
+  .tm-btn-sm {
+    min-height: 3.2rem;
+    padding: 0.4rem 1.2rem;
+    font-size: 1.2rem;
+  }
+
+  .tm-options {
+    display: flex;
+    gap: 1.6rem;
+  }
+
+  .tm-opt {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .tm-opt input[type="checkbox"] {
+    width: 1.6rem;
+    height: 1.6rem;
+    accent-color: var(--accent);
+  }
+
+  .tm-bar {
+    width: min(100%, 32rem);
+    height: 4px;
+    border-radius: 2px;
+    background: hsl(0 0% 100% / 0.06);
+    overflow: hidden;
+  }
+
+  .tm-bar-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 2px;
+    background: var(--accent-2);
+    transition: width 0.2s linear;
+  }
+
+  .tm-bar-fill.urgent {
+    background: var(--accent);
+  }
+
+  .tm-laps {
+    width: min(100%, 32rem);
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .tm-laps-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .tm-lap-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 20rem;
+    overflow-y: auto;
+  }
+
+  .tm-lap-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 1.3rem;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tm-lap-num {
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .tm-lap-list li .tm-lap-time {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 639px) {
+    .tm-page {
+      padding-top: 0;
+    }
+
+    .tm-presets {
+      gap: 0.4rem;
+    }
+
+    .tm-preset {
+      min-height: 2.8rem;
+      padding: 0.3rem 0.9rem;
+      font-size: 1.1rem;
+    }
+
+    .tm-preset-custom {
+      width: 6rem;
+    }
+
+    .tm-ring-bg { stroke-width: 3; }
+    .tm-ring-fg { stroke-width: 3; }
+
+    .tm-actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+
+    .tm-btn {
+      min-height: 3.8rem;
+      font-size: 1.3rem;
+    }
+
+    .tm-options {
+      gap: 1.2rem;
+    }
+
+    .tm-laps {
+      width: 100%;
+    }
+  }
+
+  .hidden {
+    display: none !important;
   }
 </style>

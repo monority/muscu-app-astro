@@ -44,7 +44,7 @@
 <style>
   .set-form {
     display: grid;
-    gap: 1.2rem;
+    gap: var(--gap-card);
   }
 
   .set-form-fields {
@@ -119,7 +119,7 @@
     cursor: not-allowed;
   }
 
-  @media (min-width: 500px) {
+  @media (min-width: 640px) {
     .set-form-fields {
       grid-template-columns: 1fr 1fr 1fr;
     }

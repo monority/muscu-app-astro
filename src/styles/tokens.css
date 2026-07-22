@@ -45,4 +45,41 @@
 
   --focus-ring: 0 0 0 3px hsl(0 84% 62% / 0.34);
   --motion-fast: 160ms ease;
+
+  /* Layout tokens — overridden at breakpoints */
+  --sidebar-width: 24rem;
+  --nav-bar-height: 0px;
+  --nav-toggle-top: 0px;
+  --space-page-padding: 2.4rem;
+  --gap-page: 2rem;
+  --gap-section: 1.6rem;
+  --gap-card: 1.2rem;
+
+  /* Fluid typography */
+  --text-page-title: clamp(1.6rem, 3vw, 2rem);
+  --text-stat: clamp(2rem, 5vw, 2.4rem);
+  --text-display: clamp(2.4rem, 6vw, 3.8rem);
+  --text-nav: 1.4rem;
+}
+
+/* Tablet + mobile (< 1024px) */
+@media (max-width: 1023px) {
+  :root {
+    --sidebar-width: 0px;
+    --space-page-padding: 1.6rem;
+    --gap-page: 1.6rem;
+    --gap-section: 1.2rem;
+    --gap-card: 1rem;
+    --nav-toggle-top: 5.6rem;
+  }
+}
+
+/* Mobile only (< 640px) */
+@media (max-width: 639px) {
+  :root {
+    --nav-bar-height: 5.6rem;
+    --space-page-padding: 1.2rem;
+    --gap-page: 1.2rem;
+    --nav-toggle-top: 0px;
+  }
 }

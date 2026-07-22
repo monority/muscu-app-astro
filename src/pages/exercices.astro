@@ -45,12 +45,12 @@ import AppLayout from "../layouts/AppLayout.astro";
 <style>
   .ex-page {
     display: grid;
-    gap: 1.6rem;
+    gap: var(--gap-section);
   }
 
   .ex-title {
     margin: 0;
-    font-size: 2rem;
+    font-size: var(--text-page-title);
     font-weight: 700;
     font-family: var(--font-display);
     color: var(--text);
@@ -235,5 +235,25 @@ import AppLayout from "../layouts/AppLayout.astro";
 
   .hidden {
     display: none !important;
+  }
+
+  @media (max-width: 639px) {
+    .ex-search {
+      min-width: 100%;
+    }
+
+    .ex-categories {
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .ex-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ex-list li {
+      padding: 1rem 1.2rem;
+    }
   }
 </style>

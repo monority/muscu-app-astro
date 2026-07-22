@@ -1,0 +1,53 @@
+---
+interface Props {
+  icon?: string;
+  title?: string;
+  description?: string;
+  class?: string;
+}
+
+const { icon, title, description, class: className } = Astro.props;
+---
+
+<div class={"empty-state" + (className ? " " + className : "")}>
+  {icon && <span class="empty-icon" set:html={icon} />}
+  {title && <p class="empty-title">{title}</p>}
+  {description && <p class="empty-desc">{description}</p>}
+  <slot />
+</div>
+
+<style>
+  .empty-state {
+    display: grid;
+    justify-items: center;
+    gap: 0.8rem;
+    padding: 3.2rem 2rem;
+    text-align: center;
+  }
+
+  .empty-icon {
+    width: 3.2rem;
+    height: 3.2rem;
+    color: var(--muted);
+  }
+
+  .empty-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .empty-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    font-family: var(--font-display);
+  }
+
+  .empty-desc {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--muted);
+    max-width: 32ch;
+  }
+</style>

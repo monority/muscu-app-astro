@@ -52,11 +52,15 @@ const navItems = [
 </aside>
 
 <script>
-  const toggle = document.querySelector<HTMLButtonElement>("[data-mobile-toggle]")!;
   const overlay = document.querySelector<HTMLElement>("[data-mobile-overlay]")!;
   const close = document.querySelector<HTMLButtonElement>("[data-mobile-close]")!;
 
-  toggle?.addEventListener("click", () => overlay.classList.toggle("open"));
+  const toggles = document.querySelectorAll<HTMLButtonElement>("[data-mobile-toggle]");
+
+  toggles.forEach((t) => {
+    t.addEventListener("click", () => overlay.classList.toggle("open"));
+  });
+
   close?.addEventListener("click", () => overlay.classList.remove("open"));
   overlay?.addEventListener("click", (e) => {
     if (e.target === overlay) overlay.classList.remove("open");
@@ -186,7 +190,7 @@ const navItems = [
     color: var(--accent);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1023px) and (min-width: 640px) {
     .mobile-toggle {
       display: block;
     }

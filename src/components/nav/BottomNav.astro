@@ -1,0 +1,101 @@
+---
+import { icons } from "./icons";
+
+type Props = {
+  activeNav: string;
+};
+
+const { activeNav } = Astro.props;
+
+const items = [
+  { href: "/", icon: "home" as const, label: "Accueil", key: "home" },
+  { href: "/session", icon: "dumbbell" as const, label: "Séance", key: "session" },
+  { href: "/timer", icon: "clock" as const, label: "Timer", key: "timer" },
+  { href: "/exercices", icon: "list" as const, label: "Exercices", key: "exercices" },
+];
+---
+
+<nav class="bottom-nav" aria-label="Navigation rapide">
+  {items.map((item) => (
+    <a
+      href={item.href}
+      class:list={["bottom-nav-link", { "bottom-nav-active": activeNav === item.key }]}
+    >
+      <span class="bottom-nav-icon" set:html={icons[item.icon]} />
+      <span class="bottom-nav-label">{item.label}</span>
+    </a>
+  ))}
+  <button class="bottom-nav-link bottom-nav-more" type="button" data-mobile-toggle aria-label="Plus d'options">
+    <span class="bottom-nav-icon" set:html={icons.menu} />
+    <span class="bottom-nav-label">Plus</span>
+  </button>
+</nav>
+
+<style>
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    z-index: 40;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--nav-bar-height) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .bottom-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: var(--nav-bar-height);
+  }
+
+  .bottom-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    flex: 1;
+    min-height: var(--nav-bar-height);
+    text-decoration: none;
+    color: var(--muted);
+    border: none;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bottom-nav-active {
+    color: var(--accent);
+  }
+
+  .bottom-nav-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .bottom-nav-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .bottom-nav-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 639px) {
+    .bottom-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import Sidebar from "../components/nav/Sidebar.astro";
 import MobileNav from "../components/nav/MobileNav.astro";
+import BottomNav from "../components/nav/BottomNav.astro";
 import { ClientRouter } from "astro:transitions";
 import "../styles/index.css";
 
@@ -17,41 +18,49 @@ const user = Astro.locals.user;
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#050505" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} — Muscu App</title>
     <ClientRouter />
   </head>
   <body>
     <Sidebar activeNav={activeNav} user={user} />
     <MobileNav activeNav={activeNav} user={user} />
+    <BottomNav activeNav={activeNav} />
     <main class="app-main">
       <slot />
     </main>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js");
+      }
+    </script>
   </body>
 </html>
 
 <style>
   body {
     display: grid;
-    grid-template-columns: 24rem 1fr;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
     min-height: 100svh;
     background: var(--color-bg);
   }
 
   .app-main {
-    padding: 2rem 2.4rem;
+    padding: var(--space-page-padding);
+    padding-top: calc(var(--space-page-padding) + var(--nav-toggle-top));
+    padding-bottom: calc(var(--space-page-padding) + var(--nav-bar-height) + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
     min-height: 100svh;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1023px) {
     body {
       grid-template-columns: 1fr;
-    }
-
-    .app-main {
-      padding: 1.6rem 1.6rem 1.6rem 5.6rem;
     }
   }
 </style>

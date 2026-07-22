@@ -56,16 +56,16 @@ import SetHistory from "../components/session/SetHistory.astro";
 <style>
   .session-body {
     display: grid;
-    gap: 1.6rem;
+    gap: var(--gap-section);
   }
 
   .session-track {
     display: grid;
-    gap: 1.6rem;
+    gap: var(--gap-section);
   }
 
   .session-card {
-    padding: 1.6rem;
+    padding: var(--space-page-padding);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface);
@@ -130,7 +130,7 @@ import SetHistory from "../components/session/SetHistory.astro";
   }
 
   .rest-timer-display {
-    font-size: 3.2rem;
+    font-size: clamp(2.4rem, 5vw, 3.2rem);
     font-weight: 700;
     font-family: var(--font-display);
     font-variant-numeric: tabular-nums;
@@ -180,5 +180,12 @@ import SetHistory from "../components/session/SetHistory.astro";
   .rest-timer-skip:hover {
     color: var(--text);
     border-color: hsl(0 0% 100% / 0.2);
+  }
+
+  @media (max-width: 639px) {
+    .session-start-btn,
+    .rest-timer-skip {
+      width: 100%;
+    }
   }
 </style>

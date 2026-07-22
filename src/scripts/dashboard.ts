@@ -16,7 +16,13 @@ function q<T = HTMLElement>(s: string): T | null {
   return document.querySelector<T>(s);
 }
 
+function showContent() {
+  document.querySelector("[data-dash-skeleton]")?.classList.add("hidden");
+  document.querySelector("[data-dash-content]")?.classList.remove("hidden");
+}
+
 export async function loadDashboard() {
+  showContent();
   const { data: activeSession } = await supabase
     .from("sessions")
     .select("id, started_at")

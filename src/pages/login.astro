@@ -79,7 +79,7 @@ if (user) return Astro.redirect("/");
 
   .auth-card {
     width: min(100%, 36rem);
-    padding: 2.4rem;
+    padding: var(--space-page-padding);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface);
@@ -158,5 +158,18 @@ if (user) return Astro.redirect("/");
     font-size: 1.2rem;
     color: var(--muted);
     cursor: pointer;
+  }
+
+  @media (max-width: 639px) {
+    .auth-card {
+      width: 100%;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+
+    .auth-input {
+      width: 100%;
+    }
   }
 </style>
