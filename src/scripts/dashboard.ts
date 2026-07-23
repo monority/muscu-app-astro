@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { get } from "../lib/api";
 import { showToast } from "./toast";
 
 interface SetRow {
@@ -7,10 +7,14 @@ interface SetRow {
   exercises: { name: string };
 }
 
-interface SessionRow {
+interface ActiveSession {
   id: number;
   started_at: string;
-  ended_at: string | null;
+}
+
+interface RecentSession {
+  id: number;
+  started_at: string;
 }
 
 function q<T = HTMLElement>(s: string): T | null {
@@ -26,70 +30,51 @@ export async function loadDashboard() {
   showContent();
 
   try {
-    const { data: activeSession, error: err1 } = await supabase
-    .from("sessions")
-    .select("id, started_at")
-    .is("ended_at", null)
-    .limit(1)
-    .single();
+    const activeSession = await get<ActiveSession | null>("/api/sessions/active");
 
-  if (err1 && err1.code !== "PGRST116") throw err1;
+    const activeCard = q("[data-active-session]");
+    const emptyCard = q("[data-no-session]");
+    const cta = q<HTMLAnchorElement>("[data-start-session]");
 
-  const activeCard = q("[data-active-session]");
-  const emptyCard = q("[data-no-session]");
-  const cta = q<HTMLAnchorElement>("[data-start-session]");
+    if (activeSession) {
+      activeCard?.classList.remove("hidden");
+      emptyCard?.classList.add("hidden");
 
-  if (activeSession) {
-    activeCard?.classList.remove("hidden");
-    emptyCard?.classList.add("hidden");
+      const sets = await get<SetRow[]>(`/api/sets?session_id=${activeSession.id}`);
 
-    const { data: sets, error: err3 } = await supabase
-      .from("exercise_sets")
-      .select("weight_kg, reps, exercises(name)")
-      .eq("session_id", activeSession.id)
-      .order("completed_at", { ascending: false })
-      .limit(10);
-    if (err3) throw err3;
+      if (sets && sets.length > 0) {
+        const last = sets[0] as unknown as SetRow;
+        const totalSets = sets.length;
+        const totalVol = sets.reduce((s: number, set: SetRow) => s + set.weight_kg * set.reps, 0);
 
-    if (sets && sets.length > 0) {
-      const last = sets[0] as unknown as SetRow;
-      const totalSets = sets.length;
-      const totalVol = sets.reduce((s: number, set: SetRow) => s + set.weight_kg * set.reps, 0);
+        q("[data-active-exercise]")!.textContent = last.exercises.name;
+        q("[data-active-sets]")!.textContent = String(totalSets);
+        q("[data-active-volume]")!.textContent = totalVol + " kg";
+      }
 
-      q("[data-active-exercise]")!.textContent = last.exercises.name;
-      q("[data-active-sets]")!.textContent = String(totalSets);
-      q("[data-active-volume]")!.textContent = totalVol + " kg";
+      if (cta) cta.href = "/session";
+    } else {
+      activeCard?.classList.add("hidden");
+      emptyCard?.classList.remove("hidden");
+      if (cta) cta.href = "/session";
     }
 
-    if (cta) cta.href = "/session";
-  } else {
-    activeCard?.classList.add("hidden");
-    emptyCard?.classList.remove("hidden");
-    if (cta) cta.href = "/session";
-  }
+    const recent = await get<RecentSession[]>("/api/sessions?limit=5");
 
-  const { data: recent, error: err2 } = await supabase
-    .from("sessions")
-    .select("id, started_at")
-    .not("ended_at", "is", null)
-    .order("ended_at", { ascending: false })
-    .limit(5);
-  if (err2) throw err2;
-
-  const list = q("[data-recent-list]");
-  if (list && recent && recent.length > 0) {
-    list.innerHTML = recent
-      .map(
-        (s: SessionRow) =>
-          `<li><a href="/session/${s.id}" style="display:block;text-decoration:none;color:inherit">
-            ${new Date(s.started_at).toLocaleDateString("fr-FR", {
-              day: "numeric",
-              month: "short",
-            })} — Séance #${s.id}
-          </a></li>`,
-      )
-      .join("");
-  }
+    const list = q("[data-recent-list]");
+    if (list && recent && recent.length > 0) {
+      list.innerHTML = recent
+        .map(
+          (s: RecentSession) =>
+            `<li><a href="/session/${s.id}" style="display:block;text-decoration:none;color:inherit">
+              ${new Date(s.started_at).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "short",
+              })} — Séance #${s.id}
+            </a></li>`,
+        )
+        .join("");
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Erreur de chargement";
     const el = q<HTMLElement>("[data-dash-error]");

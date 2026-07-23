@@ -11,6 +11,7 @@ const { data: session } = await supabase
   .from("sessions")
   .select("id, started_at, ended_at, notes")
   .eq("id", id)
+  .eq("user_id", Astro.locals.user?.id)
   .single();
 
 if (!session) {

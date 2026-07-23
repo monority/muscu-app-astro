@@ -26,7 +26,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const isPublic = PUBLIC_ROUTES.some((r) => context.url.pathname.startsWith(r));
   const isApi = context.url.pathname.startsWith("/api");
 
-  if (!user && !isPublic && !isApi) {
+  if (!user && !isPublic) {
+    if (isApi) {
+      return new Response(JSON.stringify({ error: "Non authentifié" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return context.redirect("/login");
   }
 

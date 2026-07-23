@@ -38,12 +38,11 @@ body::before {
   outline-offset: 3px;
 }
 
-a, button, .card, .btn, [role="button"] {
+button, .card, .btn, [role="button"] {
   transition: transform var(--motion-fast), filter var(--motion-fast), box-shadow var(--motion-default);
 }
 
 button:active:not(:disabled),
-a:active:not(:disabled),
 .card:active,
 .btn:active,
 [role="button"]:active {
@@ -52,7 +51,6 @@ a:active:not(:disabled),
 
 @media (hover: hover) {
   button:not(:disabled):hover,
-  a:not(:disabled):hover,
   .card:hover,
   .btn:hover,
   [role="button"]:hover {
@@ -66,29 +64,6 @@ a:active:not(:disabled),
   .card:hover {
     box-shadow: var(--shadow-2), 0 0 0 1px hsl(0 84% 60% / 0.08);
   }
-}
-
-/* ── View Transitions ── */
-::view-transition-old(root) {
-  animation: 200ms ease-out both fade-out, 200ms ease-out both slide-left;
-}
-::view-transition-new(root) {
-  animation: 300ms ease-out both fade-in, 300ms ease-out both slide-right;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-}
-@keyframes fade-out {
-  to { opacity: 0; }
-}
-@keyframes slide-left {
-  from { transform: translateX(0); }
-  to { transform: translateX(-2rem); }
-}
-@keyframes slide-right {
-  from { transform: translateX(2rem); }
-  to { transform: translateX(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {

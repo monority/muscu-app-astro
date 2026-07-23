@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { get, post, del } from "../lib/api";
 import { showToast } from "./toast";
 
 function q<T = HTMLElement>(s: string): T | null {
@@ -19,12 +19,8 @@ async function load() {
   q("[data-ex-error]")!.hidden = true;
 
   try {
-    let query = supabase.from("exercises").select("*").order("name");
-    if (currentFilter !== "all") {
-      query = query.eq("category", currentFilter);
-    }
-    const { data, error } = await query;
-    if (error) throw error;
+    const url = currentFilter !== "all" ? `/api/exercises?category=${encodeURIComponent(currentFilter)}` : "/api/exercises";
+    const data = await get<Exercise[]>(url);
     q("[data-ex-toolbar]")!.hidden = false;
     render(data ?? []);
   } catch (err) {
@@ -76,10 +72,9 @@ function render(exercises: Exercise[]) {
 async function deleteEx(id: number) {
   if (!confirm("Supprimer cet exercice ?")) return;
   try {
-    await supabase.from("exercises").delete().eq("id", id);
+    await del(`/api/exercises/${id}`);
     load();
   } catch {}
-
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -112,13 +107,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!name) return;
 
     try {
-      await supabase.from("exercises").insert({ name, category, default_rest_s: rest });
+      await post("/api/exercises", { name, category, default_rest_s: rest });
       (q<HTMLInputElement>("[data-ex-name]")!.value = "");
       (q<HTMLSelectElement>("[data-ex-category]")!.value = "");
       (q<HTMLInputElement>("[data-ex-rest]")!.value = "90");
       q("[data-ex-add-form]")?.classList.add("hidden");
       load();
     } catch {}
-
   });
 });

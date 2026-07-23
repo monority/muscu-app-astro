@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { get, post } from "../lib/api";
 
 interface Exercise {
   id: number;
@@ -106,12 +106,7 @@ export class ExerciseSearch {
       return;
     }
 
-    const { data } = await supabase
-      .from("exercises")
-      .select("id, name, default_rest_s")
-      .ilike("name", `%${q}%`)
-      .order("name")
-      .limit(10);
+    const data = await get<Exercise[]>(`/api/exercises?search=${encodeURIComponent(q)}`);
 
     this.results.innerHTML = "";
     let optIndex = 0;
@@ -147,12 +142,7 @@ export class ExerciseSearch {
   }
 
   private async create(name: string) {
-    const { data } = await supabase
-      .from("exercises")
-      .insert({ name, default_rest_s: 90 })
-      .select("id, name, default_rest_s")
-      .single();
-
+    const data = await post<Exercise>("/api/exercises", { name, default_rest_s: 90 });
     if (data) {
       this.setValue(data.name);
       this.onSelect?.(data);

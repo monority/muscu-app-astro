@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { get, post, patch, del } from "../lib/api";
 import { ExerciseSearch } from "./exercise-search";
 import { RestTimer } from "./rest-timer";
 import { showToast } from "./toast";
@@ -68,6 +68,21 @@ function getExerciseSets() {
   return state.sets.filter((s) => s.exercises.name === state.exercise!.name);
 }
 
+function showSessionError(msg: string) {
+  q("[data-session-loading]")?.classList.add("hidden");
+  const el = q<HTMLElement>("[data-session-error]");
+  if (el) {
+    el.innerHTML = `<div class="error-state" role="alert" aria-live="polite">
+      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="width:3.2rem;height:3.2rem;color:var(--accent)"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+      <h2 style="margin:0;font-size:1.6rem;font-weight:700;color:var(--text)">Une erreur est survenue</h2>
+      <p style="margin:0;font-size:1.3rem;color:var(--muted)">${msg}</p>
+      <button class="error-retry" type="button" style="min-height:3.8rem;padding:0.6rem 1.6rem;border:1px solid hsl(0 84% 62% / 0.45);border-radius:var(--radius-md);background:var(--accent);color:var(--accent-foreground);font:inherit;font-size:1.3rem;font-weight:700;cursor:pointer">Réessayer</button>
+    </div>`;
+    el.hidden = false;
+    el.querySelector(".error-retry")?.addEventListener("click", () => { el.hidden = true; init(); });
+  }
+}
+
 function init() {
   state = { sessionId: null, exercise: null, sets: [] };
 
@@ -128,16 +143,18 @@ function init() {
     q<HTMLInputElement>(`[${attr}]`)?.addEventListener("input", validateForm);
   });
 
-  loadOrCreateSession();
+  q("[data-session-loading]")?.classList.remove("hidden");
+  q("[data-session-error]")!.hidden = true;
+
+  loadOrCreateSession().catch((err) => {
+    showSessionError(err instanceof Error ? err.message : "Erreur de chargement");
+  }).finally(() => {
+    q("[data-session-loading]")?.classList.add("hidden");
+  });
 }
 
 async function loadOrCreateSession() {
-  const { data: session } = await supabase
-    .from("sessions")
-    .select("id")
-    .is("ended_at", null)
-    .limit(1)
-    .single();
+  const session = await get<{ id: number } | null>("/api/sessions/active");
 
   if (session) {
     state.sessionId = session.id;
@@ -152,11 +169,7 @@ async function loadOrCreateSession() {
 }
 
 async function startNewSession() {
-  const { data: session } = await supabase
-    .from("sessions")
-    .insert({})
-    .select("id")
-    .single();
+  const session = await post<{ id: number; started_at: string }>("/api/sessions");
 
   if (session) {
     state.sessionId = session.id;
@@ -169,11 +182,7 @@ async function startNewSession() {
 async function loadSets() {
   if (!state.sessionId) return;
 
-  const { data } = await supabase
-    .from("exercise_sets")
-    .select("id, set_number, weight_kg, reps, rest_s, notes, exercises(name)")
-    .eq("session_id", state.sessionId)
-    .order("completed_at", { ascending: true });
+  const data = await get<ExerciseSet[]>(`/api/sets?session_id=${state.sessionId}`);
 
   if (data) {
     state.sets = data as unknown as ExerciseSet[];
@@ -202,12 +211,7 @@ async function logSet() {
 
   try {
     if (editingSetId) {
-      const { error } = await supabase
-        .from("exercise_sets")
-        .update({ weight_kg: weight, reps: reps, notes: notes })
-        .eq("id", editingSetId);
-
-      if (error) throw error;
+      const updated = await patch<ExerciseSet>(`/api/sets/${editingSetId}`, { weight_kg: weight, reps: reps, notes: notes });
 
       const idx = state.sets.findIndex((s) => s.id === editingSetId);
       if (idx !== -1) {
@@ -221,21 +225,15 @@ async function logSet() {
     } else {
       const setNumber = getExerciseSets().length + 1;
 
-      const { data: set, error } = await supabase
-        .from("exercise_sets")
-        .insert({
-          session_id: state.sessionId,
-          exercise_id: state.exercise.id,
-          set_number: setNumber,
-          weight_kg: weight,
-          reps: reps,
-          rest_s: state.exercise.default_rest_s,
-          notes: notes,
-        })
-        .select("id, set_number, weight_kg, reps, rest_s, notes, exercises(name)")
-        .single();
-
-      if (error) throw error;
+      const set = await post<ExerciseSet>("/api/sets", {
+        session_id: state.sessionId,
+        exercise_id: state.exercise.id,
+        set_number: setNumber,
+        weight_kg: weight,
+        reps: reps,
+        rest_s: state.exercise.default_rest_s,
+        notes: notes,
+      });
 
       state.sets.push(set as unknown as ExerciseSet);
       showToast(`Série #${setNumber} enregistrée ✓`, "success");
@@ -264,8 +262,7 @@ async function deleteSet(setId: number) {
   if (!confirm("Supprimer cette série ?")) return;
 
   try {
-    const { error } = await supabase.from("exercise_sets").delete().eq("id", setId);
-    if (error) throw error;
+    await del(`/api/sets/${setId}`);
 
     state.sets = state.sets.filter((s) => s.id !== setId);
     if (editingSetId === setId) cancelEdit();
@@ -309,17 +306,14 @@ function onTimerComplete() {
   q<HTMLInputElement>("[data-set-weight]")!.focus();
 }
 
-function endSession() {
+async function endSession() {
   if (!state.sessionId) return;
   if (!confirm("Terminer la séance ?")) return;
 
-  supabase
-    .from("sessions")
-    .update({ ended_at: new Date().toISOString() })
-    .eq("id", state.sessionId)
-    .then(() => {
-      window.location.href = "/";
-    });
+  try {
+    await patch(`/api/sessions/${state.sessionId}`, { ended_at: new Date().toISOString() });
+    window.location.href = "/";
+  } catch {}
 }
 
 function renderHistory() {
