@@ -1,4 +1,5 @@
 -- Schema Muscu App v2 — User isolation
+-- Idempotent: works on fresh DB and existing DB
 -- Run this in Supabase SQL Editor
 
 -- Profiles (1:1 with auth.users)
@@ -12,30 +13,26 @@ create table if not exists profiles (
 -- Sessions
 create table if not exists sessions (
   id bigint primary key generated always as identity,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
   started_at timestamptz not null default now(),
   ended_at timestamptz,
   notes text
 );
 
-create index if not exists idx_sessions_user on sessions(user_id);
-
 -- Exercises
 create table if not exists exercises (
   id bigint primary key generated always as identity,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
   name text not null,
   category text,
   default_rest_s int not null default 90,
   created_at timestamptz not null default now()
 );
 
-create index if not exists idx_exercises_user on exercises(user_id);
-
 -- Exercise sets
 create table if not exists exercise_sets (
   id bigint primary key generated always as identity,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
   session_id bigint not null references sessions(id) on delete cascade,
   exercise_id bigint not null references exercises(id) on delete cascade,
   set_number int not null,
@@ -46,6 +43,14 @@ create table if not exists exercise_sets (
   completed_at timestamptz not null default now()
 );
 
+-- Add user_id columns if missing (for existing DBs)
+alter table sessions add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table exercises add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table exercise_sets add column if not exists user_id uuid references auth.users(id) on delete cascade;
+
+-- Indexes
+create index if not exists idx_sessions_user on sessions(user_id);
+create index if not exists idx_exercises_user on exercises(user_id);
 create index if not exists idx_sets_user on exercise_sets(user_id);
 create index if not exists idx_sets_session on exercise_sets(session_id);
 create index if not exists idx_sets_completed on exercise_sets(completed_at desc);
@@ -56,7 +61,12 @@ alter table sessions enable row level security;
 alter table exercises enable row level security;
 alter table exercise_sets enable row level security;
 
--- RLS policies
+-- Drop old wide-open policies
+drop policy if exists "Public access" on sessions;
+drop policy if exists "Public access" on exercises;
+drop policy if exists "Public access" on exercise_sets;
+
+-- RLS policies — user-scoped
 drop policy if exists "Users own their profile" on profiles;
 create policy "Users own their profile" on profiles
   for all using (auth.uid() = id) with check (auth.uid() = id);
