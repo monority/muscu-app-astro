@@ -69,7 +69,11 @@ import Skeleton from "../components/ui/Skeleton.astro";
       <div class="dash-card" data-streak-card hidden>
         <span class="dash-card-label">Régularité</span>
         <p class="dash-streak" data-streak-content>
-          <span class="dash-streak-fire">🔥</span>
+          <span class="dash-streak-fire">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:2.4rem;height:2.4rem;color:var(--accent)">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
+          </span>
           <span class="dash-streak-count" data-streak-count>0</span>
           <span class="dash-streak-label">jours consécutifs</span>
         </p>
@@ -153,7 +157,6 @@ import Skeleton from "../components/ui/Skeleton.astro";
     display: grid;
     gap: 0.8rem;
     padding: var(--space-page-padding);
-    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface);
   }
@@ -179,7 +182,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
 
   .dash-card-label {
     color: hsl(0 0% 100% / 0.4);
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -239,7 +242,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
   }
 
   .dash-weekly-stat {
-    font-size: clamp(1.6rem, 3vw, 2rem);
+    font-size: 2rem;
     font-weight: 700;
     font-family: var(--font-display);
     color: var(--text);
@@ -247,7 +250,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
   }
 
   .dash-weekly-label {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: var(--muted);
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -267,7 +270,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
   }
 
   .dash-streak-count {
-    font-size: clamp(2.4rem, 5vw, 3.2rem);
+    font-size: 3.2rem;
     font-weight: 700;
     font-family: var(--font-display);
     color: var(--accent-2);
@@ -315,7 +318,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
     border: 1px solid hsl(24 100% 55% / 0.3);
     border-radius: var(--radius-pill);
     background: hsl(24 100% 55% / 0.08);
-    color: var(--accent-2);
+    color: var(--accent);
     font: inherit;
     font-size: 1.1rem;
     font-weight: 600;

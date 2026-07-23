@@ -6,26 +6,11 @@ body {
   font-size: 1.6rem;
   color: var(--text);
   background:
-    radial-gradient(circle at 50% 15%, hsl(24 100% 55% / 0.12), transparent 28%),
-    radial-gradient(circle at 10% 10%, hsl(0 0% 100% / 0.04), transparent 22%),
-    radial-gradient(circle at 90% 85%, hsl(142 70% 50% / 0.06), transparent 24%),
-    linear-gradient(180deg, #090909 0%, #050505 62%, #020202 100%);
+    radial-gradient(circle at 50% 15%, hsl(24 100% 55% / 0.10), transparent 28%),
+    radial-gradient(circle at 85% 85%, hsl(142 70% 50% / 0.05), transparent 24%);
+  background-color: #050505;
   font-family: var(--font-body);
   line-height: 1.5;
-  text-rendering: optimizeLegibility;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.08;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(circle at center, black, transparent 80%);
 }
 
 ::selection {
@@ -40,11 +25,11 @@ body::before {
 
 button, .btn, [role="button"] {
   cursor: pointer;
-  transition: transform var(--motion-fast), filter var(--motion-fast), box-shadow var(--motion-default);
+  transition: background var(--motion-fast), border-color var(--motion-fast), opacity var(--motion-fast), transform var(--motion-fast);
 }
 
 .card {
-  transition: transform var(--motion-fast), box-shadow var(--motion-default);
+  transition: transform var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);
 }
 
 button:active:not(:disabled),
@@ -56,18 +41,13 @@ button:active:not(:disabled),
 
 @media (hover: hover) {
   button:not(:disabled):hover,
-  .card:hover,
   .btn:hover,
   [role="button"]:hover {
-    filter: brightness(1.12);
-  }
-
-  button:not(:disabled):hover {
-    box-shadow: 0 0 0 1px var(--border), 0 4px 12px hsl(0 0% 0% / 0.18);
+    opacity: 0.88;
   }
 
   .card:hover {
-    box-shadow: var(--shadow-2), 0 0 0 1px hsl(24 100% 55% / 0.08);
+    background: var(--surface-2);
   }
 }
 

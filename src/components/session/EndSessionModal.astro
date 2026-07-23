@@ -8,15 +8,31 @@
     <p class="end-modal-label">Difficulté de la séance</p>
     <div class="end-modal-difficulty" data-end-difficulty>
       <button class="end-diff-btn" type="button" data-difficulty="easy">
-        <span class="end-diff-icon">😤</span>
+        <span class="end-diff-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 16c0 3 2.5 5 6 5s6-2 6-5"/>
+            <path d="M4 10c0-2 2-3 4-3s4 1 4 3"/>
+            <path d="M12 7V2"/>
+            <path d="M10 4h4"/>
+          </svg>
+        </span>
         <span>Facile</span>
       </button>
       <button class="end-diff-btn end-diff-active" type="button" data-difficulty="normal" data-active>
-        <span class="end-diff-icon">💪</span>
+        <span class="end-diff-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="6"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+        </span>
         <span>Normal</span>
       </button>
       <button class="end-diff-btn" type="button" data-difficulty="hard">
-        <span class="end-diff-icon">🥵</span>
+        <span class="end-diff-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+        </span>
         <span>Difficile</span>
       </button>
     </div>
@@ -52,7 +68,6 @@
     display: grid;
     gap: 1.2rem;
     padding: 2rem;
-    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface-3);
   }
