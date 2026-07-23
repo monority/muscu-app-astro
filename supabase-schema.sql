@@ -97,3 +97,36 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Templates
+create table if not exists templates (
+  id bigint primary key generated always as identity,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists template_exercises (
+  id bigint primary key generated always as identity,
+  template_id bigint not null references templates(id) on delete cascade,
+  exercise_id bigint not null references exercises(id) on delete cascade,
+  sort_order int not null default 0,
+  unique(template_id, exercise_id)
+);
+
+alter table sessions add column if not exists template_id bigint references templates(id) on delete set null;
+
+create index if not exists idx_templates_user on templates(user_id);
+create index if not exists idx_template_exercises_template on template_exercises(template_id);
+
+alter table templates enable row level security;
+alter table template_exercises enable row level security;
+
+drop policy if exists "Users own their templates" on templates;
+create policy "Users own their templates" on templates
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Users own their template exercises" on template_exercises;
+create policy "Users own their template exercises" on template_exercises
+  for all using (exists (select 1 from templates t where t.id = template_exercises.template_id and t.user_id = auth.uid()))
+  with check (exists (select 1 from templates t where t.id = template_exercises.template_id and t.user_id = auth.uid()));

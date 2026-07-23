@@ -26,6 +26,11 @@ import Skeleton from "../components/ui/Skeleton.astro";
     <div class="session-track" data-session-track hidden>
       <SessionHeader />
 
+      <div class="template-progress" data-template-progress hidden>
+        <span data-template-progress-text></span>
+        <button class="template-next-btn" type="button" data-template-next hidden>Suivant →</button>
+      </div>
+
       <div class="session-card">
         <ExercisePicker />
       </div>
@@ -187,6 +192,32 @@ import Skeleton from "../components/ui/Skeleton.astro";
   .rest-timer-skip:hover {
     color: var(--text);
     border-color: hsl(0 0% 100% / 0.2);
+  }
+
+  .template-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0.8rem 1.2rem;
+    border: 1px solid hsl(24 100% 55% / 0.25);
+    border-radius: var(--radius-md);
+    background: hsl(24 100% 55% / 0.06);
+    font-size: 1.3rem;
+    color: var(--text);
+  }
+
+  .template-next-btn {
+    min-height: 3.2rem;
+    padding: 0.4rem 1.2rem;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--accent-2);
+    color: #fff;
+    font: inherit;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
   }
 
   @media (max-width: 639px) {

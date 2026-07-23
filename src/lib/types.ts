@@ -1,6 +1,7 @@
 export interface Session {
   id: number;
   user_id: string;
+  template_id: number | null;
   started_at: string;
   ended_at: string | null;
   notes: string | null;
@@ -45,4 +46,24 @@ export interface Profile {
 
 export interface ApiError {
   error: string;
+}
+
+export interface Template {
+  id: number;
+  user_id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface TemplateExercise {
+  id: number;
+  template_id: number;
+  exercise_id: number;
+  sort_order: number;
+  exercises: { id: number; name: string; default_rest_s: number } | null;
+}
+
+export interface TemplateWithExercises extends Template {
+  exercise_count: number;
+  exercises?: TemplateExercise[];
 }

@@ -32,9 +32,13 @@ export async function POST(context: APIContext) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response(JSON.stringify({ error: "Non authentifié" }), { status: 401 });
 
+  const body = await context.request.json().catch(() => ({}));
+  const insertData: Record<string, unknown> = { user_id: user.id };
+  if (body.template_id) insertData.template_id = body.template_id;
+
   const { data, error } = await supabase
     .from("sessions")
-    .insert({ user_id: user.id })
+    .insert(insertData)
     .select("id, started_at, user_id")
     .single();
 

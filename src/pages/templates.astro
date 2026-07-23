@@ -1,0 +1,292 @@
+---
+export const prerender = false;
+
+import AppLayout from "../layouts/AppLayout.astro";
+import Skeleton from "../components/ui/Skeleton.astro";
+---
+
+<AppLayout title="Templates" activeNav="templates">
+  <div class="tp-page">
+    <div class="tp-header">
+      <h1 class="tp-title">Templates</h1>
+      <button class="tp-add-btn" type="button" data-tp-add>+ Nouveau template</button>
+    </div>
+
+    <div data-tp-skeleton>
+      <Skeleton width="100%" height="6rem" borderRadius="var(--radius-md)" />
+      <Skeleton width="100%" height="6rem" borderRadius="var(--radius-md)" />
+      <Skeleton width="100%" height="6rem" borderRadius="var(--radius-md)" />
+    </div>
+
+    <div data-tp-error hidden></div>
+
+    <div class="tp-create-form hidden" data-tp-create-form>
+      <input class="tp-input" type="text" data-tp-name placeholder="Nom du template" maxlength="100" />
+      <div class="tp-ex-search" data-tp-ex-search>
+        <input class="tp-input" type="text" data-tp-ex-input placeholder="Ajouter un exercice..." />
+        <ul class="tp-ex-results hidden" data-tp-ex-results role="listbox"></ul>
+      </div>
+      <div class="tp-selected-exercises" data-tp-selected-ex></div>
+      <div class="tp-form-actions">
+        <button class="tp-cancel-btn" type="button" data-tp-cancel>Annuler</button>
+        <button class="tp-save-btn" type="button" data-tp-save>Enregistrer</button>
+      </div>
+    </div>
+
+    <div class="tp-list" data-tp-list></div>
+  </div>
+</AppLayout>
+
+<script>
+  import "../scripts/templates-page";
+</script>
+
+<style>
+  .tp-page {
+    display: grid;
+    gap: var(--gap-section);
+  }
+
+  .tp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .tp-title {
+    margin: 0;
+    font-size: var(--text-page-title);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+  }
+
+  .tp-add-btn {
+    min-height: 3.6rem;
+    padding: 0.6rem 1.4rem;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .tp-create-form {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-page-padding);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .tp-input {
+    min-height: 4rem;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.4rem;
+  }
+
+  .tp-input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .tp-ex-search {
+    position: relative;
+  }
+
+  .tp-ex-results {
+    position: absolute;
+    z-index: 10;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0.2rem 0 0;
+    padding: 0.4rem;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    max-height: 20rem;
+    overflow-y: auto;
+  }
+
+  .tp-ex-results li {
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.3rem;
+    color: var(--text);
+  }
+
+  .tp-ex-results li:hover,
+  .tp-ex-results li.highlighted {
+    background: hsl(0 84% 60% / 0.12);
+  }
+
+  .tp-selected-exercises {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .tp-selected-ex-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    font-size: 1.2rem;
+    color: var(--text);
+  }
+
+  .tp-selected-ex-remove {
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.4rem;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .tp-selected-ex-remove:hover {
+    color: var(--accent);
+  }
+
+  .tp-form-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+  }
+
+  .tp-cancel-btn {
+    min-height: 3.6rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+  }
+
+  .tp-save-btn {
+    min-height: 3.6rem;
+    padding: 0.6rem 1.4rem;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .tp-card {
+    padding: var(--space-page-padding);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .tp-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tp-card-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .tp-card-count {
+    font-size: 1.2rem;
+    color: var(--muted);
+  }
+
+  .tp-card-actions {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+  }
+
+  .tp-start-btn {
+    min-height: 3.2rem;
+    padding: 0.4rem 1.2rem;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .tp-expand-btn,
+  .tp-delete-btn {
+    min-height: 3.2rem;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  .tp-expand-btn:hover,
+  .tp-delete-btn:hover {
+    color: var(--text);
+  }
+
+  .tp-delete-btn:hover {
+    color: var(--accent);
+    border-color: hsl(0 84% 60% / 0.3);
+  }
+
+  .tp-ex-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tp-ex-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    font-size: 1.3rem;
+    color: var(--text);
+  }
+
+  .tp-ex-order {
+    color: var(--muted);
+    font-weight: 700;
+    min-width: 2rem;
+  }
+</style>

@@ -19,10 +19,18 @@ interface ExerciseSet {
   exercises: { name: string };
 }
 
+interface TemplateEx {
+  id: number;
+  name: string;
+  default_rest_s: number;
+}
+
 let state: {
   sessionId: number | null;
   exercise: Exercise | null;
   sets: ExerciseSet[];
+  templateExercises: TemplateEx[] | null;
+  templateIndex: number;
 };
 let editingSetId: number | null = null;
 let timer: RestTimer;
@@ -84,7 +92,7 @@ function showSessionError(msg: string) {
 }
 
 function init() {
-  state = { sessionId: null, exercise: null, sets: [] };
+  state = { sessionId: null, exercise: null, sets: [], templateExercises: null, templateIndex: 0 };
 
   const timerContainer = q<HTMLElement>("[data-rest-timer-container]")!;
   timer = new RestTimer(timerContainer);
@@ -143,14 +151,84 @@ function init() {
     q<HTMLInputElement>(`[${attr}]`)?.addEventListener("input", validateForm);
   });
 
+  q("[data-template-next]")?.addEventListener("click", nextTemplateExercise);
+
   q("[data-session-loading]")?.classList.remove("hidden");
   q("[data-session-error]")!.hidden = true;
 
-  loadOrCreateSession().catch((err) => {
-    showSessionError(err instanceof Error ? err.message : "Erreur de chargement");
-  }).finally(() => {
-    q("[data-session-loading]")?.classList.add("hidden");
-  });
+  const params = new URLSearchParams(window.location.search);
+  const templateSessionId = params.get("template");
+  const templateIdFromParam = params.get("tid");
+
+  if (templateSessionId && templateIdFromParam) {
+    startFromTemplate(parseInt(templateSessionId, 10), parseInt(templateIdFromParam, 10)).catch((err) => {
+      showSessionError(err instanceof Error ? err.message : "Erreur de chargement");
+    }).finally(() => {
+      q("[data-session-loading]")?.classList.add("hidden");
+    });
+  } else {
+    loadOrCreateSession().catch((err) => {
+      showSessionError(err instanceof Error ? err.message : "Erreur de chargement");
+    }).finally(() => {
+      q("[data-session-loading]")?.classList.add("hidden");
+    });
+  }
+}
+
+async function startFromTemplate(sessionId: number, templateId: number) {
+  state.sessionId = sessionId;
+
+  const templateResp = await get<{ exercises: { exercise_id: number; exercises: { id: number; name: string; default_rest_s: number } }[] }>(
+    `/api/templates/${templateId}`
+  );
+
+  if (templateResp.exercises?.length) {
+    state.templateExercises = templateResp.exercises.map((ex) => ({
+      id: ex.exercise_id,
+      name: ex.exercises.name,
+      default_rest_s: ex.exercises.default_rest_s,
+    }));
+    state.templateIndex = 0;
+    selectTemplateExercise(0);
+  }
+
+  q<HTMLElement>("[data-session-track]")!.hidden = false;
+  q<HTMLElement>("[data-session-start]")!.hidden = true;
+  q<HTMLElement>("[data-session-end]")!.hidden = false;
+
+  await loadSets();
+}
+
+function selectTemplateExercise(index: number) {
+  if (!state.templateExercises || index >= state.templateExercises.length) return;
+
+  const ex = state.templateExercises[index];
+  state.templateIndex = index;
+
+  search.setValue(ex.name);
+  state.exercise = { id: ex.id, name: ex.name, default_rest_s: ex.default_rest_s };
+  q<HTMLElement>("[data-form-container]")!.hidden = false;
+
+  const prog = q<HTMLElement>("[data-template-progress]")!;
+  prog.hidden = false;
+  q<HTMLElement>("[data-template-progress-text]")!.textContent = `Exercice ${index + 1}/${state.templateExercises.length} — ${ex.name}`;
+
+  const nextBtn = q<HTMLElement>("[data-template-next]")!;
+  nextBtn.hidden = index >= state.templateExercises.length - 1;
+
+  q<HTMLInputElement>("[data-set-weight]")!.focus();
+  validateForm();
+}
+
+function nextTemplateExercise() {
+  if (!state.templateExercises) return;
+  const next = state.templateIndex + 1;
+  if (next < state.templateExercises.length) {
+    selectTemplateExercise(next);
+  } else {
+    q<HTMLElement>("[data-template-progress]")!.hidden = true;
+    showToast("Template terminé ! 🎉", "success");
+  }
 }
 
 async function loadOrCreateSession() {
