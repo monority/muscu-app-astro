@@ -10,12 +10,18 @@ export async function GET(context: APIContext) {
 
   let query = supabase
     .from("exercises")
-    .select("id, name, category, default_rest_s")
+    .select("id, name, category, default_rest_s, notes, muscle_group, equipment")
     .eq("user_id", user.id)
     .order("name");
 
   const category = context.url.searchParams.get("category");
   if (category) query = query.eq("category", category);
+
+  const muscleGroup = context.url.searchParams.get("muscle_group");
+  if (muscleGroup) query = query.eq("muscle_group", muscleGroup);
+
+  const equipment = context.url.searchParams.get("equipment");
+  if (equipment) query = query.eq("equipment", equipment);
 
   const search = context.url.searchParams.get("search");
   if (search) query = query.ilike("name", `%${search}%`);
@@ -42,8 +48,11 @@ export async function POST(context: APIContext) {
       name: body.name.trim(),
       category: body.category || null,
       default_rest_s: body.default_rest_s ?? 90,
+      notes: body.notes || null,
+      muscle_group: body.muscle_group || null,
+      equipment: body.equipment || null,
     })
-    .select("id, name, category, default_rest_s")
+    .select("id, name, category, default_rest_s, notes, muscle_group, equipment")
     .single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

@@ -40,6 +40,20 @@ export async function fetchExercises(category?: string): Promise<Exercise[]> {
   return data ?? [];
 }
 
+export interface ProgressPoint {
+  date: string;
+  weight_kg: number;
+  reps: number;
+  estimated_1rm: number;
+  session_id: number;
+  set_type: string;
+}
+
+export function estimate1RM(weight: number, reps: number): number {
+  if (reps <= 1) return weight;
+  return weight * (1 + reps / 30);
+}
+
 export function formatRest(s: number | null): string {
   if (!s) return "—";
   return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");

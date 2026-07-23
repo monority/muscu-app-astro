@@ -1,6 +1,8 @@
 import { supabase } from "../lib/supabase";
 import { barChart } from "../lib/chart";
 import { showToast } from "./toast";
+import { get } from "../lib/api";
+import { renderHeatmap, type CalendarDay } from "./calendar-heatmap";
 
 function q<T = HTMLElement>(s: string): T | null {
   return document.querySelector<T>(s);
@@ -56,7 +58,7 @@ async function load() {
   const volumeBySession = new Map<number, number>();
   const countsBySession = new Map<number, number>();
   const exerciseIdsBySession = new Map<number, Set<number>>();
-  const volumeByExercise = new Map<string, { volume: number; sets: number }>();
+  const volumeByExercise = new Map<string, { volume: number; sets: number; id: number }>();
 
   for (const set of sets ?? []) {
     const sid = set.session_id;
@@ -69,10 +71,11 @@ async function load() {
     exerciseIdsBySession.get(sid)!.add(set.exercise_id);
 
     const ename = (set as unknown as { exercises: { name: string } }).exercises.name;
-    if (!volumeByExercise.has(ename)) volumeByExercise.set(ename, { volume: 0, sets: 0 });
+    if (!volumeByExercise.has(ename)) volumeByExercise.set(ename, { volume: 0, sets: 0, id: 0 });
     const e = volumeByExercise.get(ename)!;
     e.volume += set.weight_kg * set.reps;
     e.sets += 1;
+    e.id = set.exercise_id;
   }
 
   const totalSessions = sessions.length;
@@ -113,10 +116,10 @@ async function load() {
     topEl.innerHTML = topExercises
       .map(
         (ex) =>
-          `<div class="pr-top-item">
+          `<a href="/progress/exercise/${ex.id}" class="pr-top-item" style="text-decoration:none;color:inherit">
             <span class="pr-top-name">${ex.name}</span>
             <span class="pr-top-meta">${ex.volume.toLocaleString("fr-FR")} kg · ${ex.sets} séries</span>
-          </div>`,
+          </a>`,
       )
       .join("");
     q("[data-pr-top-section]")!.classList.remove("hidden");
@@ -134,11 +137,75 @@ async function load() {
     )
     .join("");
   q("[data-pr-recent-section]")!.classList.remove("hidden");
+
+  try {
+    const heatmapData = await get<CalendarDay[]>("/api/sessions/calendar?months=6");
+    const heatmapEl = q<HTMLElement>("[data-pr-heatmap]");
+    if (heatmapData?.length && heatmapEl) {
+      renderHeatmap(heatmapEl, heatmapData, 6);
+      q("[data-pr-heatmap-section]")?.classList.remove("hidden");
+    }
+  } catch {
+    // heatmap is optional
+  }
+
+  await renderMuscleBalance();
+
   q("[data-pr-skeleton]")?.classList.add("hidden");
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Erreur de chargement";
     showError(msg);
     showToast(msg, "error");
+  }
+}
+
+const muscleColors: Record<string, string> = {
+  chest: "hsl(0, 84%, 60%)",
+  back: "hsl(220, 80%, 55%)",
+  shoulders: "hsl(40, 90%, 55%)",
+  biceps: "hsl(270, 70%, 60%)",
+  triceps: "hsl(190, 70%, 55%)",
+  quadriceps: "hsl(120, 55%, 50%)",
+  hamstrings: "hsl(160, 55%, 45%)",
+  glutes: "hsl(30, 70%, 55%)",
+  calves: "hsl(80, 60%, 50%)",
+  abs: "hsl(320, 70%, 55%)",
+  traps: "hsl(10, 70%, 55%)",
+  forearms: "hsl(50, 60%, 50%)",
+};
+
+const muscleLabels: Record<string, string> = {
+  chest: "Pectoraux", back: "Dos", shoulders: "Épaules",
+  biceps: "Biceps", triceps: "Triceps", quadriceps: "Quadriceps",
+  hamstrings: "Ischios", glutes: "Fessiers", calves: "Mollets",
+  abs: "Abdos", traps: "Trapèzes", forearms: "Avant-bras",
+};
+
+async function renderMuscleBalance() {
+  try {
+    const data = await get<{ muscle_group: string; sets: number; volume: number }[]>("/api/progress/muscle-balance?days=30");
+    if (!data || data.length === 0) return;
+
+    const el = q<HTMLElement>("[data-pr-balance-chart]");
+    if (!el) return;
+
+    const maxSets = Math.max(...data.map((d) => d.sets), 1);
+    el.innerHTML = data
+      .map(
+        (d) =>
+          `<div class="pr-balance-bar">
+            <span class="pr-balance-label">${muscleLabels[d.muscle_group] || d.muscle_group}</span>
+            <div class="pr-balance-track">
+              <div class="pr-balance-fill" style="width:${(d.sets / maxSets) * 100}%;background:${muscleColors[d.muscle_group] || "var(--accent)"}"></div>
+            </div>
+            <span class="pr-balance-count">${d.sets}</span>
+          </div>`,
+      )
+      .join("");
+
+    q("[data-pr-balance-section]")?.classList.remove("hidden");
+  } catch {
+    // muscle balance is optional
   }
 }
 

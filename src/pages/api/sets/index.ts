@@ -13,7 +13,7 @@ export async function GET(context: APIContext) {
 
   const { data, error } = await supabase
     .from("exercise_sets")
-    .select("id, set_number, weight_kg, reps, rest_s, notes, completed_at, exercises!inner(name)")
+    .select("id, set_number, weight_kg, reps, rest_s, set_type, notes, completed_at, exercises!inner(name)")
     .eq("session_id", sessionId)
     .eq("user_id", user.id)
     .order("completed_at", { ascending: true });
@@ -42,9 +42,10 @@ export async function POST(context: APIContext) {
       weight_kg: body.weight_kg,
       reps: body.reps,
       rest_s: body.rest_s ?? null,
+      set_type: body.set_type ?? "working",
       notes: body.notes ?? null,
     })
-    .select("id, set_number, weight_kg, reps, rest_s, notes, exercises!inner(name)")
+    .select("id, set_number, weight_kg, reps, rest_s, set_type, notes, exercises!inner(name)")
     .single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

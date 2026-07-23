@@ -1,4 +1,4 @@
-import { get, post, del } from "../lib/api";
+import { get, post, patch, del } from "../lib/api";
 import { showToast } from "./toast";
 
 function q<T = HTMLElement>(s: string): T | null {
@@ -10,7 +10,23 @@ interface Exercise {
   name: string;
   category: string | null;
   default_rest_s: number;
+  notes: string | null;
+  muscle_group: string | null;
+  equipment: string | null;
 }
+
+const muscleLabels: Record<string, string> = {
+  chest: "Pectoraux", back: "Dos", shoulders: "Épaules",
+  biceps: "Biceps", triceps: "Triceps", quadriceps: "Quadriceps",
+  hamstrings: "Ischios", glutes: "Fessiers", calves: "Mollets",
+  abs: "Abdos", traps: "Trapèzes", forearms: "Avant-bras",
+};
+
+const equipmentLabels: Record<string, string> = {
+  barbell: "Barre", dumbbell: "Haltères", machine: "Machine",
+  cable: "Poulie", bodyweight: "Poids du corps", kettlebell: "Kettlebell",
+  "ez-bar": "EZ", smith: "Smith", bands: "Élastiques", other: "Autre",
+};
 
 let currentFilter = "all";
 
@@ -19,7 +35,15 @@ async function load() {
   q("[data-ex-error]")!.hidden = true;
 
   try {
-    const url = currentFilter !== "all" ? `/api/exercises?category=${encodeURIComponent(currentFilter)}` : "/api/exercises";
+    const params = new URLSearchParams();
+    if (currentFilter !== "all") params.set("category", currentFilter);
+    const muscle = (q<HTMLSelectElement>("[data-ex-filter-muscle]")?.value || "");
+    if (muscle) params.set("muscle_group", muscle);
+    const equipment = (q<HTMLSelectElement>("[data-ex-filter-equipment]")?.value || "");
+    if (equipment) params.set("equipment", equipment);
+
+    const qs = params.toString();
+    const url = qs ? `/api/exercises?${qs}` : "/api/exercises";
     const data = await get<Exercise[]>(url);
     q("[data-ex-toolbar]")!.hidden = false;
     render(data ?? []);
@@ -54,12 +78,20 @@ function render(exercises: Exercise[]) {
     .map(
       (ex) =>
         `<li>
-          <div>
+          <div class="ex-info">
             <span class="ex-name">${ex.name}</span>
-            ${ex.category ? `<span class="ex-category">${ex.category}</span>` : ""}
+            <div class="ex-meta">
+              ${ex.category ? `<span class="ex-category">${ex.category}</span>` : ""}
+              ${ex.muscle_group ? `<span class="ex-badge ex-muscle" data-muscle="${ex.muscle_group}">${muscleLabels[ex.muscle_group] || ex.muscle_group}</span>` : ""}
+              ${ex.equipment ? `<span class="ex-badge ex-equipment" data-equipment="${ex.equipment}">${equipmentLabels[ex.equipment] || ex.equipment}</span>` : ""}
+            </div>
+            ${ex.notes ? `<div class="ex-notes">${ex.notes}</div>` : ""}
           </div>
-          <span class="ex-rest">${ex.default_rest_s}s</span>
-          <button class="ex-delete" type="button" data-del="${ex.id}">Suppr.</button>
+          <div class="ex-actions">
+            <span class="ex-rest">${ex.default_rest_s}s</span>
+            <button class="ex-notes-edit" type="button" data-edit-notes="${ex.id}" aria-label="Notes">✎</button>
+            <button class="ex-delete" type="button" data-del="${ex.id}">Suppr.</button>
+          </div>
         </li>`,
     )
     .join("");
@@ -67,6 +99,27 @@ function render(exercises: Exercise[]) {
   list.querySelectorAll("[data-del]").forEach((btn) =>
     btn.addEventListener("click", () => deleteEx(parseInt((btn as HTMLElement).getAttribute("data-del")!, 10))),
   );
+
+  list.querySelectorAll("[data-edit-notes]").forEach((btn) =>
+    btn.addEventListener("click", () => editNotes(parseInt((btn as HTMLElement).getAttribute("data-edit-notes")!, 10))),
+  );
+}
+
+async function editNotes(id: number) {
+  const ex = await get<Exercise>(`/api/exercises/${id}`);
+  if (!ex) return;
+
+  const current = ex.notes ?? "";
+  const newNotes = prompt("Notes / Cues pour cet exercice :", current);
+  if (newNotes === null) return;
+
+  try {
+    await patch(`/api/exercises/${id}`, { notes: newNotes.trim() || null });
+    showToast("Notes mises à jour ✓", "success");
+    load();
+  } catch {
+    showToast("Erreur lors de la modification", "error");
+  }
 }
 
 async function deleteEx(id: number) {
@@ -91,6 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
     load();
   });
 
+  q("[data-ex-filter-muscle]")?.addEventListener("change", () => load());
+  q("[data-ex-filter-equipment]")?.addEventListener("change", () => load());
+
   q("[data-ex-add]")?.addEventListener("click", () => {
     q("[data-ex-add-form]")?.classList.remove("hidden");
   });
@@ -103,14 +159,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = (q<HTMLInputElement>("[data-ex-name]")?.value || "").trim();
     const category = (q<HTMLSelectElement>("[data-ex-category]")?.value || "").trim() || null;
     const rest = parseInt((q<HTMLInputElement>("[data-ex-rest]")?.value || "90"), 10);
+    const notes = (q<HTMLTextAreaElement>("[data-ex-notes]")?.value || "").trim() || null;
+    const muscle_group = (q<HTMLSelectElement>("[data-ex-muscle]")?.value || "").trim() || null;
+    const equipment = (q<HTMLSelectElement>("[data-ex-equipment]")?.value || "").trim() || null;
 
     if (!name) return;
 
     try {
-      await post("/api/exercises", { name, category, default_rest_s: rest });
+      await post("/api/exercises", { name, category, default_rest_s: rest, notes, muscle_group, equipment });
       (q<HTMLInputElement>("[data-ex-name]")!.value = "");
       (q<HTMLSelectElement>("[data-ex-category]")!.value = "");
+      (q<HTMLSelectElement>("[data-ex-muscle]")!.value = "");
+      (q<HTMLSelectElement>("[data-ex-equipment]")!.value = "");
       (q<HTMLInputElement>("[data-ex-rest]")!.value = "90");
+      (q<HTMLTextAreaElement>("[data-ex-notes]")!.value = "");
       q("[data-ex-add-form]")?.classList.add("hidden");
       load();
     } catch {}

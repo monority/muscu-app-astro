@@ -20,11 +20,41 @@ import Skeleton from "../components/ui/Skeleton.astro";
 
     <div class="ex-toolbar" data-ex-toolbar>
       <input class="ex-search" type="search" data-ex-search placeholder="Filtrer les exercices…" />
-      <div class="ex-categories" data-ex-categories>
-        <button class="ex-cat" type="button" data-cat="all" data-active>Tous</button>
-        <button class="ex-cat" type="button" data-cat="bench">Bench</button>
-        <button class="ex-cat" type="button" data-cat="bells">Bells</button>
-        <button class="ex-cat" type="button" data-cat="other">Autre</button>
+      <div class="ex-filters" data-ex-filters>
+        <div class="ex-categories" data-ex-categories>
+          <button class="ex-cat" type="button" data-cat="all" data-active>Tous</button>
+          <button class="ex-cat" type="button" data-cat="bench">Bench</button>
+          <button class="ex-cat" type="button" data-cat="bells">Bells</button>
+          <button class="ex-cat" type="button" data-cat="other">Autre</button>
+        </div>
+        <select class="ex-select" data-ex-filter-muscle>
+          <option value="">Muscle</option>
+          <option value="chest">Pectoraux</option>
+          <option value="back">Dos</option>
+          <option value="shoulders">Épaules</option>
+          <option value="biceps">Biceps</option>
+          <option value="triceps">Triceps</option>
+          <option value="quadriceps">Quadriceps</option>
+          <option value="hamstrings">Ischios</option>
+          <option value="glutes">Fessiers</option>
+          <option value="calves">Mollets</option>
+          <option value="abs">Abdos</option>
+          <option value="traps">Trapèzes</option>
+          <option value="forearms">Avant-bras</option>
+        </select>
+        <select class="ex-select" data-ex-filter-equipment>
+          <option value="">Équipement</option>
+          <option value="barbell">Barre</option>
+          <option value="dumbbell">Haltères</option>
+          <option value="machine">Machine</option>
+          <option value="cable">Poulie</option>
+          <option value="bodyweight">Poids du corps</option>
+          <option value="kettlebell">Kettlebell</option>
+          <option value="ez-bar">Barre EZ</option>
+          <option value="smith">Smith</option>
+          <option value="bands">Élastiques</option>
+          <option value="other">Autre</option>
+        </select>
       </div>
       <button class="ex-add-btn" type="button" data-ex-add>+ Ajouter</button>
     </div>
@@ -37,7 +67,36 @@ import Skeleton from "../components/ui/Skeleton.astro";
         <option value="bells">Bells</option>
         <option value="other">Autre</option>
       </select>
+      <select class="ex-select" data-ex-muscle>
+        <option value="">Muscle cible</option>
+        <option value="chest">Pectoraux</option>
+        <option value="back">Dos</option>
+        <option value="shoulders">Épaules</option>
+        <option value="biceps">Biceps</option>
+        <option value="triceps">Triceps</option>
+        <option value="quadriceps">Quadriceps</option>
+        <option value="hamstrings">Ischios</option>
+        <option value="glutes">Fessiers</option>
+        <option value="calves">Mollets</option>
+        <option value="abs">Abdos</option>
+        <option value="traps">Trapèzes</option>
+        <option value="forearms">Avant-bras</option>
+      </select>
+      <select class="ex-select" data-ex-equipment>
+        <option value="">Équipement</option>
+        <option value="barbell">Barre</option>
+        <option value="dumbbell">Haltères</option>
+        <option value="machine">Machine</option>
+        <option value="cable">Poulie</option>
+        <option value="bodyweight">Poids du corps</option>
+        <option value="kettlebell">Kettlebell</option>
+        <option value="ez-bar">Barre EZ</option>
+        <option value="smith">Smith</option>
+        <option value="bands">Élastiques</option>
+        <option value="other">Autre</option>
+      </select>
       <input class="ex-input ex-input-sm" type="number" data-ex-rest placeholder="Repos (s)" value="90" />
+      <textarea class="ex-textarea" data-ex-notes placeholder="Notes / Cues (optionnel)" rows="2"></textarea>
       <button class="ex-save-btn" type="button" data-ex-save>Enregistrer</button>
       <button class="ex-cancel-btn" type="button" data-ex-cancel>Annuler</button>
     </div>
@@ -92,9 +151,46 @@ import Skeleton from "../components/ui/Skeleton.astro";
     outline: none;
   }
 
+  .ex-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
   .ex-categories {
     display: flex;
     gap: 0.4rem;
+  }
+
+  .ex-badge {
+    font-size: 1.1rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+  }
+
+  .ex-muscle {
+    background: hsl(140 50% 40% / 0.15);
+    color: hsl(140 70% 60%);
+  }
+
+  .ex-equipment {
+    background: hsl(200 50% 40% / 0.15);
+    color: hsl(200 70% 60%);
+  }
+
+  .ex-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .ex-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
   }
 
   .ex-cat {
@@ -152,6 +248,25 @@ import Skeleton from "../components/ui/Skeleton.astro";
 
   .ex-input-sm {
     width: 10rem;
+  }
+
+  .ex-textarea {
+    width: 100%;
+    min-height: 4.4rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.3rem;
+    resize: vertical;
+  }
+
+  .ex-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: var(--focus-ring);
+    outline: none;
   }
 
   .ex-select {
@@ -222,9 +337,38 @@ import Skeleton from "../components/ui/Skeleton.astro";
     color: var(--accent);
   }
 
+  .ex-list .ex-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .ex-list .ex-notes {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 0.2rem;
+  }
+
   .ex-list .ex-rest {
     font-size: 1.2rem;
     color: var(--muted);
+  }
+
+  .ex-list .ex-notes-edit {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+
+  .ex-list .ex-notes-edit:hover {
+    color: var(--text);
+    border-color: hsl(0 0% 100% / 0.2);
   }
 
   .ex-list .ex-delete {

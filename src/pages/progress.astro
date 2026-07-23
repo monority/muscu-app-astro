@@ -3,7 +3,6 @@ export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
 import Skeleton from "../components/ui/Skeleton.astro";
-import ErrorState from "../components/ui/ErrorState.astro";
 ---
 
 <AppLayout title="Progression" activeNav="progress">
@@ -49,6 +48,17 @@ import ErrorState from "../components/ui/ErrorState.astro";
     <div class="pr-section" data-pr-sets-section hidden>
       <h2 class="pr-section-title">Séries par séance</h2>
       <div class="pr-chart-wrap" data-pr-sets-chart></div>
+    </div>
+
+    <div class="pr-section" data-pr-heatmap-section hidden>
+      <h2 class="pr-section-title">Calendrier d'entraînement</h2>
+      <div class="pr-chart-wrap" data-pr-heatmap></div>
+    </div>
+
+    <div class="pr-section" data-pr-balance-section hidden>
+      <h2 class="pr-section-title">Équilibre musculaire</h2>
+      <p class="pr-section-desc">Séries par groupe musculaire (30 jours)</p>
+      <div class="pr-chart-wrap" data-pr-balance-chart></div>
     </div>
 
     <div class="pr-section" data-pr-top-section hidden>
@@ -131,6 +141,50 @@ import ErrorState from "../components/ui/ErrorState.astro";
     font-weight: 700;
     font-family: var(--font-display);
     color: var(--text);
+  }
+
+  .pr-section-desc {
+    margin: -0.6rem 0 0;
+    font-size: 1.2rem;
+    color: var(--muted);
+  }
+
+  .pr-balance-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 0;
+  }
+
+  .pr-balance-label {
+    width: 10rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .pr-balance-track {
+    flex: 1;
+    height: 2rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+
+  .pr-balance-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    transition: width 0.6s ease-out;
+  }
+
+  .pr-balance-count {
+    width: 4rem;
+    font-size: 1.2rem;
+    color: var(--muted);
+    text-align: left;
+    flex-shrink: 0;
   }
 
   .pr-chart-wrap {

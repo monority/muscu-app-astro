@@ -16,13 +16,14 @@ export async function PATCH(context: APIContext) {
   if (body.weight_kg !== undefined) updates.weight_kg = body.weight_kg;
   if (body.reps !== undefined) updates.reps = body.reps;
   if (body.notes !== undefined) updates.notes = body.notes;
+  if (body.set_type !== undefined) updates.set_type = body.set_type;
 
   const { data, error } = await supabase
     .from("exercise_sets")
     .update(updates)
     .eq("id", id)
     .eq("user_id", user.id)
-    .select("id, set_number, weight_kg, reps, rest_s, notes, exercises!inner(name)")
+    .select("id, set_number, weight_kg, reps, rest_s, set_type, notes, exercises!inner(name)")
     .single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

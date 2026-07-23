@@ -6,6 +6,7 @@ import SessionHeader from "../components/session/SessionHeader.astro";
 import ExercisePicker from "../components/session/ExercisePicker.astro";
 import SetForm from "../components/session/SetForm.astro";
 import SetHistory from "../components/session/SetHistory.astro";
+import EndSessionModal from "../components/session/EndSessionModal.astro";
 import Skeleton from "../components/ui/Skeleton.astro";
 ---
 
@@ -33,11 +34,15 @@ import Skeleton from "../components/ui/Skeleton.astro";
 
       <div class="session-card">
         <ExercisePicker />
+        <div class="ex-notes-cue hidden" data-ex-notes-cue>
+          <span class="ex-notes-cue-label" data-ex-notes-content></span>
+        </div>
       </div>
 
       <div class="session-card" data-rest-timer-container hidden>
         <div class="rest-timer" data-rest-timer>
-          <span class="rest-timer-label">Repos</span>
+          <span class="rest-timer-label" data-rest-timer-label>Repos</span>
+          <span class="rest-timer-exercise" data-rest-exercise-name></span>
           <div class="rest-timer-display" data-rest-display>00:00</div>
           <div class="rest-timer-bar">
             <div class="rest-timer-bar-inner" data-rest-bar style="width:100%"></div>
@@ -59,6 +64,8 @@ import Skeleton from "../components/ui/Skeleton.astro";
       </button>
     </div>
   </div>
+
+  <EndSessionModal />
 </AppLayout>
 
 <script>
@@ -141,6 +148,12 @@ import Skeleton from "../components/ui/Skeleton.astro";
     text-transform: uppercase;
   }
 
+  .rest-timer-exercise {
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
   .rest-timer-display {
     font-size: clamp(2.4rem, 5vw, 3.2rem);
     font-weight: 700;
@@ -192,6 +205,17 @@ import Skeleton from "../components/ui/Skeleton.astro";
   .rest-timer-skip:hover {
     color: var(--text);
     border-color: hsl(0 0% 100% / 0.2);
+  }
+
+  .ex-notes-cue {
+    margin-top: 0.8rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: hsl(0 0% 100% / 0.03);
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--muted);
   }
 
   .template-progress {

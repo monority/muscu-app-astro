@@ -9,7 +9,7 @@ const id = parseInt(Astro.params.id!, 10);
 
 const { data: session } = await supabase
   .from("sessions")
-  .select("id, started_at, ended_at, notes")
+  .select("id, started_at, ended_at, notes, difficulty")
   .eq("id", id)
   .eq("user_id", Astro.locals.user?.id)
   .single();
@@ -20,7 +20,7 @@ if (!session) {
 
 const { data: sets } = await supabase
   .from("exercise_sets")
-  .select("id, set_number, weight_kg, reps, rest_s, notes, completed_at, exercises(name, category)")
+  .select("id, set_number, weight_kg, reps, rest_s, set_type, notes, completed_at, exercises(name, category)")
   .eq("session_id", id)
   .order("completed_at", { ascending: true });
 
@@ -67,7 +67,10 @@ const durationMin = Math.round((endTime - startTime) / 60000);
       </div>
     </div>
 
-    {session.notes && <p class="sd-notes">{session.notes}</p>}
+    <div class="sd-meta">
+      {session.difficulty && <span class={`sd-difficulty sd-diff-${session.difficulty}`}>{session.difficulty === "easy" ? "Facile" : session.difficulty === "hard" ? "Difficile" : "Normal"}</span>}
+      {session.notes && <p class="sd-notes">{session.notes}</p>}
+    </div>
 
     <div class="sd-exercises">
       {[...grouped.entries()].map(([name, exerciseSets]) => (
@@ -77,6 +80,7 @@ const durationMin = Math.round((endTime - startTime) / 60000);
             {exerciseSets.map((set) => (
               <li class="sd-set-item">
                 <span class="sd-set-num">#{set.set_number}</span>
+                {set.set_type && set.set_type !== "working" && <span class={`sd-set-type ${set.set_type === "warmup" ? "sd-st-warmup" : set.set_type === "top_set" ? "sd-st-top" : set.set_type === "dropset" ? "sd-st-drop" : "sd-st-failure"}`}>{set.set_type === "warmup" ? "Échauf" : set.set_type === "top_set" ? "Top" : set.set_type === "dropset" ? "Drop" : "Échec"}</span>}
                 <span class="sd-set-detail">{set.weight_kg} kg × {set.reps}</span>
                 {set.rest_s != null && <span class="sd-set-rest">Repos {Math.floor(set.rest_s / 60)}:{String(set.rest_s % 60).padStart(2, "0")}</span>}
                 {set.notes && <span class="sd-set-notes">{set.notes}</span>}
@@ -145,6 +149,40 @@ const durationMin = Math.round((endTime - startTime) / 60000);
     color: var(--text);
   }
 
+  .sd-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .sd-difficulty {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.2rem 0.8rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid;
+    width: fit-content;
+  }
+
+  .sd-diff-easy {
+    border-color: hsl(140 60% 50% / 0.3);
+    color: hsl(140 60% 60%);
+    background: hsl(140 60% 50% / 0.06);
+  }
+
+  .sd-diff-normal {
+    border-color: hsl(200 60% 60% / 0.3);
+    color: hsl(200 60% 70%);
+    background: hsl(200 60% 60% / 0.06);
+  }
+
+  .sd-diff-hard {
+    border-color: hsl(0 84% 60% / 0.3);
+    color: var(--accent);
+    background: hsl(0 84% 60% / 0.06);
+  }
+
   .sd-notes {
     margin: 0;
     padding: 1.2rem;
@@ -202,6 +240,35 @@ const durationMin = Math.round((endTime - startTime) / 60000);
   .sd-set-detail {
     color: var(--text);
     font-weight: 600;
+  }
+
+  .sd-set-type {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid hsl(0 0% 100% / 0.1);
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+  }
+
+  .sd-st-warmup {
+    border-color: hsl(200 60% 60% / 0.3);
+    color: hsl(200 60% 70%);
+  }
+
+  .sd-st-top {
+    border-color: hsl(24 100% 55% / 0.3);
+    color: var(--accent-2);
+  }
+
+  .sd-st-drop {
+    border-color: hsl(330 60% 60% / 0.3);
+    color: hsl(330 60% 70%);
+  }
+
+  .sd-st-failure {
+    border-color: hsl(0 84% 60% / 0.3);
+    color: var(--accent);
   }
 
   .sd-set-rest {

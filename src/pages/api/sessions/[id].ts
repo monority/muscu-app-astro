@@ -13,7 +13,7 @@ export async function GET(context: APIContext) {
 
   const { data: session, error } = await supabase
     .from("sessions")
-    .select("id, started_at, ended_at, notes")
+    .select("id, started_at, ended_at, notes, difficulty")
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
@@ -43,13 +43,14 @@ export async function PATCH(context: APIContext) {
   const updates: Record<string, unknown> = {};
   if (body.ended_at !== undefined) updates.ended_at = body.ended_at;
   if (body.notes !== undefined) updates.notes = body.notes;
+  if (body.difficulty !== undefined) updates.difficulty = body.difficulty;
 
   const { data, error } = await supabase
     .from("sessions")
     .update(updates)
     .eq("id", id)
     .eq("user_id", user.id)
-    .select("id, started_at, ended_at, notes")
+    .select("id, started_at, ended_at, notes, difficulty")
     .single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

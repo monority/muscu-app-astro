@@ -5,6 +5,7 @@ export class RestTimer {
   private displayEl: HTMLElement;
   private barEl: HTMLElement;
   private skipEl: HTMLElement;
+  private exerciseNameEl: HTMLElement | null;
   private totalMs = 0;
   private startTime = 0;
   private rafId = 0;
@@ -17,7 +18,14 @@ export class RestTimer {
     this.displayEl = container.querySelector("[data-rest-display]")!;
     this.barEl = container.querySelector("[data-rest-bar]")!;
     this.skipEl = container.querySelector("[data-rest-skip]")!;
+    this.exerciseNameEl = container.querySelector("[data-rest-exercise-name]");
     this.skipEl.addEventListener("click", () => this.stop());
+  }
+
+  setExerciseName(name: string) {
+    if (this.exerciseNameEl) {
+      this.exerciseNameEl.textContent = name;
+    }
   }
 
   set muted(v: boolean) { this._muted = v; }

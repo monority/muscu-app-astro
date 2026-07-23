@@ -48,6 +48,21 @@ alter table sessions add column if not exists user_id uuid references auth.users
 alter table exercises add column if not exists user_id uuid references auth.users(id) on delete cascade;
 alter table exercise_sets add column if not exists user_id uuid references auth.users(id) on delete cascade;
 
+-- Phase 6: set_type + notes
+alter table exercise_sets add column if not exists set_type text not null default 'working';
+alter table exercise_sets add constraint if not exists chk_set_type check (set_type in ('warmup','working','top_set','dropset','failure'));
+alter table exercises add column if not exists notes text;
+
+-- Phase 7: session difficulty
+alter table sessions add column if not exists difficulty text;
+alter table sessions add constraint if not exists chk_difficulty check (difficulty in ('easy','normal','hard'));
+
+-- Phase 8: exercise enrichment
+alter table exercises add column if not exists muscle_group text;
+alter table exercises add constraint if not exists chk_muscle_group check (muscle_group in ('chest','back','shoulders','biceps','triceps','quadriceps','hamstrings','glutes','calves','abs','traps','forearms'));
+alter table exercises add column if not exists equipment text;
+alter table exercises add constraint if not exists chk_equipment check (equipment in ('barbell','dumbbell','machine','cable','bodyweight','kettlebell','ez-bar','smith','bands','other'));
+
 -- Indexes
 create index if not exists idx_sessions_user on sessions(user_id);
 create index if not exists idx_exercises_user on exercises(user_id);

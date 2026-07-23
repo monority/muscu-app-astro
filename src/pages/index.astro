@@ -3,7 +3,6 @@ export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
 import Skeleton from "../components/ui/Skeleton.astro";
-import EmptyState from "../components/ui/EmptyState.astro";
 ---
 
 <AppLayout title="Accueil" activeNav="home">
@@ -30,10 +29,58 @@ import EmptyState from "../components/ui/EmptyState.astro";
 
       <div class="dash-card dash-card-empty hidden" data-no-session>
         <p class="dash-card-stat">Aucune séance active</p>
-        <p class="dash-card-meta">Prêt à commencer ?</p>
+        <p class="dash-card-meta">
+          <span data-dash-greeting>Prêt à commencer ?</span>
+        </p>
         <a href="/session" class="dash-card-cta" data-start-session>
           Nouvelle séance
         </a>
+      </div>
+
+      <div class="dash-card" data-weekly-card hidden>
+        <span class="dash-card-label">Cette semaine</span>
+        <div class="dash-weekly" data-weekly-content>
+          <div class="dash-weekly-item">
+            <span class="dash-weekly-stat" data-week-sessions>—</span>
+            <span class="dash-weekly-label">Séances</span>
+          </div>
+          <div class="dash-weekly-item">
+            <span class="dash-weekly-stat" data-week-volume>—</span>
+            <span class="dash-weekly-label">Volume</span>
+          </div>
+          <div class="dash-weekly-item">
+            <span class="dash-weekly-stat" data-week-sets>—</span>
+            <span class="dash-weekly-label">Séries</span>
+          </div>
+          <div class="dash-weekly-item">
+            <span class="dash-weekly-stat" data-week-exercises>—</span>
+            <span class="dash-weekly-label">Exercices</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card" data-last-session hidden>
+        <span class="dash-card-label">Dernière séance</span>
+        <p class="dash-card-stat" data-last-date>—</p>
+        <p class="dash-card-meta" data-last-meta></p>
+        <a href="" class="dash-card-cta" data-last-link>Voir le détail</a>
+      </div>
+
+      <div class="dash-card" data-streak-card hidden>
+        <span class="dash-card-label">Régularité</span>
+        <p class="dash-streak" data-streak-content>
+          <span class="dash-streak-fire">🔥</span>
+          <span class="dash-streak-count" data-streak-count>0</span>
+          <span class="dash-streak-label">jours consécutifs</span>
+        </p>
+        <p class="dash-card-meta" data-streak-best></p>
+      </div>
+
+      <div class="dash-card dash-card-secondary">
+        <span class="dash-card-label">Templates rapides</span>
+        <div class="dash-templates" data-templates-list>
+          <p class="dash-templates-empty">Aucun template</p>
+        </div>
       </div>
 
       <div class="dash-card dash-card-secondary">
@@ -50,6 +97,15 @@ import EmptyState from "../components/ui/EmptyState.astro";
         <Skeleton width="18rem" height="2.4rem" />
         <Skeleton width="14rem" height="1.4rem" />
         <Skeleton width="16rem" height="3.8rem" borderRadius="var(--radius-md)" />
+      </div>
+      <div class="dash-card" style="gap:1.2rem">
+        <Skeleton width="12rem" height="1.2rem" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
+          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
+          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
+          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
+        </div>
       </div>
       <div class="dash-card" style="gap:1.2rem;background:transparent">
         <Skeleton width="12rem" height="1.2rem" />
@@ -160,6 +216,109 @@ import EmptyState from "../components/ui/EmptyState.astro";
     background: transparent;
   }
 
+  .dash-weekly {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 0.8rem;
+  }
+
+  .dash-weekly-item {
+    display: grid;
+    gap: 0.2rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    text-align: center;
+  }
+
+  .dash-weekly-stat {
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash-weekly-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .dash-streak {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0;
+  }
+
+  .dash-streak-fire {
+    font-size: 2.4rem;
+    line-height: 1;
+  }
+
+  .dash-streak-count {
+    font-size: clamp(2.4rem, 5vw, 3.2rem);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--accent-2);
+  }
+
+  .dash-streak-label {
+    font-size: 1.3rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .dash-templates {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .dash-templates-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.3rem;
+  }
+
+  .dash-template-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: border-color var(--motion-fast);
+  }
+
+  .dash-template-btn:hover {
+    border-color: hsl(0 0% 100% / 0.2);
+  }
+
+  .dash-template-start {
+    padding: 0.4rem 1rem;
+    border: 1px solid hsl(24 100% 55% / 0.3);
+    border-radius: var(--radius-pill);
+    background: hsl(24 100% 55% / 0.08);
+    color: var(--accent-2);
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .dash-template-start:hover {
+    background: hsl(24 100% 55% / 0.15);
+  }
+
   .dash-recent {
     display: flex;
     flex-direction: column;
@@ -175,6 +334,16 @@ import EmptyState from "../components/ui/EmptyState.astro";
     border-radius: var(--radius-sm);
     font-size: 1.3rem;
     color: var(--muted);
+  }
+
+  .dash-recent li a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .dash-recent li a:hover {
+    color: var(--text);
   }
 
   .dash-recent-empty {
@@ -193,6 +362,10 @@ import EmptyState from "../components/ui/EmptyState.astro";
 
     .dash-card-cta {
       width: 100%;
+    }
+
+    .dash-weekly {
+      grid-template-columns: 1fr 1fr;
     }
   }
 </style>

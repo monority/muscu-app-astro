@@ -5,6 +5,7 @@ export interface Session {
   started_at: string;
   ended_at: string | null;
   notes: string | null;
+  difficulty: string | null;
 }
 
 export interface Exercise {
@@ -13,6 +14,9 @@ export interface Exercise {
   name: string;
   category: string | null;
   default_rest_s: number;
+  notes: string | null;
+  muscle_group: string | null;
+  equipment: string | null;
   created_at: string;
 }
 
@@ -25,6 +29,7 @@ export interface ExerciseSet {
   weight_kg: number;
   reps: number;
   rest_s: number | null;
+  set_type: string;
   notes: string | null;
   completed_at: string;
 }

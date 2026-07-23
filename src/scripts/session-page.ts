@@ -2,6 +2,7 @@ import { get, post, patch, del } from "../lib/api";
 import { ExerciseSearch } from "./exercise-search";
 import { RestTimer } from "./rest-timer";
 import { showToast } from "./toast";
+import { estimate1RM } from "../lib/helpers";
 
 interface Exercise {
   id: number;
@@ -15,8 +16,14 @@ interface ExerciseSet {
   weight_kg: number;
   reps: number;
   rest_s: number | null;
+  set_type: string;
   notes: string | null;
   exercises: { name: string };
+}
+
+interface LastSessionData {
+  session: { id: number; started_at: string; date_diff_days: number } | null;
+  sets: { weight_kg: number; reps: number; set_number: number; set_type: string }[];
 }
 
 interface TemplateEx {
@@ -274,6 +281,61 @@ function onExerciseSelect(ex: Exercise) {
   q<HTMLElement>("[data-form-container]")!.hidden = false;
   q<HTMLInputElement>("[data-set-weight]")!.focus();
   validateForm();
+  timer.setExerciseName(ex.name);
+  q<HTMLElement>("[data-prev-perf]")?.classList.add("hidden");
+  loadPreviousPerformance(ex.id);
+  loadExerciseNotes(ex.id);
+}
+
+async function loadExerciseNotes(exerciseId: number) {
+  try {
+    const ex = await get<{ notes: string | null }>(`/api/exercises/${exerciseId}`);
+    const cue = q<HTMLElement>("[data-ex-notes-cue]");
+    const content = q<HTMLElement>("[data-ex-notes-content]");
+    if (cue && content) {
+      if (ex?.notes) {
+        content.textContent = ex.notes;
+        cue.classList.remove("hidden");
+      } else {
+        cue.classList.add("hidden");
+      }
+    }
+  } catch {
+    // silent
+  }
+}
+
+async function loadPreviousPerformance(exerciseId: number) {
+  try {
+    const data = await get<LastSessionData>(`/api/exercises/${exerciseId}/last-session`);
+    const el = q<HTMLElement>("[data-prev-perf]");
+    if (!el) return;
+    if (!data?.session || !data.sets?.length) {
+      el.classList.add("hidden");
+      return;
+    }
+    const age = data.session.date_diff_days;
+    const ageStr = age === 0 ? "Aujourd'hui" : age === 1 ? "Hier" : `Il y a ${age} jours`;
+    const setsStr = data.sets.map((s) => `${s.weight_kg} kg × ${s.reps}`).join(", ");
+    el.querySelector("[data-prev-perf-age]")!.textContent = ageStr;
+    el.querySelector("[data-prev-perf-sets]")!.textContent = setsStr;
+    el.querySelector("[data-prev-perf-session]")!.setAttribute("href", `/session/${data.session.id}`);
+    el.classList.remove("hidden");
+  } catch {
+    // silent — previous performance is optional
+  }
+}
+
+async function checkPR(exerciseId: number, weight: number, reps: number) {
+  const current1RM = estimate1RM(weight, reps);
+  try {
+    const best = await get<{ estimated_1rm: number; weight_kg: number; reps: number } | null>(`/api/exercises/${exerciseId}/pr`);
+    if (!best || current1RM >= best.estimated_1rm) {
+      showToast(`🏆 Nouveau record ! ${weight} kg × ${reps} (${Math.round(current1RM * 10) / 10} kg estimé)`, "success");
+    }
+  } catch {
+    // PR detection is optional
+  }
 }
 
 async function logSet() {
@@ -285,11 +347,13 @@ async function logSet() {
 
   if (weight <= 0 || reps <= 0) return;
 
+  const setType = q<HTMLElement>("[data-set-type-container]")?.querySelector<HTMLElement>("[data-active]")?.getAttribute("data-set-type") ?? "working";
+
   setLoading(true);
 
   try {
     if (editingSetId) {
-      const updated = await patch<ExerciseSet>(`/api/sets/${editingSetId}`, { weight_kg: weight, reps: reps, notes: notes });
+      const updated = await patch<ExerciseSet>(`/api/sets/${editingSetId}`, { weight_kg: weight, reps: reps, notes: notes, set_type: setType });
 
       const idx = state.sets.findIndex((s) => s.id === editingSetId);
       if (idx !== -1) {
@@ -310,6 +374,7 @@ async function logSet() {
         weight_kg: weight,
         reps: reps,
         rest_s: state.exercise.default_rest_s,
+        set_type: setType,
         notes: notes,
       });
 
@@ -317,10 +382,18 @@ async function logSet() {
       showToast(`Série #${setNumber} enregistrée ✓`, "success");
 
       timer.start(state.exercise.default_rest_s);
+
+      checkPR(state.exercise.id, weight, reps).catch(() => {});
     }
 
     renderHistory();
     updateHeader();
+
+    const pills = q<HTMLElement>("[data-set-type-container]");
+    if (pills) {
+      pills.querySelectorAll("[data-set-type]").forEach((p) => p.removeAttribute("data-active"));
+      pills.querySelector<HTMLElement>('[data-set-type="working"]')?.setAttribute("data-active", "");
+    }
 
     (q<HTMLInputElement>("[data-set-weight]")!.value = "");
     (q<HTMLInputElement>("[data-set-reps]")!.value = "");
@@ -361,6 +434,11 @@ function startEdit(setId: number) {
   (q<HTMLInputElement>("[data-set-weight]")!.value = String(set.weight_kg));
   (q<HTMLInputElement>("[data-set-reps]")!.value = String(set.reps));
   (q<HTMLInputElement>("[data-set-notes]")!.value = set.notes ?? "");
+  const pills = q<HTMLElement>("[data-set-type-container]");
+  if (pills) {
+    pills.querySelectorAll("[data-set-type]").forEach((p) => p.removeAttribute("data-active"));
+    pills.querySelector<HTMLElement>(`[data-set-type="${set.set_type}"]`)?.setAttribute("data-active", "");
+  }
   q<HTMLInputElement>("[data-set-weight]")!.focus();
 
   const btn = q<HTMLButtonElement>("[data-set-submit]")!;
@@ -386,12 +464,62 @@ function onTimerComplete() {
 
 async function endSession() {
   if (!state.sessionId) return;
-  if (!confirm("Terminer la séance ?")) return;
+  const modal = q<HTMLElement>("[data-end-modal]");
+  const confirmBtn = q<HTMLButtonElement>("[data-end-confirm]");
+  const cancelBtn = q<HTMLButtonElement>("[data-end-cancel]");
+  const notesEl = q<HTMLTextAreaElement>("[data-end-notes]");
+  const difficultyContainer = q<HTMLElement>("[data-end-difficulty]");
+  if (!modal || !confirmBtn || !cancelBtn) return;
 
-  try {
-    await patch(`/api/sessions/${state.sessionId}`, { ended_at: new Date().toISOString() });
-    window.location.href = "/";
-  } catch {}
+  function getDifficulty() {
+    const active = difficultyContainer?.querySelector<HTMLElement>("[data-active]");
+    return active?.getAttribute("data-difficulty") ?? "normal";
+  }
+
+  function closeModal() {
+    modal.classList.add("hidden");
+    confirmBtn.removeAttribute("data-loading");
+    confirmBtn.disabled = false;
+  }
+
+  function onConfirm() {
+    if (confirmBtn.disabled) return;
+    confirmBtn.setAttribute("data-loading", "");
+    confirmBtn.disabled = true;
+
+    const difficulty = getDifficulty();
+    const notes = notesEl?.value?.trim() || null;
+
+    patch(`/api/sessions/${state.sessionId}`, {
+      ended_at: new Date().toISOString(),
+      difficulty,
+      notes,
+    })
+      .then(() => { window.location.href = "/"; })
+      .catch(() => { confirmBtn.removeAttribute("data-loading"); confirmBtn.disabled = false; });
+  }
+
+  function onCancel() {
+    closeModal();
+  }
+
+  function onOverlayClick(e: MouseEvent) {
+    if (e.target === modal) closeModal();
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape") closeModal();
+  }
+
+  modal.classList.remove("hidden");
+  notesEl!.value = "";
+  difficultyContainer?.querySelectorAll("[data-difficulty]").forEach((b) => b.removeAttribute("data-active"));
+  difficultyContainer?.querySelector('[data-difficulty="normal"]')?.setAttribute("data-active", "");
+
+  confirmBtn.onclick = onConfirm;
+  cancelBtn.onclick = onCancel;
+  modal.onclick = onOverlayClick;
+  document.addEventListener("keydown", onKeydown, { once: true });
 }
 
 function renderHistory() {
@@ -400,10 +528,17 @@ function renderHistory() {
 
   const filtered = getExerciseSets();
 
+  const typeLabels: Record<string, string> = { warmup: "Échauf", working: "", top_set: "Top", dropset: "Drop", failure: "Échec" };
+  const typeClasses: Record<string, string> = { warmup: "st-warmup", top_set: "st-top", dropset: "st-drop", failure: "st-failure" };
+
   for (const set of filtered) {
     const li = document.createElement("li");
+    const typeBadge = set.set_type && set.set_type !== "working"
+      ? `<span class="set-type-badge ${typeClasses[set.set_type] ?? ""}">${typeLabels[set.set_type] ?? set.set_type}</span>`
+      : "";
     li.innerHTML =
       `<span class="set-number">#${set.set_number}</span>` +
+      typeBadge +
       `<span class="set-detail">${set.weight_kg} kg × ${set.reps}</span>` +
       `<span class="set-rest">${set.exercises.name}</span>` +
       `<div class="set-actions">` +
