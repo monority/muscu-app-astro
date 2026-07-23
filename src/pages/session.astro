@@ -6,10 +6,17 @@ import SessionHeader from "../components/session/SessionHeader.astro";
 import ExercisePicker from "../components/session/ExercisePicker.astro";
 import SetForm from "../components/session/SetForm.astro";
 import SetHistory from "../components/session/SetHistory.astro";
+import Skeleton from "../components/ui/Skeleton.astro";
 ---
 
 <AppLayout title="Séance" activeNav="session">
   <div class="session-body" data-session-body>
+    <div class="session-loading hidden" data-session-loading>
+      <Skeleton width="20rem" height="4.4rem" borderRadius="var(--radius-md)" />
+    </div>
+
+    <div data-session-error hidden></div>
+
     <div class="session-start" data-session-start>
       <button class="session-start-btn" type="button" data-session-create>
         Nouvelle séance

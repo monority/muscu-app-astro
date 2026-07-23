@@ -45,6 +45,8 @@
 
   --focus-ring: 0 0 0 3px hsl(0 84% 62% / 0.34);
   --motion-fast: 160ms ease;
+  --motion-default: 200ms ease;
+  --motion-slow: 300ms ease;
 
   /* Layout tokens — overridden at breakpoints */
   --sidebar-width: 24rem;

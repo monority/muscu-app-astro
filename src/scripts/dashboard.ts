@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { showToast } from "./toast";
 
 interface SetRow {
   weight_kg: number;
@@ -23,12 +24,16 @@ function showContent() {
 
 export async function loadDashboard() {
   showContent();
-  const { data: activeSession } = await supabase
+
+  try {
+    const { data: activeSession, error: err1 } = await supabase
     .from("sessions")
     .select("id, started_at")
     .is("ended_at", null)
     .limit(1)
     .single();
+
+  if (err1 && err1.code !== "PGRST116") throw err1;
 
   const activeCard = q("[data-active-session]");
   const emptyCard = q("[data-no-session]");
@@ -38,12 +43,13 @@ export async function loadDashboard() {
     activeCard?.classList.remove("hidden");
     emptyCard?.classList.add("hidden");
 
-    const { data: sets } = await supabase
+    const { data: sets, error: err3 } = await supabase
       .from("exercise_sets")
       .select("weight_kg, reps, exercises(name)")
       .eq("session_id", activeSession.id)
       .order("completed_at", { ascending: false })
       .limit(10);
+    if (err3) throw err3;
 
     if (sets && sets.length > 0) {
       const last = sets[0] as unknown as SetRow;
@@ -62,12 +68,13 @@ export async function loadDashboard() {
     if (cta) cta.href = "/session";
   }
 
-  const { data: recent } = await supabase
+  const { data: recent, error: err2 } = await supabase
     .from("sessions")
     .select("id, started_at")
     .not("ended_at", "is", null)
     .order("ended_at", { ascending: false })
     .limit(5);
+  if (err2) throw err2;
 
   const list = q("[data-recent-list]");
   if (list && recent && recent.length > 0) {
@@ -82,6 +89,21 @@ export async function loadDashboard() {
           </a></li>`,
       )
       .join("");
+  }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur de chargement";
+    const el = q<HTMLElement>("[data-dash-error]");
+    if (el) {
+      el.innerHTML = `<div class="error-state" role="alert" aria-live="polite">
+        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="width:3.2rem;height:3.2rem;color:var(--accent)"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        <h2 style="margin:0;font-size:1.6rem;font-weight:700;color:var(--text)">Erreur</h2>
+        <p style="margin:0;font-size:1.3rem;color:var(--muted)">${msg}</p>
+        <button class="error-retry" type="button" style="min-height:3.8rem;padding:0.6rem 1.6rem;border:1px solid hsl(0 84% 62% / 0.45);border-radius:var(--radius-md);background:var(--accent);color:var(--accent-foreground);font:inherit;font-size:1.3rem;font-weight:700;cursor:pointer">Réessayer</button>
+      </div>`;
+      el.hidden = false;
+      el.querySelector(".error-retry")?.addEventListener("click", () => { el.hidden = true; loadDashboard(); });
+    }
+    showToast(msg, "error");
   }
 }
 

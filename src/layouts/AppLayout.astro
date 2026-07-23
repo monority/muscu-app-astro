@@ -29,10 +29,11 @@ const user = Astro.locals.user;
     <ClientRouter />
   </head>
   <body>
-    <Sidebar activeNav={activeNav} user={user} />
-    <MobileNav activeNav={activeNav} user={user} />
-    <BottomNav activeNav={activeNav} />
-    <main class="app-main">
+    <a href="#main-content" class="skip-link u-sr-only-focusable">Aller au contenu</a>
+    <Sidebar activeNav={activeNav} user={user} transition:persist />
+    <MobileNav activeNav={activeNav} user={user} transition:persist />
+    <BottomNav activeNav={activeNav} transition:persist />
+    <main class="app-main" id="main-content">
       <slot />
       <Toast />
     </main>
@@ -58,6 +59,21 @@ const user = Astro.locals.user;
     padding-bottom: calc(var(--space-page-padding) + var(--nav-bar-height) + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
     min-height: 100svh;
+  }
+
+  .skip-link {
+    position: fixed;
+    z-index: 9999;
+    top: 0.8rem;
+    left: 0.8rem;
+    padding: 0.8rem 1.6rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: 600;
   }
 
   @media (max-width: 1023px) {

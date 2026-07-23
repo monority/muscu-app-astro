@@ -2,13 +2,23 @@
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
+import Skeleton from "../components/ui/Skeleton.astro";
 ---
 
 <AppLayout title="Exercices" activeNav="exercices">
   <div class="ex-page">
     <h1 class="ex-title">Exercices</h1>
 
-    <div class="ex-toolbar">
+    <div class="ex-skeleton hidden" data-ex-skeleton>
+      <Skeleton height="4rem" borderRadius="var(--radius-md)" />
+      <Skeleton height="4.8rem" borderRadius="var(--radius-md)" />
+      <Skeleton height="4.8rem" borderRadius="var(--radius-md)" />
+      <Skeleton height="4.8rem" borderRadius="var(--radius-md)" />
+    </div>
+
+    <div data-ex-error hidden></div>
+
+    <div class="ex-toolbar" data-ex-toolbar>
       <input class="ex-search" type="search" data-ex-search placeholder="Filtrer les exercices…" />
       <div class="ex-categories" data-ex-categories>
         <button class="ex-cat" type="button" data-cat="all" data-active>Tous</button>
@@ -33,7 +43,7 @@ import AppLayout from "../layouts/AppLayout.astro";
     </div>
 
     <ul class="ex-list" data-ex-list>
-      <li class="ex-empty">Chargement…</li>
+      <li class="ex-empty">Aucun exercice trouvé</li>
     </ul>
   </div>
 </AppLayout>

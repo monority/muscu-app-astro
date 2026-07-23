@@ -2,11 +2,25 @@
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
+import Skeleton from "../components/ui/Skeleton.astro";
+import ErrorState from "../components/ui/ErrorState.astro";
 ---
 
 <AppLayout title="Progression" activeNav="progress">
   <div class="pr-page" data-pr-page>
     <h1 class="pr-title">Progression</h1>
+
+    <div class="pr-skeleton hidden" data-pr-skeleton>
+      <div class="pr-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:var(--gap-card)">
+        <Skeleton height="7rem" borderRadius="var(--radius-lg)" />
+        <Skeleton height="7rem" borderRadius="var(--radius-lg)" />
+        <Skeleton height="7rem" borderRadius="var(--radius-lg)" />
+        <Skeleton height="7rem" borderRadius="var(--radius-lg)" />
+      </div>
+      <Skeleton height="20rem" borderRadius="var(--radius-lg)" />
+      <Skeleton height="20rem" borderRadius="var(--radius-lg)" />
+      <Skeleton height="14rem" borderRadius="var(--radius-lg)" />
+    </div>
 
     <div class="pr-cards" data-pr-cards hidden>
       <div class="pr-card">
@@ -46,6 +60,8 @@ import AppLayout from "../layouts/AppLayout.astro";
       <h2 class="pr-section-title">Séances récentes</h2>
       <ul class="pr-recent" data-pr-recent></ul>
     </div>
+
+    <div data-pr-error hidden></div>
 
     <div class="pr-empty" data-pr-empty>
       <p>Aucune séance terminée pour le moment.</p>

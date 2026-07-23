@@ -10,9 +10,14 @@
       type="search"
       placeholder="Chercher un exercice…"
       autocomplete="off"
+      role="combobox"
+      aria-expanded="false"
+      aria-haspopup="listbox"
+      aria-autocomplete="list"
+      aria-activedescendant=""
       data-exercise-search
     />
-    <ul class="exercise-picker-results" data-exercise-results hidden></ul>
+    <ul class="exercise-picker-results" data-exercise-results role="listbox" hidden></ul>
   </div>
   <p class="exercise-picker-selected" data-exercise-selected hidden>
     ✓ <span data-exercise-name></span>

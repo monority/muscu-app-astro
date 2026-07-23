@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { showToast } from "./toast";
 
 function q<T = HTMLElement>(s: string): T | null {
   return document.querySelector<T>(s);
@@ -14,12 +15,32 @@ interface Exercise {
 let currentFilter = "all";
 
 async function load() {
-  let query = supabase.from("exercises").select("*").order("name");
-  if (currentFilter !== "all") {
-    query = query.eq("category", currentFilter);
+  q("[data-ex-skeleton]")?.classList.remove("hidden");
+  q("[data-ex-error]")!.hidden = true;
+
+  try {
+    let query = supabase.from("exercises").select("*").order("name");
+    if (currentFilter !== "all") {
+      query = query.eq("category", currentFilter);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    q("[data-ex-toolbar]")!.hidden = false;
+    render(data ?? []);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur de chargement";
+    q("[data-ex-error]")!.hidden = false;
+    q("[data-ex-error]")!.innerHTML = `<div class="error-state" role="alert" aria-live="polite">
+      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="width:3.2rem;height:3.2rem;color:var(--accent)"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+      <h2 style="margin:0;font-size:1.6rem;font-weight:700;color:var(--text)">Erreur</h2>
+      <p style="margin:0;font-size:1.3rem;color:var(--muted)">${msg}</p>
+      <button class="error-retry" type="button" style="min-height:3.8rem;padding:0.6rem 1.6rem;border:1px solid hsl(0 84% 62% / 0.45);border-radius:var(--radius-md);background:var(--accent);color:var(--accent-foreground);font:inherit;font-size:1.3rem;font-weight:700;cursor:pointer">Réessayer</button>
+    </div>`;
+    q("[data-ex-error]")!.querySelector(".error-retry")?.addEventListener("click", () => { q("[data-ex-error]")!.hidden = true; load(); });
+    showToast(msg, "error");
+  } finally {
+    q("[data-ex-skeleton]")?.classList.add("hidden");
   }
-  const { data } = await query;
-  render(data ?? []);
 }
 
 function render(exercises: Exercise[]) {
@@ -54,8 +75,11 @@ function render(exercises: Exercise[]) {
 
 async function deleteEx(id: number) {
   if (!confirm("Supprimer cet exercice ?")) return;
-  await supabase.from("exercises").delete().eq("id", id);
-  load();
+  try {
+    await supabase.from("exercises").delete().eq("id", id);
+    load();
+  } catch {}
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -87,11 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!name) return;
 
-    await supabase.from("exercises").insert({ name, category, default_rest_s: rest });
-    (q<HTMLInputElement>("[data-ex-name]")!.value = "");
-    (q<HTMLSelectElement>("[data-ex-category]")!.value = "");
-    (q<HTMLInputElement>("[data-ex-rest]")!.value = "90");
-    q("[data-ex-add-form]")?.classList.add("hidden");
-    load();
+    try {
+      await supabase.from("exercises").insert({ name, category, default_rest_s: rest });
+      (q<HTMLInputElement>("[data-ex-name]")!.value = "");
+      (q<HTMLSelectElement>("[data-ex-category]")!.value = "");
+      (q<HTMLInputElement>("[data-ex-rest]")!.value = "90");
+      q("[data-ex-add-form]")?.classList.add("hidden");
+      load();
+    } catch {}
+
   });
 });

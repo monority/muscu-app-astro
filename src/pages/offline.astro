@@ -7,27 +7,72 @@ export const prerender = false;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050505" />
     <title>Hors ligne — Muscu App</title>
     <style>
+      :root {
+        --bg: #050505;
+        --surface: #0b0b0b;
+        --surface-2: #111111;
+        --text: #f6f6f6;
+        --muted: #9ca3af;
+        --accent: hsl(0 84% 60%);
+        --radius-md: 10px;
+        --space-4: 1.6rem;
+        --space-6: 2.4rem;
+        --space-8: 3.2rem;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
         display: grid;
         place-items: center;
         min-height: 100svh;
-        margin: 0;
-        background: #050505;
-        color: #9ca3af;
-        font-family: system-ui;
+        background: var(--bg);
+        color: var(--muted);
+        font-family: system-ui, -apple-system, sans-serif;
         text-align: center;
-        padding: 2rem;
+        padding: var(--space-4);
+        font-size: 1.6rem;
+        line-height: 1.5;
       }
-      h1 { color: #f6f6f6; font-size: 2rem; }
-      p { max-width: 36ch; line-height: 1.6; }
+      .card {
+        background: var(--surface);
+        border: 1px solid hsl(0 0% 100% / 0.08);
+        border-radius: var(--radius-md);
+        padding: var(--space-8);
+        max-width: 36rem;
+        display: grid;
+        gap: var(--space-4);
+        justify-items: center;
+      }
+      svg { width: 4.8rem; height: 4.8rem; color: var(--accent); }
+      h1 { color: var(--text); font-size: 1.8rem; font-weight: 700; }
+      p { font-size: 1.3rem; }
+      .btn {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 1.3rem;
+        transition: filter 160ms ease;
+      }
+      .btn:hover { filter: brightness(1.1); }
+      .btn:active { transform: scale(0.97); }
     </style>
   </head>
   <body>
-    <div>
+    <div class="card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" x2="12" y1="9" y2="13"/>
+        <line x1="12" x2="12.01" y1="17" y2="17"/>
+      </svg>
       <h1>Hors ligne</h1>
-      <p>Tu es actuellement hors ligne. Reconnecte-toi pour continuer à utiliser Muscu App.</p>
+      <p>Tu es actuellement hors ligne. Les pages déjà visitées restent accessibles.</p>
+      <a href="/" class="btn">Réessayer</a>
     </div>
   </body>
 </html>

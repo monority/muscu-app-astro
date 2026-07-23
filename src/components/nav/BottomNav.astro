@@ -21,6 +21,7 @@ const items = [
     <a
       href={item.href}
       class:list={["bottom-nav-link", { "bottom-nav-active": activeNav === item.key }]}
+      aria-current={activeNav === item.key ? "page" : undefined}
     >
       <span class="bottom-nav-icon" set:html={icons[item.icon]} />
       <span class="bottom-nav-label">{item.label}</span>

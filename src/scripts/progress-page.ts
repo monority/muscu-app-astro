@@ -1,32 +1,43 @@
 import { supabase } from "../lib/supabase";
 import { barChart } from "../lib/chart";
+import { showToast } from "./toast";
 
 function q<T = HTMLElement>(s: string): T | null {
   return document.querySelector<T>(s);
 }
 
-interface SessionSummary {
-  id: number;
-  started_at: string;
-  total_volume: number;
-  total_sets: number;
-  total_exercises: number;
-}
-
-interface TopExercise {
-  name: string;
-  total_volume: number;
-  total_sets: number;
+function showError(msg: string) {
+  q("[data-pr-skeleton]")?.classList.add("hidden");
+  const el = q<HTMLElement>("[data-pr-error]");
+  if (el) {
+    el.innerHTML = `<div class="error-state" role="alert" aria-live="polite">
+      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="width:3.2rem;height:3.2rem;color:var(--accent)">
+        <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+      </svg>
+      <h2 style="margin:0;font-size:1.6rem;font-weight:700;color:var(--text)">Une erreur est survenue</h2>
+      <p style="margin:0;font-size:1.3rem;color:var(--muted)">${msg}</p>
+      <button class="error-retry" type="button" style="min-height:3.8rem;padding:0.6rem 1.6rem;border:1px solid hsl(0 84% 62% / 0.45);border-radius:var(--radius-md);background:var(--accent);color:var(--accent-foreground);font:inherit;font-size:1.3rem;font-weight:700;cursor:pointer;transition:background 160ms ease">Réessayer</button>
+    </div>`;
+    el.hidden = false;
+    el.querySelector(".error-retry")?.addEventListener("click", () => { el.hidden = true; load(); });
+  }
 }
 
 async function load() {
-  const { data: sessions } = await supabase
+  q("[data-pr-skeleton]")?.classList.remove("hidden");
+  q("[data-pr-error]")!.hidden = true;
+
+  try {
+    const { data: sessions, error: err1 } = await supabase
     .from("sessions")
     .select("id, started_at, ended_at")
     .not("ended_at", "is", null)
     .order("ended_at", { ascending: false });
 
+  if (err1) throw err1;
+
   if (!sessions || sessions.length === 0) {
+    q("[data-pr-skeleton]")?.classList.add("hidden");
     q("[data-pr-empty]")!.classList.remove("hidden");
     return;
   }
@@ -123,6 +134,12 @@ async function load() {
     )
     .join("");
   q("[data-pr-recent-section]")!.classList.remove("hidden");
+  q("[data-pr-skeleton]")?.classList.add("hidden");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur de chargement";
+    showError(msg);
+    showToast(msg, "error");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", load);

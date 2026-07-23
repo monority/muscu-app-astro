@@ -1,0 +1,82 @@
+---
+interface Props {
+  title?: string;
+  message?: string;
+  retryLabel?: string;
+}
+
+const { title = "Une erreur est survenue", message = "Impossible de charger les données.", retryLabel = "Réessayer" } = Astro.props;
+---
+
+<div class="error-state" role="alert" aria-live="polite">
+  <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" x2="12" y1="8" y2="12"/>
+    <line x1="12" x2="12.01" y1="16" y2="16"/>
+  </svg>
+  <h2 class="error-title">{title}</h2>
+  <p class="error-message">{message}</p>
+  <button class="error-retry" type="button" data-error-retry>{retryLabel}</button>
+  <slot />
+</div>
+
+<style>
+  .error-state {
+    display: grid;
+    gap: 0.8rem;
+    justify-items: center;
+    text-align: center;
+    padding: 3.2rem 2rem;
+    border: 1px solid hsl(0 84% 60% / 0.2);
+    border-radius: var(--radius-lg);
+    background: hsl(0 84% 60% / 0.04);
+    animation: errFadeIn var(--motion-default) both;
+  }
+
+  @keyframes errFadeIn {
+    from { opacity: 0; transform: translateY(0.8rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .error-icon {
+    width: 3.2rem;
+    height: 3.2rem;
+    color: var(--accent);
+  }
+
+  .error-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .error-message {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--muted);
+    max-width: 36rem;
+  }
+
+  .error-retry {
+    min-height: 3.8rem;
+    padding: 0.6rem 1.6rem;
+    border: 1px solid hsl(0 84% 62% / 0.45);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font: inherit;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--motion-fast);
+  }
+
+  .error-retry:hover {
+    background: hsl(0 84% 58%);
+  }
+
+  .error-retry:active {
+    transform: scale(0.97);
+  }
+</style>
