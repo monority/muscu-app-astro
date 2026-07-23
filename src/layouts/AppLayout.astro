@@ -2,6 +2,7 @@
 import Sidebar from "../components/nav/Sidebar.astro";
 import MobileNav from "../components/nav/MobileNav.astro";
 import BottomNav from "../components/nav/BottomNav.astro";
+import Toast from "../components/ui/Toast.astro";
 import { ClientRouter } from "astro:transitions";
 import "../styles/index.css";
 
@@ -33,6 +34,7 @@ const user = Astro.locals.user;
     <BottomNav activeNav={activeNav} />
     <main class="app-main">
       <slot />
+      <Toast />
     </main>
     <script>
       if ("serviceWorker" in navigator) {

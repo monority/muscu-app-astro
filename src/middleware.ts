@@ -4,11 +4,24 @@ import { createServerSupabase } from "./lib/supabase-server";
 const PUBLIC_ROUTES = ["/login", "/auth/callback", "/logout"];
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const supabase = createServerSupabase(context);
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  let user = null;
 
-  context.locals.user = user ?? null;
+  if (import.meta.env.DEV) {
+    const devUser = context.cookies.get("dev_user")?.value;
+    if (devUser) {
+      try {
+        user = JSON.parse(devUser);
+      } catch {}
+    }
+  }
+
+  if (!user) {
+    const supabase = createServerSupabase(context);
+    const { data } = await supabase.auth.getUser();
+    user = data.user ?? null;
+  }
+
+  context.locals.user = user;
 
   const isPublic = PUBLIC_ROUTES.some((r) => context.url.pathname.startsWith(r));
   const isApi = context.url.pathname.startsWith("/api");

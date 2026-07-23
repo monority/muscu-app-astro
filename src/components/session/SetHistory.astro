@@ -48,12 +48,17 @@
   .set-history-list li {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.2rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface);
+    animation: setItemIn 200ms ease both;
+  }
+
+  @keyframes setItemIn {
+    from { opacity: 0; transform: translateY(-0.4rem); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .set-history-list .set-number {
@@ -61,16 +66,51 @@
     font-size: 1.2rem;
     font-weight: 700;
     min-width: 2.4rem;
+    flex-shrink: 0;
   }
 
   .set-history-list .set-detail {
     color: var(--text);
     font-size: 1.5rem;
     font-weight: 600;
+    flex-shrink: 0;
   }
 
   .set-history-list .set-rest {
     color: var(--muted);
     font-size: 1.2rem;
+    flex: 1;
+  }
+
+  .set-history-list .set-actions {
+    display: flex;
+    gap: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  .set-delete-btn,
+  .set-edit-btn {
+    width: 2.8rem;
+    height: 2.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color var(--motion-fast), background var(--motion-fast);
+  }
+
+  .set-delete-btn:hover {
+    color: var(--accent);
+    background: hsl(0 84% 60% / 0.08);
+  }
+
+  .set-edit-btn:hover {
+    color: var(--text);
+    background: hsl(0 0% 100% / 0.06);
   }
 </style>

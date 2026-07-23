@@ -16,6 +16,7 @@
   </div>
   <p class="exercise-picker-selected" data-exercise-selected hidden>
     ✓ <span data-exercise-name></span>
+    <button class="exercise-picker-change" type="button" data-exercise-change>Changer</button>
   </p>
 </div>
 
@@ -96,9 +97,26 @@
   .exercise-picker-selected {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.6rem;
     margin: 0;
     color: var(--text);
     font-size: 1.4rem;
+  }
+
+  .exercise-picker-change {
+    margin-left: auto;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+
+  .exercise-picker-change:hover {
+    color: var(--text);
+    border-color: hsl(0 0% 100% / 0.2);
   }
 </style>

@@ -1,0 +1,217 @@
+---
+export const prerender = false;
+
+import AppLayout from "../../layouts/AppLayout.astro";
+import { createServerSupabase } from "../../lib/supabase-server";
+
+const supabase = createServerSupabase(Astro);
+const id = parseInt(Astro.params.id!, 10);
+
+const { data: session } = await supabase
+  .from("sessions")
+  .select("id, started_at, ended_at, notes")
+  .eq("id", id)
+  .single();
+
+if (!session) {
+  return Astro.redirect("/progress");
+}
+
+const { data: sets } = await supabase
+  .from("exercise_sets")
+  .select("id, set_number, weight_kg, reps, rest_s, notes, completed_at, exercises(name, category)")
+  .eq("session_id", id)
+  .order("completed_at", { ascending: true });
+
+const grouped = new Map<string, typeof sets>();
+for (const set of sets ?? []) {
+  const name = (set as unknown as { exercises: { name: string } }).exercises.name;
+  if (!grouped.has(name)) grouped.set(name, []);
+  grouped.get(name)!.push(set);
+}
+
+const totalVolume = (sets ?? []).reduce((s, set) => s + set.weight_kg * set.reps, 0);
+const totalSets = sets?.length ?? 0;
+const totalExercises = grouped.size;
+
+const startTime = new Date(session.started_at).getTime();
+const endTime = session.ended_at ? new Date(session.ended_at).getTime() : Date.now();
+const durationMin = Math.round((endTime - startTime) / 60000);
+---
+
+<AppLayout title={`Séance du ${new Date(session.started_at).toLocaleDateString("fr-FR")}`} activeNav="session">
+  <div class="sd-page">
+    <a href="/progress" class="sd-back">&larr; Retour</a>
+
+    <h1 class="sd-title">
+      Séance du {new Date(session.started_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+    </h1>
+
+    <div class="sd-cards">
+      <div class="sd-card">
+        <span class="sd-card-label">Durée</span>
+        <span class="sd-card-stat">{durationMin} min</span>
+      </div>
+      <div class="sd-card">
+        <span class="sd-card-label">Volume</span>
+        <span class="sd-card-stat">{totalVolume.toLocaleString("fr-FR")} kg</span>
+      </div>
+      <div class="sd-card">
+        <span class="sd-card-label">Séries</span>
+        <span class="sd-card-stat">{totalSets}</span>
+      </div>
+      <div class="sd-card">
+        <span class="sd-card-label">Exercices</span>
+        <span class="sd-card-stat">{totalExercises}</span>
+      </div>
+    </div>
+
+    {session.notes && <p class="sd-notes">{session.notes}</p>}
+
+    <div class="sd-exercises">
+      {[...grouped.entries()].map(([name, exerciseSets]) => (
+        <div class="sd-exercise">
+          <h2 class="sd-exercise-name">{name}</h2>
+          <ol class="sd-set-list">
+            {exerciseSets.map((set) => (
+              <li class="sd-set-item">
+                <span class="sd-set-num">#{set.set_number}</span>
+                <span class="sd-set-detail">{set.weight_kg} kg × {set.reps}</span>
+                {set.rest_s != null && <span class="sd-set-rest">Repos {Math.floor(set.rest_s / 60)}:{String(set.rest_s % 60).padStart(2, "0")}</span>}
+                {set.notes && <span class="sd-set-notes">{set.notes}</span>}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </div>
+  </div>
+</AppLayout>
+
+<style>
+  .sd-page {
+    display: grid;
+    gap: var(--gap-section);
+  }
+
+  .sd-back {
+    font-size: 1.3rem;
+    color: var(--muted);
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .sd-back:hover {
+    color: var(--text);
+  }
+
+  .sd-title {
+    margin: 0;
+    font-size: var(--text-page-title);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+  }
+
+  .sd-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--gap-card);
+  }
+
+  .sd-card {
+    display: grid;
+    gap: 0.2rem;
+    padding: 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .sd-card-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(0 0% 100% / 0.4);
+  }
+
+  .sd-card-stat {
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+  }
+
+  .sd-notes {
+    margin: 0;
+    padding: 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 1.3rem;
+    font-style: italic;
+  }
+
+  .sd-exercises {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  .sd-exercise {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .sd-exercise-name {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+  }
+
+  .sd-set-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sd-set-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: 1.3rem;
+  }
+
+  .sd-set-num {
+    color: var(--muted);
+    font-weight: 700;
+    min-width: 2.4rem;
+  }
+
+  .sd-set-detail {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .sd-set-rest {
+    color: var(--muted);
+    font-size: 1.1rem;
+    margin-left: auto;
+  }
+
+  .sd-set-notes {
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-style: italic;
+  }
+</style>

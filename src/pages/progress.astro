@@ -1,0 +1,219 @@
+---
+export const prerender = false;
+
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Progression" activeNav="progress">
+  <div class="pr-page" data-pr-page>
+    <h1 class="pr-title">Progression</h1>
+
+    <div class="pr-cards" data-pr-cards hidden>
+      <div class="pr-card">
+        <span class="pr-card-label">Séances</span>
+        <span class="pr-card-stat" data-pr-sessions>—</span>
+      </div>
+      <div class="pr-card">
+        <span class="pr-card-label">Volume total</span>
+        <span class="pr-card-stat" data-pr-volume>—</span>
+      </div>
+      <div class="pr-card">
+        <span class="pr-card-label">Séries</span>
+        <span class="pr-card-stat" data-pr-sets>—</span>
+      </div>
+      <div class="pr-card">
+        <span class="pr-card-label">Exercices</span>
+        <span class="pr-card-stat" data-pr-exercises>—</span>
+      </div>
+    </div>
+
+    <div class="pr-section" data-pr-volume-section hidden>
+      <h2 class="pr-section-title">Volume par séance</h2>
+      <div class="pr-chart-wrap" data-pr-volume-chart></div>
+    </div>
+
+    <div class="pr-section" data-pr-sets-section hidden>
+      <h2 class="pr-section-title">Séries par séance</h2>
+      <div class="pr-chart-wrap" data-pr-sets-chart></div>
+    </div>
+
+    <div class="pr-section" data-pr-top-section hidden>
+      <h2 class="pr-section-title">Top exercices</h2>
+      <div class="pr-top" data-pr-top></div>
+    </div>
+
+    <div class="pr-section" data-pr-recent-section hidden>
+      <h2 class="pr-section-title">Séances récentes</h2>
+      <ul class="pr-recent" data-pr-recent></ul>
+    </div>
+
+    <div class="pr-empty" data-pr-empty>
+      <p>Aucune séance terminée pour le moment.</p>
+      <a href="/session" class="pr-empty-cta">Commencer une séance</a>
+    </div>
+  </div>
+</AppLayout>
+
+<script>
+  import "../scripts/progress-page";
+</script>
+
+<style>
+  .pr-page {
+    display: grid;
+    gap: var(--gap-section);
+  }
+
+  .pr-title {
+    margin: 0;
+    font-size: var(--text-page-title);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+  }
+
+  .pr-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--gap-card);
+  }
+
+  .pr-card {
+    display: grid;
+    gap: 0.4rem;
+    padding: var(--space-page-padding);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .pr-card-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(0 0% 100% / 0.4);
+  }
+
+  .pr-card-stat {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pr-section {
+    display: grid;
+    gap: var(--gap-card);
+  }
+
+  .pr-section-title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+  }
+
+  .pr-chart-wrap {
+    padding: var(--space-page-padding);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pr-top {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .pr-top-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .pr-top-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .pr-top-meta {
+    font-size: 1.2rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .pr-recent {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pr-recent a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--text);
+    font-size: 1.3rem;
+  }
+
+  .pr-recent a:hover {
+    border-color: hsl(0 0% 100% / 0.15);
+  }
+
+  .pr-recent-date {
+    font-weight: 600;
+  }
+
+  .pr-recent-meta {
+    color: var(--muted);
+    font-size: 1.2rem;
+  }
+
+  .pr-empty {
+    display: grid;
+    gap: 1.2rem;
+    justify-items: center;
+    padding: 3.2rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 1.4rem;
+  }
+
+  .pr-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4rem;
+    padding: 0.6rem 1.6rem;
+    border: 1px solid hsl(0 84% 62% / 0.45);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+</style>

@@ -18,6 +18,9 @@ const { exerciseName, setCount } = Astro.props as Props;
   <p class="session-header-meta">
     <span data-set-count>{setCount ?? 0}</span> série(s)
   </p>
+  <p class="session-header-last" data-last-set hidden>
+    Dernière série&nbsp;: <span data-last-set-detail></span>
+  </p>
 </div>
 
 <style>
@@ -76,5 +79,19 @@ const { exerciseName, setCount } = Astro.props as Props;
     margin: 0;
     color: var(--muted);
     font-size: 1.3rem;
+  }
+
+  .session-header-last {
+    margin: 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 1.2rem;
+    animation: fadeSlideIn 250ms ease both;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-0.4rem); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>

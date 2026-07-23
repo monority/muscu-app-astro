@@ -74,10 +74,12 @@ export async function loadDashboard() {
     list.innerHTML = recent
       .map(
         (s: SessionRow) =>
-          `<li>${new Date(s.started_at).toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "short",
-          })} — Séance #${s.id}</li>`,
+          `<li><a href="/session/${s.id}" style="display:block;text-decoration:none;color:inherit">
+            ${new Date(s.started_at).toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "short",
+            })} — Séance #${s.id}
+          </a></li>`,
       )
       .join("");
   }

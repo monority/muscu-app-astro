@@ -36,15 +36,19 @@
       />
     </div>
   </div>
+  <div data-set-error class="set-form-error" hidden></div>
   <button class="set-form-submit" type="button" data-set-submit disabled>
-    Enregistrer la série
+    <span class="set-form-submit-text" data-set-submit-text>Enregistrer la série</span>
+    <span class="set-form-spinner" hidden aria-hidden="true"></span>
   </button>
+  <button class="set-form-cancel" type="button" data-set-cancel hidden>Annuler</button>
 </div>
 
 <style>
   .set-form {
     display: grid;
     gap: var(--gap-card);
+    transition: opacity 200ms ease;
   }
 
   .set-form-fields {
@@ -108,6 +112,10 @@
     letter-spacing: 0.04em;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .set-form-submit:hover:not(:disabled) {
@@ -117,6 +125,60 @@
   .set-form-submit:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+
+  .set-form-submit[data-loading] {
+    pointer-events: none;
+  }
+
+  .set-form-submit[data-loading] .set-form-submit-text {
+    visibility: hidden;
+  }
+
+  .set-form-submit[data-loading] .set-form-spinner {
+    visibility: visible;
+  }
+
+  .set-form-spinner {
+    position: absolute;
+    width: 1.8rem;
+    height: 1.8rem;
+    border: 2px solid hsl(0 0% 100% / 0.25);
+    border-top-color: var(--accent-foreground);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .set-form-error {
+    font-size: 1.2rem;
+    color: var(--accent);
+    padding: 0.4rem 0;
+  }
+
+  .set-form-cancel {
+    display: none;
+    width: 100%;
+    min-height: 3.6rem;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  .set-form-cancel:not([hidden]) {
+    display: block;
+  }
+
+  .set-form-cancel:hover {
+    color: var(--text);
   }
 
   @media (min-width: 640px) {
