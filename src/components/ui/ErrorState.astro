@@ -30,6 +30,7 @@ const { title = "Une erreur est survenue", message = "Impossible de charger les 
     border: 1px solid hsl(0 84% 60% / 0.2);
     border-radius: var(--radius-lg);
     background: hsl(0 84% 60% / 0.04);
+    cursor: default;
     animation: errFadeIn var(--motion-default) both;
   }
 
@@ -61,7 +62,7 @@ const { title = "Une erreur est survenue", message = "Impossible de charger les 
   .error-retry {
     min-height: 3.8rem;
     padding: 0.6rem 1.6rem;
-    border: 1px solid hsl(0 84% 62% / 0.45);
+    border: 1px solid hsl(24 100% 55% / 0.45);
     border-radius: var(--radius-md);
     background: var(--accent);
     color: var(--accent-foreground);
@@ -70,6 +71,10 @@ const { title = "Une erreur est survenue", message = "Impossible de charger les 
     font-weight: 700;
     cursor: pointer;
     transition: background var(--motion-fast);
+  }
+
+  .error-retry:hover {
+    background: hsl(24 100% 48%);
   }
 
   .error-retry:hover {

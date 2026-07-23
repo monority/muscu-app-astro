@@ -105,7 +105,7 @@
   .end-diff-btn[data-active] {
     border-color: var(--accent);
     color: var(--text);
-    background: hsl(0 84% 60% / 0.08);
+    background: hsl(24 100% 55% / 0.08);
   }
 
   .end-diff-icon {
@@ -159,7 +159,7 @@
     flex: 1;
     min-height: 4rem;
     padding: 0.6rem;
-    border: 1px solid hsl(0 84% 62% / 0.45);
+    border: 1px solid hsl(24 100% 55% / 0.45);
     border-radius: var(--radius-md);
     background: var(--accent);
     color: var(--accent-foreground);
@@ -171,10 +171,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: background var(--motion-fast);
   }
 
   .end-modal-confirm:hover {
-    background: hsl(0 84% 58%);
+    background: hsl(24 100% 48%);
   }
 
   .end-modal-confirm[data-loading] {

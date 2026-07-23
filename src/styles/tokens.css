@@ -8,9 +8,10 @@
   --color-border: hsl(0 0% 100% / 0.08);
   --color-text: #f6f6f6;
   --color-muted: #9ca3af;
-  --color-accent: hsl(0 84% 60%);
+  --color-accent: hsl(24 100% 55%);
   --color-accent-foreground: #ffffff;
-  --color-accent-2: hsl(24 100% 55%);
+  --color-accent-2: hsl(142 70% 50%);
+  --color-destructive: hsl(0 84% 60%);
 
   --bg: var(--color-bg);
   --surface: var(--color-surface);
@@ -22,9 +23,11 @@
   --accent: var(--color-accent);
   --accent-foreground: var(--color-accent-foreground);
   --accent-2: var(--color-accent-2);
+  --destructive: var(--color-destructive);
+  --success: var(--color-accent-2);
 
-  --font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Bahnschrift SemiCondensed', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Barlow', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Barlow Condensed', 'Bahnschrift SemiCondensed', 'Segoe UI', system-ui, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 10px;
@@ -43,7 +46,7 @@
   --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.22);
   --shadow-2: 0 6px 14px hsl(0 0% 0% / 0.24);
 
-  --focus-ring: 0 0 0 3px hsl(0 84% 62% / 0.34);
+  --focus-ring: 0 0 0 3px hsl(24 100% 55% / 0.35);
   --motion-fast: 160ms ease;
   --motion-default: 200ms ease;
   --motion-slow: 300ms ease;

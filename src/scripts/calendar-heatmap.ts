@@ -66,10 +66,10 @@ export function renderHeatmap(container: HTMLElement, data: CalendarDay[], month
 
   const colors = [
     "hsl(0 0% 100% / 0.04)",
-    "hsl(0 84% 60% / 0.15)",
-    "hsl(0 84% 60% / 0.35)",
-    "hsl(0 84% 60% / 0.55)",
-    "hsl(0 84% 60% / 0.85)",
+    "hsl(24 100% 55% / 0.15)",
+    "hsl(24 100% 55% / 0.35)",
+    "hsl(24 100% 55% / 0.55)",
+    "hsl(24 100% 55% / 0.85)",
   ];
 
   const cells = weeks
