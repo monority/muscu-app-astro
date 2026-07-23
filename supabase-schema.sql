@@ -145,3 +145,21 @@ drop policy if exists "Users own their template exercises" on template_exercises
 create policy "Users own their template exercises" on template_exercises
   for all using (exists (select 1 from templates t where t.id = template_exercises.template_id and t.user_id = auth.uid()))
   with check (exists (select 1 from templates t where t.id = template_exercises.template_id and t.user_id = auth.uid()));
+
+-- Phase 9: body weight tracking
+create table if not exists body_weight (
+  id bigint primary key generated always as identity,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  weight_kg real not null,
+  measured_at timestamptz not null default now(),
+  notes text
+);
+
+create index if not exists idx_body_weight_user on body_weight(user_id);
+create index if not exists idx_body_weight_measured on body_weight(measured_at desc);
+
+alter table body_weight enable row level security;
+
+drop policy if exists "Users own their body weights" on body_weight;
+create policy "Users own their body weights" on body_weight
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

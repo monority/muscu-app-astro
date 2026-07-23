@@ -1,5 +1,6 @@
 import { get, post } from "../lib/api";
 import { showToast } from "./toast";
+import type { BodyWeight } from "../lib/types";
 
 interface SetRow {
   weight_kg: number;
@@ -158,6 +159,15 @@ export async function loadDashboard() {
           }
         });
       });
+    }
+
+    const weightData = await get<BodyWeight[]>("/api/poids?limit=1").catch(() => null);
+    if (weightData && weightData.length > 0) {
+      const w = weightData[0];
+      q("[data-last-weight]")!.textContent = `${w.weight_kg.toFixed(1)} kg`;
+      const dateStr = new Date(w.measured_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+      q("[data-weight-date]")!.textContent = dateStr;
+      q("[data-weight-card]")?.classList.remove("hidden");
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Erreur de chargement";

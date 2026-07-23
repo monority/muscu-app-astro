@@ -72,3 +72,11 @@ export interface TemplateWithExercises extends Template {
   exercise_count: number;
   exercises?: TemplateExercise[];
 }
+
+export interface BodyWeight {
+  id: number;
+  user_id: string;
+  weight_kg: number;
+  measured_at: string;
+  notes: string | null;
+}
