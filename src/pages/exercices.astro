@@ -1,4 +1,4 @@
----
+﻿---
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
@@ -19,7 +19,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
     <div data-ex-error hidden></div>
 
     <div class="ex-toolbar" data-ex-toolbar>
-      <input class="ex-search" type="search" data-ex-search placeholder="Filtrer les exercices…" />
+      <input class="ex-search" type="search" data-ex-search placeholder="Filtrer les exercicesâ€¦" />
       <div class="ex-filters" data-ex-filters>
         <div class="ex-categories" data-ex-categories>
           <button class="ex-cat" type="button" data-cat="all" data-active>Tous</button>
@@ -31,7 +31,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
           <option value="">Muscle</option>
           <option value="chest">Pectoraux</option>
           <option value="back">Dos</option>
-          <option value="shoulders">Épaules</option>
+          <option value="shoulders">Ã‰paules</option>
           <option value="biceps">Biceps</option>
           <option value="triceps">Triceps</option>
           <option value="quadriceps">Quadriceps</option>
@@ -39,20 +39,20 @@ import Skeleton from "../components/ui/Skeleton.astro";
           <option value="glutes">Fessiers</option>
           <option value="calves">Mollets</option>
           <option value="abs">Abdos</option>
-          <option value="traps">Trapèzes</option>
+          <option value="traps">TrapÃ¨zes</option>
           <option value="forearms">Avant-bras</option>
         </select>
         <select class="ex-select" data-ex-filter-equipment>
-          <option value="">Équipement</option>
+          <option value="">Ã‰quipement</option>
           <option value="barbell">Barre</option>
-          <option value="dumbbell">Haltères</option>
+          <option value="dumbbell">HaltÃ¨res</option>
           <option value="machine">Machine</option>
           <option value="cable">Poulie</option>
           <option value="bodyweight">Poids du corps</option>
           <option value="kettlebell">Kettlebell</option>
           <option value="ez-bar">Barre EZ</option>
           <option value="smith">Smith</option>
-          <option value="bands">Élastiques</option>
+          <option value="bands">Ã‰lastiques</option>
           <option value="other">Autre</option>
         </select>
       </div>
@@ -62,7 +62,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
     <div class="ex-add-form hidden" data-ex-add-form>
       <input class="ex-input" type="text" data-ex-name placeholder="Nom" />
       <select class="ex-select" data-ex-category>
-        <option value="">Catégorie</option>
+        <option value="">CatÃ©gorie</option>
         <option value="bench">Bench</option>
         <option value="bells">Bells</option>
         <option value="other">Autre</option>
@@ -71,7 +71,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
         <option value="">Muscle cible</option>
         <option value="chest">Pectoraux</option>
         <option value="back">Dos</option>
-        <option value="shoulders">Épaules</option>
+        <option value="shoulders">Ã‰paules</option>
         <option value="biceps">Biceps</option>
         <option value="triceps">Triceps</option>
         <option value="quadriceps">Quadriceps</option>
@@ -79,20 +79,20 @@ import Skeleton from "../components/ui/Skeleton.astro";
         <option value="glutes">Fessiers</option>
         <option value="calves">Mollets</option>
         <option value="abs">Abdos</option>
-        <option value="traps">Trapèzes</option>
+        <option value="traps">TrapÃ¨zes</option>
         <option value="forearms">Avant-bras</option>
       </select>
       <select class="ex-select" data-ex-equipment>
-        <option value="">Équipement</option>
+        <option value="">Ã‰quipement</option>
         <option value="barbell">Barre</option>
-        <option value="dumbbell">Haltères</option>
+        <option value="dumbbell">HaltÃ¨res</option>
         <option value="machine">Machine</option>
         <option value="cable">Poulie</option>
         <option value="bodyweight">Poids du corps</option>
         <option value="kettlebell">Kettlebell</option>
         <option value="ez-bar">Barre EZ</option>
         <option value="smith">Smith</option>
-        <option value="bands">Élastiques</option>
+        <option value="bands">Ã‰lastiques</option>
         <option value="other">Autre</option>
       </select>
       <input class="ex-input ex-input-sm" type="number" data-ex-rest placeholder="Repos (s)" value="90" />
@@ -102,7 +102,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
     </div>
 
     <ul class="ex-list" data-ex-list>
-      <li class="ex-empty">Aucun exercice trouvé</li>
+      <li class="ex-empty">Aucun exercice trouvÃ©</li>
     </ul>
   </div>
 </AppLayout>
@@ -111,302 +111,4 @@ import Skeleton from "../components/ui/Skeleton.astro";
   import "../scripts/exercises-page";
 </script>
 
-<style>
-  .ex-page {
-    display: grid;
-    gap: var(--gap-section);
-  }
 
-  .ex-title {
-    margin: 0;
-    font-size: var(--text-page-title);
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .ex-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-  }
-
-  .ex-search {
-    flex: 1;
-    min-width: 20rem;
-    min-height: 4rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.3rem;
-  }
-
-  .ex-search:focus {
-    border-color: var(--accent);
-    box-shadow: var(--focus-ring);
-    outline: none;
-  }
-
-  .ex-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    align-items: center;
-  }
-
-  .ex-categories {
-    display: flex;
-    gap: 0.4rem;
-  }
-
-  .ex-badge {
-    font-size: 1.1rem;
-    padding: 0.2rem 0.7rem;
-    border-radius: var(--radius-pill);
-    font-weight: 600;
-  }
-
-  .ex-muscle {
-    background: hsl(140 50% 40% / 0.15);
-    color: hsl(140 70% 60%);
-  }
-
-  .ex-equipment {
-    background: hsl(200 50% 40% / 0.15);
-    color: hsl(200 70% 60%);
-  }
-
-  .ex-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .ex-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: center;
-  }
-
-  .ex-cat {
-    min-height: 3.2rem;
-    padding: 0.4rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-
-  .ex-cat[data-active] {
-    border-color: var(--accent);
-    color: var(--text);
-    background: hsl(24 100% 55% / 0.08);
-  }
-
-  .ex-add-btn {
-    min-height: 3.8rem;
-    padding: 0.6rem 1.4rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font: inherit;
-    font-size: 1.3rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .ex-add-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    align-items: center;
-    padding: 1.6rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-  }
-
-  .ex-input {
-    min-height: 4rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.3rem;
-  }
-
-  .ex-input-sm {
-    width: 10rem;
-  }
-
-  .ex-textarea {
-    width: 100%;
-    min-height: 4.4rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.3rem;
-    resize: vertical;
-  }
-
-  .ex-textarea:focus {
-    border-color: var(--accent);
-    box-shadow: var(--focus-ring);
-    outline: none;
-  }
-
-  .ex-select {
-    min-height: 4rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.3rem;
-  }
-
-  .ex-save-btn {
-    min-height: 3.8rem;
-    padding: 0.6rem 1.4rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font: inherit;
-    font-size: 1.3rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .ex-cancel-btn {
-    min-height: 3.8rem;
-    padding: 0.6rem 1.4rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 1.3rem;
-    cursor: pointer;
-  }
-
-  .ex-list {
-    display: grid;
-    gap: 0.6rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .ex-list li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.2rem 1.4rem;
-    border-radius: var(--radius-md);
-    background: var(--surface);
-  }
-
-  .ex-list .ex-name {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .ex-list .ex-category {
-    font-size: 1.1rem;
-    padding: 0.2rem 0.8rem;
-    border-radius: var(--radius-pill);
-    background: hsl(24 100% 55% / 0.08);
-    color: var(--accent);
-  }
-
-  .ex-list .ex-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .ex-list .ex-notes {
-    display: block;
-    font-size: 1.1rem;
-    color: var(--muted);
-    font-style: italic;
-    margin-top: 0.2rem;
-  }
-
-  .ex-list .ex-rest {
-    font-size: 1.2rem;
-    color: var(--muted);
-  }
-
-  .ex-list .ex-notes-edit {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-  }
-
-  .ex-list .ex-notes-edit:hover {
-    color: var(--text);
-    border-color: hsl(0 0% 100% / 0.2);
-  }
-
-  .ex-list .ex-delete {
-    padding: 0.4rem 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-  }
-
-  .ex-empty {
-    justify-content: center !important;
-    color: var(--muted);
-    font-size: 1.3rem;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  @media (max-width: 639px) {
-    .ex-search {
-      min-width: 100%;
-    }
-
-    .ex-categories {
-      flex-wrap: wrap;
-      width: 100%;
-    }
-
-    .ex-toolbar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .ex-list li {
-      padding: 1rem 1.2rem;
-    }
-  }
-</style>

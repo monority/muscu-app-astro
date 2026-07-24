@@ -1,4 +1,4 @@
----
+﻿---
 import { icons } from "./icons";
 import NavItem from "./NavItem.astro";
 import type { User } from "@supabase/supabase-js";
@@ -11,14 +11,14 @@ const { activeNav, user } = Astro.props;
 
 const navItems = [
   { href: "/", icon: "home" as const, label: "Accueil", key: "home" },
-  { href: "/session", icon: "dumbbell" as const, label: "Séance", key: "session" },
+  { href: "/session", icon: "dumbbell" as const, label: "SÃ©ance", key: "session" },
   { href: "/timer", icon: "clock" as const, label: "Timer", key: "timer" },
   { href: "/exercices", icon: "list" as const, label: "Exercices", key: "exercices" },
   { href: "/templates", icon: "layers" as const, label: "Templates", key: "templates" },
   { href: "/progress", icon: "bar-chart" as const, label: "Progression", key: "progress" },
   { href: "/records", icon: "award" as const, label: "Records", key: "records" },
   { href: "/poids", icon: "scale" as const, label: "Poids", key: "poids" },
-  { href: "/settings", icon: "settings" as const, label: "Réglages", key: "settings" },
+  { href: "/settings", icon: "settings" as const, label: "RÃ©glages", key: "settings" },
 ];
 ---
 
@@ -50,7 +50,7 @@ const navItems = [
     {user && (
       <div class="mobile-footer">
         <span class="mobile-email">{user.email}</span>
-        <a href="/logout" class="mobile-logout">Déconnexion</a>
+        <a href="/logout" class="mobile-logout">DÃ©connexion</a>
       </div>
     )}
   </div>
@@ -115,129 +115,4 @@ const navItems = [
   });
 </script>
 
-<style>
-  .mobile-toggle {
-    display: none;
-    position: fixed;
-    z-index: 50;
-    top: 0.8rem;
-    left: 0.8rem;
-    width: 4.4rem;
-    height: 4.4rem;
-    padding: 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    color: var(--text);
-    cursor: pointer;
-  }
 
-  .mobile-toggle svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .mobile-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: hsl(0 0% 0% / 0.6);
-  }
-
-  .mobile-overlay.open {
-    display: block;
-  }
-
-  .mobile-panel {
-    width: 28rem;
-    height: 100%;
-    padding: 1.6rem;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .mobile-close {
-    align-self: end;
-    width: 3.2rem;
-    height: 3.2rem;
-    padding: 0.6rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-  }
-
-  .mobile-close svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .mobile-brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-left: 0.4rem;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text);
-  }
-
-  .mobile-logo {
-    width: 2.4rem;
-    height: 2.4rem;
-    color: var(--accent);
-  }
-
-  .mobile-logo svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .mobile-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    flex: 1;
-    margin: 0;
-    padding: 0;
-  }
-
-  .mobile-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    padding: 1.2rem 0.4rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .mobile-email {
-    font-size: 1.1rem;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .mobile-logout {
-    font-size: 1.1rem;
-    color: var(--muted);
-    text-decoration: none;
-  }
-
-  .mobile-logout:hover {
-    color: var(--accent);
-  }
-
-  @media (max-width: 1023px) and (min-width: 640px) {
-    .mobile-toggle {
-      display: block;
-    }
-  }
-</style>

@@ -1,11 +1,11 @@
----
+﻿---
 ---
 
 <div class="end-modal-overlay hidden" data-end-modal>
   <div class="end-modal" role="dialog" aria-labelledby="end-modal-title" aria-modal="true">
-    <h2 id="end-modal-title" class="end-modal-title">Terminer la séance</h2>
+    <h2 id="end-modal-title" class="end-modal-title">Terminer la sÃ©ance</h2>
 
-    <p class="end-modal-label">Difficulté de la séance</p>
+    <p class="end-modal-label">DifficultÃ© de la sÃ©ance</p>
     <div class="end-modal-difficulty" data-end-difficulty>
       <button class="end-diff-btn" type="button" data-difficulty="easy">
         <span class="end-diff-icon">
@@ -38,7 +38,7 @@
     </div>
 
     <p class="end-modal-label">Notes (optionnel)</p>
-    <textarea class="end-modal-notes" data-end-notes placeholder="Comment s'est passée la séance ?" rows="3"></textarea>
+    <textarea class="end-modal-notes" data-end-notes placeholder="Comment s'est passÃ©e la sÃ©ance ?" rows="3"></textarea>
 
     <div class="end-modal-actions">
       <button class="end-modal-cancel" type="button" data-end-cancel>Annuler</button>
@@ -50,176 +50,4 @@
   </div>
 </div>
 
-<style>
-  .end-modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: grid;
-    place-items: center;
-    padding: 2rem;
-    background: hsl(0 0% 0% / 0.6);
-    backdrop-filter: blur(2px);
-  }
 
-  .end-modal {
-    width: 100%;
-    max-width: 40rem;
-    display: grid;
-    gap: 1.2rem;
-    padding: 2rem;
-    border-radius: var(--radius-lg);
-    background: var(--surface-3);
-  }
-
-  .end-modal-title {
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .end-modal-label {
-    margin: 0;
-    color: var(--muted);
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .end-modal-difficulty {
-    display: flex;
-    gap: 0.6rem;
-  }
-
-  .end-diff-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    min-height: 5.6rem;
-    padding: 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: border-color var(--motion-fast), color var(--motion-fast), background var(--motion-fast);
-  }
-
-  .end-diff-btn:hover {
-    border-color: hsl(0 0% 100% / 0.2);
-    color: var(--text);
-  }
-
-  .end-diff-btn[data-active] {
-    border-color: var(--accent);
-    color: var(--text);
-    background: hsl(24 100% 55% / 0.08);
-  }
-
-  .end-diff-icon {
-    font-size: 2rem;
-    line-height: 1;
-  }
-
-  .end-modal-notes {
-    width: 100%;
-    min-height: 6rem;
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.3rem;
-    resize: vertical;
-  }
-
-  .end-modal-notes:focus {
-    border-color: var(--accent);
-    box-shadow: var(--focus-ring);
-    outline: none;
-  }
-
-  .end-modal-actions {
-    display: flex;
-    gap: 0.8rem;
-  }
-
-  .end-modal-cancel {
-    flex: 1;
-    min-height: 4rem;
-    padding: 0.6rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 1.3rem;
-    cursor: pointer;
-  }
-
-  .end-modal-cancel:hover {
-    color: var(--text);
-    border-color: hsl(0 0% 100% / 0.2);
-  }
-
-  .end-modal-confirm {
-    flex: 1;
-    min-height: 4rem;
-    padding: 0.6rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font: inherit;
-    font-size: 1.3rem;
-    font-weight: 700;
-    cursor: pointer;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background var(--motion-fast);
-  }
-
-  .end-modal-confirm:hover {
-    background: hsl(24 100% 48%);
-  }
-
-  .end-modal-confirm[data-loading] {
-    pointer-events: none;
-  }
-
-  .end-modal-confirm[data-loading] .end-confirm-text {
-    visibility: hidden;
-  }
-
-  .end-modal-confirm[data-loading] .end-confirm-spinner {
-    visibility: visible;
-  }
-
-  .end-confirm-spinner {
-    position: absolute;
-    width: 1.6rem;
-    height: 1.6rem;
-    border: 2px solid hsl(0 0% 100% / 0.25);
-    border-top-color: var(--accent-foreground);
-    border-radius: 50%;
-    animation: endSpin 0.6s linear infinite;
-  }
-
-  @keyframes endSpin {
-    to { transform: rotate(360deg); }
-  }
-
-  .hidden {
-    display: none !important;
-  }
-</style>

@@ -1,13 +1,13 @@
----
+﻿---
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
 import Skeleton from "../components/ui/Skeleton.astro";
 ---
 
-<AppLayout title="Réglages" activeNav="settings">
+<AppLayout title="RÃ©glages" activeNav="settings">
   <div class="settings-page">
-    <h1 class="settings-title">Réglages</h1>
+    <h1 class="settings-title">RÃ©glages</h1>
 
     <div data-settings-skeleton>
       <div class="settings-card" style="gap:1.2rem;background:transparent">
@@ -22,7 +22,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
       <label class="settings-label" for="display_name">Nom d'affichage</label>
       <input class="settings-input" type="text" id="display_name" placeholder="Ton nom" maxlength="100" />
 
-      <label class="settings-label" for="preferred_rest_s">Repos par défaut (secondes)</label>
+      <label class="settings-label" for="preferred_rest_s">Repos par dÃ©faut (secondes)</label>
       <input class="settings-input" type="number" id="preferred_rest_s" min="30" max="300" step="5" />
 
       <button class="settings-btn" type="button" data-settings-save>Enregistrer</button>
@@ -34,68 +34,4 @@ import Skeleton from "../components/ui/Skeleton.astro";
   import "../scripts/settings-page";
 </script>
 
-<style>
-  .settings-page {
-    display: grid;
-    gap: var(--gap-section);
-    max-width: 48rem;
-  }
 
-  .settings-title {
-    margin: 0;
-    font-size: var(--text-page-title);
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .settings-card {
-    padding: var(--space-page-padding);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    display: grid;
-    gap: 0.6rem;
-  }
-
-  .settings-label {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--muted);
-    margin-top: var(--space-2);
-  }
-
-  .settings-label:first-child {
-    margin-top: 0;
-  }
-
-  .settings-input {
-    min-height: 4rem;
-    padding: 0.8rem 1.2rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.4rem;
-  }
-
-  .settings-input:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  .settings-btn {
-    justify-self: start;
-    min-height: 4rem;
-    padding: 0.8rem 2rem;
-    margin-top: var(--space-2);
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font: inherit;
-    font-size: 1.4rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-</style>

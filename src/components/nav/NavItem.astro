@@ -1,4 +1,4 @@
----
+﻿---
 export type NavItemProps = {
   href: string;
   icon: string;
@@ -14,40 +14,4 @@ const { href, icon, label, active } = Astro.props;
   <span class="nav-label">{label}</span>
 </a>
 
-<style>
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.8rem 1.2rem;
-    border-radius: var(--radius-md);
-    color: var(--muted);
-    text-decoration: none;
-    font-size: var(--text-nav);
-    font-weight: 500;
-    transition: background var(--motion-fast), color var(--motion-fast);
-  }
 
-  .nav-item:hover {
-    color: var(--text);
-    background: hsl(0 0% 100% / 0.04);
-  }
-
-  .nav-item[aria-current="page"] {
-    color: var(--text);
-    background: hsl(24 100% 55% / 0.1);
-  }
-
-  .nav-icon {
-    width: 2rem;
-    height: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .nav-label {
-    flex: 1;
-  }
-</style>

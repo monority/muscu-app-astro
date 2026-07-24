@@ -1,4 +1,4 @@
----
+﻿---
 import NavItem from "./NavItem.astro";
 import type { User } from "@supabase/supabase-js";
 
@@ -10,14 +10,14 @@ const { activeNav, user } = Astro.props;
 
 const navItems = [
   { href: "/", icon: "home" as const, label: "Accueil", key: "home" },
-  { href: "/session", icon: "dumbbell" as const, label: "Séance", key: "session" },
+  { href: "/session", icon: "dumbbell" as const, label: "SÃ©ance", key: "session" },
   { href: "/timer", icon: "clock" as const, label: "Timer", key: "timer" },
   { href: "/exercices", icon: "list" as const, label: "Exercices", key: "exercices" },
   { href: "/templates", icon: "layers" as const, label: "Templates", key: "templates" },
   { href: "/progress", icon: "bar-chart" as const, label: "Progression", key: "progress" },
   { href: "/records", icon: "award" as const, label: "Records", key: "records" },
   { href: "/poids", icon: "scale" as const, label: "Poids", key: "poids" },
-  { href: "/settings", icon: "settings" as const, label: "Réglages", key: "settings" },
+  { href: "/settings", icon: "settings" as const, label: "RÃ©glages", key: "settings" },
 ];
 ---
 
@@ -41,89 +41,10 @@ const navItems = [
     {user && (
       <>
         <span class="sidebar-email">{user.email}</span>
-        <a href="/logout" class="sidebar-logout">Déconnexion</a>
+        <a href="/logout" class="sidebar-logout">DÃ©connexion</a>
       </>
     )}
   </div>
 </nav>
 
-<style>
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 2.4rem;
-    width: 24rem;
-    min-height: 100svh;
-    padding: 1.6rem 1.2rem;
-    border-right: 1px solid var(--border);
-    background: var(--surface);
-  }
 
-  .sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.4rem 0.4rem 0.4rem 0.8rem;
-  }
-
-  .sidebar-logo {
-    width: 2.4rem;
-    height: 2.4rem;
-    color: var(--accent);
-  }
-
-  .sidebar-logo svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .sidebar-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text);
-  }
-
-  .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    flex: 1;
-    margin: 0;
-    padding: 0;
-  }
-
-  .sidebar-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    padding: 1.2rem 0.8rem;
-    border-top: 1px solid var(--border);
-    margin-top: auto;
-  }
-
-  .sidebar-email {
-    font-size: 1.1rem;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .sidebar-logout {
-    font-size: 1.1rem;
-    color: var(--muted);
-    text-decoration: none;
-  }
-
-  .sidebar-logout:hover {
-    color: var(--accent);
-  }
-
-  @media (max-width: 1023px) {
-    .sidebar {
-      display: none;
-    }
-  }
-</style>

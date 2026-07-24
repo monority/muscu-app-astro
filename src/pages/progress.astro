@@ -1,4 +1,4 @@
----
+﻿---
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
@@ -23,41 +23,41 @@ import Skeleton from "../components/ui/Skeleton.astro";
 
     <div class="pr-cards" data-pr-cards hidden>
       <div class="pr-card">
-        <span class="pr-card-label">Séances</span>
-        <span class="pr-card-stat" data-pr-sessions>—</span>
+        <span class="pr-card-label">SÃ©ances</span>
+        <span class="pr-card-stat" data-pr-sessions>â€”</span>
       </div>
       <div class="pr-card">
         <span class="pr-card-label">Volume total</span>
-        <span class="pr-card-stat" data-pr-volume>—</span>
+        <span class="pr-card-stat" data-pr-volume>â€”</span>
       </div>
       <div class="pr-card">
-        <span class="pr-card-label">Séries</span>
-        <span class="pr-card-stat" data-pr-sets>—</span>
+        <span class="pr-card-label">SÃ©ries</span>
+        <span class="pr-card-stat" data-pr-sets>â€”</span>
       </div>
       <div class="pr-card">
         <span class="pr-card-label">Exercices</span>
-        <span class="pr-card-stat" data-pr-exercises>—</span>
+        <span class="pr-card-stat" data-pr-exercises>â€”</span>
       </div>
     </div>
 
     <div class="pr-section" data-pr-volume-section hidden>
-      <h2 class="pr-section-title">Volume par séance</h2>
+      <h2 class="pr-section-title">Volume par sÃ©ance</h2>
       <div class="pr-chart-wrap" data-pr-volume-chart></div>
     </div>
 
     <div class="pr-section" data-pr-sets-section hidden>
-      <h2 class="pr-section-title">Séries par séance</h2>
+      <h2 class="pr-section-title">SÃ©ries par sÃ©ance</h2>
       <div class="pr-chart-wrap" data-pr-sets-chart></div>
     </div>
 
     <div class="pr-section" data-pr-heatmap-section hidden>
-      <h2 class="pr-section-title">Calendrier d'entraînement</h2>
+      <h2 class="pr-section-title">Calendrier d'entraÃ®nement</h2>
       <div class="pr-chart-wrap" data-pr-heatmap></div>
     </div>
 
     <div class="pr-section" data-pr-balance-section hidden>
-      <h2 class="pr-section-title">Équilibre musculaire</h2>
-      <p class="pr-section-desc">Séries par groupe musculaire (30 jours)</p>
+      <h2 class="pr-section-title">Ã‰quilibre musculaire</h2>
+      <p class="pr-section-desc">SÃ©ries par groupe musculaire (30 jours)</p>
       <div class="pr-chart-wrap" data-pr-balance-chart></div>
     </div>
 
@@ -67,15 +67,15 @@ import Skeleton from "../components/ui/Skeleton.astro";
     </div>
 
     <div class="pr-section" data-pr-recent-section hidden>
-      <h2 class="pr-section-title">Séances récentes</h2>
+      <h2 class="pr-section-title">SÃ©ances rÃ©centes</h2>
       <ul class="pr-recent" data-pr-recent></ul>
     </div>
 
     <div data-pr-error hidden></div>
 
     <div class="pr-empty" data-pr-empty>
-      <p>Aucune séance terminée pour le moment.</p>
-      <a href="/session" class="pr-empty-cta">Commencer une séance</a>
+      <p>Aucune sÃ©ance terminÃ©e pour le moment.</p>
+      <a href="/session" class="pr-empty-cta">Commencer une sÃ©ance</a>
     </div>
   </div>
 </AppLayout>
@@ -84,202 +84,4 @@ import Skeleton from "../components/ui/Skeleton.astro";
   import "../scripts/progress-page";
 </script>
 
-<style>
-  .pr-page {
-    display: grid;
-    gap: var(--gap-section);
-  }
 
-  .pr-title {
-    margin: 0;
-    font-size: var(--text-page-title);
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .pr-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-    gap: var(--gap-card);
-  }
-
-  .pr-card {
-    display: grid;
-    gap: 0.4rem;
-    padding: var(--space-page-padding);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    text-align: center;
-  }
-
-  .pr-card-label {
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: hsl(0 0% 100% / 0.4);
-  }
-
-  .pr-card-stat {
-    font-size: 2.4rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .pr-section {
-    display: grid;
-    gap: var(--gap-card);
-  }
-
-  .pr-section-title {
-    margin: 0;
-    font-size: 1.4rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .pr-section-desc {
-    margin: -0.6rem 0 0;
-    font-size: 1.2rem;
-    color: var(--muted);
-  }
-
-  .pr-balance-bar {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.6rem 0;
-  }
-
-  .pr-balance-label {
-    width: 10rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text);
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .pr-balance-track {
-    flex: 1;
-    height: 2rem;
-    border-radius: var(--radius-sm);
-    background: var(--surface-2);
-    overflow: hidden;
-  }
-
-  .pr-balance-fill {
-    height: 100%;
-    border-radius: var(--radius-sm);
-    transition: width 0.6s ease-out;
-  }
-
-  .pr-balance-count {
-    width: 4rem;
-    font-size: 1.2rem;
-    color: var(--muted);
-    text-align: left;
-    flex-shrink: 0;
-  }
-
-  .pr-chart-wrap {
-    padding: var(--space-page-padding);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .pr-top {
-    display: grid;
-    gap: 0.6rem;
-  }
-
-  .pr-top-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.2rem;
-    border-radius: var(--radius-md);
-    background: var(--surface);
-  }
-
-  .pr-top-name {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .pr-top-meta {
-    font-size: 1.2rem;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
-  .pr-recent {
-    display: grid;
-    gap: 0.6rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .pr-recent a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.2rem;
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    text-decoration: none;
-    color: var(--text);
-    font-size: 1.3rem;
-  }
-
-  .pr-recent a:hover {
-    border-color: hsl(0 0% 100% / 0.15);
-  }
-
-  .pr-recent-date {
-    font-weight: 600;
-  }
-
-  .pr-recent-meta {
-    color: var(--muted);
-    font-size: 1.2rem;
-  }
-
-  .pr-empty {
-    display: grid;
-    gap: 1.2rem;
-    justify-items: center;
-    padding: 3.2rem 2rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 1.4rem;
-  }
-
-  .pr-empty-cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4rem;
-    padding: 0.6rem 1.6rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    text-decoration: none;
-    font-size: 1.4rem;
-    font-weight: 700;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-</style>

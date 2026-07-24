@@ -1,5 +1,6 @@
 import { get, post } from "../lib/api";
 import { showToast } from "./toast";
+import { sparkline } from "../lib/chart";
 import type { BodyWeight } from "../lib/types";
 
 interface SetRow {
@@ -117,12 +118,28 @@ export async function loadDashboard() {
       q("[data-weekly-card]")?.classList.remove("hidden");
     }
 
+    const trendRes = await get<{ trend: { date: string; sessions: number; volume: number; sets: number }[] }>("/api/dashboard/weekly-trend").catch(() => null);
+    if (trendRes && trendRes.trend && trendRes.trend.length > 0) {
+      const trend = trendRes.trend;
+      const volumes = trend.map((d) => d.volume);
+      const sparkVol = sparkline(volumes, "var(--accent-3)");
+      const volContainer = q("[data-week-volume]");
+      if (volContainer && sparkVol) {
+        volContainer.innerHTML += ` <span style="display:inline-flex;vertical-align:middle">${sparkVol}</span>`;
+      }
+    }
+
     if (streak.status === "fulfilled" && streak.value) {
       const s = streak.value;
       if (s.current_streak > 0) {
         q("[data-streak-count]")!.textContent = String(s.current_streak);
         q("[data-streak-best]")!.textContent = s.longest_streak > 1 ? `Meilleure série : ${s.longest_streak} jours` : "";
         q("[data-streak-card]")?.classList.remove("hidden");
+        const barFill = q<HTMLElement>("[data-streak-bar-fill]");
+        if (barFill) {
+          const pct = Math.min((s.current_streak / Math.max(s.longest_streak, 30)) * 100, 100);
+          barFill.style.width = pct + "%";
+        }
       }
     }
 

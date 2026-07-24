@@ -1,4 +1,4 @@
----
+﻿---
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
@@ -38,16 +38,16 @@ import Skeleton from "../components/ui/Skeleton.astro";
         <input class="po-input" type="date" id="measured_at" />
 
         <label class="po-label" for="weight_notes">Notes (optionnel)</label>
-        <input class="po-input" type="text" id="weight_notes" placeholder="Matin, à jeun…" maxlength="200" />
+        <input class="po-input" type="text" id="weight_notes" placeholder="Matin, Ã  jeunâ€¦" maxlength="200" />
 
         <button class="po-btn" type="button" data-po-save>Enregistrer</button>
         <span class="po-edit-hint hidden" data-po-edit-hint>
-          Mode édition — <button class="po-cancel-edit" type="button" data-po-cancel>Annuler</button>
+          Mode Ã©dition â€” <button class="po-cancel-edit" type="button" data-po-cancel>Annuler</button>
         </span>
       </div>
 
       <div class="po-card" data-po-chart-section>
-        <span class="po-section-title">Évolution</span>
+        <span class="po-section-title">Ã‰volution</span>
         <div class="po-chart" data-po-chart></div>
       </div>
 
@@ -57,7 +57,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
       </div>
 
       <div class="po-card hidden" data-po-empty>
-        <p style="margin:0;color:var(--muted);font-size:1.3rem;text-align:center">Aucune entrée. Ajoute ta première pesée !</p>
+        <p style="margin:0;color:var(--muted);font-size:1.3rem;text-align:center">Aucune entrÃ©e. Ajoute ta premiÃ¨re pesÃ©e !</p>
       </div>
     </div>
 
@@ -69,174 +69,4 @@ import Skeleton from "../components/ui/Skeleton.astro";
   import "../scripts/poids-page";
 </script>
 
-<style>
-  .po-page {
-    display: grid;
-    gap: var(--gap-section);
-    max-width: 48rem;
-  }
 
-  .po-title {
-    margin: 0;
-    font-size: var(--text-page-title);
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .po-card {
-    display: grid;
-    gap: 0.8rem;
-    padding: var(--space-page-padding);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-  }
-
-  .po-label {
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .po-input {
-    min-height: 4.2rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.6rem;
-  }
-
-  .po-input:focus {
-    border-color: var(--accent);
-    box-shadow: var(--focus-ring);
-    outline: none;
-  }
-
-  .po-input::placeholder {
-    color: hsl(0 0% 100% / 0.25);
-  }
-
-  .po-btn {
-    min-height: 4rem;
-    padding: 0.6rem 1.6rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font: inherit;
-    font-size: 1.4rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 160ms ease;
-  }
-
-  .po-btn:hover {
-    background: hsl(24 100% 48%);
-  }
-
-  .po-edit-hint {
-    font-size: 1.2rem;
-    color: var(--muted);
-    text-align: center;
-  }
-
-  .po-cancel-edit {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font: inherit;
-    font-size: 1.2rem;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-
-  .po-section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: hsl(0 0% 100% / 0.4);
-  }
-
-  .po-chart {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .po-list {
-    display: grid;
-    gap: 0.4rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .po-list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.8rem 1rem;
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-  }
-
-  .po-list-main {
-    display: grid;
-    gap: 0.2rem;
-  }
-
-  .po-list-weight {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text);
-    font-family: var(--font-display);
-  }
-
-  .po-list-date {
-    font-size: 1.1rem;
-    color: var(--muted);
-  }
-
-  .po-list-notes {
-    font-size: 1.1rem;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  .po-list-actions {
-    display: flex;
-    gap: 0.4rem;
-  }
-
-  .po-list-actions button {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-  }
-
-  .po-list-actions button:hover {
-    color: var(--text);
-    border-color: hsl(0 0% 100% / 0.2);
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  @media (max-width: 639px) {
-    .po-page {
-      max-width: 100%;
-    }
-  }
-</style>

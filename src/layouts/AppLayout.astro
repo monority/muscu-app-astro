@@ -1,4 +1,4 @@
----
+﻿---
 import Sidebar from "../components/nav/Sidebar.astro";
 import MobileNav from "../components/nav/MobileNav.astro";
 import BottomNav from "../components/nav/BottomNav.astro";
@@ -28,7 +28,7 @@ const user = Astro.locals.user;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <title>{title} — Muscu App</title>
+    <title>{title} â€” Muscu App</title>
     <ClientRouter />
   </head>
   <body>
@@ -48,40 +48,4 @@ const user = Astro.locals.user;
   </body>
 </html>
 
-<style>
-  body {
-    display: grid;
-    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-    min-height: 100svh;
-    background: var(--color-bg);
-  }
 
-  .app-main {
-    padding: var(--space-page-padding);
-    padding-top: calc(var(--space-page-padding) + var(--nav-toggle-top));
-    padding-bottom: calc(var(--space-page-padding) + var(--nav-bar-height) + env(safe-area-inset-bottom, 0px));
-    overflow-y: auto;
-    min-height: 100svh;
-  }
-
-  .skip-link {
-    position: fixed;
-    z-index: 9999;
-    top: 0.8rem;
-    left: 0.8rem;
-    padding: 0.8rem 1.6rem;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--accent);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-
-  @media (max-width: 1023px) {
-    body {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>

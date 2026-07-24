@@ -1,4 +1,4 @@
----
+﻿---
 export const prerender = false;
 
 import { createServerSupabase } from "../lib/supabase-server";
@@ -49,7 +49,7 @@ if (user) return Astro.redirect("/");
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#050505" />
-    <title>Connexion — Muscu App</title>
+    <title>Connexion â€” Muscu App</title>
     <link rel="stylesheet" href="/src/styles/index.css" />
   </head>
   <body class="auth-body">
@@ -86,7 +86,7 @@ if (user) return Astro.redirect("/");
           <input type="hidden" name="action" value="dev-login" />
           <button class="auth-btn auth-btn-dev" type="submit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.8rem;height:1.8rem"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Mode développement
+            Mode dÃ©veloppement
           </button>
         </form>
       )}
@@ -94,126 +94,4 @@ if (user) return Astro.redirect("/");
   </body>
 </html>
 
-<style>
-  .auth-body {
-    display: grid;
-    place-items: center;
-    min-height: 100svh;
-    background: var(--bg);
-    margin: 0;
-  }
 
-  .auth-card {
-    width: min(100%, 36rem);
-    padding: var(--space-page-padding);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-  }
-
-  .auth-title {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-    text-align: center;
-  }
-
-  .auth-subtitle {
-    margin: 0.5rem 0 2rem;
-    color: var(--muted);
-    text-align: center;
-  }
-
-  .auth-form {
-    display: grid;
-    gap: 0.8rem;
-  }
-
-  .auth-label {
-    font-size: 1.2rem;
-    color: var(--muted);
-  }
-
-  .auth-input {
-    min-height: 4rem;
-    padding: 0.8rem 1.2rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.4rem;
-  }
-
-  .auth-input:focus {
-    border-color: var(--accent);
-    box-shadow: var(--focus-ring);
-    outline: none;
-  }
-
-  .auth-actions {
-    margin-top: 0.4rem;
-  }
-
-  .auth-btn {
-    width: 100%;
-    min-height: 4.4rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font: inherit;
-    font-size: 1.4rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .auth-btn:hover {
-    background: hsl(24 100% 48%);
-  }
-
-  .auth-details {
-    margin-top: 1.6rem;
-    border-top: 1px solid var(--border);
-    padding-top: 1.2rem;
-  }
-
-  .auth-summary {
-    font-size: 1.2rem;
-    color: var(--muted);
-    cursor: pointer;
-  }
-
-  .dev-form {
-    margin-top: 1.6rem;
-    border-top: 1px solid var(--border);
-    padding-top: 1.6rem;
-  }
-
-  .auth-btn-dev {
-    background: transparent;
-    border-color: var(--border);
-    color: var(--muted);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-  }
-
-  .auth-btn-dev:hover {
-    color: var(--text);
-    border-color: hsl(0 0% 100% / 0.2);
-  }
-
-  @media (max-width: 639px) {
-    .auth-card {
-      width: 100%;
-      border-radius: 0;
-      border-left: none;
-      border-right: none;
-    }
-
-    .auth-input {
-      width: 100%;
-    }
-  }
-</style>

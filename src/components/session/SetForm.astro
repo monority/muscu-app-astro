@@ -1,13 +1,13 @@
----
+﻿---
 ---
 
 <div class="set-form">
   <div class="set-form-pills" data-set-type-container>
-    <button class="set-type-pill" type="button" data-set-type="warmup">Échauff.</button>
+    <button class="set-type-pill" type="button" data-set-type="warmup">Ã‰chauff.</button>
     <button class="set-type-pill set-type-pill-active" type="button" data-set-type="working" data-active>Travail</button>
     <button class="set-type-pill" type="button" data-set-type="top_set">Top Set</button>
     <button class="set-type-pill" type="button" data-set-type="dropset">Drop</button>
-    <button class="set-type-pill" type="button" data-set-type="failure">Échec</button>
+    <button class="set-type-pill" type="button" data-set-type="failure">Ã‰chec</button>
   </div>
   <div class="set-form-fields">
     <div class="set-form-field">
@@ -22,7 +22,7 @@
       />
     </div>
     <div class="set-form-field">
-      <label for="set-reps">Répétitions</label>
+      <label for="set-reps">RÃ©pÃ©titions</label>
       <input
         id="set-reps"
         class="set-form-input"
@@ -45,210 +45,10 @@
   </div>
   <div data-set-error class="set-form-error" hidden></div>
   <button class="set-form-submit" type="button" data-set-submit disabled>
-    <span class="set-form-submit-text" data-set-submit-text>Enregistrer la série</span>
+    <span class="set-form-submit-text" data-set-submit-text>Enregistrer la sÃ©rie</span>
     <span class="set-form-spinner" hidden aria-hidden="true"></span>
   </button>
   <button class="set-form-cancel" type="button" data-set-cancel hidden>Annuler</button>
 </div>
 
-<style>
-  .set-form {
-    display: grid;
-    gap: var(--gap-card);
-    transition: opacity 200ms ease;
-  }
 
-  .set-form-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  .set-form-field-note {
-    grid-column: 1 / -1;
-  }
-
-  .set-form-field {
-    display: grid;
-    gap: 0.4rem;
-  }
-
-  .set-form-field label {
-    color: var(--muted);
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .set-form-input {
-    width: 100%;
-    min-height: 4.4rem;
-    padding: 0.8rem 1.2rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.8rem;
-    font-weight: 600;
-    text-align: center;
-    outline: none;
-  }
-
-  .set-form-input:focus {
-    border-color: var(--accent);
-    box-shadow: var(--focus-ring);
-  }
-
-  .set-form-input::placeholder {
-    color: hsl(0 0% 100% / 0.2);
-  }
-
-  .set-form-submit {
-    width: 100%;
-    min-height: 4.8rem;
-    padding: 1rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    font: inherit;
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .set-form-submit:hover:not(:disabled) {
-    background: hsl(24 100% 48%);
-  }
-
-  .set-form-submit:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .set-form-submit[data-loading] {
-    pointer-events: none;
-  }
-
-  .set-form-submit[data-loading] .set-form-submit-text {
-    visibility: hidden;
-  }
-
-  .set-form-submit[data-loading] .set-form-spinner {
-    visibility: visible;
-  }
-
-  .set-form-spinner {
-    position: absolute;
-    width: 1.8rem;
-    height: 1.8rem;
-    border: 2px solid hsl(0 0% 100% / 0.25);
-    border-top-color: var(--accent-foreground);
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .set-form-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .set-type-pill {
-    min-height: 3.2rem;
-    padding: 0.4rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: border-color var(--motion-fast), color var(--motion-fast), background var(--motion-fast);
-  }
-
-  .set-type-pill:hover {
-    border-color: hsl(0 0% 100% / 0.2);
-    color: var(--text);
-  }
-
-  .set-type-pill[data-active] {
-    border-color: var(--accent);
-    color: var(--text);
-    background: hsl(24 100% 55% / 0.08);
-  }
-
-  .set-type-pill[data-active][data-set-type="warmup"] {
-    border-color: hsl(200 60% 60%);
-    background: hsl(200 60% 60% / 0.08);
-    color: hsl(200 60% 70%);
-  }
-
-  .set-type-pill[data-active][data-set-type="top_set"] {
-    border-color: var(--accent-2);
-    background: hsl(24 100% 55% / 0.08);
-    color: var(--accent-2);
-  }
-
-  .set-type-pill[data-active][data-set-type="dropset"] {
-    border-color: hsl(330 60% 60%);
-    background: hsl(330 60% 60% / 0.08);
-    color: hsl(330 60% 70%);
-  }
-
-  .set-type-pill[data-active][data-set-type="failure"] {
-    border-color: hsl(24 100% 55%);
-    background: hsl(24 100% 55% / 0.15);
-    color: var(--accent);
-  }
-
-  .set-form-error {
-    font-size: 1.2rem;
-    color: var(--accent);
-    padding: 0.4rem 0;
-  }
-
-  .set-form-cancel {
-    display: none;
-    width: 100%;
-    min-height: 3.6rem;
-    padding: 0.6rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-
-  .set-form-cancel:not([hidden]) {
-    display: block;
-  }
-
-  .set-form-cancel:hover {
-    color: var(--text);
-  }
-
-  @media (min-width: 640px) {
-    .set-form-fields {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-
-    .set-form-field-note {
-      grid-column: auto;
-    }
-  }
-</style>

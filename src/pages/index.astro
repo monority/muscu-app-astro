@@ -1,4 +1,4 @@
----
+﻿---
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
@@ -10,64 +10,64 @@ import Skeleton from "../components/ui/Skeleton.astro";
     <h1 class="dash-title">Tableau de bord</h1>
 
     <div class="dash-cards" data-dash-content>
-      <div class="dash-card" data-active-session>
+      <div class="dash-card" data-module="session" data-active-session>
         <div class="dash-card-header">
           <span class="dash-card-dot" aria-hidden="true"></span>
-          <span class="dash-card-label">Séance en cours</span>
+          <span class="dash-card-label">SÃ©ance en cours</span>
         </div>
         <p class="dash-card-stat">
-          <span data-active-exercise>—</span>
+          <span data-active-exercise>â€”</span>
         </p>
         <p class="dash-card-meta">
-          <span data-active-sets>0</span> série(s) ·
+          <span data-active-sets>0</span> sÃ©rie(s) Â·
           <span data-active-volume>0</span> kg
         </p>
         <a href="/session" class="dash-card-cta" data-start-session>
-          Continuer la séance
+          Continuer la sÃ©ance
         </a>
       </div>
 
-      <div class="dash-card dash-card-empty hidden" data-no-session>
-        <p class="dash-card-stat">Aucune séance active</p>
+      <div class="dash-card dash-card-empty hidden" data-module="session" data-no-session>
+        <p class="dash-card-stat">Aucune sÃ©ance active</p>
         <p class="dash-card-meta">
-          <span data-dash-greeting>Prêt à commencer ?</span>
+          <span data-dash-greeting>PrÃªt Ã  commencer ?</span>
         </p>
         <a href="/session" class="dash-card-cta" data-start-session>
-          Nouvelle séance
+          Nouvelle sÃ©ance
         </a>
       </div>
 
-      <div class="dash-card" data-weekly-card hidden>
+      <div class="dash-card" data-module="weekly" data-weekly-card hidden>
         <span class="dash-card-label">Cette semaine</span>
         <div class="dash-weekly" data-weekly-content>
           <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-sessions>—</span>
-            <span class="dash-weekly-label">Séances</span>
+            <span class="dash-weekly-stat" data-week-sessions>â€”</span>
+            <span class="dash-weekly-label">SÃ©ances</span>
           </div>
           <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-volume>—</span>
+            <span class="dash-weekly-stat" data-week-volume>â€”</span>
             <span class="dash-weekly-label">Volume</span>
           </div>
           <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-sets>—</span>
-            <span class="dash-weekly-label">Séries</span>
+            <span class="dash-weekly-stat" data-week-sets>â€”</span>
+            <span class="dash-weekly-label">SÃ©ries</span>
           </div>
           <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-exercises>—</span>
+            <span class="dash-weekly-stat" data-week-exercises>â€”</span>
             <span class="dash-weekly-label">Exercices</span>
           </div>
         </div>
       </div>
 
-      <div class="dash-card" data-last-session hidden>
-        <span class="dash-card-label">Dernière séance</span>
-        <p class="dash-card-stat" data-last-date>—</p>
+      <div class="dash-card" data-module="last" data-last-session hidden>
+        <span class="dash-card-label">DerniÃ¨re sÃ©ance</span>
+        <p class="dash-card-stat" data-last-date>â€”</p>
         <p class="dash-card-meta" data-last-meta></p>
-        <a href="" class="dash-card-cta" data-last-link>Voir le détail</a>
+        <a href="" class="dash-card-cta" data-last-link>Voir le dÃ©tail</a>
       </div>
 
-      <div class="dash-card" data-streak-card hidden>
-        <span class="dash-card-label">Régularité</span>
+      <div class="dash-card" data-module="streak" data-streak-card hidden>
+        <span class="dash-card-label">RÃ©gularitÃ©</span>
         <p class="dash-streak" data-streak-content>
           <span class="dash-streak-fire">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:2.4rem;height:2.4rem;color:var(--accent)">
@@ -75,29 +75,32 @@ import Skeleton from "../components/ui/Skeleton.astro";
             </svg>
           </span>
           <span class="dash-streak-count" data-streak-count>0</span>
-          <span class="dash-streak-label">jours consécutifs</span>
+          <span class="dash-streak-label">jours consÃ©cutifs</span>
         </p>
         <p class="dash-card-meta" data-streak-best></p>
+        <div class="dash-streak-bar">
+          <div class="dash-streak-bar-fill" data-streak-bar-fill style="width:0%"></div>
+        </div>
       </div>
 
-      <div class="dash-card dash-card-secondary">
+      <div class="dash-card dash-card-secondary" data-module="templates">
         <span class="dash-card-label">Templates rapides</span>
         <div class="dash-templates" data-templates-list>
           <p class="dash-templates-empty">Aucun template</p>
         </div>
       </div>
 
-      <div class="dash-card" data-weight-card hidden>
+      <div class="dash-card" data-module="weight" data-weight-card hidden>
         <span class="dash-card-label">Poids</span>
-        <p class="dash-card-stat" data-last-weight>—</p>
+        <p class="dash-card-stat" data-last-weight>â€”</p>
         <p class="dash-card-meta" data-weight-date></p>
         <a href="/poids" class="dash-card-cta">Voir l'historique</a>
       </div>
 
       <div class="dash-card dash-card-secondary">
-        <span class="dash-card-label">Dernières séances</span>
+        <span class="dash-card-label">DerniÃ¨res sÃ©ances</span>
         <ul class="dash-recent" data-recent-list>
-          <li class="dash-recent-empty">Aucune séance terminée</li>
+          <li class="dash-recent-empty">Aucune sÃ©ance terminÃ©e</li>
         </ul>
       </div>
     </div>
@@ -133,249 +136,4 @@ import Skeleton from "../components/ui/Skeleton.astro";
   import "../scripts/dashboard";
 </script>
 
-<style>
-  .dash {
-    display: grid;
-    gap: var(--gap-page);
-  }
 
-  .dash-title {
-    margin: 0;
-    font-size: var(--text-page-title);
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .dash-cards {
-    display: grid;
-    gap: var(--gap-section);
-    grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
-  }
-
-  .dash-card {
-    display: grid;
-    gap: 0.8rem;
-    padding: var(--space-page-padding);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-  }
-
-  .dash-card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .dash-card-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .dash-card-label {
-    color: hsl(0 0% 100% / 0.4);
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .dash-card-stat {
-    margin: 0;
-    font-size: var(--text-stat);
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .dash-card-meta {
-    margin: 0;
-    color: var(--muted);
-    font-size: 1.3rem;
-  }
-
-  .dash-card-cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 3.8rem;
-    padding: 0.6rem 1.6rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    text-decoration: none;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-top: 0.4rem;
-  }
-
-  .dash-card-cta:hover {
-    background: hsl(24 100% 48%);
-  }
-
-  .dash-card-secondary {
-    background: transparent;
-  }
-
-  .dash-weekly {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-    gap: 0.8rem;
-  }
-
-  .dash-weekly-item {
-    display: grid;
-    gap: 0.2rem;
-    padding: 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    text-align: center;
-  }
-
-  .dash-weekly-stat {
-    font-size: 2rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash-weekly-label {
-    font-size: 1.1rem;
-    color: var(--muted);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .dash-streak {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    margin: 0;
-  }
-
-  .dash-streak-fire {
-    font-size: 2.4rem;
-    line-height: 1;
-  }
-
-  .dash-streak-count {
-    font-size: 3.2rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--accent-2);
-  }
-
-  .dash-streak-label {
-    font-size: 1.3rem;
-    color: var(--muted);
-    font-weight: 600;
-  }
-
-  .dash-templates {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .dash-templates-empty {
-    margin: 0;
-    color: var(--muted);
-    font-size: 1.3rem;
-  }
-
-  .dash-template-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.2rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    color: var(--text);
-    font: inherit;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: border-color var(--motion-fast);
-  }
-
-  .dash-template-btn:hover {
-    border-color: hsl(0 0% 100% / 0.2);
-  }
-
-  .dash-template-start {
-    padding: 0.4rem 1rem;
-    border: 1px solid hsl(24 100% 55% / 0.3);
-    border-radius: var(--radius-pill);
-    background: hsl(24 100% 55% / 0.08);
-    color: var(--accent);
-    font: inherit;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .dash-template-start:hover {
-    background: hsl(24 100% 55% / 0.15);
-  }
-
-  .dash-recent {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .dash-recent li {
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 1.3rem;
-    color: var(--muted);
-  }
-
-  .dash-recent li a {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .dash-recent li a:hover {
-    color: var(--text);
-  }
-
-  .dash-recent-empty {
-    color: var(--muted);
-    font-size: 1.3rem;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  @media (max-width: 639px) {
-    .dash-cards {
-      grid-template-columns: 1fr;
-    }
-
-    .dash-card-cta {
-      width: 100%;
-    }
-
-    .dash-weekly {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-</style>

@@ -1,4 +1,4 @@
----
+﻿---
 export const prerender = false;
 
 import AppLayout from "../layouts/AppLayout.astro";
@@ -19,8 +19,8 @@ import Skeleton from "../components/ui/Skeleton.astro";
     <div class="rec-list" data-rec-list></div>
 
     <div class="rec-empty hidden" data-rec-empty>
-      <p>Termine ta première séance pour établir des records !</p>
-      <a href="/session" class="rec-empty-cta">Commencer une séance</a>
+      <p>Termine ta premiÃ¨re sÃ©ance pour Ã©tablir des records !</p>
+      <a href="/session" class="rec-empty-cta">Commencer une sÃ©ance</a>
     </div>
 
     <div data-rec-error hidden></div>
@@ -31,103 +31,4 @@ import Skeleton from "../components/ui/Skeleton.astro";
   import "../scripts/records";
 </script>
 
-<style>
-  .rec-page {
-    display: grid;
-    gap: var(--gap-section);
-  }
 
-  .rec-title {
-    margin: 0;
-    font-size: var(--text-page-title);
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--text);
-  }
-
-  .rec-list {
-    display: grid;
-    gap: 0.6rem;
-  }
-
-  .rec-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    padding: 1.2rem 1.4rem;
-    border-radius: var(--radius-md);
-    background: var(--surface);
-  }
-
-  .rec-rank {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--muted);
-    min-width: 2rem;
-    text-align: center;
-  }
-
-  .rec-rank-1 { color: hsl(45 100% 60%); }
-  .rec-rank-2 { color: hsl(0 0% 70%); }
-  .rec-rank-3 { color: hsl(30 60% 60%); }
-
-  .rec-info {
-    display: grid;
-    gap: 0.2rem;
-  }
-
-  .rec-name {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .rec-meta {
-    font-size: 1.1rem;
-    color: var(--muted);
-  }
-
-  .rec-1rm {
-    font-size: 1.8rem;
-    font-weight: 700;
-    font-family: var(--font-display);
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  .rec-1rm-unit {
-    font-size: 1.2rem;
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .rec-empty {
-    display: grid;
-    gap: 1.2rem;
-    justify-items: center;
-    padding: 3.2rem 2rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 1.4rem;
-  }
-
-  .rec-empty-cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4rem;
-    padding: 0.6rem 1.6rem;
-    border: 1px solid hsl(24 100% 55% / 0.45);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--accent-foreground);
-    text-decoration: none;
-    font-size: 1.4rem;
-    font-weight: 700;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-</style>

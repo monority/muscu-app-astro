@@ -103,3 +103,31 @@ export function lineChart(data: LinePoint[], width = 600, height = 240): string 
     ${labels}
   </svg>`;
 }
+
+export function sparkline(data: number[], color = "var(--accent)", height = 24, width = 100): string {
+  if (data.length < 2) return "";
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const stepX = width / (data.length - 1);
+
+  const polyPoints = data.map((v, i) => {
+    const x = i * stepX;
+    const y = height - ((v - min) / range) * (height - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  const areaPoints = [`0,${height}`, ...polyPoints, `${width},${height}`].join(" ");
+
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sf" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${color}" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    <polygon points="${areaPoints}" fill="url(#sf)"/>
+    <polyline points="${polyPoints.join(" ")}" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>`;
+}
