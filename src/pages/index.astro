@@ -70,7 +70,7 @@ import Skeleton from "../components/ui/Skeleton.astro";
         <span class="dash-card-label">RÃ©gularitÃ©</span>
         <p class="dash-streak" data-streak-content>
           <span class="dash-streak-fire">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:2.4rem;height:2.4rem;color:var(--accent)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
             </svg>
           </span>
@@ -106,22 +106,22 @@ import Skeleton from "../components/ui/Skeleton.astro";
     </div>
 
     <div class="dash-cards hidden" data-dash-skeleton>
-      <div class="dash-card" style="gap:1.2rem">
+      <div class="dash-card dash-card-skeleton">
         <Skeleton width="12rem" height="1.2rem" />
         <Skeleton width="18rem" height="2.4rem" />
         <Skeleton width="14rem" height="1.4rem" />
         <Skeleton width="16rem" height="3.8rem" borderRadius="var(--radius-md)" />
       </div>
-      <div class="dash-card" style="gap:1.2rem">
+      <div class="dash-card dash-card-skeleton">
         <Skeleton width="12rem" height="1.2rem" />
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="dash-card-skeleton-grid">
           <Skeleton height="4rem" borderRadius="var(--radius-md)" />
           <Skeleton height="4rem" borderRadius="var(--radius-md)" />
           <Skeleton height="4rem" borderRadius="var(--radius-md)" />
           <Skeleton height="4rem" borderRadius="var(--radius-md)" />
         </div>
       </div>
-      <div class="dash-card" style="gap:1.2rem;background:transparent">
+      <div class="dash-card dash-card-skeleton dash-card-secondary">
         <Skeleton width="12rem" height="1.2rem" />
         <Skeleton width="100%" height="4rem" />
         <Skeleton width="100%" height="4rem" />

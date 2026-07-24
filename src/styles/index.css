@@ -1,4 +1,6 @@
-@import './tokens.css';
-@import './reset.css';
-@import './base.css';
-@import './utilities.css';
+@import './tokens.css' layer(tokens);
+@import './reset.css' layer(reset);
+@import './base.css' layer(base);
+@import './themes.css' layer(themes);
+@import './utilities.css' layer(utilities);
+@import './components.css' layer(components);

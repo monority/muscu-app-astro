@@ -1,1 +1,121 @@
-/* Base — à reconstruire */
+body {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, hsl(24 95% 50% / 0.08), transparent),
+    radial-gradient(ellipse 60% 50% at 80% 100%, hsl(222 90% 50% / 0.05), transparent);
+  pointer-events: none;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-xl); }
+h4 { font-size: var(--text-lg); }
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+::placeholder {
+  color: var(--color-muted);
+  opacity: 0.7;
+}
+
+input, textarea, select {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin-bottom: var(--space-1);
+  color: var(--color-muted);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin-block: var(--space-6);
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  color: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  transform: translateY(-120%);
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--gap-page);
+  padding-top: calc(var(--gap-page) + 5.6rem);
+  padding-bottom: calc(var(--gap-page) + 7.2rem);
+  max-width: 960px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+@media (width >= 1024px) {
+  .app-main {
+    padding-top: var(--gap-page);
+    padding-bottom: var(--gap-page);
+    margin-left: 260px;
+    max-width: 960px;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-3);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
