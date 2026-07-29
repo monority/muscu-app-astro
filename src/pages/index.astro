@@ -1,22 +1,24 @@
-﻿---
-import AppLayout from "../layouts/AppLayout.astro";
----
-
-<AppLayout>
-  <section class="dash">
-    <h1 class="dash-title">Tableau de bord</h1>
-
-    <div class="dash-cards" data-dash-content>
-      <div class="dash-card dash-card-empty" data-no-session>
-        <p class="dash-card-stat">Aucune séance active</p>
-        <p class="dash-card-meta">
-          <span data-dash-greeting>Prêt à commencer ?</span>
-        </p>
-      </div>
-    </div>
-  </section>
-</AppLayout>
-
-<script>
-  import "../scripts/dashboard";
-</script>
+﻿<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Muscu App</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, sans-serif;
+        font-size: 1.6rem;
+        color: #111;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Muscu App — bientôt disponible</p>
+  </body>
+</html>
