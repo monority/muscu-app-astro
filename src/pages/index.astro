@@ -1,139 +1,22 @@
 ﻿---
-export const prerender = false;
-
 import AppLayout from "../layouts/AppLayout.astro";
-import Skeleton from "../components/ui/Skeleton.astro";
 ---
 
-<AppLayout title="Accueil" activeNav="home">
+<AppLayout>
   <section class="dash">
     <h1 class="dash-title">Tableau de bord</h1>
 
     <div class="dash-cards" data-dash-content>
-      <div class="dash-card" data-module="session" data-active-session>
-        <div class="dash-card-header">
-          <span class="dash-card-dot" aria-hidden="true"></span>
-          <span class="dash-card-label">SÃ©ance en cours</span>
-        </div>
-        <p class="dash-card-stat">
-          <span data-active-exercise>â€”</span>
-        </p>
+      <div class="dash-card dash-card-empty" data-no-session>
+        <p class="dash-card-stat">Aucune séance active</p>
         <p class="dash-card-meta">
-          <span data-active-sets>0</span> sÃ©rie(s) Â·
-          <span data-active-volume>0</span> kg
+          <span data-dash-greeting>Prêt à commencer ?</span>
         </p>
-        <a href="/session" class="dash-card-cta" data-start-session>
-          Continuer la sÃ©ance
-        </a>
-      </div>
-
-      <div class="dash-card dash-card-empty hidden" data-module="session" data-no-session>
-        <p class="dash-card-stat">Aucune sÃ©ance active</p>
-        <p class="dash-card-meta">
-          <span data-dash-greeting>PrÃªt Ã  commencer ?</span>
-        </p>
-        <a href="/session" class="dash-card-cta" data-start-session>
-          Nouvelle sÃ©ance
-        </a>
-      </div>
-
-      <div class="dash-card" data-module="weekly" data-weekly-card hidden>
-        <span class="dash-card-label">Cette semaine</span>
-        <div class="dash-weekly" data-weekly-content>
-          <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-sessions>â€”</span>
-            <span class="dash-weekly-label">SÃ©ances</span>
-          </div>
-          <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-volume>â€”</span>
-            <span class="dash-weekly-label">Volume</span>
-          </div>
-          <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-sets>â€”</span>
-            <span class="dash-weekly-label">SÃ©ries</span>
-          </div>
-          <div class="dash-weekly-item">
-            <span class="dash-weekly-stat" data-week-exercises>â€”</span>
-            <span class="dash-weekly-label">Exercices</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-card" data-module="last" data-last-session hidden>
-        <span class="dash-card-label">DerniÃ¨re sÃ©ance</span>
-        <p class="dash-card-stat" data-last-date>â€”</p>
-        <p class="dash-card-meta" data-last-meta></p>
-        <a href="" class="dash-card-cta" data-last-link>Voir le dÃ©tail</a>
-      </div>
-
-      <div class="dash-card" data-module="streak" data-streak-card hidden>
-        <span class="dash-card-label">RÃ©gularitÃ©</span>
-        <p class="dash-streak" data-streak-content>
-          <span class="dash-streak-fire">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
-            </svg>
-          </span>
-          <span class="dash-streak-count" data-streak-count>0</span>
-          <span class="dash-streak-label">jours consÃ©cutifs</span>
-        </p>
-        <p class="dash-card-meta" data-streak-best></p>
-        <div class="dash-streak-bar">
-          <div class="dash-streak-bar-fill" data-streak-bar-fill></div>
-        </div>
-      </div>
-
-      <div class="dash-card dash-card-secondary" data-module="templates">
-        <span class="dash-card-label">Templates rapides</span>
-        <div class="dash-templates" data-templates-list>
-          <p class="dash-templates-empty">Aucun template</p>
-        </div>
-      </div>
-
-      <div class="dash-card" data-module="weight" data-weight-card hidden>
-        <span class="dash-card-label">Poids</span>
-        <p class="dash-card-stat" data-last-weight>â€”</p>
-        <p class="dash-card-meta" data-weight-date></p>
-        <a href="/poids" class="dash-card-cta">Voir l'historique</a>
-      </div>
-
-      <div class="dash-card dash-card-secondary">
-        <span class="dash-card-label">DerniÃ¨res sÃ©ances</span>
-        <ul class="dash-recent" data-recent-list>
-          <li class="dash-recent-empty">Aucune sÃ©ance terminÃ©e</li>
-        </ul>
       </div>
     </div>
-
-    <div class="dash-cards hidden" data-dash-skeleton>
-      <div class="dash-card dash-card-skeleton">
-        <Skeleton width="12rem" height="1.2rem" />
-        <Skeleton width="18rem" height="2.4rem" />
-        <Skeleton width="14rem" height="1.4rem" />
-        <Skeleton width="16rem" height="3.8rem" borderRadius="var(--radius-md)" />
-      </div>
-      <div class="dash-card dash-card-skeleton">
-        <Skeleton width="12rem" height="1.2rem" />
-        <div class="dash-card-skeleton-grid">
-          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
-          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
-          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
-          <Skeleton height="4rem" borderRadius="var(--radius-md)" />
-        </div>
-      </div>
-      <div class="dash-card dash-card-skeleton dash-card-secondary">
-        <Skeleton width="12rem" height="1.2rem" />
-        <Skeleton width="100%" height="4rem" />
-        <Skeleton width="100%" height="4rem" />
-      </div>
-    </div>
-
-    <div data-dash-error hidden></div>
   </section>
 </AppLayout>
 
 <script>
   import "../scripts/dashboard";
 </script>
-
-

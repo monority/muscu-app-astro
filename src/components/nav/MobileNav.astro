@@ -1,35 +1,15 @@
-﻿---
-import { icons } from "./icons";
-import NavItem from "./NavItem.astro";
-import type { User } from "@supabase/supabase-js";
-
-type Props = {
-  activeNav: string;
-  user: User | null;
-};
-const { activeNav, user } = Astro.props;
-
-const navItems = [
-  { href: "/", icon: "home" as const, label: "Accueil", key: "home" },
-  { href: "/session", icon: "dumbbell" as const, label: "SÃ©ance", key: "session" },
-  { href: "/timer", icon: "clock" as const, label: "Timer", key: "timer" },
-  { href: "/exercices", icon: "list" as const, label: "Exercices", key: "exercices" },
-  { href: "/templates", icon: "layers" as const, label: "Templates", key: "templates" },
-  { href: "/progress", icon: "bar-chart" as const, label: "Progression", key: "progress" },
-  { href: "/records", icon: "award" as const, label: "Records", key: "records" },
-  { href: "/poids", icon: "scale" as const, label: "Poids", key: "poids" },
-  { href: "/settings", icon: "settings" as const, label: "RÃ©glages", key: "settings" },
-];
----
-
-<button class="mobile-toggle" data-mobile-toggle aria-label="Menu" type="button">
-  <span set:html={icons.menu} />
+﻿<button class="mobile-toggle" data-mobile-toggle aria-label="Menu" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>
+  </svg>
 </button>
 
 <aside class="mobile-overlay" data-mobile-overlay aria-label="Navigation">
   <div class="mobile-panel">
     <button class="mobile-close" data-mobile-close aria-label="Fermer" type="button">
-      <span set:html={icons.close} />
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+      </svg>
     </button>
 
     <div class="mobile-brand">
@@ -42,46 +22,35 @@ const navItems = [
     </div>
 
     <ul class="mobile-nav">
-      {navItems.map((item) => (
-        <NavItem href={item.href} icon={item.icon} label={item.label} active={activeNav === item.key} />
-      ))}
+      <a href="/" class="nav-item" aria-current="page">
+        <span class="nav-icon" data-icon="home"></span>
+        <span class="nav-label">Accueil</span>
+      </a>
     </ul>
-
-    {user && (
-      <div class="mobile-footer">
-        <span class="mobile-email">{user.email}</span>
-        <a href="/logout" class="mobile-logout">DÃ©connexion</a>
-      </div>
-    )}
   </div>
 </aside>
 
 <script>
   const overlay = document.querySelector<HTMLElement>("[data-mobile-overlay]")!;
   const close = document.querySelector<HTMLButtonElement>("[data-mobile-close]")!;
-
   const toggles = document.querySelectorAll<HTMLButtonElement>("[data-mobile-toggle]");
 
   toggles.forEach((t) => {
     t.addEventListener("click", () => {
       overlay.classList.toggle("open");
-      if (overlay.classList.contains("open")) {
-        close?.focus();
-      }
+      if (overlay.classList.contains("open")) close?.focus();
     });
   });
 
   close?.addEventListener("click", () => {
     overlay.classList.remove("open");
-    const lastToggle = toggles[toggles.length - 1];
-    lastToggle?.focus();
+    toggles[toggles.length - 1]?.focus();
   });
 
   overlay?.addEventListener("click", (e) => {
     if (e.target === overlay) {
       overlay.classList.remove("open");
-      const lastToggle = toggles[toggles.length - 1];
-      lastToggle?.focus();
+      toggles[toggles.length - 1]?.focus();
     }
   });
 
@@ -92,27 +61,7 @@ const navItems = [
   overlay?.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       overlay.classList.remove("open");
-      const lastToggle = toggles[toggles.length - 1];
-      lastToggle?.focus();
-      return;
-    }
-
-    if (e.key === "Tab") {
-      const focusable = overlay.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last?.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first?.focus();
-      }
+      toggles[toggles.length - 1]?.focus();
     }
   });
 </script>
-
-

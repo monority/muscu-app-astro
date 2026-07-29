@@ -1,27 +1,4 @@
-﻿---
-import NavItem from "./NavItem.astro";
-import type { User } from "@supabase/supabase-js";
-
-type Props = {
-  activeNav: string;
-  user: User | null;
-};
-const { activeNav, user } = Astro.props;
-
-const navItems = [
-  { href: "/", icon: "home" as const, label: "Accueil", key: "home" },
-  { href: "/session", icon: "dumbbell" as const, label: "SÃ©ance", key: "session" },
-  { href: "/timer", icon: "clock" as const, label: "Timer", key: "timer" },
-  { href: "/exercices", icon: "list" as const, label: "Exercices", key: "exercices" },
-  { href: "/templates", icon: "layers" as const, label: "Templates", key: "templates" },
-  { href: "/progress", icon: "bar-chart" as const, label: "Progression", key: "progress" },
-  { href: "/records", icon: "award" as const, label: "Records", key: "records" },
-  { href: "/poids", icon: "scale" as const, label: "Poids", key: "poids" },
-  { href: "/settings", icon: "settings" as const, label: "RÃ©glages", key: "settings" },
-];
----
-
-<nav class="sidebar" aria-label="Navigation principale">
+﻿<nav class="sidebar" aria-label="Navigation principale">
   <div class="sidebar-brand">
     <span class="sidebar-logo" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -32,19 +9,9 @@ const navItems = [
   </div>
 
   <ul class="sidebar-nav">
-    {navItems.map((item) => (
-      <NavItem href={item.href} icon={item.icon} label={item.label} active={activeNav === item.key} />
-    ))}
+    <a href="/" class="nav-item" aria-current="page">
+      <span class="nav-icon" data-icon="home"></span>
+      <span class="nav-label">Accueil</span>
+    </a>
   </ul>
-
-  <div class="sidebar-footer">
-    {user && (
-      <>
-        <span class="sidebar-email">{user.email}</span>
-        <a href="/logout" class="sidebar-logout">DÃ©connexion</a>
-      </>
-    )}
-  </div>
 </nav>
-
-

@@ -1,40 +1,10 @@
-﻿---
-import { icons } from "./icons";
-
-type Props = {
-  activeNav: string;
-};
-
-const { activeNav } = Astro.props;
-
-const items = [
-  { href: "/", icon: "home" as const, label: "Accueil", key: "home" },
-  { href: "/session", icon: "dumbbell" as const, label: "SÃ©ance", key: "session" },
-  { href: "/timer", icon: "clock" as const, label: "Timer", key: "timer" },
-  { href: "/exercices", icon: "list" as const, label: "Exercices", key: "exercices" },
-  { href: "/templates", icon: "layers" as const, label: "Templates", key: "templates" },
-  { href: "/progress", icon: "bar-chart" as const, label: "Stats", key: "progress" },
-  { href: "/records", icon: "award" as const, label: "Records", key: "records" },
-  { href: "/poids", icon: "scale" as const, label: "Poids", key: "poids" },
-  { href: "/settings", icon: "settings" as const, label: "RÃ©glages", key: "settings" },
-];
----
-
-<nav class="bottom-nav" aria-label="Navigation rapide">
-  {items.map((item) => (
-    <a
-      href={item.href}
-      class:list={["bottom-nav-link", { "bottom-nav-active": activeNav === item.key }]}
-      aria-current={activeNav === item.key ? "page" : undefined}
-    >
-      <span class="bottom-nav-icon" set:html={icons[item.icon]} />
-      <span class="bottom-nav-label">{item.label}</span>
-    </a>
-  ))}
-  <button class="bottom-nav-link bottom-nav-more" type="button" data-mobile-toggle aria-label="Plus d'options">
-    <span class="bottom-nav-icon" set:html={icons.menu} />
-    <span class="bottom-nav-label">Plus</span>
-  </button>
+﻿<nav class="bottom-nav" aria-label="Navigation rapide">
+  <a href="/" class="bottom-nav-link" aria-current="page">
+    <span class="bottom-nav-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </span>
+    <span class="bottom-nav-label">Accueil</span>
+  </a>
 </nav>
-
-
