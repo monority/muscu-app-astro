@@ -1,0 +1,157 @@
+---
+/**
+ * Header — slim top bar.
+ *
+ * Layout (palworld.tools-style):
+ *   [ ☰ ]   [ page title ]                              [ actions … ]
+ *
+ * - Hamburger is visible only on mobile/tablet (<1024px); it toggles
+ *   a slide-in drawer (rendered by AppShell) that mirrors the
+ *   sidebar's navigation.
+ * - The brand logo lives in the Sidebar; this topbar stays minimal
+ *   so the IA is owned by the side nav on every screen size.
+ * - `title` is the current page title — shows the heading right
+ *   where the user is looking, no need to scroll the content.
+ */
+interface Props {
+  title?: string;
+  class?: string;
+}
+
+const { title, class: className = "" } = Astro.props;
+---
+
+<header class:list={["topbar", className]} data-topbar>
+  <div class="topbar__inner">
+    {/* Hamburger (mobile/tablet only) */}
+    <button
+      type="button"
+      class="topbar__hamburger"
+      aria-label="Ouvrir le menu"
+      aria-expanded="false"
+      aria-controls="primary-drawer"
+      data-mobile-toggle
+    >
+      <span class="topbar__hamburger-bar"></span>
+      <span class="topbar__hamburger-bar"></span>
+      <span class="topbar__hamburger-bar"></span>
+    </button>
+
+    {title && <span class="topbar__title">{title}</span>}
+
+    <div class="topbar__right">
+      <slot name="actions" />
+    </div>
+  </div>
+</header>
+
+<style>
+  /* ── Shell ─────────────────────────────────────────────── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background-color: hsl(0 0% 0% / 0.85);
+    backdrop-filter: saturate(160%) blur(10px);
+    -webkit-backdrop-filter: saturate(160%) blur(10px);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .topbar__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    height: 5.6rem;
+    padding: 0 1.6rem;
+  }
+
+  /* ── Page title ────────────────────────────────────────── */
+  .topbar__title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--color-text);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Right cluster ─────────────────────────────────────── */
+  .topbar__right {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+
+  /* ── Hamburger ─────────────────────────────────────────── */
+  .topbar__hamburger {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 3.8rem;
+    height: 3.8rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    padding: 0 1.0rem;
+    color: var(--color-text);
+    flex: 0 0 auto;
+    transition: background-color var(--transition-fast);
+  }
+
+  .topbar__hamburger:hover {
+    background-color: hsl(0 0% 100% / 0.04);
+  }
+
+  .topbar__hamburger-bar {
+    display: block;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 2px;
+    transition: transform var(--transition-fast),
+      opacity var(--transition-fast);
+  }
+
+  .topbar__hamburger[aria-expanded="true"] .topbar__hamburger-bar:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .topbar__hamburger[aria-expanded="true"] .topbar__hamburger-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .topbar__hamburger[aria-expanded="true"] .topbar__hamburger-bar:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* ── Responsive ────────────────────────────────────────── */
+  @media (min-width: 1024px) {
+    .topbar__hamburger {
+      display: none;
+    }
+    .topbar__inner {
+      padding: 0 2.4rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .topbar__inner {
+      padding: 0 1.2rem;
+    }
+    .topbar__title {
+      font-size: 1.4rem;
+    }
+  }
+
+  /* ── Reduced motion ────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .topbar__hamburger-bar {
+      transition: none;
+    }
+  }
+</style>

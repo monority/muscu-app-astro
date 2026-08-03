@@ -1,0 +1,24 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import PageHeader from '../../components/layout/PageHeader.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+import Card from '../../components/ui/Card.astro';
+---
+
+<AppLayout title="Exercices">
+  <PageHeader
+    title="Exercices"
+    description="Parcourez et configurez votre bibliothèque d'exercices."
+    actionLabel="Ajouter un exercice"
+    actionHref="/exercices/creer"
+  />
+
+  <Card>
+    <EmptyState
+      title="Aucun exercice enregistré"
+      description="Ajoutez des exercices pour les retrouver rapidement lors de la création de vos séances."
+      actionLabel="Ajouter un exercice"
+      actionHref="/exercices/creer"
+    />
+  </Card>
+</AppLayout>

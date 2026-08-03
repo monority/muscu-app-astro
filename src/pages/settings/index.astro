@@ -1,0 +1,20 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import PageHeader from '../../components/layout/PageHeader.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+import Card from '../../components/ui/Card.astro';
+---
+
+<AppLayout title="Réglages">
+  <PageHeader
+    title="Réglages"
+    description="Personnalisez votre application et gérez vos préférences."
+  />
+
+  <Card>
+    <EmptyState
+      title="Réglages à venir"
+      description="Cette section accueillera prochainement les options de configuration de l'application."
+    />
+  </Card>
+</AppLayout>

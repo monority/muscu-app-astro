@@ -1,0 +1,61 @@
+---
+/**
+ * PageHeader — design-system primitive.
+ *
+ * Standard page title block. Renders a left-aligned title (and optional
+ * description) with an optional right-aligned primary action link.
+ *
+ * Layout: row with `justify-between` on desktop, stacks vertically on
+ * mobile (<640px) so the action button falls below the title block.
+ */
+interface Props {
+  title: string;
+  description?: string;
+  actionLabel?: string;
+  actionHref?: string;
+  class?: string;
+}
+
+const {
+  title,
+  description,
+  actionLabel,
+  actionHref,
+  class: className = '',
+} = Astro.props;
+
+const hasAction = Boolean(actionLabel && actionHref);
+
+const wrapperClasses = [
+  'flex flex-col gap-3 items-start',
+  'sm:flex-row sm:items-center sm:justify-between sm:gap-4',
+  'mb-6',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<header class={wrapperClasses}>
+  <div class="min-w-0">
+    <h1
+      class="font-[var(--font-display)] font-bold leading-tight text-[clamp(1.6rem,3vw,2rem)] text-[var(--color-text)]"
+    >
+      {title}
+    </h1>
+    {description && (
+      <p class="text-[1.2rem] text-[var(--color-muted)] mt-1">
+        {description}
+      </p>
+    )}
+  </div>
+
+  {hasAction && (
+    <a
+      href={actionHref}
+      class="inline-flex items-center justify-center bg-[var(--color-accent)] text-white rounded-[var(--radius-md)] px-4 py-2 text-[1.3rem] font-semibold transition-all duration-[160ms] hover:brightness-110 active:scale-[0.97] shrink-0"
+    >
+      {actionLabel}
+    </a>
+  )}
+</header>

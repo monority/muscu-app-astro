@@ -1,0 +1,22 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import PageHeader from '../../components/layout/PageHeader.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+import Card from '../../components/ui/Card.astro';
+---
+
+<AppLayout title="Progression">
+  <PageHeader
+    title="Progression"
+    description="Suivez l'évolution de vos performances et de vos records personnels."
+  />
+
+  <Card>
+    <EmptyState
+      title="Pas encore de données"
+      description="Enregistrez vos premières séances pour visualiser votre progression au fil du temps."
+      actionLabel="Démarrer une séance"
+      actionHref="/seances/creer"
+    />
+  </Card>
+</AppLayout>

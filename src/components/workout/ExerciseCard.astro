@@ -1,0 +1,90 @@
+---
+/**
+ * ExerciseCard — one exercise inside a workout session.
+ *
+ * Built on top of the generic Card primitive. Shows a name + muscle
+ * badge header, a compact "count × reps @ topWeight kg" summary
+ * (always visible), and a list of SetRow entries (rendered when
+ * `expanded` is true). Designed for dense session views: session
+ * detail, builder preview, and the play page history pane.
+ *
+ * Summary derivation: uses the first set's reps and the heaviest
+ * weight reached. For uniform blocks this reads naturally as
+ * "4 × 10 @ 80 kg". For pyramid / cluster blocks it shows the
+ * top load with the opening set's rep target.
+ */
+import Card from "../ui/Card.astro";
+import CardTitle from "../ui/CardTitle.astro";
+import Badge from "../ui/Badge.astro";
+import SetRow from "./SetRow.astro";
+
+interface Props {
+  name: string;
+  muscle: string;
+  sets: Array<{ weight: number; reps: number; completed: boolean; type?: string }>;
+  expanded?: boolean;
+  class?: string;
+}
+
+const {
+  name,
+  muscle,
+  sets,
+  expanded = false,
+  class: className = "",
+} = Astro.props;
+
+const count = sets.length;
+const reps = count > 0 ? sets[0].reps : 0;
+const topWeight =
+  count > 0 ? sets.reduce((max, s) => (s.weight > max ? s.weight : max), 0) : 0;
+const completedCount = sets.filter((s) => s.completed).length;
+const allDone = count > 0 && completedCount === count;
+
+const cardClasses = [
+  "flex flex-col gap-2",
+  allDone ? "border-[var(--color-success)]/30" : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const headerClasses = "flex items-start justify-between gap-3";
+
+const summaryClasses = [
+  "text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums",
+  "px-3 py-2 rounded-[var(--radius-sm)]",
+  "bg-[var(--color-surface-2)]/60 border border-[var(--color-border)]/50",
+].join(" ");
+
+const listClasses = "flex flex-col gap-2";
+const listAria = `${name} — ${count} sets`;
+const summaryAria = `${count} sets of ${reps} at ${topWeight} kilograms`;
+---
+
+<Card padding="md" class={cardClasses}>
+  <header class={headerClasses}>
+    <CardTitle class="truncate min-w-0 flex-1">{name}</CardTitle>
+    <Badge variant="success" size="sm">{muscle}</Badge>
+  </header>
+
+  {count > 0 && (
+    <div class={summaryClasses} aria-label={summaryAria}>
+      <span>{count}</span><span class="text-[var(--color-muted)] font-medium mx-0.5">×</span><span>{reps}</span><span class="text-[var(--color-muted)] font-medium mx-1">@</span><span>{topWeight}</span><span class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-0.5">kg</span>
+    </div>
+  )}
+
+  {expanded && count > 0 && (
+    <div class={listClasses} role="list" aria-label={listAria}>
+      {sets.map((set, i) => (
+        <SetRow
+          index={i + 1}
+          weight={set.weight}
+          reps={set.reps}
+          completed={set.completed}
+          type={set.type}
+        />
+      ))}
+    </div>
+  )}
+</Card>

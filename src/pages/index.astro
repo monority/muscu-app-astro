@@ -1,589 +1,91 @@
 ﻿---
-import '../styles/globals.css';
-
-import Button from '../components/ui/Button.astro';
+import AppLayout from '../layouts/AppLayout.astro';
 import Card from '../components/ui/Card.astro';
 import CardHeader from '../components/ui/CardHeader.astro';
 import CardTitle from '../components/ui/CardTitle.astro';
 import CardContent from '../components/ui/CardContent.astro';
-import CardFooter from '../components/ui/CardFooter.astro';
 import Badge from '../components/ui/Badge.astro';
-import Input from '../components/ui/Input.astro';
-import Select from '../components/ui/Select.astro';
-import Checkbox from '../components/ui/Checkbox.astro';
-import Toggle from '../components/ui/Toggle.astro';
-import Tabs from '../components/ui/Tabs.astro';
-import TabList from '../components/ui/TabList.astro';
-import TabPanel from '../components/ui/TabPanel.astro';
-import Dialog from '../components/ui/Dialog.astro';
-import Dropdown from '../components/ui/Dropdown.astro';
-import Table from '../components/ui/Table.astro';
-import TableHead from '../components/ui/TableHead.astro';
-import TableBody from '../components/ui/TableBody.astro';
-import TableRow from '../components/ui/TableRow.astro';
-import TableCell from '../components/ui/TableCell.astro';
-import Pagination from '../components/ui/Pagination.astro';
-import Tooltip from '../components/ui/Tooltip.astro';
-import Skeleton from '../components/ui/Skeleton.astro';
-import Avatar from '../components/ui/Avatar.astro';
-import Progress from '../components/ui/Progress.astro';
-import EmptyState from '../components/ui/EmptyState.astro';
-
-const variants = ['primary', 'secondary', 'destructive', 'ghost'] as const;
-const sizes = ['sm', 'md', 'lg'] as const;
-const badgeVariants = [
-  'default',
-  'success',
-  'warning',
-  'danger',
-  'info',
-  'accent',
-] as const;
-const badgeSizes = ['sm', 'md'] as const;
-const cardVariants = ['default', 'elevated', 'interactive'] as const;
-
-const selectOptions = [
-  { value: 'push', label: 'Push (pectoraux, épaules, triceps)' },
-  { value: 'pull', label: 'Pull (dos, biceps)' },
-  { value: 'legs', label: 'Legs (quadriceps, ischio, mollets)' },
-];
-
-const tabItems = [
-  { id: 'overview', label: 'Vue d\'ensemble' },
-  { id: 'volume', label: 'Volume' },
-  { id: 'records', label: 'Records' },
-];
-
-const tableRows = [
-  { name: 'Développé couché', sets: 4, volume: 2880 },
-  { name: 'Squat barre', sets: 5, volume: 4250 },
-  { name: 'Soulevé de terre', sets: 3, volume: 3300 },
-  { name: 'Tractions lestées', sets: 4, volume: 1920 },
-  { name: 'Développé militaire', sets: 3, volume: 1440 },
-];
+import Button from '../components/ui/Button.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
 ---
 
-<html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Muscu App — Design System</title>
-  </head>
-  <body>
-    <main style="max-width: 96rem; margin: 0 auto; padding: 4.8rem 2.4rem;">
-      <header style="margin-bottom: 4.8rem;">
-        <h1 style="font-size: 3.2rem; margin-bottom: 0.8rem;">Design System</h1>
-        <p style="color: var(--color-muted); font-size: 1.6rem;">
-          Démo des composants UI core.
-        </p>
-      </header>
+<AppLayout title="Dashboard">
+  <PageHeader
+    title="Dashboard"
+    description="Vue d'ensemble de votre entraînement."
+    actionLabel="Nouvelle séance"
+    actionHref="/seances/creer"
+  />
 
-      <!-- ============== BUTTONS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Buttons
-        </h2>
-
-        <h3 style="font-size: 1.6rem; margin-bottom: 1.2rem;">Variants × Sizes</h3>
-        <div style="display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 2.4rem;">
-          {variants.map((variant) => (
-            <div style="display: flex; align-items: center; gap: 1.2rem;">
-              <span style="min-width: 10rem; color: var(--color-muted); font-size: 1.3rem; text-transform: capitalize;">
-                {variant}
-              </span>
-              {sizes.map((size) => (
-                <Button variant={variant} size={size}>
-                  {size.toUpperCase()}
-                </Button>
-              ))}
-            </div>
-          ))}
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1.6rem; margin-bottom: 3.2rem;">
+    <Card variant="elevated">
+      <CardContent>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <span style="font-size: 1.1rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em;">Volume total</span>
+          <span style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums;">12 940 kg</span>
         </div>
+      </CardContent>
+    </Card>
 
-        <h3 style="font-size: 1.6rem; margin-bottom: 1.2rem;">States</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: center; margin-bottom: 2.4rem;">
-          <Button variant="primary" loading>Loading…</Button>
-          <Button variant="primary" disabled>Disabled</Button>
-          <Button variant="secondary" disabled>Disabled</Button>
-          <Button variant="destructive" disabled>Disabled</Button>
+    <Card variant="elevated">
+      <CardContent>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <span style="font-size: 1.1rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em;">Séances</span>
+          <span style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums;">4</span>
         </div>
+      </CardContent>
+    </Card>
 
-        <h3 style="font-size: 1.6rem; margin-bottom: 1.2rem;">Full width</h3>
-        <div style="max-width: 32rem;">
-          <Button variant="primary" fullWidth>Plein largeur</Button>
+    <Card variant="elevated">
+      <CardContent>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <span style="font-size: 1.1rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em;">PRs</span>
+          <span style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums;">2</span>
         </div>
-      </section>
+      </CardContent>
+    </Card>
 
-      <!-- ============== CARDS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Cards
-        </h2>
-
-        <h3 style="font-size: 1.6rem; margin-bottom: 1.2rem;">Composition complète</h3>
-        <div style="max-width: 42rem; margin-bottom: 3.2rem;">
-          <Card>
-            <CardHeader>
-              <CardTitle>Titre de la carte</CardTitle>
-              <Badge variant="accent" size="sm">NEW</Badge>
-            </CardHeader>
-            <CardContent>
-              <p style="color: var(--color-muted);">
-                Le Card se compose d'un header (titre + actions), d'un content (corps) et
-                d'un footer (actions). Les slots acceptent n'importe quel markup.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="ghost" size="sm">Annuler</Button>
-              <Button variant="primary" size="sm">Confirmer</Button>
-            </CardFooter>
-          </Card>
+    <Card variant="elevated">
+      <CardContent>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <span style="font-size: 1.1rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em;">Streak</span>
+          <span style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums;">12 jours</span>
         </div>
+      </CardContent>
+    </Card>
+  </div>
 
-        <h3 style="font-size: 1.6rem; margin-bottom: 1.2rem;">Variants</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr)); gap: 1.6rem;">
-          {cardVariants.map((variant) => (
-            <Card variant={variant}>
-              <CardTitle>Card · {variant}</CardTitle>
-              <p style="color: var(--color-muted); margin-top: 0.8rem;">
-                Variant <strong style="color: var(--color-text);">{variant}</strong> — fond, bordure et ombre diffèrent.
-              </p>
-            </Card>
-          ))}
-        </div>
-      </section>
+  <h2 style="font-size: 1.6rem; color: var(--color-muted); margin-bottom: 1.6rem;">Séances récentes</h2>
 
-      <!-- ============== BADGES ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Badges
-        </h2>
+  <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+    <Card hover clickable>
+      <CardHeader>
+        <CardTitle>Push Day</CardTitle>
+        <Badge variant="success" size="sm">Terminée</Badge>
+      </CardHeader>
+      <CardContent>
+        <p style="color: var(--color-muted); font-size: 1.2rem;">12 mars 2026 · 4 exercices · 3 200 kg</p>
+      </CardContent>
+    </Card>
 
-        {badgeSizes.map((size) => (
-          <div style="margin-bottom: 1.6rem;">
-            <h3 style="font-size: 1.6rem; margin-bottom: 1.2rem; text-transform: capitalize;">
-              Size · {size}
-            </h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.8rem;">
-              {badgeVariants.map((variant) => (
-                <Badge variant={variant} size={size}>
-                  {variant}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        ))}
-      </section>
+    <Card hover clickable>
+      <CardHeader>
+        <CardTitle>Pull Day</CardTitle>
+        <Badge variant="success" size="sm">Terminée</Badge>
+      </CardHeader>
+      <CardContent>
+        <p style="color: var(--color-muted); font-size: 1.2rem;">10 mars 2026 · 5 exercices · 4 100 kg</p>
+      </CardContent>
+    </Card>
 
-      <!-- ============== INPUTS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Inputs
-        </h2>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr)); gap: 2.4rem; max-width: 64rem;">
-          <Input
-            id="demo-normal"
-            label="Nom de l'exercice"
-            hint="Nom affiché dans la bibliothèque."
-            placeholder="Ex. Développé couché"
-            name="name"
-          />
-
-          <Input
-            id="demo-error"
-            label="Email"
-            error="Format invalide. Attendu : nom@domaine.com"
-            placeholder="vous@exemple.com"
-            name="email"
-          />
-
-          <Input
-            id="demo-disabled"
-            label="Champ verrouillé"
-            hint="Édition désactivée tant que la séance n'est pas créée."
-            placeholder="Non éditable"
-            name="locked"
-            disabled
-          />
-
-          <Input
-            id="demo-required"
-            label="Poids (kg)"
-            hint="Charge travaillée sur la série."
-            placeholder="80"
-            name="weight"
-            required
-            type="number"
-          />
-        </div>
-      </section>
-
-      <!-- ============== SELECTS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Selects
-        </h2>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr)); gap: 2.4rem; max-width: 64rem;">
-          <Select
-            id="demo-select-normal"
-            label="Type de séance"
-            hint="Détermine quels exercices seront suggérés."
-            name="sessionType"
-            placeholder="Choisir un split…"
-            options={selectOptions}
-          />
-
-          <Select
-            id="demo-select-error"
-            label="Objectif principal"
-            error="Aucun objectif sélectionné. Requis pour générer le programme."
-            name="goal"
-            placeholder="Choisir un objectif"
-            options={[
-              { value: 'strength', label: 'Force maximale' },
-              { value: 'hypertrophy', label: 'Hypertrophie' },
-              { value: 'endurance', label: 'Endurance musculaire' },
-            ]}
-          />
-
-          <Select
-            id="demo-select-disabled"
-            label="Programme"
-            hint="Sélection verrouillée tant que la séance de test n'est pas validée."
-            name="program"
-            disabled
-            placeholder="Indisponible pour le moment"
-            options={[
-              { value: 'ppl', label: 'Push / Pull / Legs' },
-              { value: 'upper', label: 'Upper / Lower' },
-            ]}
-          />
-        </div>
-      </section>
-
-      <!-- ============== CHECKBOXES ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Checkboxes
-        </h2>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 2.4rem; align-items: center;">
-          <Checkbox
-            id="demo-cb-unchecked"
-            name="warmup"
-            label="Inclure l'échauffement (2 séries)"
-          />
-          <Checkbox
-            id="demo-cb-checked"
-            name="rpe"
-            label="Suivre la RPE sur chaque série"
-            checked
-          />
-          <Checkbox
-            id="demo-cb-disabled"
-            name="dropset"
-            label="Autoriser les drop-sets (bêta)"
-            disabled
-          />
-        </div>
-      </section>
-
-      <!-- ============== TOGGLES ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Toggles
-        </h2>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 2.4rem; align-items: center;">
-          <Toggle
-            id="demo-toggle-off"
-            name="restAlarm"
-            label="Alarme de repos"
-          />
-          <Toggle
-            id="demo-toggle-on"
-            name="darkMode"
-            label="Mode sombre"
-            checked
-          />
-          <Toggle
-            id="demo-toggle-disabled"
-            name="cloudSync"
-            label="Sync cloud (indisponible)"
-            disabled
-          />
-        </div>
-      </section>
-
-      <!-- ============== TABS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Tabs
-        </h2>
-
-        <div style="max-width: 56rem;">
-          <Tabs>
-            <TabList tabs={tabItems} activeTab="overview" />
-            <TabPanel id="overview">
-              <div style="padding: 2rem 0; color: var(--color-muted); font-size: 1.4rem; line-height: 1.6;">
-                Vue d'ensemble de la semaine en cours. 4 séances planifiées, 12 940 kg
-                de volume total, soit +8 % par rapport à la semaine précédente.
-              </div>
-            </TabPanel>
-            <TabPanel id="volume">
-              <div style="padding: 2rem 0; color: var(--color-muted); font-size: 1.4rem; line-height: 1.6;">
-                Volume hebdo : Push 4 200 kg · Pull 3 800 kg · Legs 4 940 kg.
-              </div>
-            </TabPanel>
-            <TabPanel id="records">
-              <div style="padding: 2rem 0; color: var(--color-muted); font-size: 1.4rem; line-height: 1.6;">
-                PR récents : Squat 142,5 kg · Développé couché 102,5 kg · Soulevé 180 kg.
-              </div>
-            </TabPanel>
-          </Tabs>
-        </div>
-      </section>
-
-      <!-- ============== DIALOG ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Dialog
-        </h2>
-
-        <div style="display: flex; align-items: center; gap: 1.2rem;">
-          <Button variant="primary" data-dialog-trigger="demo-dialog">
-            Ouvrir la modale
-          </Button>
-          <span style="color: var(--color-muted); font-size: 1.3rem;">
-            Backdrop + Échap ferment automatiquement. Focus piégé à l'intérieur.
-          </span>
-        </div>
-
-        <Dialog id="demo-dialog" title="Supprimer la séance ?">
-          <p style="color: var(--color-muted); font-size: 1.4rem; line-height: 1.6;">
-            Cette action est irréversible. La séance du 12 mars 2026 et ses 8 séries
-            seront définitivement supprimées de votre bibliothèque.
-          </p>
-          <div slot="footer">
-            <Button variant="ghost" data-dialog-close>Annuler</Button>
-            <Button variant="destructive" data-dialog-close>Supprimer</Button>
-          </div>
-        </Dialog>
-      </section>
-
-      <!-- ============== DROPDOWN ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Dropdown
-        </h2>
-
-        <div style="display: flex; align-items: center; gap: 1.2rem;">
-          <Dropdown align="start">
-            <Button variant="secondary">
-              Actions
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="w-4 h-4"
-                aria-hidden="true"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </Button>
-            <button slot="menu" role="menuitem" type="button">Dupliquer la séance</button>
-            <button slot="menu" role="menuitem" type="button">Exporter en JSON</button>
-            <hr slot="menu" />
-            <button slot="menu" role="menuitem" type="button">Supprimer</button>
-          </Dropdown>
-          <span style="color: var(--color-muted); font-size: 1.3rem;">
-            Clic · Échap · clic dehors ferment le menu.
-          </span>
-        </div>
-      </section>
-
-      <!-- ============== TABLE ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Table
-        </h2>
-
-        <div style="max-width: 64rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;">
-          <Table>
-            <TableHead>
-              <tr>
-                <th>Exercice</th>
-                <th class="text-right">Séries</th>
-                <th class="text-right">Volume (kg)</th>
-              </tr>
-            </TableHead>
-            <TableBody>
-              {tableRows.map((row) => (
-                <TableRow>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell numeric>{row.sets}</TableCell>
-                  <TableCell numeric>{row.volume.toLocaleString('fr-FR')}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
-
-      <!-- ============== PAGINATION ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Pagination
-        </h2>
-
-        <div style="display: flex; align-items: center; gap: 2.4rem; flex-wrap: wrap;">
-          <Pagination
-            currentPage={3}
-            totalPages={10}
-            hrefPattern="/seances?page={n}"
-          />
-          <span style="color: var(--color-muted); font-size: 1.3rem;">
-            Page 3 sur 10 — ellipsis intelligentes (first / last / current ± 1).
-          </span>
-        </div>
-      </section>
-
-      <!-- ============== TOOLTIP ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Tooltip
-        </h2>
-
-        <div style="display: flex; align-items: center; gap: 2.4rem; flex-wrap: wrap;">
-          <Tooltip content="Démarrer la séance immersive" position="top">
-            <Button variant="primary">Play</Button>
-          </Tooltip>
-          <Tooltip content="Exporter en JSON (bientôt)" position="bottom">
-            <Button variant="secondary">Exporter</Button>
-          </Tooltip>
-          <Tooltip content="Supprimer définitivement" position="right">
-            <Button variant="destructive">Supprimer</Button>
-          </Tooltip>
-        </div>
-      </section>
-
-      <!-- ============== SKELETONS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Skeletons
-        </h2>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr)); gap: 2.4rem; max-width: 64rem;">
-          <Card>
-            <CardContent>
-              <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <span style="color: var(--color-muted); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                  Text
-                </span>
-                <Skeleton variant="text" lines={3} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent>
-              <div style="display: flex; flex-direction: column; gap: 1rem; align-items: flex-start;">
-                <span style="color: var(--color-muted); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                  Circle
-                </span>
-                <div style="display: flex; gap: 1.2rem; align-items: center;">
-                  <Skeleton variant="circle" width="40px" />
-                  <Skeleton variant="circle" width="56px" />
-                  <Skeleton variant="circle" width="72px" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent>
-              <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <span style="color: var(--color-muted); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                  Rect
-                </span>
-                <Skeleton variant="rect" width="100%" height="96px" />
-                <Skeleton variant="rect" width="60%" height="32px" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <!-- ============== AVATARS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Avatars
-        </h2>
-
-        <div style="display: flex; align-items: center; gap: 2rem;">
-          <Avatar size="sm" fallback="Jean Dupont" alt="Jean Dupont" />
-          <Avatar size="md" fallback="Marie Lefevre" alt="Marie Lefevre" />
-          <Avatar size="lg" fallback="Alex Martin" alt="Alex Martin" />
-        </div>
-      </section>
-
-      <!-- ============== PROGRESS ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Progress
-        </h2>
-
-        <div style="display: flex; flex-direction: column; gap: 1.6rem; max-width: 42rem;">
-          <Progress
-            value={25}
-            label="Push · Semaine 1 (25 %)"
-            variant="default"
-          />
-          <Progress
-            value={65}
-            label="Pull · Volume cible (65 %)"
-            variant="accent"
-          />
-          <Progress
-            value={90}
-            label="Objectif mensuel (90 %)"
-            variant="success"
-          />
-          <Progress
-            value={45}
-            label="Alerte RPE moyenne (45 %)"
-            variant="warning"
-          />
-          <Progress
-            value={15}
-            label="Risque blessure (15 %)"
-            variant="danger"
-          />
-        </div>
-      </section>
-
-      <!-- ============== EMPTY STATE ============== -->
-      <section style="margin-bottom: 4.8rem;">
-        <h2 style="font-size: 2.2rem; margin-bottom: 2.4rem; color: var(--color-muted);">
-          Empty State
-        </h2>
-
-        <Card>
-          <EmptyState
-            icon="inbox"
-            title="Aucune séance pour le moment"
-            description="Commencez par créer votre première séance pour suivre vos performances et vos PR."
-            actionLabel="Créer une séance"
-            actionHref="/seances/creer"
-          />
-        </Card>
-      </section>
-    </main>
-  </body>
-</html>
+    <Card hover clickable>
+      <CardHeader>
+        <CardTitle>Legs Day</CardTitle>
+        <Badge variant="accent" size="sm">En cours</Badge>
+      </CardHeader>
+      <CardContent>
+        <p style="color: var(--color-muted); font-size: 1.2rem;">8 mars 2026 · 4 exercices · 5 640 kg</p>
+      </CardContent>
+    </Card>
+  </div>
+</AppLayout>

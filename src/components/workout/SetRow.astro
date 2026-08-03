@@ -1,0 +1,110 @@
+---
+/**
+ * SetRow — one set inside an ExerciseCard.
+ *
+ * Compact horizontal row showing: set number chip, load, reps,
+ * an optional type label (warmup / failure / dropset…), and a
+ * completion indicator on the right. Designed to stack inside
+ * ExerciseCard.astro (which uses a `gap-2` parent).
+ *
+ * Renders a `<div role="listitem">` so it can be dropped into a
+ * parent `role="list"` without extra wiring.
+ */
+interface Props {
+  index: number;
+  weight: number;
+  reps: number;
+  completed: boolean;
+  type?: string;
+  class?: string;
+}
+
+const {
+  index,
+  weight,
+  reps,
+  completed,
+  type,
+  class: className = "",
+} = Astro.props;
+
+const containerClasses = [
+  "flex items-center gap-3",
+  "min-h-[44px]",
+  "px-3 py-2.5",
+  "rounded-[var(--radius-sm)]",
+  "border",
+  completed
+    ? "border-[var(--color-success)]/25 bg-[var(--color-success)]/[0.04]"
+    : "border-[var(--color-border)]/50 bg-[var(--color-surface-2)]/40",
+  "transition-colors duration-200",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const indexClasses = [
+  "shrink-0 w-7 h-7",
+  "inline-flex items-center justify-center",
+  "rounded-[var(--radius-sm)]",
+  "bg-[var(--color-surface-3)]",
+  "text-[1.1rem] font-mono font-bold",
+  "text-[var(--color-muted)] tabular-nums",
+].join(" ");
+
+const statusClasses = [
+  "ml-auto shrink-0 w-6 h-6",
+  "inline-flex items-center justify-center",
+  "rounded-full",
+  completed
+    ? "bg-[var(--color-success)]/20 text-[var(--color-success)]"
+    : "bg-white/5 text-[var(--color-muted)]/60",
+].join(" ");
+
+const completedSuffix = completed ? ", completed" : "";
+const ariaLabel = `Set ${index}: ${weight} kg x ${reps}${completedSuffix}`;
+---
+
+<div class={containerClasses} role="listitem" aria-label={ariaLabel}>
+  <span class={indexClasses} aria-hidden="true">{index}</span>
+
+  <span class="font-bold text-[1.3rem] tabular-nums text-[var(--color-text)]">
+    {weight}<span class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-0.5">kg</span>
+  </span>
+
+  <span class="text-[1.2rem] text-[var(--color-muted)]" aria-hidden="true">×</span>
+
+  <span class="font-bold text-[1.3rem] tabular-nums text-[var(--color-text)]">
+    {reps}
+  </span>
+
+  {type && (
+    <span
+      class="text-[1.0rem] uppercase tracking-wider font-semibold text-[var(--color-info)] bg-blue-500/10 px-2 py-0.5 rounded-[var(--radius-pill)]"
+      aria-label={`Type: ${type}`}
+    >
+      {type}
+    </span>
+  )}
+
+  <span class={statusClasses} aria-hidden="true">
+    {completed ? (
+      <svg
+        viewBox="0 0 16 16"
+        class="w-3.5 h-3.5"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3.5 8L6.5 11L12.5 5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    ) : (
+      <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+    )}
+  </span>
+</div>

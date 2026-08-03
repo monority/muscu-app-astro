@@ -1,0 +1,117 @@
+---
+import "../styles/globals.css";
+import AppShell from "../components/layout/AppShell.astro";
+
+/**
+ * Nav structure for the sidebar (palworld.tools style).
+ *
+ * - `label`: group name (rendered as section header)
+ * - `items`: top-level links
+ * - `icon`:  icon name (rendered as inline SVG by Sidebar/drawer)
+ * - `children`: optional sub-links, indented under the parent
+ */
+export type NavLeaf = { label: string; href: string; active?: boolean };
+export type NavItem = {
+  label: string;
+  href: string;
+  icon?: string;
+  children?: NavLeaf[];
+  active?: boolean;
+};
+export type NavGroup = { label: string; items: NavItem[] };
+export type NavTree = NavGroup[];
+
+interface Props {
+  title: string;
+  description?: string;
+  groups?: NavTree;
+}
+
+const defaultGroups: NavTree = [
+  {
+    label: "Entraînement",
+    items: [
+      { label: "Dashboard", href: "/", icon: "dashboard" },
+      {
+        label: "Séances",
+        href: "/seances",
+        icon: "clipboard",
+        children: [
+          { label: "Historique", href: "/seances" },
+          { label: "Nouvelle séance", href: "/seances/creer" },
+        ],
+      },
+      { label: "Timer", href: "/timer", icon: "timer" },
+    ],
+  },
+  {
+    label: "Données",
+    items: [
+      { label: "Exercices", href: "/exercices", icon: "dumbbell" },
+      { label: "Progression", href: "/progression", icon: "trending-up" },
+    ],
+  },
+  {
+    label: "Outils",
+    items: [
+      { label: "Réglages", href: "/settings", icon: "settings" },
+    ],
+  },
+];
+
+const {
+  title,
+  description,
+  groups = defaultGroups,
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+
+// Mark active state on each item (and its children when present)
+// so the Sidebar and the mobile drawer can highlight the right
+// link without recomputing on the client.
+const groupsWithActive = groups.map((g) => ({
+  label: g.label,
+  items: g.items.map((it) => {
+    const isActive =
+      currentPath === it.href ||
+      (it.href !== "/" && currentPath.startsWith(it.href + "/"));
+    return {
+      ...it,
+      active: isActive,
+      children: it.children?.map((c) => ({
+        ...c,
+        active:
+          currentPath === c.href ||
+          (c.href !== "/" && currentPath.startsWith(c.href + "/")),
+      })),
+    };
+  }),
+}));
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Muscu App</title>
+    <meta
+      name="description"
+      content={description || "Application de musculation"}
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    {
+      groupsWithActive.length > 0 ? (
+        <AppShell groups={groupsWithActive} title={title}>
+          <slot />
+        </AppShell>
+      ) : (
+        <main style="max-width: 96rem; margin: 0 auto; padding: 2.4rem;">
+          <slot />
+        </main>
+      )
+    }
+  </body>
+</html>
