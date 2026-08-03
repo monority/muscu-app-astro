@@ -1,0 +1,38 @@
+---
+/**
+ * Table — design-system primitive.
+ *
+ * Scrollable wrapper around a native <table>.
+ * Use with TableHead / TableBody / TableRow / TableCell.
+ * The default <th> styling (uppercase, muted, small) is applied
+ * globally to all <th> inside this component's table.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const wrapperClasses = ['overflow-x-auto', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div class={wrapperClasses} data-ui-table>
+  <table class="w-full border-collapse">
+    <slot />
+  </table>
+</div>
+
+<style is:global>
+  [data-ui-table] thead th {
+    text-align: left;
+    font-size: 1.1rem;
+    line-height: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+  }
+</style>

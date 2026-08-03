@@ -1,0 +1,185 @@
+---
+/**
+ * TabList — renders the row of tab triggers.
+ *
+ * Each tab is a <button role="tab"> wired to a <TabPanel> via a shared id.
+ * The active tab is controlled server-side via the `activeTab` prop; the
+ * embedded <script> handles click + keyboard navigation and syncs the
+ * visibility of the matching <TabPanel>.
+ *
+ * Visual states:
+ *   - active  : text-[--color-text]  +  border-b-2 border-[--color-accent]
+ *   - inactive: text-[--color-muted] hover:text-[--color-text]
+ *   - disabled: opacity-50, non-interactive
+ */
+interface Tab {
+  id: string;
+  label: string;
+  disabled?: boolean;
+}
+
+interface Props {
+  tabs: Tab[];
+  activeTab?: string;
+  class?: string;
+}
+
+const { tabs, activeTab, class: className = '' } = Astro.props;
+
+const listClasses = [
+  'flex',
+  'items-end',
+  'gap-0.5',
+  'border-b',
+  'border-[var(--color-border)]',
+  'overflow-x-auto',
+  'overflow-y-hidden',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div role="tablist" aria-orientation="horizontal" class={listClasses}>
+  {
+    tabs.map((tab) => {
+      const isActive = activeTab !== undefined && tab.id === activeTab;
+      const buttonClasses = [
+        'relative',
+        'px-4',
+        'py-2.5',
+        'text-[1.3rem]',
+        'font-medium',
+        'whitespace-nowrap',
+        'select-none',
+        'border-b-2',
+        '-mb-px',
+        'transition-colors',
+        'duration-[160ms]',
+        'ease-[ease]',
+        'outline-none',
+        'rounded-t-[var(--radius-sm)]',
+        isActive
+          ? 'text-[var(--color-text)] border-[var(--color-accent)] font-semibold'
+          : 'text-[var(--color-muted)] border-transparent hover:text-[var(--color-text)]',
+        tab.disabled
+          ? 'opacity-50 cursor-not-allowed pointer-events-none'
+          : 'cursor-pointer',
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      return (
+        <button
+          type="button"
+          role="tab"
+          id={`tab-${tab.id}`}
+          aria-selected={isActive ? 'true' : 'false'}
+          aria-controls={tab.id}
+          tabindex={isActive ? 0 : -1}
+          disabled={tab.disabled}
+          data-tab-trigger
+          data-tab-id={tab.id}
+          class={buttonClasses}
+        >
+          {tab.label}
+        </button>
+      );
+    })
+  }
+</div>
+
+<script>
+  /**
+   * Tabs controller — ARIA Authoring Practices "tabs" pattern.
+   *
+   * - Click on a trigger toggles aria-selected/tabindex on triggers and
+   *   shows/hides the matching [data-tab-panel] within the same root.
+   * - Arrow keys (Left/Right) cycle between enabled triggers, Home/End
+   *   jump to first/last. The newly focused tab is also activated.
+   * - On init, the panel matching the SSR-selected trigger is shown and
+   *   every other panel is hidden. If no trigger is marked active, the
+   *   first non-disabled one is activated.
+   */
+  function initTabs() {
+    const roots = document.querySelectorAll<HTMLElement>('[data-tabs-root]');
+    roots.forEach((root) => {
+      const triggers = Array.from(
+        root.querySelectorAll<HTMLButtonElement>('[data-tab-trigger]'),
+      );
+      const panels = Array.from(
+        root.querySelectorAll<HTMLElement>('[data-tab-panel]'),
+      );
+      if (triggers.length === 0) return;
+
+      const activate = (trigger: HTMLButtonElement) => {
+        if (trigger.disabled) return;
+        const id = trigger.dataset.tabId;
+        if (!id) return;
+
+        triggers.forEach((t) => {
+          const active = t === trigger;
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
+          t.setAttribute('tabindex', active ? '0' : '-1');
+        });
+
+        panels.forEach((panel) => {
+          if (panel.id === id) {
+            panel.removeAttribute('hidden');
+          } else {
+            panel.setAttribute('hidden', '');
+          }
+        });
+      };
+
+      // Sync the visible panel to whichever trigger is currently marked
+      // active (SSR default or user-set). Fallback: first non-disabled.
+      const preselected =
+        triggers.find((t) => t.getAttribute('aria-selected') === 'true') ??
+        triggers.find((t) => !t.disabled) ??
+        triggers[0];
+      activate(preselected);
+
+      triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => activate(trigger));
+      });
+
+      // Roving keyboard navigation scoped to this tablist.
+      root.addEventListener('keydown', (event) => {
+        const target = event.target as HTMLElement;
+        if (target.getAttribute('role') !== 'tab') return;
+
+        const enabled = triggers.filter((t) => !t.disabled);
+        if (enabled.length === 0) return;
+
+        const currentIndex = enabled.indexOf(target as HTMLButtonElement);
+        if (currentIndex === -1) return;
+
+        let nextIndex: number | null = null;
+        switch (event.key) {
+          case 'ArrowRight':
+            nextIndex = (currentIndex + 1) % enabled.length;
+            break;
+          case 'ArrowLeft':
+            nextIndex = (currentIndex - 1 + enabled.length) % enabled.length;
+            break;
+          case 'Home':
+            nextIndex = 0;
+            break;
+          case 'End':
+            nextIndex = enabled.length - 1;
+            break;
+        }
+
+        if (nextIndex !== null) {
+          event.preventDefault();
+          enabled[nextIndex].focus();
+          activate(enabled[nextIndex]);
+        }
+      });
+    });
+  }
+
+  initTabs();
+  document.addEventListener('astro:page-load', initTabs);
+</script>

@@ -1,0 +1,125 @@
+---
+/**
+ * Toggle — design-system primitive.
+ *
+ * Accessible switch built on a hidden <input type="checkbox" role="switch">
+ * + custom-styled track and thumb. Visual state is driven entirely by the
+ * sibling `+` selector: `.toggle-input:checked + .toggle-track` and
+ * `.toggle-input:checked + .toggle-track .toggle-thumb`, so no JS is needed
+ * for hover/checked/focus/disabled.
+ *
+ * A tiny script keeps `aria-checked` in sync with `checked` on user toggle
+ * for assistive tech. The value is also set initially in the HTML so the
+ * first paint is correct without waiting for hydration.
+ *
+ * Sizes:
+ *   - track: 44 × 24px
+ *   - thumb: 18 × 18px, offset 3px from the edge, slides 20px when checked
+ */
+interface Props {
+  label?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  name?: string;
+  id?: string;
+  class?: string;
+}
+
+const {
+  label,
+  checked = false,
+  disabled = false,
+  name,
+  id,
+  class: className = '',
+} = Astro.props;
+
+const wrapperClasses = [
+  'toggle-wrapper',
+  disabled ? 'disabled' : '',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<label class={wrapperClasses}>
+  <input
+    type="checkbox"
+    id={id}
+    name={name}
+    checked={checked}
+    disabled={disabled}
+    class="toggle-input sr-only"
+    role="switch"
+    aria-checked={checked ? 'true' : 'false'}
+  />
+  <span class="toggle-track">
+    <span class="toggle-thumb"></span>
+  </span>
+  {label && <span class="toggle-label">{label}</span>}
+</label>
+
+<style>
+  .toggle-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .toggle-wrapper.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .toggle-track {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    transition: background-color 200ms ease, border-color 200ms ease;
+    flex-shrink: 0;
+  }
+  .toggle-input:checked + .toggle-track {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 200ms ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  .toggle-input:checked + .toggle-track .toggle-thumb {
+    transform: translateX(20px);
+  }
+  .toggle-input:focus-visible + .toggle-track {
+    box-shadow: var(--focus-ring);
+  }
+</style>
+
+<script>
+  function initToggles() {
+    document.querySelectorAll<HTMLInputElement>('.toggle-input[role="switch"]').forEach((input) => {
+      if (input.dataset.init) return;
+      input.dataset.init = '1';
+
+      const update = () => {
+        input.setAttribute('aria-checked', input.checked ? 'true' : 'false');
+      };
+
+      input.addEventListener('change', update);
+      update(); // sync on init
+    });
+  }
+
+  initToggles();
+  document.addEventListener('astro:page-load', initToggles);
+</script>

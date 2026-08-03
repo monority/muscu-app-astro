@@ -1,0 +1,81 @@
+---
+/**
+ * Tooltip — design-system primitive.
+ *
+ * Wrap any trigger element; a small bubble surfaces on hover/focus.
+ * Pure CSS reveal (group-hover + group-focus-within) — no JS runtime cost.
+ * Reveal is delayed 200ms to avoid flicker on quick pointer traversal.
+ */
+interface Props {
+  content: string;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  class?: string;
+}
+
+const {
+  content,
+  position = 'top',
+  class: className = '',
+} = Astro.props;
+
+const id = `tooltip-${crypto.randomUUID()}`;
+
+const positionMap: Record<NonNullable<Props['position']>, string> = {
+  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
+  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+  left: 'right-full top-1/2 -translate-y-1/2 mr-2',
+  right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+};
+
+const arrowPositionMap: Record<NonNullable<Props['position']>, string> = {
+  top: 'top-full left-1/2 -translate-x-1/2',
+  bottom: 'bottom-full left-1/2 -translate-x-1/2',
+  left: 'left-full top-1/2 -translate-y-1/2',
+  right: 'right-full top-1/2 -translate-y-1/2',
+};
+
+const arrowBorderMap: Record<NonNullable<Props['position']>, string> = {
+  top: 'border-width: 6px 5px 0 5px; border-top-color: var(--color-surface-3);',
+  bottom: 'border-width: 0 5px 6px 5px; border-bottom-color: var(--color-surface-3);',
+  left: 'border-width: 5px 6px 5px 0; border-left-color: var(--color-surface-3);',
+  right: 'border-width: 5px 0 5px 6px; border-right-color: var(--color-surface-3);',
+};
+
+const wrapperClasses = [
+  'relative inline-flex group',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const bubbleClasses = [
+  'absolute z-50',
+  'px-3 py-2',
+  'text-[1.2rem] font-medium whitespace-nowrap',
+  'bg-[var(--color-surface-3)] text-[var(--color-text)]',
+  'rounded-[var(--radius-sm)]',
+  'shadow-[var(--shadow-1)]',
+  'pointer-events-none',
+  'opacity-0 transition-opacity duration-200 delay-200',
+  'group-hover:opacity-100 group-focus-within:opacity-100',
+  'min-w-[80px] text-center',
+  positionMap[position],
+]
+  .filter(Boolean)
+  .join(' ');
+
+const arrowClasses = [
+  'absolute h-0 w-0 border-solid border-transparent',
+  arrowPositionMap[position],
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span class={wrapperClasses} aria-describedby={id}>
+  <slot />
+  <span id={id} role="tooltip" class={bubbleClasses}>
+    {content}
+    <span class={arrowClasses} style={arrowBorderMap[position]} aria-hidden="true"></span>
+  </span>
+</span>

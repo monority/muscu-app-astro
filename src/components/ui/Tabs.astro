@@ -1,0 +1,18 @@
+---
+/**
+ * Tabs — root container for a tabbed interface.
+ *
+ * Wraps a <TabList /> and one or more <TabPanel /> children in a single
+ * region so the client-side controller can scope its queries to the
+ * correct tab group via [data-tabs-root].
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class={className} data-tabs-root>
+  <slot />
+</div>

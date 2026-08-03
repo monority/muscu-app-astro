@@ -1,0 +1,114 @@
+---
+interface Props {
+  label?: string;
+  hint?: string;
+  error?: string;
+  disabled?: boolean;
+  required?: boolean;
+  type?: string;
+  placeholder?: string;
+  name?: string;
+  id?: string;
+  value?: string;
+  class?: string;
+}
+
+const {
+  label,
+  hint,
+  error,
+  disabled = false,
+  required = false,
+  type = "text",
+  placeholder,
+  name,
+  id,
+  value,
+  class: className = "",
+} = Astro.props;
+
+const hintId = id ? `${id}-hint` : undefined;
+const errorId = id ? `${id}-error` : undefined;
+const describedBy =
+  [hint && hintId, error && errorId].filter(Boolean).join(" ") || undefined;
+
+const inputClasses = [
+  "w-full",
+  "px-3",
+  "p-2",
+  "bg-[var(--color-surface-2)]",
+  "border",
+  error ? "border-[var(--color-destructive)]" : "border-[var(--color-border)]",
+  "rounded-[var(--radius-sm)]",
+  "text-[var(--color-text)]",
+  "placeholder:text-white/25",
+  "outline-none",
+  "transition-[border-color,box-shadow]",
+  "duration-[160ms]",
+  "ease-[ease]",
+  "focus:border-[var(--color-accent)]",
+  "focus:shadow-[var(--focus-ring)]",
+  "disabled:opacity-50",
+  "disabled:cursor-not-allowed",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+<div class="flex flex-col">
+  {
+    label && (
+      <label
+        for={id}
+        class="text-[1.2rem] font-medium text-[var(--color-muted)] mb-2 leading-tight"
+      >
+        {label}
+        {required && (
+          <span
+            class="text-[var(--color-destructive)] ml-0.5"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        )}
+      </label>
+    )
+  }
+
+  <input
+    type={type}
+    id={id}
+    name={name}
+    value={value}
+    placeholder={placeholder}
+    disabled={disabled}
+    required={required}
+    aria-invalid={error ? "true" : undefined}
+    aria-describedby={describedBy}
+    class={inputClasses}
+  />
+
+  {
+    hint && !error && (
+      <p
+        id={hintId}
+        class="text-[1.2rem] text-[var(--color-muted)] mt-1.5 leading-snug"
+      >
+        {hint}
+      </p>
+    )
+  }
+
+  {
+    error && (
+      <p
+        id={errorId}
+        class="text-[1.2rem] text-[var(--color-destructive)] mt-1.5 leading-snug"
+        role="alert"
+      >
+        {error}
+      </p>
+    )
+  }
+</div>

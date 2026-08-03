@@ -1,0 +1,82 @@
+---
+interface Props {
+  variant?: 'text' | 'circle' | 'rect';
+  width?: string;
+  height?: string;
+  lines?: number;
+  class?: string;
+}
+
+const {
+  variant = 'text',
+  width,
+  height,
+  lines = 1,
+  class: className = '',
+} = Astro.props;
+
+const variantClasses: Record<NonNullable<Props['variant']>, string> = {
+  text: 'h-4 rounded-[var(--radius-sm)]',
+  circle: 'rounded-full aspect-square',
+  rect: 'rounded-[var(--radius-md)]',
+};
+
+const baseClasses =
+  'skeleton block bg-[var(--color-surface-2)] animate-pulse';
+
+const buildStyle = (w?: string, h?: string): string => {
+  const parts: string[] = [];
+  if (w) parts.push(`width:${w}`);
+  if (h) parts.push(`height:${h}`);
+  return parts.join(';');
+};
+
+const isMultiline = variant === 'text' && lines > 1;
+
+const getLineWidth = (index: number, total: number): string => {
+  if (index === total - 1) return '60%';
+  if (index === total - 2) return '90%';
+  return '100%';
+};
+---
+
+{isMultiline ? (
+  <div class:list={['flex flex-col gap-1.5', className]} aria-hidden="true">
+    {Array.from({ length: lines }, (_, i) => (
+      <span
+        class:list={[baseClasses, variantClasses[variant]]}
+        style={buildStyle(getLineWidth(i, lines), height)}
+      />
+    ))}
+  </div>
+) : (
+  <span
+    class:list={[baseClasses, variantClasses[variant], className]}
+    style={buildStyle(width, height)}
+    aria-hidden="true"
+  />
+)}
+
+<style>
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-2) 0%,
+      var(--color-surface-3) 50%,
+      var(--color-surface-2) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none;
+    }
+  }
+</style>

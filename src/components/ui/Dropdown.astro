@@ -1,0 +1,221 @@
+---
+/**
+ * Dropdown — design-system primitive.
+ *
+ * Renders a relative wrapper around a trigger and an absolutely-positioned
+ * menu. The menu is closed by default and toggled by clicking the trigger
+ * (default slot). Menu items go in the `menu` named slot and are styled
+ * automatically as long as they carry `role="menuitem"`. Use `<hr>` or an
+ * element with `role="separator"` between groups.
+ *
+ * Usage:
+ *   <Dropdown align="end">
+ *     <Button variant="ghost">Compte</Button>
+ *     <button slot="menu" role="menuitem">Profil</button>
+ *     <button slot="menu" role="menuitem">Paramètres</button>
+ *     <hr slot="menu" />
+ *     <button slot="menu" role="menuitem">Déconnexion</button>
+ *   </Dropdown>
+ *
+ * Behavior (handled by the embedded <script>):
+ *   - Click trigger → toggle the menu.
+ *   - Click outside the wrapper → close.
+ *   - Press Escape while open → close.
+ *   - Click any [role="menuitem"] inside the menu → close.
+ *   - Opening a dropdown auto-closes any other open dropdown on the page.
+ */
+interface Props {
+  align?: 'start' | 'end';
+  class?: string;
+}
+
+const {
+  align = 'start',
+  class: className = '',
+} = Astro.props;
+
+const wrapperClasses = [
+  'relative',
+  'inline-block',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const menuPositionClass = align === 'end' ? 'right-0' : 'left-0';
+
+const menuClasses = [
+  'absolute',
+  'z-50',
+  'mt-1',
+  menuPositionClass,
+  'min-w-48',
+  'bg-[var(--color-surface-3)]',
+  'border',
+  'border-[var(--color-border)]',
+  'rounded-[var(--radius-md)]',
+  'shadow-[var(--shadow-2)]',
+  'py-1',
+  'hidden',
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div class={wrapperClasses} data-dropdown>
+  <div data-dropdown-trigger>
+    <slot />
+  </div>
+
+  <div
+    class={menuClasses}
+    role="menu"
+    data-dropdown-menu
+    aria-hidden="true"
+    tabindex={-1}
+  >
+    <slot name="menu" />
+  </div>
+</div>
+
+<script>
+  /**
+   * Dropdown controller.
+   *
+   * - Finds every [data-dropdown] root on the page and wires up:
+   *     click trigger → toggle
+   *     click outside root → close
+   *     keydown Escape → close (any open dropdown)
+   *     click [role="menuitem"] inside the menu → close
+   * - Keeps a `data-dropdown-inited` flag on each root so the bindings are
+   *   idempotent across `astro:page-load` re-runs.
+   */
+  function initDropdowns() {
+    document.querySelectorAll<HTMLElement>('[data-dropdown]').forEach((root) => {
+      if (root.dataset.dropdownInited === 'true') return;
+      root.dataset.dropdownInited = 'true';
+
+      const trigger = root.querySelector<HTMLElement>('[data-dropdown-trigger]');
+      const menu = root.querySelector<HTMLElement>('[data-dropdown-menu]');
+      if (!trigger || !menu) return;
+
+      const isOpen = () => !menu.classList.contains('hidden');
+
+      const open = () => {
+        // Auto-close any other open dropdown on the page so only one is visible.
+        document
+          .querySelectorAll<HTMLElement>('[data-dropdown-menu]:not(.hidden)')
+          .forEach((other) => {
+            if (other === menu) return;
+            other.classList.add('hidden');
+            other.setAttribute('aria-hidden', 'true');
+            other
+              .closest('[data-dropdown]')
+              ?.querySelector('[data-dropdown-trigger]')
+              ?.setAttribute('aria-expanded', 'false');
+          });
+
+        menu.classList.remove('hidden');
+        menu.setAttribute('aria-hidden', 'false');
+        trigger.setAttribute('aria-expanded', 'true');
+      };
+
+      const close = () => {
+        menu.classList.add('hidden');
+        menu.setAttribute('aria-hidden', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+      };
+
+      // Toggle on trigger click. stopPropagation so the document-level
+      // outside-click listener doesn't immediately re-close what we just opened.
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isOpen()) {
+          close();
+        } else {
+          open();
+        }
+      });
+
+      // Click on any menu item (delegated) closes the menu.
+      menu.addEventListener('click', (e) => {
+        const target = e.target as Element | null;
+        if (target?.closest('[role="menuitem"]')) {
+          close();
+        }
+      });
+
+      // Click outside the wrapper closes the menu.
+      document.addEventListener('click', (e) => {
+        if (!isOpen()) return;
+        if (!root.contains(e.target as Node)) {
+          close();
+        }
+      });
+
+      // Escape closes any open dropdown.
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isOpen()) {
+          close();
+        }
+      });
+    });
+  }
+
+  // Run after DOM ready; safe to call multiple times.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDropdowns);
+  } else {
+    initDropdowns();
+  }
+
+  // Re-bind on Astro view transitions / dynamic content.
+  document.addEventListener('astro:page-load', initDropdowns);
+</script>
+
+<style>
+  /* ── Menu items ───────────────────────────────────────────────
+   * Slotted content is not scoped by Astro's default <style>, so we use
+   * :global() to reach into the menu. Matches the spec:
+   *   block w-full text-left px-3 py-2 text-sm hover:bg-white/5
+   */
+  [data-dropdown-menu] :global([role='menuitem']) {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color-text);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 160ms ease;
+    white-space: nowrap;
+  }
+
+  [data-dropdown-menu] :global([role='menuitem']:hover),
+  [data-dropdown-menu] :global([role='menuitem']:focus-visible) {
+    background-color: rgb(255 255 255 / 0.05);
+    outline: none;
+  }
+
+  [data-dropdown-menu] :global([role='menuitem']:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ── Divider ─────────────────────────────────────────────────
+   * <hr> or any [role="separator"] inside the menu gets a thin top border
+   * and vertical breathing room.
+   */
+  [data-dropdown-menu] :global(hr),
+  [data-dropdown-menu] :global([role='separator']) {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 0.25rem 0;
+    height: 0;
+  }
+</style>

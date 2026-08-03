@@ -1,0 +1,154 @@
+---
+interface Option {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
+interface Props {
+  label?: string;
+  hint?: string;
+  error?: string;
+  disabled?: boolean;
+  required?: boolean;
+  name?: string;
+  id?: string;
+  value?: string;
+  placeholder?: string;
+  options: Option[];
+  class?: string;
+}
+
+const {
+  label,
+  hint,
+  error,
+  disabled = false,
+  required = false,
+  name,
+  id,
+  value,
+  placeholder,
+  options,
+  class: className = "",
+} = Astro.props;
+
+const hintId = id ? `${id}-hint` : undefined;
+const errorId = id ? `${id}-error` : undefined;
+const describedBy =
+  [hint && hintId, error && errorId].filter(Boolean).join(" ") || undefined;
+
+const selectClasses = [
+  "w-full",
+  "px-3",
+  "p-2",
+  "bg-[var(--color-surface-2)]",
+  "border",
+  error ? "border-[var(--color-destructive)]" : "border-[var(--color-border)]",
+  "rounded-[var(--radius-sm)]",
+  "text-[var(--color-text)]",
+  "outline-none",
+  "appearance-none",
+  "cursor-pointer",
+  "transition-[border-color,box-shadow]",
+  "duration-[160ms]",
+  "ease-[ease]",
+  "focus:border-[var(--color-accent)]",
+  "focus:shadow-[var(--focus-ring)]",
+  "disabled:opacity-50",
+  "disabled:cursor-not-allowed",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+<div class="flex flex-col">
+  {
+    label && (
+      <label
+        for={id}
+        class="text-[1.2rem] font-medium text-[var(--color-muted)] mb-2 leading-tight"
+      >
+        {label}
+        {required && (
+          <span
+            class="text-[var(--color-destructive)] ml-0.5"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        )}
+      </label>
+    )
+  }
+
+  <div class="relative w-full">
+    <select
+      id={id}
+      name={name}
+      value={value}
+      disabled={disabled}
+      required={required}
+      aria-invalid={error ? "true" : undefined}
+      aria-describedby={describedBy}
+      class={selectClasses}
+    >
+      {
+        placeholder && (
+          <option value="" disabled selected={!value}>
+            {placeholder}
+          </option>
+        )
+      }
+      {
+        options.map((opt) => (
+          <option
+            value={opt.value}
+            disabled={opt.disabled}
+            selected={opt.value === value}
+          >
+            {opt.label}
+          </option>
+        ))
+      }
+    </select>
+
+    <svg
+      class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </div>
+
+  {
+    hint && !error && (
+      <p
+        id={hintId}
+        class="text-[1.2rem] text-[var(--color-muted)] mt-1.5 leading-snug"
+      >
+        {hint}
+      </p>
+    )
+  }
+
+  {
+    error && (
+      <p
+        id={errorId}
+        class="text-[1.2rem] text-[var(--color-destructive)] mt-1.5 leading-snug"
+        role="alert"
+      >
+        {error}
+      </p>
+    )
+  }
+</div>

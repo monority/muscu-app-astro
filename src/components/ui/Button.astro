@@ -1,0 +1,145 @@
+---
+/**
+ * Button — design-system primitive.
+ *
+ * Renders an <a> when `href` is provided, otherwise a <button>.
+ * All visual state comes from the @theme tokens in src/styles/tokens.css
+ * (bg-accent, text-muted, border-border, rounded-[var(--radius-md)], …).
+ */
+interface Props {
+  variant?: "primary" | "secondary" | "destructive" | "ghost";
+  size?: "sm" | "md" | "lg";
+  disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
+  href?: string;
+  type?: "button" | "submit" | "reset";
+  class?: string;
+}
+
+const {
+  variant = "primary",
+  size = "md",
+  disabled = false,
+  loading = false,
+  fullWidth = false,
+  href,
+  type = "button",
+  class: className = "",
+} = Astro.props;
+
+const baseClasses = [
+  "inline-flex items-center justify-center gap-2",
+  "rounded-[var(--radius-sm)]",
+  "font-semibold",
+  "transition-all duration-[160ms]",
+  "select-none whitespace-nowrap",
+  "active:scale-[0.97]",
+];
+
+const variantClasses: Record<NonNullable<Props["variant"]>, string> = {
+  primary:
+    "bg-accent text-accent-foreground border border-accent/45 hover:bg-accent-hover hover:brightness-110",
+  secondary:
+    "bg-transparent text-muted border border-border hover:text-white hover:border-white/20",
+  destructive: "bg-destructive text-white",
+  ghost: "bg-transparent text-muted hover:bg-white/5",
+};
+
+const sizeClasses: Record<NonNullable<Props["size"]>, string> = {
+  sm: "h-10 px-4 text-[1.2rem]",
+  md: "h-12 px-5 text-[1.3rem]",
+  lg: "h-14 px-6 text-[1.4rem]",
+};
+
+const isInactive = disabled || loading;
+const stateClasses = isInactive ? "opacity-50 pointer-events-none" : "";
+const widthClasses = fullWidth ? "w-full" : "min-w-[8rem]";
+
+const classes = [
+  ...baseClasses,
+  variantClasses[variant],
+  sizeClasses[size],
+  stateClasses,
+  widthClasses,
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+{
+  href ? (
+    <a
+      href={isInactive ? undefined : href}
+      class={classes}
+      role="button"
+      aria-disabled={isInactive ? "true" : undefined}
+      aria-busy={loading ? "true" : undefined}
+      tabindex={isInactive ? -1 : undefined}
+    >
+      {loading && (
+        <svg
+          class="animate-spin h-4 w-4 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-opacity="0.25"
+          />
+          <path
+            d="M22 12a10 10 0 0 1-10 10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+        </svg>
+      )}
+      <span class={loading ? "sr-only" : "inline-flex items-center gap-2"}>
+        <slot />
+      </span>
+    </a>
+  ) : (
+    <button
+      type={type}
+      class={classes}
+      disabled={isInactive}
+      aria-busy={loading ? "true" : undefined}
+    >
+      {loading && (
+        <svg
+          class="animate-spin h-4 w-4 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-opacity="0.25"
+          />
+          <path
+            d="M22 12a10 10 0 0 1-10 10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+        </svg>
+      )}
+      <span class={loading ? "sr-only" : "inline-flex items-center gap-2"}>
+        <slot />
+      </span>
+    </button>
+  )
+}

@@ -1,0 +1,43 @@
+---
+interface Props {
+  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
+  size?: 'sm' | 'md';
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  class: className = '',
+} = Astro.props;
+
+const sizeMap: Record<NonNullable<Props['size']>, string> = {
+  sm: 'px-2 py-0.5 text-[0.9rem] uppercase tracking-wider',
+  md: 'px-2.5 py-1 text-[1.1rem]',
+};
+
+const variantClasses: Record<NonNullable<Props['variant']>, string> = {
+  default: 'bg-white/5 text-[var(--color-muted)]',
+  success: 'bg-green-500/10 text-[var(--color-success)]',
+  warning: 'bg-yellow-500/10 text-[var(--color-warning)]',
+  danger: 'bg-red-500/10 text-[var(--color-destructive)]',
+  info: 'bg-blue-500/10 text-[var(--color-info)]',
+  accent: 'bg-orange-500/10 text-[var(--color-accent)]',
+};
+
+const baseClasses =
+  'inline-flex items-center font-semibold rounded-[var(--radius-pill)]';
+
+const classes = [
+  baseClasses,
+  variantClasses[variant],
+  sizeMap[size],
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span class={classes}>
+  <slot />
+</span>

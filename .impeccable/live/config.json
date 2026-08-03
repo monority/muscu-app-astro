@@ -1,6 +1,0 @@
-﻿{
-  "files": ["src/pages/index.astro"],
-  "insertBefore": "</body>",
-  "commentSyntax": "html",
-  "cspChecked": true
-}

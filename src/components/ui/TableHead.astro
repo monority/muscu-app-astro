@@ -1,0 +1,20 @@
+---
+/**
+ * TableHead — <thead> wrapper with bottom border.
+ * Renders <th> children with the default styling (uppercase / muted / small)
+ * defined globally in Table.astro.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const classes = ['border-b border-[var(--color-border)]', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<thead class={classes}>
+  <slot />
+</thead>

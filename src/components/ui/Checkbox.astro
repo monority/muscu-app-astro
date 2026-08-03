@@ -1,0 +1,89 @@
+---
+/**
+ * Checkbox — design-system primitive.
+ *
+ * Hidden native <input type="checkbox"> + custom-styled visual box.
+ * State is driven by Tailwind peer/group variants, so the same element
+ * handles hover, focus-visible, checked, and disabled transitions.
+ * All colors come from the @theme tokens in src/styles/tokens.css.
+ */
+interface Props {
+  label?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  name?: string;
+  id?: string;
+  class?: string;
+}
+
+const {
+  label,
+  checked = false,
+  disabled = false,
+  name,
+  id,
+  class: className = "",
+} = Astro.props;
+
+const labelClasses = [
+  "group inline-flex items-center gap-3",
+  "min-h-[44px] min-w-[44px] py-3 pl-1 pr-3",
+  "cursor-pointer select-none",
+  "text-sm text-[var(--color-text)]",
+  disabled ? "opacity-50 cursor-not-allowed" : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const boxClasses = [
+  "shrink-0",
+  "w-[22px] h-[22px]",
+  "inline-flex items-center justify-center",
+  "border border-[var(--color-border)]",
+  "rounded-[5px]",
+  "bg-transparent",
+  "transition-[background-color,border-color,box-shadow] duration-200",
+  "group-hover:border-[var(--color-muted)]",
+  "peer-focus-visible:shadow-[var(--focus-ring)]",
+  "peer-checked:bg-[var(--color-accent)]",
+  "peer-checked:border-[var(--color-accent)]",
+  "peer-checked:group-hover:border-[var(--color-accent)]",
+].join(" ");
+
+const checkClasses = [
+  "w-3.5 h-3.5 text-white",
+  "opacity-0 peer-checked:opacity-100",
+  "transition-opacity duration-200",
+].join(" ");
+---
+
+<label for={id} class={labelClasses}>
+  <input
+    type="checkbox"
+    id={id}
+    name={name}
+    checked={checked}
+    disabled={disabled}
+    class="peer sr-only"
+  />
+
+  <span aria-hidden="true" class={boxClasses}>
+    <svg
+      class={checkClasses}
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.5 8L6.5 11L12.5 5"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
+
+  {label && <span class="leading-none">{label}</span>}
+</label>

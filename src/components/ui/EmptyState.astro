@@ -1,0 +1,80 @@
+---
+/**
+ * EmptyState — design-system primitive.
+ *
+ * Centered placeholder used when a list/table/section has no data.
+ * Renders an optional icon disc, a title, an optional description, and an
+ * optional call-to-action rendered as an <a> link styled as a primary button.
+ */
+interface Props {
+  icon?: string;
+  title: string;
+  description?: string;
+  actionLabel?: string;
+  actionHref?: string;
+  class?: string;
+}
+
+const {
+  icon,
+  title,
+  description,
+  actionLabel,
+  actionHref,
+  class: className = '',
+} = Astro.props;
+
+const hasAction = Boolean(actionLabel && actionHref);
+
+const wrapperClasses = [
+  'flex flex-col items-center justify-center',
+  'py-12 px-6',
+  'max-w-sm mx-auto',
+  'text-center',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div class={wrapperClasses} role="status">
+  {icon && (
+    <div
+      class="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 text-[var(--color-muted)]"
+      aria-hidden="true"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="w-6 h-6"
+      >
+        <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z" />
+      </svg>
+    </div>
+  )}
+
+  <h3 class="font-[var(--font-display)] text-lg font-bold text-[var(--color-text)] mt-4 text-center">
+    {title}
+  </h3>
+
+  {description && (
+    <p class="text-sm text-[var(--color-muted)] mt-2 text-center">
+      {description}
+    </p>
+  )}
+
+  {hasAction && (
+    <a
+      href={actionHref}
+      class="inline-flex items-center justify-center bg-[var(--color-accent)] text-white rounded-[var(--radius-md)] px-4 py-2 text-sm font-semibold mt-4 transition-all duration-[160ms] hover:brightness-110 active:scale-[0.97]"
+    >
+      {actionLabel}
+    </a>
+  )}
+</div>

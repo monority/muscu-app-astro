@@ -1,0 +1,107 @@
+---
+interface Props {
+  src?: string;
+  alt?: string;
+  fallback?: string;
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const {
+  src,
+  alt = '',
+  fallback = '',
+  size = 'md',
+  class: className = '',
+} = Astro.props;
+
+const sizeMap: Record<NonNullable<Props['size']>, string> = {
+  sm: 'h-8 w-8',
+  md: 'h-10 w-10',
+  lg: 'h-14 w-14',
+};
+
+const textSizeMap: Record<NonNullable<Props['size']>, string> = {
+  sm: 'text-xs',
+  md: 'text-sm',
+  lg: 'text-base',
+};
+
+const initials = fallback
+  .trim()
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((word) => word[0]!.toUpperCase())
+  .join('');
+
+const baseClasses =
+  'relative inline-flex items-center justify-center rounded-full overflow-hidden border-2 border-[var(--color-surface)] select-none';
+
+const classes = [baseClasses, sizeMap[size], className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span
+  class={classes}
+  aria-label={alt || undefined}
+  role="img"
+  data-avatar
+>
+  {src ? (
+    <img
+      src={src}
+      alt={alt}
+      class="absolute inset-0 h-full w-full object-cover"
+      loading="lazy"
+      decoding="async"
+      data-avatar-img
+    />
+  ) : null}
+  <span
+    class:list={[
+      'absolute inset-0 flex items-center justify-center bg-[var(--color-accent)] text-white font-semibold',
+      textSizeMap[size],
+    ]}
+    data-avatar-fallback
+  >
+    {initials}
+  </span>
+</span>
+
+<script>
+  const avatars = document.querySelectorAll<HTMLElement>('[data-avatar]');
+
+  avatars.forEach((avatar) => {
+    const img = avatar.querySelector<HTMLImageElement>('[data-avatar-img]');
+    const fallback = avatar.querySelector<HTMLElement>('[data-avatar-fallback]');
+
+    if (!img || !fallback) {
+      // No <img> => purely fallback, keep it visible
+      fallback?.classList.remove('hidden');
+      return;
+    }
+
+    // Start in fallback mode; switch to img once it actually loads
+    fallback.classList.remove('hidden');
+    img.classList.add('opacity-0');
+
+    const showImg = () => {
+      img.classList.remove('opacity-0');
+      fallback.classList.add('hidden');
+    };
+
+    const showFallback = () => {
+      img.classList.add('opacity-0');
+      fallback.classList.remove('hidden');
+    };
+
+    if (img.complete && img.naturalWidth > 0) {
+      showImg();
+    } else {
+      img.addEventListener('load', showImg, { once: true });
+      img.addEventListener('error', showFallback, { once: true });
+    }
+  });
+</script>

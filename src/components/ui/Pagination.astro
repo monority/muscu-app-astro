@@ -1,0 +1,166 @@
+---
+/**
+ * Pagination — design-system primitive.
+ *
+ * Renders a flex row of previous/next anchors + page-number links
+ * with smart ellipsis collapsing. Visual state comes from
+ * `@theme` tokens in src/styles/tokens.css (--color-accent,
+ * --color-muted, --radius-sm, …).
+ */
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  hrefPattern?: string;
+  class?: string;
+}
+
+const {
+  currentPage,
+  totalPages,
+  hrefPattern,
+  class: className = '',
+} = Astro.props;
+
+if (totalPages < 1) {
+  throw new Error('Pagination: totalPages must be >= 1');
+}
+if (currentPage < 1 || currentPage > totalPages) {
+  throw new Error(
+    `Pagination: currentPage (${currentPage}) must be between 1 and totalPages (${totalPages})`,
+  );
+}
+
+const buildHref = (page: number): string => {
+  if (!hrefPattern) return '#';
+  return hrefPattern.replace('{n}', String(page));
+};
+
+type Item =
+  | { kind: 'page'; page: number }
+  | { kind: 'ellipsis'; key: string };
+
+const items: Item[] = [];
+
+// Build a set of page numbers to display: first, last, current-1, current, current+1
+const pageSet = new Set<number>([1, totalPages]);
+for (let delta = -1; delta <= 1; delta++) {
+  const p = currentPage + delta;
+  if (p >= 1 && p <= totalPages) pageSet.add(p);
+}
+
+const sortedPages = Array.from(pageSet).sort((a, b) => a - b);
+
+for (let i = 0; i < sortedPages.length; i++) {
+  const page = sortedPages[i];
+  items.push({ kind: 'page', page });
+  const next = sortedPages[i + 1];
+  if (next !== undefined && next - page > 1) {
+    items.push({ kind: 'ellipsis', key: `e-${page}-${next}` });
+  }
+}
+
+const isFirst = currentPage === 1;
+const isLast = currentPage === totalPages;
+
+const wrapperClasses = [
+  'flex items-center gap-1',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const pageBase =
+  'inline-flex items-center justify-center min-w-[3.2rem] h-10 px-2.5 text-[1.2rem] rounded-[var(--radius-sm)] transition-colors duration-[160ms] select-none';
+
+const activeClasses =
+  'bg-[var(--color-accent)] text-white font-semibold pointer-events-none';
+const inactiveClasses =
+  'text-[var(--color-muted)] hover:bg-white/5 hover:text-white';
+const disabledClasses = 'opacity-40 pointer-events-none';
+---
+
+{
+  totalPages > 1 && (
+    <nav
+      class={wrapperClasses}
+      aria-label="Pagination"
+    >
+      {/* Previous */}
+      <a
+        href={isFirst ? undefined : buildHref(currentPage - 1)}
+        class:list={[
+          pageBase,
+          inactiveClasses,
+          isFirst ? disabledClasses : '',
+        ]}
+        aria-label="Page précédente"
+        aria-disabled={isFirst ? 'true' : undefined}
+        tabindex={isFirst ? -1 : undefined}
+      >
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </a>
+
+      {/* Page numbers + ellipsis */}
+      {items.map((item) =>
+        item.kind === 'ellipsis' ? (
+          <span
+            key={item.key}
+            class="inline-flex items-center justify-center min-w-[3.2rem] h-10 text-[1.2rem] text-[var(--color-muted)] select-none"
+            aria-hidden="true"
+          >
+            …
+          </span>
+        ) : (
+          <a
+            href={buildHref(item.page)}
+            class:list={[
+              pageBase,
+              item.page === currentPage ? activeClasses : inactiveClasses,
+            ]}
+            aria-current={item.page === currentPage ? 'page' : undefined}
+            aria-label={`Page ${item.page}`}
+          >
+            {item.page}
+          </a>
+        ),
+      )}
+
+      {/* Next */}
+      <a
+        href={isLast ? undefined : buildHref(currentPage + 1)}
+        class:list={[
+          pageBase,
+          inactiveClasses,
+          isLast ? disabledClasses : '',
+        ]}
+        aria-label="Page suivante"
+        aria-disabled={isLast ? 'true' : undefined}
+        tabindex={isLast ? -1 : undefined}
+      >
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+      </a>
+    </nav>
+  )
+}

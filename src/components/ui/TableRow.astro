@@ -1,0 +1,23 @@
+---
+/**
+ * TableRow — <tr> with bottom border and a subtle hover state.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const classes = [
+  'border-b border-[var(--color-border)]',
+  'hover:bg-white/[0.02]',
+  'transition-colors',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<tr class={classes}>
+  <slot />
+</tr>

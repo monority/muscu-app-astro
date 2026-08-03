@@ -1,0 +1,24 @@
+---
+/**
+ * TableCell — <td> cell with default padding and text color.
+ * Set `numeric` on cells containing numbers so digits align column-wise.
+ */
+interface Props {
+  numeric?: boolean;
+  class?: string;
+}
+
+const { numeric = false, class: className = '' } = Astro.props;
+
+const classes = [
+  'px-4 py-3 text-[1.3rem] text-[var(--color-text)]',
+  numeric ? 'tabular-nums' : '',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<td class={classes}>
+  <slot />
+</td>
