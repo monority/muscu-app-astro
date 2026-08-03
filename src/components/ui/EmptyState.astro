@@ -59,12 +59,12 @@ const wrapperClasses = [
     </div>
   )}
 
-  <h3 class="font-[var(--font-display)] text-lg font-bold text-[var(--color-text)] mt-4 text-center">
+  <h3 class="font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] mt-4 text-center">
     {title}
   </h3>
 
   {description && (
-    <p class="text-sm text-[var(--color-muted)] mt-2 text-center">
+    <p class="text-[1.2rem] text-[var(--color-muted)] mt-2 text-center">
       {description}
     </p>
   )}
@@ -72,7 +72,7 @@ const wrapperClasses = [
   {hasAction && (
     <a
       href={actionHref}
-      class="inline-flex items-center justify-center bg-[var(--color-accent)] text-white rounded-[var(--radius-md)] px-4 py-2 text-sm font-semibold mt-4 transition-all duration-[160ms] hover:brightness-110 active:scale-[0.97]"
+      class="inline-flex items-center justify-center bg-[var(--color-accent)] text-white rounded-[var(--radius-md)] px-4 py-2 text-[1.2rem] font-semibold mt-4 transition-all duration-[160ms] hover:brightness-110 active:scale-[0.97]"
     >
       {actionLabel}
     </a>
