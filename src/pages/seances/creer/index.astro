@@ -1,0 +1,1247 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PageHeader from '../../../components/layout/PageHeader.astro';
+import Card from '../../../components/ui/Card.astro';
+import CardHeader from '../../../components/ui/CardHeader.astro';
+import CardTitle from '../../../components/ui/CardTitle.astro';
+import CardContent from '../../../components/ui/CardContent.astro';
+import Badge from '../../../components/ui/Badge.astro';
+import Dialog from '../../../components/ui/Dialog.astro';
+
+/**
+ * Set types (mirrors SessionSet['type'] in src/lib/storage.ts).
+ * Labels are localised to French for the in-row selector.
+ */
+const setTypes = [
+  { value: 'warmup', label: 'Échauffement' },
+  { value: 'work', label: 'Travail' },
+  { value: 'top', label: 'Top set' },
+  { value: 'drop', label: 'Drop set' },
+  { value: 'failure', label: 'Échec' },
+] as const;
+---
+
+<AppLayout title="Nouvelle séance">
+  <div
+    class="ses"
+    x-data="sessionBuilder()"
+    x-init="init()"
+    x-cloak
+  >
+    <PageHeader
+      title="Nouvelle séance"
+      description="Construisez votre séance, ajoutez vos exercices et enregistrez vos séries."
+    />
+
+    {/* ════════════════════════════════════════════════════
+        ACTION BAR — Annuler / Enregistrer
+        ════════════════════════════════════════════════════ */}
+    <div class="ses__actions">
+      <button
+        type="button"
+        class="ses__btn ses__btn--secondary"
+        @click="discard()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="ses__btn ses__btn--primary"
+        :disabled="!canSave"
+        :class="{ 'is-disabled': !canSave }"
+        @click="save()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="ses__btn-icon"
+          aria-hidden="true"
+        >
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        <span>Enregistrer la séance</span>
+      </button>
+    </div>
+
+    {/* ════════════════════════════════════════════════════
+        SESSION INFO CARD — name + date
+        ════════════════════════════════════════════════════ */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Informations</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="ses__info-grid">
+          <div class="ses__field">
+            <label for="ses-name" class="ses__label">
+              Nom de la séance
+              <span class="ses__req" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="ses-name"
+              type="text"
+              class="ses__input"
+              placeholder="Ex. Push day, Jambes, Full body…"
+              x-model="sessionName"
+              required
+              autocomplete="off"
+              maxlength="80"
+            />
+          </div>
+
+          <div class="ses__field">
+            <label for="ses-date" class="ses__label">Date</label>
+            <input
+              id="ses-date"
+              type="date"
+              class="ses__input"
+              x-model="sessionDate"
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* ════════════════════════════════════════════════════
+        EMPTY STATE — no exercises added yet
+        ════════════════════════════════════════════════════ */}
+    <template x-if="exercises.length === 0">
+      <Card>
+        <div class="ses__empty">
+          <div class="ses__empty-icon" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M6.5 6.5h11v11h-11z"></path>
+              <path d="M2 9v6"></path>
+              <path d="M22 9v6"></path>
+              <path d="M6.5 6.5L2 9"></path>
+              <path d="M17.5 6.5L22 9"></path>
+              <path d="M6.5 17.5L2 15"></path>
+              <path d="M17.5 17.5L22 15"></path>
+            </svg>
+          </div>
+          <h3 class="ses__empty-title">Aucun exercice ajouté</h3>
+          <p class="ses__empty-desc">
+            Commencez par sélectionner des exercices depuis votre bibliothèque
+            pour construire votre séance.
+          </p>
+          <button
+            type="button"
+            class="ses__add-btn ses__add-btn--primary"
+            @click="openPicker()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="ses__add-icon"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Ajouter un exercice</span>
+          </button>
+        </div>
+      </Card>
+    </template>
+
+    {/* ════════════════════════════════════════════════════
+        EXERCISE BLOCKS — one Card per added exercise
+        ════════════════════════════════════════════════════ */}
+    <template x-for="(ex, exIdx) in exercises" :key="ex.exerciseId + '-' + exIdx">
+      <Card>
+        <CardHeader>
+          <div class="ses__ex-head">
+            <h3 class="ses__ex-name" x-text="ex.name"></h3>
+            <Badge variant="accent" x-text="ex.muscle"></Badge>
+          </div>
+          <button
+            type="button"
+            class="ses__icon-btn ses__icon-btn--danger"
+            @click="removeExercise(exIdx)"
+            aria-label="Retirer l'exercice de la séance"
+            title="Retirer l'exercice"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="ses__icon"
+              aria-hidden="true"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+            </svg>
+          </button>
+        </CardHeader>
+
+        <CardContent>
+          {/* ── Sets table ── */}
+          <div class="ses__table" role="table" :aria-label="'Séries pour ' + ex.name">
+            <div class="ses__table-head" role="row">
+              <div class="ses__cell ses__cell--num" role="columnheader">#</div>
+              <div class="ses__cell ses__cell--type" role="columnheader">Type</div>
+              <div class="ses__cell ses__cell--num" role="columnheader">Poids (kg)</div>
+              <div class="ses__cell ses__cell--num" role="columnheader">Reps</div>
+              <div class="ses__cell ses__cell--action" role="columnheader" aria-label="Actions"></div>
+            </div>
+            <template x-for="(set, setIdx) in ex.sets" :key="setIdx">
+              <div class="ses__table-row" role="row">
+                <div class="ses__cell ses__cell--num" role="cell" x-text="set.setNumber"></div>
+                <div class="ses__cell ses__cell--type" role="cell">
+                  <select
+                    class="ses__select ses__select--inline"
+                    x-model="set.type"
+                    :aria-label="'Type de la série ' + (setIdx + 1)"
+                  >
+                    {setTypes.map((t) => (
+                      <option value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="ses__cell ses__cell--num" role="cell">
+                  <input
+                    type="number"
+                    class="ses__input ses__input--inline"
+                    min="0"
+                    step="0.5"
+                    x-model.number="set.weight"
+                    inputmode="decimal"
+                    :aria-label="'Poids de la série ' + (setIdx + 1)"
+                  />
+                </div>
+                <div class="ses__cell ses__cell--num" role="cell">
+                  <input
+                    type="number"
+                    class="ses__input ses__input--inline"
+                    min="0"
+                    step="1"
+                    x-model.number="set.reps"
+                    inputmode="numeric"
+                    :aria-label="'Reps de la série ' + (setIdx + 1)"
+                  />
+                </div>
+                <div class="ses__cell ses__cell--action" role="cell">
+                  <button
+                    type="button"
+                    class="ses__icon-btn ses__icon-btn--danger ses__icon-btn--sm"
+                    @click="removeSet(exIdx, setIdx)"
+                    :aria-label="'Supprimer la série ' + (setIdx + 1)"
+                    title="Supprimer la série"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="ses__icon"
+                      aria-hidden="true"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div class="ses__ex-actions">
+            <button
+              type="button"
+              class="ses__btn ses__btn--secondary ses__btn--sm"
+              @click="addSet(exIdx)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="ses__btn-icon"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Ajouter une série</span>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    </template>
+
+    {/* ════════════════════════════════════════════════════
+        ADD EXERCISE — bottom button (shown when ≥1 exercise)
+        ════════════════════════════════════════════════════ */}
+    <template x-if="exercises.length > 0">
+      <div class="ses__add-row">
+        <button
+          type="button"
+          class="ses__add-btn"
+          @click="openPicker()"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="ses__add-icon"
+            aria-hidden="true"
+          >
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Ajouter un exercice</span>
+        </button>
+      </div>
+    </template>
+
+    {/* ════════════════════════════════════════════════════
+        VALIDATION HINT — context-aware error message
+        ════════════════════════════════════════════════════ */}
+    <div
+      class="ses__hint"
+      x-show="!canSave && (sessionName.trim() || exercises.length > 0)"
+      x-cloak
+    >
+      <template x-if="!sessionName.trim()">
+        <span>Ajoutez un nom à la séance pour pouvoir l'enregistrer.</span>
+      </template>
+      <template x-if="sessionName.trim() && exercises.length === 0">
+        <span>Ajoutez au moins un exercice pour enregistrer la séance.</span>
+      </template>
+    </div>
+
+    {/* ════════════════════════════════════════════════════
+        EXERCISE PICKER DIALOG
+        ════════════════════════════════════════════════════ */}
+    <Dialog id="ses-picker-dialog" title="Choisir un exercice">
+      <div class="ses__picker">
+        <div class="ses__search">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="ses__search-icon"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="search"
+            class="ses__search-input"
+            placeholder="Rechercher un exercice…"
+            x-model="exerciseSearch"
+            aria-label="Rechercher un exercice"
+            x-ref="pickerSearch"
+            @keydown.escape="closeDialogById('ses-picker-dialog')"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="ses__picker-list" role="list">
+          {/* ── Library empty ── */}
+          <template x-if="availableExercises.length === 0">
+            <div class="ses__picker-empty">
+              <p>Votre bibliothèque d'exercices est vide.</p>
+              <a href="/exercices" class="ses__picker-link">
+                Créer des exercices →
+              </a>
+            </div>
+          </template>
+
+          {/* ── All exercises already added ── */}
+          <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() === ''">
+            <div class="ses__picker-empty">
+              <p>Tous vos exercices sont déjà dans cette séance.</p>
+            </div>
+          </template>
+
+          {/* ── No match for search ── */}
+          <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() !== ''">
+            <div class="ses__picker-empty">
+              <p>Aucun exercice ne correspond à votre recherche.</p>
+            </div>
+          </template>
+
+          {/* ── Picker items ── */}
+          <template x-for="ex in filteredExercises" :key="ex.id">
+            <button
+              type="button"
+              class="ses__picker-item"
+              @click="addExercise(ex)"
+              role="listitem"
+            >
+              <span class="ses__picker-name" x-text="ex.name"></span>
+              <span class="ses__picker-muscle" x-text="ex.muscle"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <div slot="footer">
+        <button
+          type="button"
+          class="ses__btn ses__btn--secondary"
+          data-dialog-close
+        >
+          Fermer
+        </button>
+      </div>
+    </Dialog>
+  </div>
+</AppLayout>
+
+{/* Alpine.js via CDN (defer — runs after DOM is parsed) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+<script>
+  import {
+    getExercises,
+    saveSession,
+    type Exercise,
+    type SessionExercise,
+    type SessionSet,
+    type SetType,
+  } from '../../../lib/storage';
+
+  // Default set type for newly created sets (mirrors spec).
+  const DEFAULT_SET_TYPE: SetType = 'work';
+
+  document.addEventListener('alpine:init', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data('sessionBuilder', () => ({
+      // ── State ──
+      sessionName: '',
+      sessionDate: new Date().toISOString().split('T')[0],
+      exercises: [] as SessionExercise[],
+      availableExercises: [] as Exercise[],
+      exerciseSearch: '',
+
+      // ── Init ──
+      init() {
+        this.availableExercises = getExercises();
+      },
+
+      // ── Derived ──
+      get filteredExercises(): Exercise[] {
+        const q = this.exerciseSearch.trim().toLowerCase();
+        const addedIds = new Set(this.exercises.map((se) => se.exerciseId));
+        return this.availableExercises.filter((e) => {
+          if (addedIds.has(e.id)) return false;
+          if (q && !e.name.toLowerCase().includes(q)) return false;
+          return true;
+        });
+      },
+
+      get canSave(): boolean {
+        return Boolean(this.sessionName.trim()) && this.exercises.length > 0;
+      },
+
+      // ── Actions ──
+      openPicker() {
+        this.exerciseSearch = '';
+        this.openDialogById('ses-picker-dialog');
+        // Focus the search input once the dialog has opened.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ref = (this as any).$refs?.pickerSearch as HTMLInputElement | undefined;
+        if (ref) {
+          requestAnimationFrame(() => ref.focus());
+        }
+      },
+
+      addExercise(exercise: Exercise) {
+        const firstSet: SessionSet = {
+          exerciseId: exercise.id,
+          setNumber: 1,
+          weight: 0,
+          reps: 0,
+          type: DEFAULT_SET_TYPE,
+          completed: false,
+        };
+        const newEx: SessionExercise = {
+          exerciseId: exercise.id,
+          name: exercise.name,
+          muscle: exercise.muscle,
+          sets: [firstSet],
+        };
+        this.exercises.push(newEx);
+        this.exerciseSearch = '';
+        this.closeDialogById('ses-picker-dialog');
+      },
+
+      addSet(exerciseIndex: number) {
+        const ex = this.exercises[exerciseIndex];
+        if (!ex) return;
+        const last = ex.sets[ex.sets.length - 1];
+        const next: SessionSet = {
+          exerciseId: ex.exerciseId,
+          setNumber: ex.sets.length + 1,
+          weight: last ? last.weight : 0,
+          reps: last ? last.reps : 0,
+          type: DEFAULT_SET_TYPE,
+          completed: false,
+        };
+        ex.sets.push(next);
+      },
+
+      removeSet(exerciseIndex: number, setIndex: number) {
+        const ex = this.exercises[exerciseIndex];
+        if (!ex) return;
+        ex.sets.splice(setIndex, 1);
+        // Re-number remaining sets so the displayed # stays 1..N.
+        ex.sets.forEach((s, i) => {
+          s.setNumber = i + 1;
+        });
+      },
+
+      removeExercise(exerciseIndex: number) {
+        this.exercises.splice(exerciseIndex, 1);
+      },
+
+      discard() {
+        if (this.exercises.length > 0 || this.sessionName.trim()) {
+          const ok = window.confirm(
+            'Annuler la séance en cours ? Les modifications non enregistrées seront perdues.',
+          );
+          if (!ok) return;
+        }
+        window.location.href = '/seances';
+      },
+
+      save() {
+        if (!this.canSave) return;
+        saveSession({
+          name: this.sessionName.trim(),
+          date: this.sessionDate,
+          exercises: this.exercises,
+          status: 'completed',
+        });
+        window.location.href = '/seances';
+      },
+
+      // ── Dialog helpers (wrap the global Dialog API) ──
+      openDialogById(id: string) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).openDialog as ((i: string) => void) | undefined;
+        if (fn) fn(id);
+      },
+      closeDialogById(id: string) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).closeDialog as ((i: string) => void) | undefined;
+        if (fn) fn(id);
+      },
+    }));
+  });
+</script>
+
+<style>
+  /* Hide Alpine elements until initialized (prevents flash) */
+  [x-cloak] {
+    display: none !important;
+  }
+
+  /* ════════════════════════════════════════════════════
+     CONTAINER
+     ════════════════════════════════════════════════════ */
+  .ses {
+    max-width: 96rem;
+    margin: 0 auto;
+    padding-bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     ACTION BAR — Annuler / Enregistrer
+     ════════════════════════════════════════════════════ */
+  .ses__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* ════════════════════════════════════════════════════
+     BUTTONS (reusable variants)
+     ════════════════════════════════════════════════════ */
+  .ses__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    height: 4.4rem;
+    padding: 0 1.8rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    min-width: 8rem;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .ses__btn:active {
+    transform: scale(0.97);
+  }
+
+  .ses__btn--sm {
+    height: 3.6rem;
+    padding: 0 1.4rem;
+    font-size: 1.2rem;
+  }
+
+  .ses__btn--primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px hsl(32 95% 50% / 0.25);
+  }
+
+  .ses__btn--primary:hover:not(:disabled):not(.is-disabled) {
+    background-color: var(--color-accent-hover);
+    box-shadow: 0 4px 14px hsl(32 95% 50% / 0.40);
+  }
+
+  .ses__btn--primary:disabled,
+  .ses__btn--primary.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    background-color: var(--color-surface-3);
+    border-color: var(--color-border);
+    color: var(--color-muted);
+  }
+
+  .ses__btn--secondary {
+    background-color: transparent;
+    color: var(--color-muted);
+    border-color: var(--color-border);
+  }
+
+  .ses__btn--secondary:hover {
+    background-color: hsl(0 0% 100% / 0.05);
+    border-color: hsl(0 0% 100% / 0.18);
+    color: var(--color-text);
+  }
+
+  .ses__btn-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SESSION INFO — form grid
+     ════════════════════════════════════════════════════ */
+  .ses__info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+
+  @media (min-width: 640px) {
+    .ses__info-grid {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      align-items: end;
+    }
+  }
+
+  .ses__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .ses__label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    line-height: 1.2;
+  }
+
+  .ses__req {
+    color: var(--color-destructive);
+    margin-left: 0.2rem;
+  }
+
+  .ses__input,
+  .ses__select {
+    width: 100%;
+    height: 4.4rem;
+    padding: 0 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    line-height: 1.2;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .ses__input::placeholder {
+    color: hsl(0 0% 100% / 0.25);
+  }
+
+  .ses__input:focus,
+  .ses__select:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  /* Inline inputs inside the sets table */
+  .ses__input--inline {
+    height: 3.6rem;
+    padding: 0 0.8rem;
+    font-size: 1.3rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ses__input--inline::-webkit-outer-spin-button,
+  .ses__input--inline::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .ses__input--inline {
+    -moz-appearance: textfield;
+  }
+
+  .ses__select--inline {
+    height: 3.6rem;
+    padding: 0 2.6rem 0 1rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--color-muted) 50%),
+      linear-gradient(135deg, var(--color-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 1.5rem) 50%,
+      calc(100% - 1rem) 50%;
+    background-size: 0.5rem 0.5rem, 0.5rem 0.5rem;
+    background-repeat: no-repeat;
+  }
+
+  /* Native date picker indicator on dark theme */
+  .ses__input[type='date'] {
+    color-scheme: dark;
+  }
+
+  /* ════════════════════════════════════════════════════
+     EXERCISE BLOCK — header + table
+     ════════════════════════════════════════════════════ */
+  .ses__ex-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .ses__ex-name {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  /* ── Sets table ── */
+  .ses__table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: var(--color-surface-2);
+  }
+
+  .ses__table-head,
+  .ses__table-row {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) 3.6rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.2rem;
+  }
+
+  .ses__table-head {
+    height: 3.6rem;
+    background-color: var(--color-surface-3);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+
+  .ses__table-row {
+    min-height: 4.8rem;
+    border-top: 1px solid var(--color-border);
+    transition: background-color var(--transition-fast);
+  }
+
+  .ses__table-row:hover {
+    background-color: hsl(0 0% 100% / 0.025);
+  }
+
+  .ses__cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .ses__cell--num {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ses__table-head .ses__cell--num {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+  }
+
+  .ses__cell--type {
+    justify-content: stretch;
+  }
+
+  .ses__cell--action {
+    justify-content: flex-end;
+  }
+
+  /* ── Exercise block footer actions ── */
+  .ses__ex-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 1.4rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     ICON BUTTONS (remove exercise / remove set)
+     ════════════════════════════════════════════════════ */
+  .ses__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .ses__icon-btn:hover {
+    background-color: hsl(0 0% 100% / 0.05);
+    border-color: hsl(0 0% 100% / 0.10);
+    color: var(--color-text);
+  }
+
+  .ses__icon-btn:active {
+    transform: scale(0.94);
+  }
+
+  .ses__icon-btn--sm {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .ses__icon-btn--danger:hover {
+    background-color: hsl(0 80% 55% / 0.12);
+    border-color: hsl(0 80% 55% / 0.40);
+    color: var(--color-destructive);
+  }
+
+  .ses__icon {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .ses__icon-btn--sm .ses__icon {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     ADD EXERCISE — empty state + bottom row
+     ════════════════════════════════════════════════════ */
+  .ses__add-row {
+    display: flex;
+    justify-content: center;
+    padding: 0.4rem 0;
+  }
+
+  .ses__add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    height: 4.4rem;
+    padding: 0 2rem;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px dashed hsl(0 0% 100% / 0.20);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .ses__add-btn:hover {
+    background-color: var(--color-surface-2);
+    border-color: var(--color-accent);
+    border-style: solid;
+    color: var(--color-accent);
+  }
+
+  .ses__add-btn:active {
+    transform: scale(0.98);
+  }
+
+  .ses__add-btn--primary {
+    border-style: solid;
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    box-shadow: 0 2px 8px hsl(32 95% 50% / 0.25);
+  }
+
+  .ses__add-btn--primary:hover {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    color: var(--color-accent-foreground);
+    box-shadow: 0 4px 14px hsl(32 95% 50% / 0.40);
+  }
+
+  .ses__add-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     EMPTY STATE
+     ════════════════════════════════════════════════════ */
+  .ses__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3.6rem 1.6rem 3rem;
+    text-align: center;
+  }
+
+  .ses__empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 5.6rem;
+    height: 5.6rem;
+    border-radius: 50%;
+    background-color: hsl(32 95% 50% / 0.10);
+    color: var(--color-accent);
+  }
+
+  .ses__empty-icon svg {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .ses__empty-title {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-top: 1.4rem;
+  }
+
+  .ses__empty-desc {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    max-width: 38rem;
+    margin: 0.6rem 0 0;
+    line-height: 1.5;
+  }
+
+  /* ════════════════════════════════════════════════════
+     VALIDATION HINT
+     ════════════════════════════════════════════════════ */
+  .ses__hint {
+    background-color: hsl(0 80% 55% / 0.08);
+    border: 1px solid hsl(0 80% 55% / 0.25);
+    border-radius: var(--radius-md);
+    color: hsl(0 80% 75%);
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 1rem 1.4rem;
+    text-align: center;
+  }
+
+  /* ════════════════════════════════════════════════════
+     EXERCISE PICKER (inside Dialog)
+     ════════════════════════════════════════════════════ */
+  .ses__picker {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-top: 0.4rem;
+  }
+
+  .ses__search {
+    position: relative;
+  }
+
+  .ses__search-icon {
+    position: absolute;
+    top: 50%;
+    left: 1.4rem;
+    transform: translateY(-50%);
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--color-muted);
+    pointer-events: none;
+  }
+
+  .ses__search-input {
+    width: 100%;
+    height: 4.4rem;
+    padding: 0 1.4rem 0 4.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .ses__search-input::placeholder {
+    color: hsl(0 0% 100% / 0.25);
+  }
+
+  .ses__search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .ses__search-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .ses__picker-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 36rem;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-2);
+  }
+
+  .ses__picker-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 1.2rem 1.6rem;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: background-color var(--transition-fast);
+  }
+
+  .ses__picker-item:last-child {
+    border-bottom: none;
+  }
+
+  .ses__picker-item:hover {
+    background-color: hsl(32 95% 50% / 0.08);
+  }
+
+  .ses__picker-item:active {
+    background-color: hsl(32 95% 50% / 0.14);
+  }
+
+  .ses__picker-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.2;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ses__picker-muscle {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    padding: 0.3rem 0.9rem;
+    background-color: hsl(32 95% 50% / 0.10);
+    border: 1px solid hsl(32 95% 50% / 0.25);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+
+  .ses__picker-empty {
+    padding: 2.6rem 1.6rem;
+    text-align: center;
+    color: var(--color-muted);
+  }
+
+  .ses__picker-empty p {
+    font-size: 1.3rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .ses__picker-link {
+    display: inline-block;
+    margin-top: 0.8rem;
+    color: var(--color-accent);
+    font-weight: 700;
+    font-size: 1.3rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     RESPONSIVE — small screens
+     ════════════════════════════════════════════════════ */
+  @media (max-width: 640px) {
+    .ses__actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+    .ses__actions .ses__btn {
+      width: 100%;
+    }
+    .ses__table-head {
+      display: none;
+    }
+    .ses__table-row {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        'num type'
+        'weight reps'
+        'action action';
+      gap: 0.8rem;
+      padding: 1rem;
+      min-height: 0;
+    }
+    .ses__table-row .ses__cell--num:nth-of-type(1) {
+      grid-area: num;
+    }
+    .ses__table-row .ses__cell--type {
+      grid-area: type;
+    }
+    .ses__table-row .ses__cell--num:nth-of-type(3) {
+      grid-area: weight;
+    }
+    .ses__table-row .ses__cell--num:nth-of-type(4) {
+      grid-area: reps;
+    }
+    .ses__table-row .ses__cell--action {
+      grid-area: action;
+      justify-content: flex-end;
+      padding-top: 0.4rem;
+      border-top: 1px dashed var(--color-border);
+    }
+    .ses__picker-name {
+      white-space: normal;
+    }
+    .ses__picker-muscle {
+      font-size: 1.0rem;
+      padding: 0.2rem 0.7rem;
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     REDUCED MOTION
+     ════════════════════════════════════════════════════ */
+  @media (prefers-reduced-motion: reduce) {
+    .ses__btn,
+    .ses__icon-btn,
+    .ses__add-btn,
+    .ses__input,
+    .ses__select,
+    .ses__search-input,
+    .ses__picker-item,
+    .ses__table-row {
+      transition: none;
+    }
+  }
+</style>

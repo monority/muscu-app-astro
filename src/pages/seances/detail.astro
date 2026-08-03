@@ -1,0 +1,1071 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Dialog from '../../components/ui/Dialog.astro';
+---
+
+<AppLayout title="Séance">
+  <div
+    class="detail"
+    x-data="sessionDetailApp()"
+    x-init="init()"
+    x-cloak
+  >
+    {/* ── Back link ── */}
+    <a href="/seances" class="detail__back">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      <span>Retour aux séances</span>
+    </a>
+
+    {/* ── Not found state ── */}
+    <template x-if="notFound">
+      <Card>
+        <div class="detail__error">
+          <div class="detail__error-icon" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h2 class="detail__error-title">Séance introuvable</h2>
+          <p class="detail__error-text">
+            Cette séance n'existe pas, a été supprimée ou le lien est invalide.
+          </p>
+          <a href="/seances" class="detail__error-link">
+            Voir toutes les séances
+          </a>
+        </div>
+      </Card>
+    </template>
+
+    {/* ── Loaded session ── */}
+    <template x-if="!notFound && session">
+      <div class="detail__content">
+        {/* Header */}
+        <header class="detail__header">
+          <div class="detail__header-row">
+            <h1 class="detail__title" x-text="session.name"></h1>
+            <span
+              class="detail__badge"
+              :class="'detail__badge--' + session.status"
+              x-text="statusLabel(session.status)"
+            ></span>
+          </div>
+          <div
+            class="detail__date"
+            x-text="formatDateTime(session.date)"
+          ></div>
+        </header>
+
+        {/* Stats grid */}
+        <div class="detail__stats">
+          <div class="detail__stat">
+            <div class="detail__stat-label">Durée</div>
+            <div
+              class="detail__stat-value"
+              x-text="formatDuration(session.duration)"
+            ></div>
+          </div>
+          <div class="detail__stat">
+            <div class="detail__stat-label">Volume total</div>
+            <div
+              class="detail__stat-value"
+              x-text="formatVolume(sessionTotalVolume)"
+            ></div>
+          </div>
+          <div class="detail__stat">
+            <div class="detail__stat-label">Exercices</div>
+            <div
+              class="detail__stat-value"
+              x-text="session.exercises.length"
+            ></div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div class="detail__actions">
+          <button
+            type="button"
+            class="detail__btn detail__btn--secondary"
+            disabled
+            title="Bientôt disponible"
+            aria-label="Éditer (bientôt disponible)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="detail__btn-icon"
+              aria-hidden="true"
+            >
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Éditer
+          </button>
+          <button
+            type="button"
+            class="detail__btn detail__btn--destructive"
+            @click="openDeleteDialog"
+            aria-label="Supprimer la séance"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="detail__btn-icon"
+              aria-hidden="true"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+              <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Supprimer
+          </button>
+        </div>
+
+        {/* Exercises */}
+        <section class="detail__exercises">
+          <h2 class="detail__section-title">Exercices</h2>
+
+          <template x-if="session.exercises.length === 0">
+            <Card>
+              <p class="detail__no-exercises">
+                Aucun exercice n'a été enregistré dans cette séance.
+              </p>
+            </Card>
+          </template>
+
+          <template x-for="(ex, exIdx) in session.exercises" :key="exIdx">
+            <Card>
+              <article class="exo-row">
+                <header class="exo-row__head">
+                  <h3 class="exo-row__name" x-text="ex.name"></h3>
+                  <span class="exo-row__muscle" x-text="ex.muscle"></span>
+                </header>
+
+                <div class="exo-row__stats">
+                  <div class="exo-row__stat">
+                    <span class="exo-row__stat-label">Volume</span>
+                    <span
+                      class="exo-row__stat-value"
+                      x-text="formatVolume(exerciseVolume(ex))"
+                    ></span>
+                  </div>
+                  <div class="exo-row__stat">
+                    <span class="exo-row__stat-label">Meilleur 1RM</span>
+                    <span
+                      class="exo-row__stat-value"
+                      x-text="formatVolume(best1RM(ex))"
+                    ></span>
+                  </div>
+                  <div class="exo-row__stat">
+                    <span class="exo-row__stat-label">Séries</span>
+                    <span
+                      class="exo-row__stat-value"
+                      x-text="ex.sets.length"
+                    ></span>
+                  </div>
+                </div>
+
+                <div
+                  class="exo-row__table-wrap"
+                  x-show="ex.sets.length > 0"
+                >
+                  <table class="exo-row__table">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Poids</th>
+                        <th scope="col">Reps</th>
+                        <th scope="col">RPE</th>
+                        <th scope="col" class="exo-row__th-end">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="set in ex.sets" :key="set.setNumber">
+                        <tr
+                          class="exo-row__tr"
+                          :class="{ 'is-completed': set.completed }"
+                        >
+                          <td class="exo-row__num" x-text="set.setNumber"></td>
+                          <td>
+                            <span
+                              class="exo-row__type"
+                              :class="'exo-row__type--' + set.type"
+                              x-text="typeLabel(set.type)"
+                            ></span>
+                          </td>
+                          <td class="exo-row__num" x-text="formatWeight(set.weight)"></td>
+                          <td class="exo-row__num" x-text="set.reps"></td>
+                          <td x-text="set.rpe != null ? formatRpe(set.rpe) : '—'"></td>
+                          <td class="exo-row__td-end">
+                            <svg
+                              x-show="set.completed"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="exo-row__check"
+                              aria-label="Série complétée"
+                            >
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span
+                              x-show="!set.completed"
+                              class="exo-row__dash"
+                              aria-label="Série non complétée"
+                            >—</span>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <p
+                  class="exo-row__no-sets"
+                  x-show="ex.sets.length === 0"
+                >
+                  Aucune série enregistrée.
+                </p>
+              </article>
+            </Card>
+          </template>
+        </section>
+      </div>
+    </template>
+
+    {/* ════════════════════════════════════════════════════
+        DELETE CONFIRMATION DIALOG
+        ════════════════════════════════════════════════════ */}
+    <Dialog
+      id="delete-session-dialog"
+      title="Supprimer cette séance ?"
+    >
+      <p class="detail__confirm-text">
+        Vous êtes sur le point de supprimer
+        <strong x-text="session ? session.name : 'cette séance'"></strong>.
+        Cette action est irréversible.
+      </p>
+
+      <div slot="footer">
+        <button
+          type="button"
+          class="detail__btn detail__btn--secondary"
+          data-dialog-close
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="detail__btn detail__btn--destructive"
+          @click="confirmDelete"
+        >
+          Supprimer définitivement
+        </button>
+      </div>
+    </Dialog>
+  </div>
+</AppLayout>
+
+{/* Alpine.js via CDN (defer — runs after DOM is parsed) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+<script>
+  import {
+    getSessionById,
+    deleteSession,
+    calculate1RM,
+    type Session,
+    type SessionExercise,
+    type SessionStatus,
+    type SetType,
+  } from '../../lib/storage';
+
+  // ── Pure helpers (module scope) ────────────────────────────
+  function statusLabelFn(s: SessionStatus): string {
+    if (s === 'completed') return 'Terminée';
+    if (s === 'in-progress') return 'En cours';
+    return 'Planifiée';
+  }
+
+  function typeLabelFn(t: SetType): string {
+    switch (t) {
+      case 'warmup': return 'Échauf.';
+      case 'work':   return 'Travail';
+      case 'top':    return 'Top';
+      case 'drop':   return 'Drop';
+      case 'failure': return 'Échec';
+    }
+  }
+
+  function formatDateTimeFn(iso: string): string {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const date = d.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const time = d.toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    // Capitalize first letter
+    const cap = date.charAt(0).toUpperCase() + date.slice(1);
+    return cap + ' à ' + time;
+  }
+
+  function formatDurationFn(seconds?: number): string {
+    if (!seconds || seconds <= 0) return '—';
+    const total = Math.floor(seconds);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    if (h > 0) {
+      return `${h}h ${m.toString().padStart(2, '0')}m`;
+    }
+    if (m > 0) {
+      return `${m}m ${s.toString().padStart(2, '0')}s`;
+    }
+    return `${s}s`;
+  }
+
+  function formatVolumeFn(v: number): string {
+    if (!Number.isFinite(v) || v <= 0) return '0 kg';
+    return Math.round(v).toLocaleString('fr-FR') + ' kg';
+  }
+
+  function formatWeightFn(w: number): string {
+    if (!Number.isFinite(w) || w <= 0) return '0 kg';
+    return Math.round(w).toLocaleString('fr-FR') + ' kg';
+  }
+
+  function formatRpeFn(rpe: number): string {
+    if (!Number.isFinite(rpe)) return '—';
+    return rpe.toString();
+  }
+
+  document.addEventListener('alpine:init', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data('sessionDetailApp', () => ({
+      // ── State ──
+      session: null as Session | null,
+      sessionId: '',
+      notFound: false,
+
+      // ── Init ──
+      init() {
+        const params = new URLSearchParams(window.location.search);
+        this.sessionId = params.get('id') || '';
+        if (!this.sessionId) {
+          this.notFound = true;
+          return;
+        }
+        const found = getSessionById(this.sessionId);
+        if (!found) {
+          this.notFound = true;
+          return;
+        }
+        this.session = found;
+      },
+
+      // ── Computed ──
+      get sessionTotalVolume(): number {
+        if (!this.session) return 0;
+        return this.session.exercises.reduce(
+          (sum, ex) => sum + this.exerciseVolume(ex),
+          0,
+        );
+      },
+
+      // ── Helpers ──
+      exerciseVolume(ex: SessionExercise): number {
+        return ex.sets.reduce(
+          (s, set) => s + (set.completed ? set.weight * set.reps : 0),
+          0,
+        );
+      },
+
+      best1RM(ex: SessionExercise): number {
+        let best = 0;
+        for (const set of ex.sets) {
+          if (!set.completed) continue;
+          const e = calculate1RM(set.weight, set.reps);
+          if (e > best) best = e;
+        }
+        return best;
+      },
+
+      statusLabel(s: SessionStatus): string {
+        return statusLabelFn(s);
+      },
+
+      typeLabel(t: SetType): string {
+        return typeLabelFn(t);
+      },
+
+      formatDateTime(iso: string): string {
+        return formatDateTimeFn(iso);
+      },
+
+      formatDuration(seconds?: number): string {
+        return formatDurationFn(seconds);
+      },
+
+      formatVolume(v: number): string {
+        return formatVolumeFn(v);
+      },
+
+      formatWeight(w: number): string {
+        return formatWeightFn(w);
+      },
+
+      formatRpe(rpe: number): string {
+        return formatRpeFn(rpe);
+      },
+
+      // ── Actions ──
+      openDeleteDialog() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).openDialog as
+          | ((id: string) => void)
+          | undefined;
+        if (fn) fn('delete-session-dialog');
+      },
+
+      confirmDelete() {
+        if (!this.session) return;
+        const id = this.session.id;
+        deleteSession(id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).closeDialog as
+          | ((i: string) => void)
+          | undefined;
+        if (fn) fn('delete-session-dialog');
+        window.location.href = '/seances';
+      },
+    }));
+  });
+</script>
+
+<style>
+  /* Hide Alpine elements until initialized (prevents flash) */
+  [x-cloak] {
+    display: none !important;
+  }
+
+  /* ════════════════════════════════════════════════════
+     CONTAINER
+     ════════════════════════════════════════════════════ */
+  .detail {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding-bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .detail__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     BACK LINK
+     ════════════════════════════════════════════════════ */
+  .detail__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-decoration: none;
+    align-self: flex-start;
+    padding: 0.4rem 0.6rem 0.4rem 0.4rem;
+    margin-left: -0.4rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast),
+                background-color var(--transition-fast);
+  }
+
+  .detail__back:hover {
+    color: var(--color-accent);
+    background-color: hsl(0 0% 100% / 0.04);
+  }
+
+  .detail__back:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .detail__back svg {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     HEADER
+     ════════════════════════════════════════════════════ */
+  .detail__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .detail__header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .detail__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 4.5vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
+    word-break: break-word;
+  }
+
+  .detail__date {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    text-transform: capitalize;
+  }
+
+  /* ── Status badge ── */
+  .detail__badge {
+    display: inline-flex;
+    align-items: center;
+    height: 2.8rem;
+    padding: 0 1.2rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .detail__badge--completed {
+    background-color: hsl(142 70% 45% / 0.12);
+    color: var(--color-success);
+    border: 1px solid hsl(142 70% 45% / 0.30);
+  }
+
+  .detail__badge--in-progress {
+    background-color: hsl(217 80% 55% / 0.12);
+    color: hsl(217 80% 65%);
+    border: 1px solid hsl(217 80% 55% / 0.30);
+  }
+
+  .detail__badge--planned {
+    background-color: hsl(0 0% 100% / 0.05);
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  /* ════════════════════════════════════════════════════
+     STATS GRID — 3 cards
+     ════════════════════════════════════════════════════ */
+  .detail__stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  @media (min-width: 640px) {
+    .detail__stats {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .detail__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.8rem 2rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .detail__stat-label {
+    font-size: 1.0rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+  }
+
+  .detail__stat-value {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  /* ════════════════════════════════════════════════════
+     ACTIONS
+     ════════════════════════════════════════════════════ */
+  .detail__actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .detail__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 4.4rem;
+    padding: 0 1.8rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast),
+                box-shadow var(--transition-fast);
+  }
+
+  .detail__btn-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .detail__btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .detail__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .detail__btn--secondary {
+    background-color: var(--color-surface-2);
+    color: var(--color-muted);
+    border-color: var(--color-border);
+  }
+
+  .detail__btn--secondary:hover:not(:disabled) {
+    background-color: var(--color-surface-3);
+    color: var(--color-text);
+    border-color: hsl(0 0% 100% / 0.20);
+  }
+
+  .detail__btn--destructive {
+    background-color: var(--color-destructive);
+    color: #fff;
+    border-color: var(--color-destructive);
+  }
+
+  .detail__btn--destructive:hover {
+    background-color: hsl(0 80% 50%);
+    box-shadow: 0 4px 14px hsl(0 80% 55% / 0.35);
+  }
+
+  /* ════════════════════════════════════════════════════
+     SECTION
+     ════════════════════════════════════════════════════ */
+  .detail__section-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  .detail__exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .detail__no-exercises {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    padding: 2rem 0;
+  }
+
+  /* ════════════════════════════════════════════════════
+     NOT FOUND STATE
+     ════════════════════════════════════════════════════ */
+  .detail__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.2rem;
+    padding: 2rem 0;
+    max-width: 32rem;
+    margin: 0 auto;
+  }
+
+  .detail__error-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    background-color: hsl(0 80% 55% / 0.10);
+    color: var(--color-destructive);
+  }
+
+  .detail__error-icon svg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .detail__error-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--color-text);
+  }
+
+  .detail__error-text {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+
+  .detail__error-link {
+    display: inline-flex;
+    align-items: center;
+    height: 4.2rem;
+    padding: 0 1.8rem;
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-decoration: none;
+    margin-top: 0.4rem;
+    transition: background-color var(--transition-fast);
+  }
+
+  .detail__error-link:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  /* ════════════════════════════════════════════════════
+     DIALOG TEXT
+     ════════════════════════════════════════════════════ */
+  .detail__confirm-text {
+    color: var(--color-text);
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+
+  .detail__confirm-text strong {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  /* ════════════════════════════════════════════════════
+     EXERCISE ROW
+     ════════════════════════════════════════════════════ */
+  .exo-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .exo-row__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .exo-row__name {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .exo-row__muscle {
+    display: inline-flex;
+    align-items: center;
+    height: 2.8rem;
+    padding: 0 1.2rem;
+    border-radius: var(--radius-pill);
+    background-color: hsl(32 95% 50% / 0.12);
+    color: var(--color-accent);
+    border: 1px solid hsl(32 95% 50% / 0.30);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Per-exercise stats ── */
+  .exo-row__stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding: 0.4rem 0 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .exo-row__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .exo-row__stat-label {
+    font-size: 1.0rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+  }
+
+  .exo-row__stat-value {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  /* ── Sets table ── */
+  .exo-row__table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+  }
+
+  .exo-row__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.3rem;
+  }
+
+  .exo-row__table thead th {
+    background-color: var(--color-surface-3);
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-size: 1.0rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    text-align: left;
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  .exo-row__th-end {
+    text-align: right !important;
+  }
+
+  .exo-row__table tbody td {
+    padding: 1.0rem 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .exo-row__table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .exo-row__table tbody tr:nth-child(even) {
+    background-color: var(--color-surface-2);
+  }
+
+  .exo-row__tr.is-completed {
+    color: var(--color-text);
+  }
+
+  .exo-row__num {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .exo-row__td-end {
+    text-align: right;
+  }
+
+  /* ── Set type pill ── */
+  .exo-row__type {
+    display: inline-flex;
+    align-items: center;
+    height: 2.4rem;
+    padding: 0 0.8rem;
+    border-radius: var(--radius-pill);
+    font-size: 1.0rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .exo-row__type--warmup {
+    background-color: hsl(217 80% 55% / 0.12);
+    color: hsl(217 80% 70%);
+  }
+
+  .exo-row__type--work {
+    background-color: hsl(0 0% 100% / 0.06);
+    color: var(--color-text);
+  }
+
+  .exo-row__type--top {
+    background-color: hsl(32 95% 50% / 0.14);
+    color: var(--color-accent);
+  }
+
+  .exo-row__type--drop {
+    background-color: hsl(48 95% 55% / 0.14);
+    color: var(--color-warning);
+  }
+
+  .exo-row__type--failure {
+    background-color: hsl(0 80% 55% / 0.14);
+    color: var(--color-destructive);
+  }
+
+  /* ── Check / dash ── */
+  .exo-row__check {
+    width: 1.8rem;
+    height: 1.8rem;
+    color: var(--color-success);
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .exo-row__dash {
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+  }
+
+  .exo-row__no-sets {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    text-align: center;
+    padding: 1.6rem 0 0.4rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     RESPONSIVE — small screens
+     ════════════════════════════════════════════════════ */
+  @media (max-width: 640px) {
+    /* Hide the RPE column on small screens to keep the table readable */
+    .exo-row__table thead th:nth-child(5),
+    .exo-row__table tbody td:nth-child(5) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .detail__stats {
+      gap: 0.8rem;
+    }
+    .detail__stat {
+      padding: 1.4rem 1.6rem;
+    }
+    .detail__stat-value {
+      font-size: 2rem;
+    }
+    .exo-row__name {
+      font-size: 1.7rem;
+    }
+    .exo-row__stats {
+      gap: 1.4rem;
+    }
+    .exo-row__stat-value {
+      font-size: 1.5rem;
+    }
+    .exo-row__table thead th,
+    .exo-row__table tbody td {
+      padding: 0.8rem 1.0rem;
+      font-size: 1.2rem;
+    }
+    .exo-row__table thead th {
+      font-size: 0.9rem;
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     REDUCED MOTION
+     ════════════════════════════════════════════════════ */
+  @media (prefers-reduced-motion: reduce) {
+    .detail__btn,
+    .detail__back,
+    .detail__error-link {
+      transition: none;
+    }
+    .detail__btn:active:not(:disabled) {
+      transform: none;
+    }
+  }
+</style>

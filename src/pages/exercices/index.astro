@@ -1,24 +1,1089 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import EmptyState from '../../components/ui/EmptyState.astro';
 import Card from '../../components/ui/Card.astro';
+import Dialog from '../../components/ui/Dialog.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+
+/**
+ * Static list of categories offered in the form. Kept on the
+ * frontmatter so the markup stays declarative.
+ */
+const categories = [
+  'Barre',
+  'Haltère',
+  'Machine',
+  'Poids du corps',
+  'Câble',
+  'Autre',
+] as const;
 ---
 
 <AppLayout title="Exercices">
   <PageHeader
     title="Exercices"
     description="Parcourez et configurez votre bibliothèque d'exercices."
-    actionLabel="Ajouter un exercice"
-    actionHref="/exercices/creer"
   />
 
-  <Card>
-    <EmptyState
-      title="Aucun exercice enregistré"
-      description="Ajoutez des exercices pour les retrouver rapidement lors de la création de vos séances."
-      actionLabel="Ajouter un exercice"
-      actionHref="/exercices/creer"
-    />
-  </Card>
+  <div
+    class="exo"
+    x-data="exercisesApp()"
+    x-init="init()"
+    x-cloak
+  >
+    {/* ── Toolbar: search + filter ── */}
+    <div class="exo__toolbar">
+      <div class="exo__search">
+        <svg
+          class="exo__search-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="search"
+          class="exo__search-input"
+          placeholder="Rechercher un exercice…"
+          x-model="search"
+          aria-label="Rechercher un exercice"
+        />
+      </div>
+
+      <div class="exo__filters" role="group" aria-label="Filtrer par groupe musculaire">
+        <button
+          type="button"
+          class="exo__filter"
+          :class="{ 'is-active': muscleFilter === '' }"
+          @click="muscleFilter = ''"
+        >
+          Tous
+        </button>
+        <template x-for="m in muscleGroups" :key="m">
+          <button
+            type="button"
+            class="exo__filter"
+            :class="{ 'is-active': muscleFilter === m }"
+            @click="muscleFilter = m"
+            x-text="m"
+          ></button>
+        </template>
+      </div>
+    </div>
+
+    {/* ── Meta row: count + add button ── */}
+    <div class="exo__meta">
+      <span class="exo__count" x-text="countLabel"></span>
+      <button
+        type="button"
+        class="exo__add-btn"
+        @click="openAdd()"
+        aria-label="Ajouter un exercice"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="exo__add-icon"
+          aria-hidden="true"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Ajouter</span>
+      </button>
+    </div>
+
+    {/* ── Grid ── */}
+    <template x-if="filtered.length > 0">
+      <div class="exo__grid">
+        <template x-for="ex in filtered" :key="ex.id">
+          <article class="exo__card">
+            <header class="exo__card-head">
+              <h3 class="exo__card-name" x-text="ex.name"></h3>
+            </header>
+
+            <div class="exo__card-badges">
+              <span class="exo__badge exo__badge--muscle" x-text="ex.muscle"></span>
+              <span class="exo__badge exo__badge--category" x-text="ex.category"></span>
+            </div>
+
+            <footer class="exo__card-foot">
+              <button
+                type="button"
+                class="exo__icon-btn"
+                @click="edit(ex)"
+                aria-label="Modifier l'exercice"
+                title="Modifier"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="exo__icon"
+                  aria-hidden="true"
+                >
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="exo__icon-btn exo__icon-btn--danger"
+                @click="askDelete(ex)"
+                aria-label="Supprimer l'exercice"
+                title="Supprimer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="exo__icon"
+                  aria-hidden="true"
+                >
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                </svg>
+              </button>
+            </footer>
+          </article>
+        </template>
+      </div>
+    </template>
+
+    {/* ── Empty state ── */}
+    <template x-if="filtered.length === 0">
+      <Card>
+        <EmptyState
+          title="Aucun exercice"
+          description="Aucun exercice ne correspond à votre recherche. Essayez d'élargir vos filtres ou ajoutez un nouvel exercice."
+        />
+        <div class="exo__empty-cta">
+          <button
+            type="button"
+            class="exo__add-btn exo__add-btn--centered"
+            @click="openAdd()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="exo__add-icon"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Ajouter un exercice</span>
+          </button>
+          <button
+            type="button"
+            class="exo__reset-btn"
+            @click="search = ''; muscleFilter = ''"
+            x-show="hasFilters"
+          >
+            Réinitialiser les filtres
+          </button>
+        </div>
+      </Card>
+    </template>
+
+    {/* ════════════════════════════════════════════════════
+        ADD / EDIT DIALOG
+        ════════════════════════════════════════════════════ */}
+    <Dialog id="exo-form-dialog" :title="editingId ? 'Modifier l\u2019exercice' : 'Nouvel exercice'">
+      <form class="exo__form" @submit.prevent="save()">
+        <div class="exo__field">
+          <label for="exo-name" class="exo__label">
+            Nom
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="exo-name"
+            type="text"
+            class="exo__input"
+            placeholder="Ex. Développé couché"
+            x-model="form.name"
+            required
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="exo__field">
+          <label for="exo-muscle" class="exo__label">
+            Groupe musculaire
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <div class="exo__select-wrap">
+            <select
+              id="exo-muscle"
+              class="exo__select"
+              x-model="form.muscle"
+              required
+            >
+              <option value="" disabled>Sélectionner…</option>
+              <template x-for="opt in muscleOptionsForSelect" :key="opt.value">
+                <option :value="opt.value" x-text="opt.label"></option>
+              </template>
+            </select>
+            <svg
+              class="exo__select-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="exo__field" x-show="form.muscle === '__custom__'" x-cloak>
+          <label for="exo-muscle-custom" class="exo__label">
+            Nouveau groupe musculaire
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="exo-muscle-custom"
+            type="text"
+            class="exo__input"
+            placeholder="Ex. Mollets"
+            x-model="form.customMuscle"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="exo__field">
+          <label for="exo-category" class="exo__label">
+            Catégorie
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <div class="exo__select-wrap">
+            <select
+              id="exo-category"
+              class="exo__select"
+              x-model="form.category"
+              required
+            >
+              <option value="" disabled>Sélectionner…</option>
+              {categories.map((c) => (
+                <option value={c}>{c}</option>
+              ))}
+            </select>
+            <svg
+              class="exo__select-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="exo__form-error" x-show="formError" x-text="formError" x-cloak></div>
+
+        <div class="exo__form-actions">
+          <button
+            type="button"
+            class="exo__btn exo__btn--secondary"
+            @click="closeForm()"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            class="exo__btn exo__btn--primary"
+            x-text="editingId ? 'Enregistrer' : 'Créer'"
+          ></button>
+        </div>
+      </form>
+    </Dialog>
+
+    {/* ════════════════════════════════════════════════════
+        DELETE CONFIRMATION DIALOG
+        ════════════════════════════════════════════════════ */}
+    <Dialog id="exo-delete-dialog" title="Supprimer l'exercice ?">
+      <p class="exo__confirm-text">
+        Vous êtes sur le point de supprimer
+        <strong x-text="deletingName || 'cet exercice'"></strong>.
+        Cette action est irréversible.
+      </p>
+
+      <div slot="footer">
+        <button
+          type="button"
+          class="exo__btn exo__btn--secondary"
+          data-dialog-close
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="exo__btn exo__btn--destructive"
+          @click="confirmDelete()"
+        >
+          Supprimer
+        </button>
+      </div>
+    </Dialog>
+  </div>
 </AppLayout>
+
+{/* Alpine.js via CDN (defer — runs after DOM is parsed) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+<script>
+  import {
+    getExercises,
+    saveExercise,
+    updateExercise,
+    deleteExercise,
+    type Exercise,
+  } from '../../lib/storage';
+
+  // Default muscle groups always surfaced in the filter bar
+  // (mirrors the seed list in src/lib/storage.ts).
+  const EXO_DEFAULT_MUSCLES = [
+    'Pectoraux',
+    'Quadriceps',
+    'Dos',
+    'Épaules',
+    'Biceps',
+    'Triceps',
+  ];
+
+  // Sentinel value used by the muscle <select> to reveal the
+  // "custom muscle" input.
+  const CUSTOM_MUSCLE = '__custom__';
+
+  interface AlpineFormState {
+    name: string;
+    muscle: string;
+    customMuscle: string;
+    category: string;
+  }
+
+  function resolveForm(form: AlpineFormState): { name: string; muscle: string; category: string } | null {
+    const name = form.name.trim();
+    const muscle = form.muscle === CUSTOM_MUSCLE ? form.customMuscle.trim() : form.muscle.trim();
+    const category = form.category.trim();
+    if (!name || !muscle || !category) return null;
+    return { name, muscle, category };
+  }
+
+  document.addEventListener('alpine:init', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data('exercisesApp', () => ({
+      // ── State ──
+      exercises: [] as Exercise[],
+      search: '',
+      muscleFilter: '',
+      form: { name: '', muscle: '', customMuscle: '', category: '' } as AlpineFormState,
+      formError: '',
+      editingId: '' as string,
+      deletingExercise: null as Exercise | null,
+      deletingName: '' as string,
+
+      // ── Init ──
+      init() {
+        this.refresh();
+      },
+
+      refresh() {
+        this.exercises = getExercises();
+      },
+
+      // ── Derived ──
+      get muscleGroups(): string[] {
+        const fromData = this.exercises.map((e) => e.muscle);
+        const set = new Set<string>([...EXO_DEFAULT_MUSCLES, ...fromData]);
+        return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr'));
+      },
+
+      get muscleOptionsForSelect(): { value: string; label: string }[] {
+        const groups = this.muscleGroups;
+        return [
+          ...groups.map((m) => ({ value: m, label: m })),
+          { value: CUSTOM_MUSCLE, label: 'Autre…' },
+        ];
+      },
+
+      get filtered(): Exercise[] {
+        const q = this.search.trim().toLowerCase();
+        const muscle = this.muscleFilter;
+        return this.exercises.filter((ex) => {
+          if (muscle && ex.muscle !== muscle) return false;
+          if (q && !ex.name.toLowerCase().includes(q)) return false;
+          return true;
+        });
+      },
+
+      get countLabel(): string {
+        const n = this.filtered.length;
+        return `${n} exercice${n > 1 ? 's' : ''}`;
+      },
+
+      get hasFilters(): boolean {
+        return Boolean(this.search.trim() || this.muscleFilter);
+      },
+
+      // ── Actions ──
+      openAdd() {
+        this.editingId = '';
+        this.form = { name: '', muscle: '', customMuscle: '', category: '' };
+        this.formError = '';
+        this.openDialogById('exo-form-dialog');
+      },
+
+      edit(exercise: Exercise) {
+        this.editingId = exercise.id;
+        const known = this.muscleGroups.includes(exercise.muscle);
+        this.form = {
+          name: exercise.name,
+          muscle: known ? exercise.muscle : CUSTOM_MUSCLE,
+          customMuscle: known ? '' : exercise.muscle,
+          category: exercise.category,
+        };
+        this.formError = '';
+        this.openDialogById('exo-form-dialog');
+      },
+
+      save() {
+        const resolved = resolveForm(this.form);
+        if (!resolved) {
+          this.formError = 'Tous les champs sont obligatoires.';
+          return;
+        }
+        try {
+          if (this.editingId) {
+            updateExercise(this.editingId, resolved);
+          } else {
+            saveExercise(resolved);
+          }
+          this.refresh();
+          this.closeDialogById('exo-form-dialog');
+        } catch (err) {
+          this.formError = 'Une erreur est survenue. Réessayez.';
+        }
+      },
+
+      closeForm() {
+        this.closeDialogById('exo-form-dialog');
+      },
+
+      askDelete(exercise: Exercise) {
+        this.deletingExercise = exercise;
+        this.deletingName = exercise.name;
+        this.openDialogById('exo-delete-dialog');
+      },
+
+      confirmDelete() {
+        if (!this.deletingExercise) return;
+        deleteExercise(this.deletingExercise.id);
+        this.deletingExercise = null;
+        this.deletingName = '';
+        this.refresh();
+        this.closeDialogById('exo-delete-dialog');
+      },
+
+      // ── Dialog helpers (wrap the global Dialog API) ──
+      openDialogById(id: string) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).openDialog as ((i: string) => void) | undefined;
+        if (fn) fn(id);
+      },
+      closeDialogById(id: string) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).closeDialog as ((i: string) => void) | undefined;
+        if (fn) fn(id);
+      },
+    }));
+  });
+</script>
+
+<style>
+  /* Hide Alpine elements until initialized (prevents flash) */
+  [x-cloak] {
+    display: none !important;
+  }
+
+  /* ════════════════════════════════════════════════════
+     CONTAINER
+     ════════════════════════════════════════════════════ */
+  .exo {
+    max-width: 96rem;
+    margin: 0 auto;
+    padding-bottom: 6rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     TOOLBAR — search + muscle filter pills
+     ════════════════════════════════════════════════════ */
+  .exo__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    margin-bottom: 2rem;
+  }
+
+  /* ── Search input ── */
+  .exo__search {
+    position: relative;
+    width: 100%;
+  }
+
+  .exo__search-icon {
+    position: absolute;
+    top: 50%;
+    left: 1.4rem;
+    transform: translateY(-50%);
+    width: 1.8rem;
+    height: 1.8rem;
+    color: var(--color-muted);
+    pointer-events: none;
+  }
+
+  .exo__search-input {
+    width: 100%;
+    height: 4.8rem;
+    padding: 0 1.6rem 0 4.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    line-height: 1.2;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .exo__search-input::placeholder {
+    color: hsl(0 0% 100% / 0.25);
+  }
+
+  .exo__search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .exo__search-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  /* ── Filter pills ── */
+  .exo__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .exo__filter {
+    height: 3.6rem;
+    padding: 0 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .exo__filter:hover {
+    background-color: var(--color-surface-3);
+    border-color: hsl(0 0% 100% / 0.18);
+    color: var(--color-text);
+  }
+
+  .exo__filter:active {
+    transform: scale(0.97);
+  }
+
+  .exo__filter.is-active {
+    background-color: hsl(32 95% 50% / 0.12);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* ════════════════════════════════════════════════════
+     META ROW — count + add button
+     ════════════════════════════════════════════════════ */
+  .exo__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .exo__count {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+  }
+
+  .exo__add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 3.8rem;
+    padding: 0 1.6rem;
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow: 0 2px 8px hsl(32 95% 50% / 0.25);
+    transition: background-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .exo__add-btn:hover {
+    background-color: var(--color-accent-hover);
+    box-shadow: 0 4px 14px hsl(32 95% 50% / 0.40);
+  }
+
+  .exo__add-btn:active {
+    transform: scale(0.97);
+  }
+
+  .exo__add-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .exo__add-btn--centered {
+    margin: 1.6rem auto 0;
+  }
+
+  /* ════════════════════════════════════════════════════
+     GRID — 1 col → 2 col → 3 col
+     ════════════════════════════════════════════════════ */
+  .exo__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+
+  @media (min-width: 640px) {
+    .exo__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .exo__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     CARD
+     ════════════════════════════════════════════════════ */
+  .exo__card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 2rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--transition-base),
+                box-shadow var(--transition-base),
+                transform var(--transition-base);
+  }
+
+  .exo__card:hover {
+    border-color: hsl(0 0% 100% / 0.18);
+    box-shadow: 0 6px 20px hsl(0 0% 0% / 0.40);
+    transform: translateY(-2px);
+  }
+
+  .exo__card-head {
+    min-width: 0;
+  }
+
+  .exo__card-name {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+    word-break: break-word;
+  }
+
+  .exo__card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .exo__badge {
+    display: inline-flex;
+    align-items: center;
+    height: 2.4rem;
+    padding: 0 1rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .exo__badge--muscle {
+    background-color: hsl(32 95% 50% / 0.12);
+    color: var(--color-accent);
+    border: 1px solid hsl(32 95% 50% / 0.30);
+  }
+
+  .exo__badge--category {
+    background-color: hsl(0 0% 100% / 0.05);
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  .exo__card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: 0.4rem;
+  }
+
+  .exo__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .exo__icon-btn:hover {
+    background-color: hsl(0 0% 100% / 0.05);
+    border-color: hsl(0 0% 100% / 0.10);
+    color: var(--color-text);
+  }
+
+  .exo__icon-btn:active {
+    transform: scale(0.94);
+  }
+
+  .exo__icon-btn--danger:hover {
+    background-color: hsl(0 80% 55% / 0.12);
+    border-color: hsl(0 80% 55% / 0.40);
+    color: var(--color-destructive);
+  }
+
+  .exo__icon {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     EMPTY STATE CTA
+     ════════════════════════════════════════════════════ */
+  .exo__empty-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 0.4rem 0 0.8rem;
+  }
+
+  .exo__reset-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 3.8rem;
+    padding: 0 1.6rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast);
+  }
+
+  .exo__reset-btn:hover {
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border-color: hsl(0 0% 100% / 0.18);
+  }
+
+  /* ════════════════════════════════════════════════════
+     FORM
+     ════════════════════════════════════════════════════ */
+  .exo__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    margin-top: 0.8rem;
+  }
+
+  .exo__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .exo__label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    line-height: 1.2;
+  }
+
+  .exo__label-req {
+    color: var(--color-destructive);
+    margin-left: 0.2rem;
+  }
+
+  .exo__input,
+  .exo__select {
+    width: 100%;
+    height: 4.4rem;
+    padding: 0 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    line-height: 1.2;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .exo__input::placeholder {
+    color: hsl(0 0% 100% / 0.25);
+  }
+
+  .exo__input:focus,
+  .exo__select:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .exo__select-wrap {
+    position: relative;
+  }
+
+  .exo__select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    padding-right: 4rem;
+  }
+
+  .exo__select-icon {
+    position: absolute;
+    right: 1.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--color-muted);
+    pointer-events: none;
+  }
+
+  .exo__form-error {
+    background-color: hsl(0 80% 55% / 0.10);
+    border: 1px solid hsl(0 80% 55% / 0.35);
+    border-radius: var(--radius-sm);
+    color: var(--color-destructive);
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 0.8rem 1.2rem;
+  }
+
+  .exo__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 0.6rem;
+  }
+
+  /* ── Buttons (form) ── */
+  .exo__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    height: 4.4rem;
+    padding: 0 2rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    min-width: 8rem;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .exo__btn:active {
+    transform: scale(0.97);
+  }
+
+  .exo__btn--primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px hsl(32 95% 50% / 0.25);
+  }
+
+  .exo__btn--primary:hover {
+    background-color: var(--color-accent-hover);
+    box-shadow: 0 4px 14px hsl(32 95% 50% / 0.40);
+  }
+
+  .exo__btn--secondary {
+    background-color: transparent;
+    color: var(--color-muted);
+    border-color: var(--color-border);
+  }
+
+  .exo__btn--secondary:hover {
+    background-color: hsl(0 0% 100% / 0.05);
+    border-color: hsl(0 0% 100% / 0.18);
+    color: var(--color-text);
+  }
+
+  .exo__btn--destructive {
+    background-color: var(--color-destructive);
+    color: #fff;
+    border-color: var(--color-destructive);
+  }
+
+  .exo__btn--destructive:hover {
+    background-color: hsl(0 80% 50%);
+    box-shadow: 0 4px 14px hsl(0 80% 55% / 0.35);
+  }
+
+  /* ════════════════════════════════════════════════════
+     CONFIRM DIALOG
+     ════════════════════════════════════════════════════ */
+  .exo__confirm-text {
+    color: var(--color-text);
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+
+  .exo__confirm-text strong {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  /* ════════════════════════════════════════════════════
+     RESPONSIVE — small screens
+     ════════════════════════════════════════════════════ */
+  @media (max-width: 480px) {
+    .exo__toolbar {
+      gap: 1.2rem;
+    }
+    .exo__search-input {
+      height: 4.4rem;
+      font-size: 1.3rem;
+    }
+    .exo__filter {
+      height: 3.2rem;
+      font-size: 1.1rem;
+      padding: 0 1.2rem;
+    }
+    .exo__card {
+      padding: 1.6rem;
+    }
+    .exo__card-name {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     REDUCED MOTION
+     ════════════════════════════════════════════════════ */
+  @media (prefers-reduced-motion: reduce) {
+    .exo__card,
+    .exo__add-btn,
+    .exo__filter,
+    .exo__icon-btn {
+      transition: none;
+    }
+    .exo__card:hover {
+      transform: none;
+    }
+  }
+</style>
