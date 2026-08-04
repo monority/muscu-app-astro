@@ -7,6 +7,7 @@ import CardTitle from '../../../components/ui/CardTitle.astro';
 import CardContent from '../../../components/ui/CardContent.astro';
 import Badge from '../../../components/ui/Badge.astro';
 import Dialog from '../../../components/ui/Dialog.astro';
+import { TRAINING_TEMPLATES } from '../../../lib/templates';
 
 /**
  * Set types (mirrors SessionSet['type'] in src/lib/storage.ts).
@@ -170,6 +171,49 @@ const setTypes = [
         ════════════════════════════════════════════════════ */}
     <template x-for="(ex, exIdx) in exercises" :key="ex.exerciseId + '-' + exIdx">
       <Card>
+        <div
+          class="ses__ex-superset-bar"
+          x-show="ex.supersetId != null"
+          x-cloak
+          :class="'ses__ex-superset-bar--g' + ex.supersetId"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            class="ses__ex-superset-icon"
+          >
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          <span>Superset <span x-text="ex.supersetId"></span></span>
+          <button
+            type="button"
+            class="ses__ex-superset-remove"
+            @click="removeFromSuperset(exIdx)"
+            aria-label="Retirer du superset"
+            title="Retirer du superset"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
         {/* ── Clickable header (always visible) ── */}
         <div class="ses__ex-header">
           <button
@@ -206,6 +250,19 @@ const setTypes = [
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
+          <select
+            class="ses__ex-superset-select"
+            x-model.number="ex.supersetId"
+            @change="onSupersetChange(exIdx)"
+            :aria-label="'Superset pour ' + ex.name"
+            title="Déplacer dans un superset"
+          >
+            <option :value="null">—</option>
+            <template x-for="gId in availableSupersetIds()" :key="gId">
+              <option :value="gId" x-text="'Superset ' + gId"></option>
+            </template>
+            <option :value="nextSupersetId()">+ Nouveau superset</option>
+          </select>
           <button
             type="button"
             class="ses__icon-btn ses__icon-btn--danger"
@@ -584,6 +641,28 @@ const setTypes = [
           />
         </div>
 
+        {/* ── Templates (added 2026-08-04) ── */}
+        <div class="ses__templates" x-show="exerciseSearch.trim() === ''">
+          <div class="ses__templates-head">
+            <span class="ses__templates-eyebrow">Templates</span>
+            <span class="ses__templates-hint">Cliquez pour ajouter toute la séance en un clic</span>
+          </div>
+          <div class="ses__templates-grid">
+            {TRAINING_TEMPLATES.map((tpl) => (
+              <button
+                type="button"
+                class="ses__template"
+                @click={`loadTemplate('${tpl.id}')`}
+                :disabled="!canLoadTemplate('${tpl.id}')"
+              >
+                <span class="ses__template-name">{tpl.name}</span>
+                <span class="ses__template-desc">{tpl.description}</span>
+                <span class="ses__template-count">{tpl.exercises.length} exercices</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div class="ses__picker-list" role="list">
           {/* ── Library empty ── */}
           <template x-if="availableExercises.length === 0">
@@ -611,15 +690,50 @@ const setTypes = [
 
           {/* ── Picker items ── */}
           <template x-for="ex in filteredExercises" :key="ex.id">
-            <button
-              type="button"
+            <div
               class="ses__picker-item"
-              @click="addExercise(ex)"
               role="listitem"
             >
-              <span class="ses__picker-name" x-text="ex.name"></span>
-              <span class="ses__picker-muscle" x-text="ex.muscle"></span>
-            </button>
+              <button
+                type="button"
+                class="ses__picker-item-main"
+                @click="addExercise(ex)"
+                :aria-label="'Ajouter ' + ex.name + ' à la séance'"
+              >
+                <span class="ses__picker-name" x-text="ex.name"></span>
+                <span class="ses__picker-muscle" x-text="ex.muscle"></span>
+              </button>
+              <button
+                type="button"
+                class="ses__picker-tip-toggle"
+                @click="toggleTip(ex.id)"
+                :aria-expanded="isTipOpen(ex.id).toString()"
+                :aria-label="'Afficher les conseils pour ' + ex.name"
+                title="Conseils"
+                x-show="hasTip(ex.name)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </button>
+              <p
+                class="ses__picker-tip"
+                x-show="isTipOpen(ex.id) && hasTip(ex.name)"
+                x-cloak
+                x-text="getTip(ex.name)"
+              ></p>
+            </div>
           </template>
         </div>
       </div>
@@ -647,6 +761,8 @@ const setTypes = [
     type SessionMood,
     type SetType,
   } from '../../../lib/storage';
+  import { TRAINING_TEMPLATES, getTemplateById, type TemplateExercise } from '../../../lib/templates';
+  import { getExerciseTip } from '../../../lib/exercise-tips';
 
   // Default set type for newly created sets (mirrors spec).
   const DEFAULT_SET_TYPE: SetType = 'work';
@@ -667,6 +783,14 @@ const setTypes = [
     return 'Maximum';
   }
 
+  /**
+   * In-builder shape: each exercise has an optional `supersetId`
+   * (1-based, contiguous) used to visually group exercises. On save,
+   * we collapse these into the `supersets: Superset[]` shape stored
+   * on `Session`.
+   */
+  type BuilderExercise = SessionExercise & { supersetId: number | null };
+
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
@@ -675,7 +799,7 @@ const setTypes = [
       // ── State ──
       sessionName: '',
       sessionDate: new Date().toISOString().split('T')[0],
-      exercises: [] as SessionExercise[],
+      exercises: [] as BuilderExercise[],
       availableExercises: [] as Exercise[],
       exerciseSearch: '',
 
@@ -686,11 +810,11 @@ const setTypes = [
       sessionNotes: '',
 
       // ── Collapse state (added 2026-08-04) ──
-      // New exercises are added collapsed by default to keep the page
-      // scannable; users click the card header to expand and edit sets.
-      // The list holds the *expanded* indices, not the collapsed ones,
-      // so an empty list = everything collapsed (safe default).
       expandedExercises: [] as number[],
+
+      // ── Picker tips (added 2026-08-04) ──
+      // Set of exercise ids whose tip is currently expanded.
+      openTips: [] as string[],
 
       // ── Init ──
       init() {
@@ -799,15 +923,146 @@ const setTypes = [
           type: DEFAULT_SET_TYPE,
           completed: false,
         };
-        const newEx: SessionExercise = {
+        const newEx: BuilderExercise = {
           exerciseId: exercise.id,
           name: exercise.name,
           muscle: exercise.muscle,
           sets: [firstSet],
+          supersetId: null,
         };
         this.exercises.push(newEx);
+        // Auto-expand the new exercise so the user can adjust sets right away.
+        this.expandedExercises = [...this.expandedExercises, this.exercises.length - 1];
         this.exerciseSearch = '';
         this.closeDialogById('ses-picker-dialog');
+      },
+
+      // ── Templates (added 2026-08-04) ──
+      /**
+       * Returns true when every exercise referenced by the template
+       * exists in the user's library. Templates referencing unknown
+       * exercises are skipped silently so the rest of the template
+       * still loads.
+       */
+      canLoadTemplate(templateId: string): boolean {
+        const tpl = getTemplateById(templateId);
+        if (!tpl) return false;
+        return tpl.exercises.some((te) => this.findExerciseByName(te.name) != null);
+      },
+
+      /**
+       * Inserts every exercise from the template at the bottom of the
+       * current session. Existing exercises are left untouched.
+       */
+      loadTemplate(templateId: string) {
+        const tpl = getTemplateById(templateId);
+        if (!tpl) return;
+        const added: number[] = [];
+        for (const te of tpl.exercises) {
+          const ex = this.findExerciseByName(te.name);
+          if (!ex) continue;
+          const newEx = this.buildBuilderExercise(ex, te);
+          this.exercises.push(newEx);
+          added.push(this.exercises.length - 1);
+        }
+        // Auto-expand the newly added exercises so the user can see them.
+        if (added.length > 0) {
+          this.expandedExercises = [...this.expandedExercises, ...added];
+        }
+        this.exerciseSearch = '';
+        this.closeDialogById('ses-picker-dialog');
+      },
+
+      buildBuilderExercise(ex: Exercise, te: TemplateExercise): BuilderExercise {
+        const sets: SessionSet[] = [];
+        for (let i = 0; i < Math.max(1, te.defaultSets); i++) {
+          sets.push({
+            exerciseId: ex.id,
+            setNumber: i + 1,
+            weight: 0,
+            reps: te.defaultReps,
+            type: DEFAULT_SET_TYPE,
+            completed: false,
+          });
+        }
+        return {
+          exerciseId: ex.id,
+          name: ex.name,
+          muscle: ex.muscle,
+          sets,
+          supersetId: null,
+        };
+      },
+
+      findExerciseByName(name: string): Exercise | undefined {
+        return this.availableExercises.find((e) => e.name === name);
+      },
+
+      // ── Tips (added 2026-08-04) ──
+      hasTip(name: string): boolean {
+        return getExerciseTip(name) != null;
+      },
+      getTip(name: string): string {
+        return getExerciseTip(name) ?? '';
+      },
+      isTipOpen(exId: string): boolean {
+        return this.openTips.includes(exId);
+      },
+      toggleTip(exId: string) {
+        if (this.isTipOpen(exId)) {
+          this.openTips = this.openTips.filter((id) => id !== exId);
+        } else {
+          this.openTips = [...this.openTips, exId];
+        }
+      },
+
+      // ── Supersets (added 2026-08-04) ──
+      /**
+       * List of currently used superset ids (1-based, sorted). Used
+       * to populate the per-exercise superset dropdown.
+       */
+      availableSupersetIds(): number[] {
+        const ids = new Set<number>();
+        for (const ex of this.exercises) {
+          if (ex.supersetId != null) ids.add(ex.supersetId);
+        }
+        return Array.from(ids).sort((a, b) => a - b);
+      },
+
+      /**
+       * Returns the next free superset id (= max + 1, or 1 if none).
+       * Used to seed the "+ Nouveau superset" option.
+       */
+      nextSupersetId(): number {
+        const used = this.availableSupersetIds();
+        if (used.length === 0) return 1;
+        return Math.max(...used) + 1;
+      },
+
+      /**
+       * Triggered when the user changes the superset select. We do
+       * not need to do much because x-model.number already wrote
+       * the new id onto the exercise, but we normalise the value
+       * (NaN → null) for the "no superset" case.
+       */
+      onSupersetChange(exIdx: number) {
+        const ex = this.exercises[exIdx];
+        if (!ex) return;
+        if (!Number.isFinite(ex.supersetId as number) || (ex.supersetId as number) <= 0) {
+          ex.supersetId = null;
+        }
+      },
+
+      /**
+       * Pulls an exercise out of its current superset (if any). No
+       * effect on the other exercises in the group — they keep
+       * referencing the same supersetId; orphaned ids are pruned
+       * at save time.
+       */
+      removeFromSuperset(exIdx: number) {
+        const ex = this.exercises[exIdx];
+        if (!ex) return;
+        ex.supersetId = null;
       },
 
       addSet(exerciseIndex: number) {
@@ -899,19 +1154,38 @@ const setTypes = [
 
       save() {
         if (!this.canSave) return;
+        // Strip the builder-only `supersetId` from each exercise and
+        // build the persisted `supersets` array (only groups with 2+
+        // members are saved; orphan groups are dropped).
+        const cleanExercises: SessionExercise[] = this.exercises.map(
+          ({ supersetId: _supersetId, ...ex }) => ex,
+        );
+        const groupMap = new Map<number, string[]>();
+        for (const ex of this.exercises) {
+          if (ex.supersetId == null) continue;
+          const list = groupMap.get(ex.supersetId) ?? [];
+          list.push(ex.exerciseId);
+          groupMap.set(ex.supersetId, list);
+        }
+        const supersets: { exercises: string[] }[] = [];
+        for (const [, ids] of groupMap) {
+          if (ids.length >= 2) supersets.push({ exercises: ids });
+        }
+
         // Build the payload; only attach a field when meaningful so older
         // sessions stored before this feature stay clean.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const payload: any = {
           name: this.sessionName.trim(),
           date: this.sessionDate,
-          exercises: this.exercises,
+          exercises: cleanExercises,
           status: 'planned' as const,
         };
         if (this.sessionRpe) payload.rpe = this.sessionRpe;
         if (this.sessionFatigue > 0) payload.fatigue = this.sessionFatigue;
         if (this.sessionMood !== '') payload.mood = this.sessionMood;
         if (this.sessionNotes.trim() !== '') payload.notes = this.sessionNotes.trim();
+        if (supersets.length > 0) payload.supersets = supersets;
         saveSession(payload);
         window.location.href = '/seances';
       },
@@ -1581,18 +1855,17 @@ const setTypes = [
   }
 
   .ses__picker-item {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    gap: 0.6rem 1rem;
     width: 100%;
-    padding: 1.2rem 1.6rem;
+    padding: 1.0rem 1.6rem;
     background-color: transparent;
     border: none;
     border-bottom: 1px solid var(--color-border);
     color: var(--color-text);
     text-align: left;
-    cursor: pointer;
     font-family: var(--font-body);
     transition: background-color var(--transition-fast);
   }
@@ -1605,8 +1878,64 @@ const setTypes = [
     background-color: hsl(32 95% 50% / 0.08);
   }
 
-  .ses__picker-item:active {
-    background-color: hsl(32 95% 50% / 0.14);
+  .ses__picker-item-main {
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    padding: 0.2rem 0;
+  }
+
+  .ses__picker-tip-toggle {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .ses__picker-tip-toggle:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .ses__picker-tip-toggle svg {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .ses__picker-tip {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0.6rem 0 0;
+    padding: 0.9rem 1.0rem;
+    background-color: var(--color-surface-2);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-size: 1.2rem;
+    line-height: 1.5;
   }
 
   .ses__picker-name {
@@ -1649,6 +1978,197 @@ const setTypes = [
     color: var(--color-accent);
     font-weight: 700;
     font-size: 1.3rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     TEMPLATES (added 2026-08-04)
+     ════════════════════════════════════════════════════ */
+  .ses__templates {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 0.8rem;
+  }
+
+  .ses__templates-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .ses__templates-eyebrow {
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .ses__templates-hint {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+  }
+
+  .ses__templates-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  @media (min-width: 640px) {
+    .ses__templates-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .ses__template {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 1.0rem 1.2rem;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .ses__template:hover {
+    background-color: var(--color-surface-2);
+    border-color: var(--color-accent);
+  }
+
+  .ses__template:active {
+    transform: scale(0.98);
+  }
+
+  .ses__template:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background-color: var(--color-surface-2);
+  }
+
+  .ses__template-name {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .ses__template-desc {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.3;
+  }
+
+  .ses__template-count {
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SUPERSET UI (added 2026-08-04)
+     ════════════════════════════════════════════════════ */
+  .ses__ex-superset-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1.2rem;
+    margin-bottom: 0.6rem;
+    background-color: hsl(0 0% 100% / 0.05);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .ses__ex-superset-bar--g1 { border-left-color: #D97706; }
+  .ses__ex-superset-bar--g2 { border-left-color: #38BDF8; }
+  .ses__ex-superset-bar--g3 { border-left-color: #A855F7; }
+  .ses__ex-superset-bar--g4 { border-left-color: #22C55E; }
+  .ses__ex-superset-bar--g5 { border-left-color: #F472B6; }
+
+  .ses__ex-superset-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    color: currentColor;
+    flex-shrink: 0;
+  }
+
+  .ses__ex-superset-remove {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .ses__ex-superset-remove:hover {
+    background-color: hsl(0 80% 55% / 0.10);
+    border-color: hsl(0 80% 55% / 0.35);
+    color: var(--color-destructive);
+  }
+
+  .ses__ex-superset-remove svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .ses__ex-superset-select {
+    height: 4.0rem;
+    padding: 0 2.2rem 0 1.0rem;
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--color-muted) 50%),
+      linear-gradient(135deg, var(--color-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 1.3rem) 50%,
+      calc(100% - 0.8rem) 50%;
+    background-size: 0.5rem 0.5rem, 0.5rem 0.5rem;
+    background-repeat: no-repeat;
+    transition: border-color var(--transition-fast);
+  }
+
+  .ses__ex-superset-select:focus-visible {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
   }
 
   /* ════════════════════════════════════════════════════
@@ -2019,6 +2539,10 @@ const setTypes = [
     .ses__select,
     .ses__search-input,
     .ses__picker-item,
+    .ses__picker-tip-toggle,
+    .ses__template,
+    .ses__ex-superset-remove,
+    .ses__ex-superset-select,
     .ses__table-row,
     .ses__rpe-input,
     .ses__rpe-value,

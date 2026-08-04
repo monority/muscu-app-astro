@@ -48,12 +48,21 @@ const defaultGroups: NavTree = [
     label: "Données",
     items: [
       { label: "Exercices", href: "/exercices", icon: "dumbbell" },
-      { label: "Progression", href: "/progression", icon: "trending-up" },
+      {
+        label: "Progression",
+        href: "/progression",
+        icon: "trending-up",
+        children: [
+          { label: "Force", href: "/progression" },
+          { label: "Poids & mesures", href: "/progression/poids" },
+        ],
+      },
     ],
   },
   {
     label: "Outils",
     items: [
+      { label: "Calculateur", href: "/calculateur", icon: "calculator" },
       { label: "Réglages", href: "/settings", icon: "settings" },
     ],
   },

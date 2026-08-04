@@ -107,61 +107,94 @@ const categories = [
 
     {/* ── Grid ── */}
     <template x-if="filtered.length > 0">
-      <div class="exo__grid">
-        <template x-for="ex in filtered" :key="ex.id">
-          <article class="exo__card">
-            <header class="exo__card-head">
-              <div class="exo__card-title">
-                <svg
-                  class="exo__card-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M6.5 6.5h11v11h-11z"></path>
-                  <path d="M2 9v6"></path>
-                  <path d="M22 9v6"></path>
-                  <path d="M6.5 6.5L2 9"></path>
-                  <path d="M17.5 6.5L22 9"></path>
-                  <path d="M6.5 17.5L2 15"></path>
-                  <path d="M17.5 17.5L22 15"></path>
-                </svg>
-                <h3 class="exo__card-name" x-text="ex.name"></h3>
-              </div>
-              <span
-                class="exo__set-badge"
-                x-show="getSetCount(ex.id) > 0"
-                x-cloak
-                x-transition.opacity.duration.200ms
-                :title="getSetCount(ex.id) + ' série' + (getSetCount(ex.id) > 1 ? 's' : '') + ' enregistrée' + (getSetCount(ex.id) > 1 ? 's' : '')"
-              >
-                <svg
-                  class="exo__set-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"></line>
-                  <line x1="8" y1="18" x2="21" y2="18"></line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
-                <span x-text="getSetCount(ex.id)"></span>
-                <span class="exo__set-label">séries</span>
-              </span>
-            </header>
+          <div class="exo__grid">
+            <template x-for="ex in filtered" :key="ex.id">
+              <article class="exo__card">
+                <header class="exo__card-head">
+                  <div class="exo__card-title">
+                    <svg
+                      class="exo__card-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M6.5 6.5h11v11h-11z"></path>
+                      <path d="M2 9v6"></path>
+                      <path d="M22 9v6"></path>
+                      <path d="M6.5 6.5L2 9"></path>
+                      <path d="M17.5 6.5L22 9"></path>
+                      <path d="M6.5 17.5L2 15"></path>
+                      <path d="M17.5 17.5L22 15"></path>
+                    </svg>
+                    <h3 class="exo__card-name" x-text="ex.name"></h3>
+                    <button
+                      type="button"
+                      class="exo__tip-toggle"
+                      @click="toggleTip(ex.id)"
+                      :aria-expanded="isTipOpen(ex.id).toString()"
+                      :aria-label="'Afficher les conseils pour ' + ex.name"
+                      title="Conseils"
+                      x-show="hasTip(ex.name)"
+                      x-cloak
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                      </svg>
+                    </button>
+                  </div>
+                  <span
+                    class="exo__set-badge"
+                    x-show="getSetCount(ex.id) > 0"
+                    x-cloak
+                    x-transition.opacity.duration.200ms
+                    :title="getSetCount(ex.id) + ' série' + (getSetCount(ex.id) > 1 ? 's' : '') + ' enregistrée' + (getSetCount(ex.id) > 1 ? 's' : '')"
+                  >
+                    <svg
+                      class="exo__set-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <line x1="8" y1="6" x2="21" y2="6"></line>
+                      <line x1="8" y1="12" x2="21" y2="12"></line>
+                      <line x1="8" y1="18" x2="21" y2="18"></line>
+                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <span x-text="getSetCount(ex.id)"></span>
+                    <span class="exo__set-label">séries</span>
+                  </span>
+                </header>
+
+                <p
+                  class="exo__tip"
+                  x-show="isTipOpen(ex.id) && hasTip(ex.name)"
+                  x-cloak
+                  x-transition.opacity.duration.180ms
+                  x-text="getTip(ex.name)"
+                ></p>
 
             <div class="exo__card-badges">
               <span class="exo__badge exo__badge--muscle" x-text="ex.muscle"></span>
@@ -710,6 +743,7 @@ const categories = [
     type SessionSet,
     type SetType,
   } from '../../lib/storage';
+  import { getExerciseTip } from '../../lib/exercise-tips';
 
   // Default muscle groups always surfaced in the filter bar
   // (mirrors the seed list in src/lib/storage.ts).
@@ -780,6 +814,9 @@ const categories = [
       ] as AddSetRow[],
       toast: { visible: false, message: '' },
       _toastTimer: 0,
+
+      // ── Tips (added 2026-08-04) ──
+      openTips: [] as string[],
 
       // ── Init ──
       init() {
@@ -919,6 +956,24 @@ const categories = [
         this.addToSessionId = '';
         this.newSessionName = '';
         this.closeDialogById('exo-add-to-session-dialog');
+      },
+
+      // ── Tips (added 2026-08-04) ──
+      hasTip(name: string): boolean {
+        return getExerciseTip(name) != null;
+      },
+      getTip(name: string): string {
+        return getExerciseTip(name) ?? '';
+      },
+      isTipOpen(exId: string): boolean {
+        return this.openTips.includes(exId);
+      },
+      toggleTip(exId: string) {
+        if (this.isTipOpen(exId)) {
+          this.openTips = this.openTips.filter((id) => id !== exId);
+        } else {
+          this.openTips = [...this.openTips, exId];
+        }
       },
 
       addSetToConfig() {
@@ -1303,6 +1358,51 @@ const categories = [
     line-height: 1.2;
     color: var(--color-text);
     word-break: break-word;
+  }
+
+  /* ── Tip toggle + tip body (added 2026-08-04) ── */
+  .exo__tip-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.0rem;
+    height: 3.0rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .exo__tip-toggle:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .exo__tip-toggle:active {
+    transform: scale(0.94);
+  }
+
+  .exo__tip-toggle svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .exo__tip {
+    margin: 0;
+    padding: 1.0rem 1.2rem;
+    background-color: var(--color-surface-2);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-size: 1.2rem;
+    line-height: 1.5;
   }
 
   .exo__card-badges {
@@ -1995,8 +2095,11 @@ const categories = [
     .exo__filter,
     .exo__icon-btn,
     .exo__add-sets-warmup,
-    .exo__add-sets-add {
+    .exo__add-sets-add,
+    .exo__tip-toggle,
+    .exo__tip-toggle:active {
       transition: none;
+      transform: none;
     }
     .exo__card:hover {
       transform: none;

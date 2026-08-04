@@ -34,6 +34,15 @@ export type SessionStatus = 'in-progress' | 'completed' | 'planned';
 
 export type SessionMood = 'great' | 'good' | 'ok' | 'tired' | 'bad';
 
+/**
+ * A superset groups 2+ exercises that are performed back-to-back
+ * without rest. Stored on the session as an array of groups; each
+ * group references the `exerciseId` of the participating exercises.
+ */
+export interface Superset {
+  exercises: string[]; // exerciseIds
+}
+
 export interface SessionExercise {
   exerciseId: string;
   name: string;
@@ -53,6 +62,10 @@ export interface Session {
   rpe?: number; // session-level RPE, 1-10
   fatigue?: number; // fatigue level, 1-5
   mood?: SessionMood;
+  // ── Superset groups (added 2026-08-04) ──
+  // Optional to keep older sessions clean. Each entry lists 2+ exerciseIds
+  // that the user has grouped into a superset/circuit.
+  supersets?: Superset[];
 }
 
 export interface ProgressRecord {
@@ -61,6 +74,20 @@ export interface ProgressRecord {
   estimated1RM: number;
   bestWeight: number;
   bestReps: number;
+}
+
+/**
+ * Body composition snapshot. Stored under `muscu:body` and used by
+ * the /progression/poids page to chart weight + measurements over time.
+ * All measurements are optional except `date` and `weight`.
+ */
+export interface BodyRecord {
+  date: string; // ISO date (YYYY-MM-DD)
+  weight: number; // kg
+  arm?: number; // cm
+  chest?: number; // cm
+  waist?: number; // cm
+  hips?: number; // cm
 }
 
 export type WeightUnit = 'kg' | 'lbs';
@@ -74,6 +101,11 @@ export interface Settings {
   defaultRestTime: number; // seconds
   soundAlerts: boolean;
   weeklyGoal: number; // sessions per week (1-7)
+  // ── Latest known body weight (added 2026-08-04) ──
+  // Mirrored from the most recent BodyRecord so the settings
+  // page can show a quick "current weight" without reading
+  // the body store separately.
+  bodyWeight?: number;
 }
 
 // ============================================================================
@@ -85,6 +117,7 @@ const STORAGE_KEYS = {
   sessions: 'muscu:sessions',
   progress: 'muscu:progress',
   settings: 'muscu-settings',
+  body: 'muscu:body',
 } as const;
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -437,6 +470,47 @@ export function addProgressRecord(
 }
 
 // ============================================================================
+// Body measurements (added 2026-08-04)
+// ============================================================================
+
+/**
+ * Returns all body composition records, sorted oldest → newest by date.
+ * Defensive sort: invalid dates sort to the end so they don't break the chart.
+ */
+export function getBodyRecords(): BodyRecord[] {
+  const raw = getStore<BodyRecord[]>(STORAGE_KEYS.body, []);
+  return [...raw].sort((a, b) => {
+    const ta = new Date(a.date).getTime();
+    const tb = new Date(b.date).getTime();
+    if (isNaN(ta) && isNaN(tb)) return 0;
+    if (isNaN(ta)) return 1;
+    if (isNaN(tb)) return -1;
+    return ta - tb;
+  });
+}
+
+/**
+ * Appends a body record and updates the settings.bodyWeight mirror so
+ * the settings page always shows the most recent weight.
+ */
+export function addBodyRecord(record: BodyRecord): void {
+  const all = getStore<BodyRecord[]>(STORAGE_KEYS.body, []);
+  all.push(record);
+  setStore(STORAGE_KEYS.body, all);
+  // Mirror the latest weight into settings for quick display.
+  if (Number.isFinite(record.weight) && record.weight > 0) {
+    updateSettings({ bodyWeight: record.weight });
+  }
+}
+
+export function deleteBodyRecord(date: string): void {
+  const filtered = getStore<BodyRecord[]>(STORAGE_KEYS.body, []).filter(
+    (r) => r.date !== date,
+  );
+  setStore(STORAGE_KEYS.body, filtered);
+}
+
+// ============================================================================
 // Settings
 // ============================================================================
 
@@ -469,6 +543,7 @@ export interface AppDataSnapshot {
   exercises: Exercise[];
   sessions: Session[];
   progress: ProgressRecord[];
+  body: BodyRecord[];
   settings: Settings;
 }
 
@@ -478,6 +553,7 @@ const APP_DATA_KEYS: ReadonlyArray<{ key: string; match: RegExp }> = [
   { key: STORAGE_KEYS.sessions, match: /^muscu:sessions$/ },
   { key: STORAGE_KEYS.progress, match: /^muscu:progress$/ },
   { key: STORAGE_KEYS.settings, match: /^muscu-settings$/ },
+  { key: STORAGE_KEYS.body, match: /^muscu:body$/ },
 ];
 
 /**
@@ -492,6 +568,7 @@ export function exportAllData(): AppDataSnapshot | null {
     exercises: getExercises(),
     sessions: getSessions(),
     progress: getStore<ProgressRecord[]>(STORAGE_KEYS.progress, []),
+    body: getStore<BodyRecord[]>(STORAGE_KEYS.body, []),
     settings: getSettings(),
   };
 }
@@ -566,6 +643,9 @@ export function importAllData(snapshot: unknown): void {
   if (data.progress && !Array.isArray(data.progress)) {
     throw new Error('Historique de progression invalide.');
   }
+  if (data.body && !Array.isArray(data.body)) {
+    throw new Error('Historique de mesures corporelles invalide.');
+  }
   if (data.settings && typeof data.settings !== 'object') {
     throw new Error('Réglages invalides.');
   }
@@ -573,6 +653,7 @@ export function importAllData(snapshot: unknown): void {
   if (data.exercises) setStore(STORAGE_KEYS.exercises, data.exercises);
   if (data.sessions) setStore(STORAGE_KEYS.sessions, data.sessions);
   if (data.progress) setStore(STORAGE_KEYS.progress, data.progress);
+  if (data.body) setStore(STORAGE_KEYS.body, data.body);
   if (data.settings) {
     setStore(STORAGE_KEYS.settings, { ...DEFAULT_SETTINGS, ...data.settings });
   }

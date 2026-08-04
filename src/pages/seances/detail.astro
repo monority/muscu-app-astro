@@ -297,6 +297,58 @@ import Dialog from '../../components/ui/Dialog.astro';
           </button>
         </div>
 
+        {/* RPE-based progression suggestions (added 2026-08-04) */}
+        <template x-if="session.status === 'completed' && rpeSuggestion">
+          <section class="detail__suggestion">
+            <h2 class="detail__section-title">Suggestion de progression</h2>
+            <Card>
+              <div
+                class="suggestion"
+                :class="'suggestion--' + rpeSuggestion.tone"
+              >
+                <div class="suggestion__icon" aria-hidden="true">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M12 2v4"></path>
+                    <path d="M12 18v4"></path>
+                    <path d="M4.93 4.93l2.83 2.83"></path>
+                    <path d="M16.24 16.24l2.83 2.83"></path>
+                    <path d="M2 12h4"></path>
+                    <path d="M18 12h4"></path>
+                    <path d="M4.93 19.07l2.83-2.83"></path>
+                    <path d="M16.24 7.76l2.83-2.83"></path>
+                  </svg>
+                </div>
+                <div class="suggestion__body">
+                  <div class="suggestion__headline" x-text="rpeSuggestion.headline"></div>
+                  <p class="suggestion__detail" x-text="rpeSuggestion.detail"></p>
+                  <div class="suggestion__meta">
+                    <span>
+                      RPE moyen :
+                      <strong x-text="formatRpe(rpeStats.avg)"></strong>/10
+                    </span>
+                    <span>
+                      RPE max :
+                      <strong x-text="formatRpe(rpeStats.max)"></strong>/10
+                    </span>
+                    <span>
+                      Séries analysées :
+                      <strong x-text="rpeStats.count"></strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </section>
+        </template>
+
         {/* Session notes (RPE / fatigue / mood / free text) */}
         <template x-if="hasNotes">
           <section class="detail__notes">
@@ -758,6 +810,72 @@ import Dialog from '../../components/ui/Dialog.astro';
 
       get hasNotes(): boolean {
         return hasNotesFn(this.session);
+      },
+
+      /**
+       * Aggregates RPE values across the whole session (completed sets
+       * only). Returns count=0 when no RPE is recorded → the suggestion
+       * UI stays hidden.
+       */
+      get rpeStats(): { count: number; avg: number; max: number } {
+        if (!this.session) return { count: 0, avg: 0, max: 0 };
+        let count = 0;
+        let sum = 0;
+        let max = 0;
+        let allTen = true;
+        for (const ex of this.session.exercises) {
+          for (const set of ex.sets) {
+            if (!set.completed) continue;
+            if (set.rpe == null || !Number.isFinite(set.rpe)) continue;
+            count += 1;
+            sum += set.rpe;
+            if (set.rpe > max) max = set.rpe;
+            if (set.rpe < 10) allTen = false;
+          }
+        }
+        if (count === 0) return { count: 0, avg: 0, max: 0 };
+        return { count, avg: sum / count, max, allTen };
+      },
+
+      /**
+       * Returns the headline + detail + tone for the suggestion card,
+       * or null when no actionable advice can be given.
+       */
+      get rpeSuggestion(): { headline: string; detail: string; tone: 'up' | 'maintain' | 'down' } | null {
+        const stats = this.rpeStats;
+        if (stats.count === 0) return null;
+        // Highest priority: every set hit a perfect 10 → back off.
+        if ((stats as { allTen?: boolean }).allTen) {
+          return {
+            headline: 'Réduis le volume ou le poids',
+            detail:
+              "Toutes tes séries terminées sont à RPE 10 (échec total). Le corps n'a probablement plus de marge — réduis le volume d'une série par exercice ou baisse la charge de 5 à 10 % avant la prochaine séance.",
+            tone: 'down',
+          };
+        }
+        if (stats.avg < 6) {
+          return {
+            headline: 'Augmente le poids de 2,5 kg',
+            detail:
+              "Ta séance était trop facile (RPE moyen < 6 / 10). Tu as de la marge sur la majorité des séries : ajoute 2,5 kg aux exercices composés la prochaine fois pour continuer à progresser.",
+            tone: 'up',
+          };
+        }
+        if (stats.avg > 8) {
+          return {
+            headline: 'Maintiens le même poids',
+            detail:
+              "L'effort perçu est élevé (RPE moyen > 8 / 10). Conserve la même charge une à deux séances de plus pour solidifier le palier, puis augmente de 2,5 kg.",
+            tone: 'maintain',
+          };
+        }
+        // Middle ground — no actionable advice.
+        return {
+          headline: 'Continue sur cette lancée',
+          detail:
+            "Tu travailles dans la bonne zone d'effort (RPE moyen entre 6 et 8 / 10). Conserve la même charge encore une ou deux séances avant d'augmenter.",
+          tone: 'maintain',
+        };
       },
 
       // ── Helpers ──
@@ -1796,6 +1914,125 @@ import Dialog from '../../components/ui/Dialog.astro';
     font-size: 1.3rem;
     text-align: center;
     padding: 1.6rem 0 0.4rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     RPE-BASED PROGRESSION SUGGESTION (added 2026-08-04)
+     Sits under the notes section, only when the session is
+     completed and at least one RPE value was recorded.
+     ════════════════════════════════════════════════════ */
+  .detail__suggestion {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .suggestion {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.4rem;
+    padding: 1.8rem 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+  }
+
+  .suggestion--up {
+    background-color: hsl(142 70% 45% / 0.10);
+    border-color: hsl(142 70% 45% / 0.40);
+  }
+
+  .suggestion--maintain {
+    background-color: hsl(48 95% 55% / 0.10);
+    border-color: hsl(48 95% 55% / 0.40);
+  }
+
+  .suggestion--down {
+    background-color: hsl(0 80% 55% / 0.10);
+    border-color: hsl(0 80% 55% / 0.40);
+  }
+
+  .suggestion__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.2rem;
+    height: 4.2rem;
+    border-radius: 50%;
+    background-color: hsl(0 0% 100% / 0.06);
+    color: var(--color-text);
+  }
+
+  .suggestion--up .suggestion__icon {
+    color: var(--color-success);
+    background-color: hsl(142 70% 45% / 0.18);
+  }
+
+  .suggestion--maintain .suggestion__icon {
+    color: var(--color-warning);
+    background-color: hsl(48 95% 55% / 0.18);
+  }
+
+  .suggestion--down .suggestion__icon {
+    color: var(--color-destructive);
+    background-color: hsl(0 80% 55% / 0.18);
+  }
+
+  .suggestion__icon svg {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .suggestion__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .suggestion__headline {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .suggestion--up .suggestion__headline {
+    color: var(--color-success);
+  }
+
+  .suggestion--maintain .suggestion__headline {
+    color: var(--color-warning);
+  }
+
+  .suggestion--down .suggestion__headline {
+    color: var(--color-destructive);
+  }
+
+  .suggestion__detail {
+    color: var(--color-text);
+    font-size: 1.3rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .suggestion__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-top: 0.4rem;
+    color: var(--color-muted);
+    font-size: 1.2rem;
+  }
+
+  .suggestion__meta strong {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ════════════════════════════════════════════════════

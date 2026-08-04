@@ -1,0 +1,701 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import PageHeader from '../components/layout/PageHeader.astro';
+import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardContent from '../components/ui/CardContent.astro';
+---
+
+<AppLayout title="Calculateur de disques">
+  <PageHeader
+    title="Calculateur de disques"
+    description="Indiquez la charge totale et visualisez le chargement par côté de la barre olympique."
+  />
+
+  <div
+    class="calc"
+    x-data="plateCalculator()"
+    x-init="init()"
+    x-cloak
+  >
+    <Card>
+      <CardHeader>
+        <CardTitle>Charge cible</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="calc__form">
+          <div class="calc__field">
+            <label for="calc-target" class="calc__label">
+              Poids total (kg)
+              <span class="calc__req" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="calc-target"
+              type="number"
+              class="calc__input"
+              step="0.5"
+              min="0"
+              inputmode="decimal"
+              x-model.number="target"
+              placeholder="Ex. 80"
+            />
+          </div>
+          <div class="calc__field">
+            <label for="calc-bar" class="calc__label">Barre (kg)</label>
+            <select id="calc-bar" class="calc__select" x-model.number="barWeight">
+              <option value="20">Olympique — 20 kg</option>
+              <option value="15">Femme — 15 kg</option>
+              <option value="10">Technique — 10 kg</option>
+              <option value="7">Courte — 7 kg</option>
+            </select>
+          </div>
+          <div class="calc__quickrow">
+            <span class="calc__quickrow-label">Raccourcis :</span>
+            <button
+              type="button"
+              class="calc__quick"
+              @click="target = 60"
+            >60</button>
+            <button
+              type="button"
+              class="calc__quick"
+              @click="target = 80"
+            >80</button>
+            <button
+              type="button"
+              class="calc__quick"
+              @click="target = 100"
+            >100</button>
+            <button
+              type="button"
+              class="calc__quick"
+              @click="target = 120"
+            >120</button>
+            <button
+              type="button"
+              class="calc__quick"
+              @click="target = 140"
+            >140</button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* ═══ Result card ═══ */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Chargement par côté</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <template x-if="errorMessage">
+          <div class="calc__error" x-text="errorMessage"></div>
+        </template>
+        <template x-if="!errorMessage">
+          <div>
+            <div class="calc__summary">
+              <div class="calc__summary-item">
+                <span class="calc__summary-label">Barre</span>
+                <span class="calc__summary-value" x-text="formatKg(barWeight)"></span>
+              </div>
+              <div class="calc__summary-item">
+                <span class="calc__summary-label">Par côté</span>
+                <span class="calc__summary-value" x-text="formatKg(perSide)"></span>
+              </div>
+              <div class="calc__summary-item">
+                <span class="calc__summary-label">Total</span>
+                <span
+                  class="calc__summary-value calc__summary-value--accent"
+                  x-text="formatKg(target)"
+                ></span>
+              </div>
+              <div class="calc__summary-item">
+                <span class="calc__summary-label">Reste</span>
+                <span
+                  class="calc__summary-value"
+                  :class="remainder > 0 ? 'calc__summary-value--warn' : ''"
+                  x-text="formatKg(remainder)"
+                ></span>
+              </div>
+            </div>
+
+            {/* ── Visual barbell diagram ── */}
+            <div class="calc__bar" :aria-label="'Barbell with ' + platesPerSide.length + ' plate(s) per side'">
+              {/* Left collar (closest to center) → outer */}
+              <div class="calc__bar-row calc__bar-row--left">
+                <template x-for="(p, i) in [...platesPerSide].reverse()" :key="'l-' + i">
+                  <div
+                    class="calc__plate"
+                    :class="'calc__plate--' + plateClass(p)"
+                    :style="{ height: plateHeight(p) + 'px' }"
+                    :title="formatKg(p) + ' kg'"
+                  >
+                    <span class="calc__plate-label" x-text="p"></span>
+                  </div>
+                </template>
+                <div class="calc__collar"></div>
+              </div>
+              <div class="calc__bar-shaft" :aria-hidden="true">
+                <span class="calc__bar-mark"></span>
+                <span class="calc__bar-mark"></span>
+                <span class="calc__bar-mark"></span>
+              </div>
+              <div class="calc__bar-row calc__bar-row--right">
+                <div class="calc__collar"></div>
+                <template x-for="(p, i) in platesPerSide" :key="'r-' + i">
+                  <div
+                    class="calc__plate"
+                    :class="'calc__plate--' + plateClass(p)"
+                    :style="{ height: plateHeight(p) + 'px' }"
+                    :title="formatKg(p) + ' kg'"
+                  >
+                    <span class="calc__plate-label" x-text="p"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            {/* ── Plate breakdown list ── */}
+            <div class="calc__breakdown" x-show="platesPerSide.length > 0">
+              <h3 class="calc__breakdown-title">Détail (par côté)</h3>
+              <ul class="calc__plate-list">
+                <template x-for="entry in plateBreakdown" :key="entry.weight">
+                  <li class="calc__plate-row">
+                    <span
+                      class="calc__plate-chip"
+                      :class="'calc__plate--' + plateClass(entry.weight)"
+                    >
+                      <span x-text="entry.weight"></span>
+                      <span class="calc__plate-chip-unit">kg</span>
+                    </span>
+                    <span class="calc__plate-x">×</span>
+                    <span class="calc__plate-count" x-text="entry.count"></span>
+                    <span class="calc__plate-sub" x-text="formatKg(entry.weight * entry.count)"></span>
+                  </li>
+                </template>
+              </ul>
+            </div>
+
+            <p
+              class="calc__hint"
+              x-show="platesPerSide.length === 0 && !errorMessage"
+            >
+              Aucune plaque à charger (cible = barre).
+            </p>
+          </div>
+        </template>
+      </CardContent>
+    </Card>
+  </div>
+</AppLayout>
+
+<script>
+  /** Available plate weights, biggest first so we can use a greedy algo. */
+  const PLATE_INVENTORY: ReadonlyArray<number> = [25, 20, 15, 10, 5, 2.5, 1.25];
+
+  interface PlateCount {
+    weight: number;
+    count: number;
+  }
+
+  function computePlatesPerSide(
+    target: number,
+    bar: number,
+  ): { plates: number[]; remainder: number; error: string | null } {
+    if (!Number.isFinite(target) || target < 0) {
+      return { plates: [], remainder: 0, error: null };
+    }
+    if (target < bar) {
+      return {
+        plates: [],
+        remainder: 0,
+        error: `La cible (${target} kg) est inférieure au poids de la barre (${bar} kg).`,
+      };
+    }
+    if (target === bar) {
+      return { plates: [], remainder: 0, error: null };
+    }
+    // Weight that needs to be split across the two sides.
+    const perSideTarget = (target - bar) / 2;
+    let remaining = perSideTarget;
+    const plates: number[] = [];
+    for (const p of PLATE_INVENTORY) {
+      // Use Math.floor to be conservative — leftover goes to "remainder".
+      const count = Math.floor(remaining / p);
+      for (let i = 0; i < count; i++) plates.push(p);
+      remaining = +(remaining - count * p).toFixed(4);
+    }
+    const used = plates.reduce((s, p) => s + p, 0);
+    const remainder = +(perSideTarget - used).toFixed(2);
+    return { plates, remainder, error: null };
+  }
+
+  function groupPlates(plates: number[]): PlateCount[] {
+    const map = new Map<number, number>();
+    for (const p of plates) map.set(p, (map.get(p) ?? 0) + 1);
+    return PLATE_INVENTORY.filter((p) => map.has(p)).map((p) => ({
+      weight: p,
+      count: map.get(p) ?? 0,
+    }));
+  }
+
+  document.addEventListener('alpine:init', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data('plateCalculator', () => ({
+      // ── State ──
+      target: 80,
+      barWeight: 20,
+
+      // ── Init ──
+      init() {
+        // Sensible default; user can override via the input.
+      },
+
+      // ── Computed ──
+      get perSide(): number {
+        if (!Number.isFinite(this.target)) return 0;
+        return Math.max(0, (this.target - this.barWeight) / 2);
+      },
+
+      get errorMessage(): string | null {
+        if (!Number.isFinite(this.target) || this.target < 0) {
+          return 'Veuillez entrer un poids cible valide.';
+        }
+        if (this.target === 0) return null;
+        if (this.target < this.barWeight) {
+          return `La cible (${this.target} kg) est inférieure au poids de la barre (${this.barWeight} kg).`;
+        }
+        return null;
+      },
+
+      get computedResult(): { plates: number[]; remainder: number } {
+        return computePlatesPerSide(this.target, this.barWeight);
+      },
+
+      get platesPerSide(): number[] {
+        if (this.errorMessage) return [];
+        return this.computedResult.plates;
+      },
+
+      get remainder(): number {
+        if (this.errorMessage) return 0;
+        return this.computedResult.remainder;
+      },
+
+      get plateBreakdown(): PlateCount[] {
+        return groupPlates(this.platesPerSide);
+      },
+
+      // ── Display helpers ──
+      formatKg(value: number): string {
+        if (!Number.isFinite(value)) return '0 kg';
+        return Math.round(value * 100) / 100 + ' kg';
+      },
+
+      /**
+       * Visual scaling: 25kg plate = 160px, smallest (1.25kg) = 32px.
+       * Linear-ish mapping to keep larger plates obviously bigger.
+       */
+      plateHeight(weight: number): number {
+        const map: Record<number, number> = {
+          25: 160,
+          20: 144,
+          15: 128,
+          10: 108,
+          5: 84,
+          2.5: 60,
+          1.25: 44,
+        };
+        return map[weight] ?? 60;
+      },
+
+      /**
+       * CSS modifier class for each plate weight — drives the colour.
+       * Keeps the visual matching the Olympic colour convention.
+       */
+      plateClass(weight: number): string {
+        return 'calc__plate--' + weight.toString().replace('.', '_');
+      },
+    }));
+  });
+</script>
+
+{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+<style>
+  [x-cloak] {
+    display: none !important;
+  }
+
+  .calc {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding-bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* ═══ Form ═══ */
+  .calc__form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+  }
+
+  @media (min-width: 640px) {
+    .calc__form {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .calc__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .calc__label {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    line-height: 1.2;
+  }
+
+  .calc__req {
+    color: var(--color-destructive);
+    margin-left: 0.2rem;
+  }
+
+  .calc__input,
+  .calc__select {
+    width: 100%;
+    height: 4.6rem;
+    padding: 0 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .calc__input:focus,
+  .calc__select:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .calc__input[type='number'] {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.7rem;
+  }
+
+  .calc__quickrow {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .calc__quickrow-label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+  }
+
+  .calc__quick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 5.4rem;
+    height: 3.6rem;
+    padding: 0 1.2rem;
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .calc__quick:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .calc__quick:active {
+    transform: scale(0.97);
+  }
+
+  /* ═══ Summary row ═══ */
+  .calc__summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (min-width: 640px) {
+    .calc__summary {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .calc__summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.2rem 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .calc__summary-label {
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+
+  .calc__summary-value {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .calc__summary-value--accent {
+    color: var(--color-accent);
+  }
+
+  .calc__summary-value--warn {
+    color: var(--color-warning);
+  }
+
+  /* ═══ Error ═══ */
+  .calc__error {
+    padding: 1.6rem 1.8rem;
+    background-color: hsl(0 80% 55% / 0.10);
+    border: 1px solid hsl(0 80% 55% / 0.35);
+    border-radius: var(--radius-md);
+    color: var(--color-destructive);
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  /* ═══ Barbell diagram ═══ */
+  .calc__bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 2rem 1rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+  }
+
+  .calc__bar-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .calc__bar-row--left {
+    flex-direction: row;
+  }
+
+  .calc__bar-row--right {
+    flex-direction: row;
+  }
+
+  .calc__bar-shaft {
+    width: 14rem;
+    height: 1rem;
+    background: linear-gradient(180deg, #6b6b6b, #2b2b2b);
+    border-top: 1px solid #888;
+    border-bottom: 1px solid #1a1a1a;
+    border-radius: 0.3rem;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .calc__bar-mark {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.4rem;
+    height: 1.2rem;
+    background-color: #c0c0c0;
+  }
+
+  .calc__bar-mark:nth-child(1) { left: 1rem; }
+  .calc__bar-mark:nth-child(2) { left: 50%; transform: translate(-50%, -50%); }
+  .calc__bar-mark:nth-child(3) { right: 1rem; }
+
+  .calc__collar {
+    width: 0.6rem;
+    height: 4rem;
+    background: linear-gradient(180deg, #888, #2b2b2b);
+    border-radius: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Plate visuals (Olympic colour-coded) ── */
+  .calc__plate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    min-width: 2.2rem;
+    margin: 0 0.1rem;
+    border-radius: 0.5rem;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 1.0rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+  }
+
+  .calc__plate-label {
+    display: block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .calc__plate--25    { background: linear-gradient(180deg, #b91c1c, #7f1d1d); }
+  .calc__plate--20    { background: linear-gradient(180deg, #1d4ed8, #1e3a8a); }
+  .calc__plate--15    { background: linear-gradient(180deg, #ca8a04, #854d0e); }
+  .calc__plate--10    { background: linear-gradient(180deg, #15803d, #14532d); }
+  .calc__plate--5     { background: linear-gradient(180deg, #d4d4d8, #71717a); color: #111; }
+  .calc__plate--2_5   { background: linear-gradient(180deg, #1f2937, #111827); }
+  .calc__plate--1_25  { background: linear-gradient(180deg, #525252, #262626); }
+
+  /* ── Breakdown list ── */
+  .calc__breakdown {
+    margin-top: 2.4rem;
+  }
+
+  .calc__breakdown-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-muted);
+    margin: 0 0 1rem;
+  }
+
+  .calc__plate-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .calc__plate-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .calc__plate-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    min-width: 5.6rem;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+  }
+
+  .calc__plate-chip-unit {
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  .calc__plate--5.calc__plate-chip {
+    color: #111;
+  }
+
+  .calc__plate-x {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  .calc__plate-count {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    min-width: 2.4rem;
+  }
+
+  .calc__plate-sub {
+    margin-left: auto;
+    color: var(--color-muted);
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .calc__hint {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    padding: 1rem;
+  }
+
+  /* ═══ Reduced motion ═══ */
+  @media (prefers-reduced-motion: reduce) {
+    .calc__input,
+    .calc__select,
+    .calc__quick,
+    .calc__quick:active {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>
