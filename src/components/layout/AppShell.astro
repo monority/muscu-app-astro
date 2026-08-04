@@ -389,8 +389,11 @@ const renderIcon = (name?: string): string => {
   }
 
   .drawer__item.is-active {
-    background-color: hsl(32 95% 50% / 0.14);
+    background: none;
     color: var(--color-accent);
+    border-left: 3px solid var(--color-accent);
+    padding-left: calc(1.4rem - 3px);
+    box-shadow: -2px 0 8px rgba(217, 119, 6, 0.3);
   }
 
   .drawer__item-icon {
@@ -439,8 +442,11 @@ const renderIcon = (name?: string): string => {
   }
 
   .drawer__subitem.is-active {
+    background: none;
     color: var(--color-accent);
-    background-color: hsl(32 95% 50% / 0.08);
+    border-left: 2px solid var(--color-accent);
+    padding-left: calc(1.4rem - 2px);
+    box-shadow: -1px 0 6px rgba(217, 119, 6, 0.25);
   }
 
   .drawer__item:focus-visible,
