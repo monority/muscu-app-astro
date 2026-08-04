@@ -48,8 +48,9 @@
   --focus-ring: 0 0 0 3px hsl(32 95% 50% / 0.35);
 
   /* Transitions */
-  --transition-fast: 160ms ease;
+  --transition-fast: 140ms ease;
   --transition-base: 200ms ease;
+  --transition-normal: 240ms ease;
 
   /* Layout */
   --sidebar-width: 26rem;

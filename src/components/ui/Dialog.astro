@@ -89,6 +89,27 @@ const classes = [
 </dialog>
 
 <style>
+  /* ════════════════════════════════════════════════════
+     BASE DIALOG STYLES
+     The native <dialog> element relies on UA stylesheet
+     centering (position: fixed; inset-block: 0; margin: auto)
+     that breaks the moment Tailwind's `w-full` (width: 100%)
+     is applied. We re-assert explicit centering here so the
+     modal is reliably centered both horizontally and
+     vertically on every browser, regardless of utility
+     classes layered on top.
+     ════════════════════════════════════════════════════ */
+  dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    border: none;
+    background: transparent;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    color: inherit;
+  }
+
   /* Backdrop */
   dialog::backdrop {
     background-color: rgb(0 0 0 / 0.6);

@@ -59,7 +59,7 @@ const renderIcon = (name?: string): string => {
     <Header title={title}>
       <slot name="actions" slot="actions" />
     </Header>
-    <main class="page-content">
+    <main class="page-content anim-fade-in">
       <slot />
     </main>
   </div>
@@ -171,6 +171,38 @@ const renderIcon = (name?: string): string => {
           ))
         }
       </nav>
+
+      {/* Footer — user session + logout (mirrors sidebar) */}
+      <div class="drawer__user" data-user-zone hidden>
+        <div class="drawer__user-info">
+          <span class="drawer__user-label">Connecté en tant que</span>
+          <span class="drawer__user-name" data-user-name>—</span>
+          <span class="drawer__user-email" data-user-email>—</span>
+        </div>
+        <button
+          type="button"
+          class="drawer__logout"
+          data-logout
+          aria-label="Se déconnecter"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Déconnexion</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -222,6 +254,45 @@ const renderIcon = (name?: string): string => {
       a.addEventListener("click", () => close());
     });
   })();
+
+  // ── Auth gate + session display ─────────────────────────
+  // Runs only for pages that render the AppShell (every page except
+  // /login, which uses AppLayout with empty groups and therefore
+  // doesn't get this script). Keeps the public/login surface small
+  // while protecting the rest of the app behind a localStorage check.
+  import { getAuth, clearAuth } from "../../lib/auth";
+
+  const logout = () => {
+    clearAuth();
+    window.location.href = "/login";
+  };
+
+  // ── Wire logout buttons (sidebar + drawer) ──────────────
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-logout]")
+    .forEach((btn) => {
+      btn.addEventListener("click", logout);
+    });
+
+  // ── Populate user session zones ─────────────────────────
+  const auth = getAuth();
+  if (auth) {
+    document.querySelectorAll<HTMLElement>("[data-user-name]").forEach((el) => {
+      el.textContent = auth.name;
+    });
+    document
+      .querySelectorAll<HTMLElement>("[data-user-email]")
+      .forEach((el) => {
+        el.textContent = auth.email;
+      });
+    document.querySelectorAll<HTMLElement>("[data-user-zone]").forEach((el) => {
+      el.removeAttribute("hidden");
+    });
+  } else {
+    // No session → bounce to the login page. /login itself does NOT
+    // render the AppShell, so this redirect never loops.
+    window.location.replace("/login");
+  }
 </script>
 
 <style>
@@ -230,6 +301,9 @@ const renderIcon = (name?: string): string => {
     display: flex;
     min-height: 100vh;
     align-items: stretch;
+    /* Same dark surface as <body> so the page never flashes white
+       when the sidebar or main area are short. */
+    background-color: #050505;
   }
 
   .main-area {
@@ -237,11 +311,60 @@ const renderIcon = (name?: string): string => {
     min-width: 0;
     display: flex;
     flex-direction: column;
+    background-color: #050505;
+    /* Mobile: the body is the scroll container, the topbar is
+       `position: sticky` in Header.astro and pins to the top of
+       the viewport. Desktop overrides below switch to an in-page
+       scroll container (`.main-area` itself) so the fixed sidebar
+       and fixed topbar stay anchored regardless of content height. */
   }
 
   .page-content {
     flex: 1;
     padding: 2.4rem;
+    /* Allow the flex child to shrink below its content height so any
+       visual overflow propagates to the scroll container instead of
+       being clipped or pushing the body. */
+    min-height: 0;
+  }
+
+  /* ── Desktop: fixed sidebar + header ───────────────────── */
+  /* Take the sidebar and topbar out of the flex flow so long pages
+     (e.g. session builder with many exercises + notes) can no
+     longer push them off screen. The main column gets the
+     corresponding offsets and becomes the scroll container. */
+  @media (min-width: 1024px) {
+    :global(.sidebar) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 26rem;
+      z-index: 40;
+    }
+
+    :global(.topbar) {
+      position: fixed;
+      top: 0;
+      left: 26rem;
+      right: 0;
+      height: 5.6rem;
+      z-index: 50;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .main-area {
+      margin-left: 26rem;
+      padding-top: 5.6rem; /* offset of the fixed topbar */
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .page-content {
+      padding: 2.4rem;
+      min-height: 0;
+    }
   }
 
   /* ── Drawer shell ──────────────────────────────────────── */
@@ -327,8 +450,8 @@ const renderIcon = (name?: string): string => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.6rem;
-    height: 3.6rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background: transparent;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -424,7 +547,7 @@ const renderIcon = (name?: string): string => {
 
   .drawer__subitem {
     display: block;
-    padding: 0.8rem 1.4rem;
+    padding: 1.0rem 1.4rem;
     color: var(--color-muted);
     text-decoration: none;
     font-family: var(--font-body);
@@ -479,8 +602,103 @@ const renderIcon = (name?: string): string => {
     .drawer__backdrop,
     .drawer__panel,
     .drawer__item,
-    .drawer__subitem {
+    .drawer__subitem,
+    .drawer__logout,
+    .drawer__logout:active {
       transition: none;
+      transform: none;
     }
+  }
+
+  /* ── Drawer user session + logout ────────────────────── */
+  .drawer__user {
+    display: flex;
+    flex-direction: column;
+    gap: 1.0rem;
+    margin: 1.2rem 0.8rem 1.2rem;
+    padding: 1.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+
+  .drawer__user[hidden] {
+    display: none;
+  }
+
+  .drawer__user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .drawer__user-label {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .drawer__user-name {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--color-text);
+    font-weight: 700;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .drawer__user-email {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .drawer__logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    height: 4.4rem;
+    padding: 0 1.2rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+
+  .drawer__logout:hover {
+    background-color: hsl(0 80% 55% / 0.10);
+    border-color: hsl(0 80% 55% / 0.35);
+    color: var(--color-destructive);
+  }
+
+  .drawer__logout:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .drawer__logout:active {
+    transform: scale(0.98);
   }
 </style>

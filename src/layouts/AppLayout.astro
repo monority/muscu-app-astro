@@ -100,6 +100,11 @@ const groupsWithActive = groups.map((g) => ({
       content={description || "Application de musculation"}
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#D97706" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="muscu.app" />
   </head>
   <body>
     {
@@ -113,5 +118,17 @@ const groupsWithActive = groups.map((g) => ({
         </main>
       )
     }
+
+    <script is:inline>
+      // Register the service worker for offline use (gym wifi is spotty).
+      // Deferred until the load event so it doesn't compete with first paint.
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch((err) => {
+            console.warn("[muscu] service worker registration failed:", err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

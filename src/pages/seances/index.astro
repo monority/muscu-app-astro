@@ -66,7 +66,36 @@ import Card from '../../components/ui/Card.astro';
             :aria-label="'Voir les détails de ' + session.name"
           >
             <header class="sess__card-head">
-              <h3 class="sess__card-name" x-text="session.name"></h3>
+              <div class="sess__card-title">
+                <svg
+                  class="sess__card-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6.5 6.5h11v11h-11z"></path>
+                  <path d="M2 9v6"></path>
+                  <path d="M22 9v6"></path>
+                  <path d="M6.5 6.5L2 9"></path>
+                  <path d="M17.5 6.5L22 9"></path>
+                  <path d="M6.5 17.5L2 15"></path>
+                  <path d="M17.5 17.5L22 15"></path>
+                </svg>
+                <h3 class="sess__card-name" x-text="session.name"></h3>
+                <span
+                  class="sess__mood-indicator"
+                  x-show="session.mood"
+                  :title="'Humeur : ' + moodLabel(session.mood)"
+                  :aria-label="'Humeur : ' + moodLabel(session.mood)"
+                >
+                  <span class="sess__mood-emoji" x-html="moodEmoji(session.mood)" aria-hidden="true"></span>
+                </span>
+              </div>
               <span
                 class="sess__badge"
                 :class="'sess__badge--' + session.status"
@@ -101,14 +130,14 @@ import Card from '../../components/ui/Card.astro';
                 <span class="sess__meta-value" x-text="session.exercises.length"></span>
                 <span class="sess__meta-label" x-text="session.exercises.length > 1 ? 'exercices' : 'exercice'"></span>
               </div>
-              <div class="sess__meta-item">
+              <div class="sess__volume-badge">
                 <svg
-                  class="sess__meta-icon"
+                  class="sess__volume-icon"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="1.8"
+                  stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   aria-hidden="true"
@@ -119,7 +148,7 @@ import Card from '../../components/ui/Card.astro';
                   <path d="M21 9v6"></path>
                   <path d="M6.5 6.5 3 9v6l3.5 2.5h11L21 15V9l-3.5-2.5Z"></path>
                 </svg>
-                <span class="sess__meta-value" x-text="formatVolume(totalVolume(session))"></span>
+                <span x-text="formatVolume(totalVolume(session))"></span>
               </div>
             </div>
 
@@ -190,14 +219,12 @@ import Card from '../../components/ui/Card.astro';
   </div>
 </AppLayout>
 
-{/* Alpine.js via CDN (defer — runs after DOM is parsed) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <script>
   import {
     getSessions,
     deleteSession,
     type Session,
+    type SessionMood,
     type SessionStatus,
   } from '../../lib/storage';
 
@@ -227,6 +254,34 @@ import Card from '../../components/ui/Card.astro';
   function formatVolume(volume: number): string {
     if (!Number.isFinite(volume) || volume <= 0) return '0 kg';
     return Math.round(volume).toLocaleString('fr-FR') + ' kg';
+  }
+
+  // Mood helpers return inline Lucide SVG markup so they can be
+  // rendered via x-html. The colour is inherited from
+  // .sess__mood-indicator via currentColor.
+  const MOOD_SVG_ATTRS = 'viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  const MOOD_SMILE  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+  const MOOD_HEART  = `<svg ${MOOD_SVG_ATTRS}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+  const MOOD_MEH    = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+  const MOOD_FROWN  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+  const MOOD_BED    = `<svg ${MOOD_SVG_ATTRS}><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
+
+  function moodEmojiFn(mood: SessionMood | undefined | null): string {
+    if (!mood) return '';
+    if (mood === 'great') return MOOD_SMILE;
+    if (mood === 'good') return MOOD_HEART;
+    if (mood === 'ok') return MOOD_MEH;
+    if (mood === 'tired') return MOOD_FROWN;
+    return MOOD_BED;
+  }
+
+  function moodLabelFn(mood: SessionMood | undefined | null): string {
+    if (!mood) return '';
+    if (mood === 'great') return 'Très bonne';
+    if (mood === 'good') return 'Bonne';
+    if (mood === 'ok') return 'Moyenne';
+    if (mood === 'tired') return 'Fatiguée';
+    return 'Mauvaise';
   }
 
   document.addEventListener('alpine:init', () => {
@@ -292,6 +347,14 @@ import Card from '../../components/ui/Card.astro';
         return formatVolume(volume);
       },
 
+      moodEmoji(mood: SessionMood | undefined | null) {
+        return moodEmojiFn(mood);
+      },
+
+      moodLabel(mood: SessionMood | undefined | null) {
+        return moodLabelFn(mood);
+      },
+
       // ── Actions ──
       navigateTo(id: string) {
         window.location.href = '/seances/detail?id=' + encodeURIComponent(id);
@@ -308,12 +371,10 @@ import Card from '../../components/ui/Card.astro';
   });
 </script>
 
-<style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
+{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
+<style>
   /* ════════════════════════════════════════════════════
      CONTAINER
      ════════════════════════════════════════════════════ */
@@ -454,6 +515,7 @@ import Card from '../../components/ui/Card.astro';
   }
 
   .sess__card:hover {
+    background-color: var(--color-surface-2);
     border-color: hsl(0 0% 100% / 0.18);
     box-shadow: 0 8px 24px hsl(0 0% 0% / 0.42);
     transform: translateY(-2px);
@@ -489,6 +551,21 @@ import Card from '../../components/ui/Card.astro';
     min-width: 0;
   }
 
+  .sess__card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .sess__card-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
   .sess__card-name {
     font-family: var(--font-display);
     font-size: 1.8rem;
@@ -498,6 +575,32 @@ import Card from '../../components/ui/Card.astro';
     word-break: break-word;
     /* leave room for the hover arrow on the right */
     padding-right: 1.6rem;
+  }
+
+  /* ── Mood indicator (next to the session name) ── */
+  .sess__mood-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    cursor: help;
+  }
+
+  .sess__mood-emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    color: var(--color-text);
+  }
+
+  .sess__mood-emoji svg {
+    display: block;
   }
 
   .sess__card-date {
@@ -543,6 +646,31 @@ import Card from '../../components/ui/Card.astro';
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
+  }
+
+  /* ── Volume badge (pill) ── */
+  .sess__volume-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.8rem;
+    padding: 0 1.1rem;
+    background-color: hsl(32 95% 50% / 0.10);
+    border: 1px solid hsl(32 95% 50% / 0.30);
+    border-radius: var(--radius-pill);
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .sess__volume-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
   }
 
   /* ── Status badge ── */
@@ -592,8 +720,8 @@ import Card from '../../components/ui/Card.astro';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.6rem;
-    height: 3.6rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);

@@ -5,7 +5,10 @@ interface Props {
 
 const { class: className = '' } = Astro.props;
 
-const classes = ['flex flex-row justify-between items-center pb-3', className]
+const classes = [
+  'flex flex-col gap-[var(--spacing-2)] pb-[var(--spacing-3)]',
+  className,
+]
   .filter(Boolean)
   .join(' ');
 ---

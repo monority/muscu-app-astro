@@ -1,0 +1,799 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+
+/**
+ * Login page — fake auth (any email/password works).
+ *
+ * - No sidebar/header (passed empty `groups` to AppLayout, which
+ *   falls back to a bare <main> wrapper).
+ * - Alpine.js handles the form state, validation, and redirect.
+ * - The `muscu-auth` localStorage entry is the single source of
+ *   truth for the rest of the app (see src/lib/auth.ts).
+ */
+---
+
+<AppLayout title="Connexion" groups={[]}>
+  <div
+    class="login"
+    x-data="loginApp()"
+    x-init="init()"
+    x-cloak
+  >
+    <div class="login__card" role="form" aria-labelledby="login-title">
+      {/* ── Logo ── */}
+      <div class="login__logo" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="32"
+          height="32"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M14.4 14.4 9.6 9.6"></path>
+          <path
+            d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
+          ></path>
+          <path d="m21.5 21.5-1.4-1.4"></path>
+          <path d="M3.9 3.9 2.5 2.5"></path>
+          <path
+            d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
+          ></path>
+        </svg>
+      </div>
+
+      <h1 id="login-title" class="login__title">Bon retour</h1>
+      <p class="login__subtitle">
+        Connectez-vous à votre espace d'entraînement.
+      </p>
+
+      {/* ── Form ── */}
+      <form class="login__form" @submit.prevent="submit" novalidate>
+        <div class="login__field">
+          <label for="login-email" class="login__label">Email</label>
+          <input
+            type="email"
+            id="login-email"
+            class="login__input"
+            placeholder="vous@exemple.com"
+            x-model="email"
+            @input="error = ''"
+            required
+            autocomplete="email"
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="login__field">
+          <label for="login-password" class="login__label">Mot de passe</label>
+          <div class="login__password">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              id="login-password"
+              class="login__input"
+              placeholder="••••••••"
+              x-model="password"
+              @input="error = ''"
+              required
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="login__toggle"
+              @click="showPassword = !showPassword"
+              :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              :aria-pressed="showPassword ? 'true' : 'false'"
+            >
+              {/* Eye icon */}
+              <svg
+                x-show="!showPassword"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              {/* Eye-off icon */}
+              <svg
+                x-show="showPassword"
+                x-cloak
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                <path
+                  d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+                ></path>
+                <path
+                  d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+                ></path>
+                <line x1="2" y1="2" x2="22" y2="22"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <p
+          class="login__error"
+          x-show="error"
+          x-text="error"
+          x-cloak
+          role="alert"
+        ></p>
+
+        <button
+          type="submit"
+          class="login__submit"
+          :disabled="loading"
+        >
+          {/* Always-present label (visible whether Alpine is loaded
+              or not, before/after submit). */}
+          <span class="login__submit-label">Se connecter</span>
+          {/* Loading overlay — only shown while the form is in flight. */}
+          <span class="login__submit-loading" x-show="loading" x-cloak>
+            <svg
+              class="login__spinner"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25" />
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            </svg>
+            Connexion…
+          </span>
+        </button>
+      </form>
+
+      {/* ── Divider ── */}
+      <div class="login__divider" aria-hidden="true">
+        <span>ou</span>
+      </div>
+
+      {/* ── Dev mode (temporary, one-click login) ── */}
+      <section class="login__dev" aria-labelledby="login-dev-title">
+        <div class="login__dev-head">
+          <span class="login__dev-badge" aria-hidden="true">DEV</span>
+          <h2 id="login-dev-title" class="login__dev-title">
+            Mode développement
+          </h2>
+        </div>
+        <p class="login__dev-warning" role="note">
+          <span aria-hidden="true" class="login__dev-warning-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          </span>
+          Ceci est un compte de développement
+        </p>
+        <button
+          type="button"
+          class="login__dev-btn"
+          @click="devLogin()"
+        >
+          <svg
+            class="login__dev-icon"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>Connexion rapide (dev)</span>
+        </button>
+      </section>
+
+      {/* ── Signup link ── */}
+      <p class="login__signup">
+        Pas de compte ?
+        <button
+          type="button"
+          class="login__signup-link"
+          @click="showSignupMessage = !showSignupMessage"
+        >
+          Créer un compte
+        </button>
+      </p>
+
+      <p
+        class="login__signup-msg"
+        x-show="showSignupMessage"
+        x-cloak
+        x-transition.opacity.duration.200ms
+      >
+        L'inscription arrive bientôt. En attendant, utilisez n'importe
+        quel email et mot de passe pour vous connecter — c'est un espace
+        de dev.
+      </p>
+    </div>
+
+    <p class="login__brand">muscu.app · TRAINING LOG</p>
+  </div>
+</AppLayout>
+
+<script>
+  import { setAuth, isAuthenticated } from '../lib/auth';
+
+  function nameFromEmail(email: string): string {
+    const local = email.split('@')[0] ?? '';
+    const formatted = local
+      .split(/[._\-+]+/)
+      .filter(Boolean)
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+      .join(' ');
+    return formatted || 'Athlète';
+  }
+
+  function isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  document.addEventListener('alpine:init', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data('loginApp', () => ({
+      email: '',
+      password: '',
+      error: '',
+      showPassword: false,
+      showSignupMessage: false,
+      loading: false,
+
+      init() {
+        if (isAuthenticated()) {
+          window.location.href = '/';
+        }
+      },
+
+      submit() {
+        this.error = '';
+        const email = this.email.trim();
+        const password = this.password;
+
+        if (!email) { this.error = 'Veuillez saisir votre email.'; return; }
+        if (!isValidEmail(email)) { this.error = "Format d'email invalide."; return; }
+        if (!password) { this.error = 'Veuillez saisir votre mot de passe.'; return; }
+
+        this.loading = true;
+        const name = nameFromEmail(email);
+        setAuth(email, name);
+        window.setTimeout(() => { window.location.href = '/'; }, 240);
+      },
+
+      devLogin() {
+        this.error = '';
+        this.loading = true;
+        setAuth('dev@muscu.app', 'Dev User');
+        window.location.href = '/';
+      },
+    }));
+  });
+</script>
+
+{/* Alpine.js via CDN — MUST be after the module script above
+    (type="module" executes before defer in the HTML spec) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+<style>
+  /* Hide Alpine elements until initialized (prevents flash) */
+  [x-cloak] {
+    display: none !important;
+  }
+
+  /* ════════════════════════════════════════════════════
+     PAGE — full-viewport centered stage with subtle glow
+     ════════════════════════════════════════════════════ */
+  .login {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.4rem 1.6rem 3.2rem;
+    gap: 2.4rem;
+    background:
+      radial-gradient(
+        circle at 20% 10%,
+        hsl(32 55% 45% / 0.10),
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 80% 90%,
+        hsl(32 55% 45% / 0.06),
+        transparent 50%
+      );
+  }
+
+  /* ════════════════════════════════════════════════════
+     CARD — 400px wide per spec, premium dark surface
+     ════════════════════════════════════════════════════ */
+  .login__card {
+    width: 100%;
+    max-width: 40rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 4.0rem 3.2rem;
+    box-shadow: 0 24px 60px hsl(0 0% 0% / 0.55),
+      0 1px 0 hsl(0 0% 100% / 0.04) inset;
+  }
+
+  /* ── Logo ── */
+  .login__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 6.4rem;
+    height: 6.4rem;
+    margin: 0 auto 2.4rem;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    color: var(--color-accent);
+    box-shadow: 0 8px 20px hsl(0 0% 0% / 0.35);
+  }
+
+  /* ── Title block ── */
+  .login__title {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-text);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    margin: 0 0 0.8rem;
+  }
+
+  .login__subtitle {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    line-height: 1.4;
+    margin: 0 0 3.2rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     FORM
+     ════════════════════════════════════════════════════ */
+  .login__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+
+  .login__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .login__label {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  .login__input {
+    width: 100%;
+    height: 4.8rem;
+    padding: 0 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    line-height: 1.2;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      background-color var(--transition-fast);
+  }
+
+  .login__input::placeholder {
+    color: hsl(0 0% 100% / 0.25);
+  }
+
+  .login__input:hover {
+    border-color: hsl(0 0% 100% / 0.16);
+  }
+
+  .login__input:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  /* ── Password input + show/hide toggle ── */
+  .login__password {
+    position: relative;
+  }
+
+  .login__password .login__input {
+    padding-right: 5.2rem;
+  }
+
+  .login__toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.4rem;
+    transform: translateY(-50%);
+    width: 4.4rem;
+    height: 4.4rem;
+    background: transparent;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-fast),
+      background-color var(--transition-fast);
+  }
+
+  .login__toggle:hover {
+    color: var(--color-text);
+    background-color: hsl(0 0% 100% / 0.05);
+  }
+
+  .login__toggle:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* ── Error banner ── */
+  .login__error {
+    color: hsl(0 80% 75%);
+    font-size: 1.2rem;
+    background-color: hsl(0 80% 55% / 0.10);
+    border: 1px solid hsl(0 80% 55% / 0.30);
+    border-radius: var(--radius-sm);
+    padding: 1.0rem 1.2rem;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* ── Submit button (primary, full-width) ── */
+  .login__submit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    width: 100%;
+    min-width: 0;
+    height: 5.2rem;
+    padding: 0 1.6rem;
+    margin-top: 0.4rem;
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border: 1px solid hsl(32 95% 50% / 0.45);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: 0 6px 18px hsl(32 80% 40% / 0.30);
+    transition: filter var(--transition-fast),
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .login__submit-label {
+    display: inline-block;
+    line-height: 1;
+  }
+
+  /* Loading overlay sits on top of the static label so the button
+     keeps its size and shape while in flight. */
+  .login__submit-loading {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+
+  .login__submit:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 8px 22px hsl(32 80% 40% / 0.42);
+  }
+
+  .login__submit:active:not(:disabled) {
+    transform: scale(0.985);
+  }
+
+  .login__submit:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+
+  .login__submit:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring),
+      0 6px 18px hsl(32 80% 40% / 0.30);
+  }
+
+  .login__spinner {
+    animation: login-spin 0.7s linear infinite;
+  }
+
+  @keyframes login-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     DIVIDER + SIGNUP
+     ════════════════════════════════════════════════════ */
+  .login__divider {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin: 2.4rem 0 1.6rem;
+  }
+
+  .login__divider::before,
+  .login__divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-border);
+  }
+
+  .login__divider span {
+    font-family: var(--font-display);
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+  }
+
+  /* ════════════════════════════════════════════════════
+     DEV MODE — clearly marked, secondary visual treatment
+     ════════════════════════════════════════════════════ */
+  .login__dev {
+    display: flex;
+    flex-direction: column;
+    gap: 1.0rem;
+    padding: 1.6rem 1.6rem 1.4rem;
+    margin-top: 0.4rem;
+    background-color: hsl(32 80% 50% / 0.04);
+    border: 1px dashed hsl(32 80% 50% / 0.35);
+    border-radius: var(--radius-sm);
+  }
+
+  .login__dev-head {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .login__dev-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.2rem;
+    padding: 0 0.7rem;
+    border-radius: var(--radius-pill);
+    background-color: hsl(32 80% 50% / 0.15);
+    color: var(--color-accent);
+    border: 1px solid hsl(32 80% 50% / 0.35);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  .login__dev-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .login__dev-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+  }
+
+  .login__dev-warning-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-warning);
+    flex-shrink: 0;
+  }
+
+  .login__dev-warning-icon svg {
+    display: block;
+  }
+
+  /* Secondary/outline button — visually distinct from the primary
+     submit so it's obvious this is a different action. */
+  .login__dev-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    width: 100%;
+    height: 4.6rem;
+    padding: 0 1.6rem;
+    background-color: transparent;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .login__dev-btn:hover {
+    background-color: hsl(0 0% 100% / 0.05);
+    border-color: hsl(0 0% 100% / 0.20);
+    color: var(--color-text);
+  }
+
+  .login__dev-btn:active {
+    transform: scale(0.985);
+  }
+
+  .login__dev-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .login__dev-icon {
+    flex-shrink: 0;
+    color: var(--color-accent);
+  }
+
+  .login__signup {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .login__signup-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: 0.4rem;
+    color: var(--color-accent);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: color var(--transition-fast);
+  }
+
+  .login__signup-link:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+  }
+
+  .login__signup-link:focus-visible {
+    outline: none;
+    text-decoration: underline;
+    box-shadow: var(--focus-ring);
+    border-radius: 2px;
+  }
+
+  .login__signup-msg {
+    margin: 1.2rem 0 0;
+    padding: 1.2rem 1.4rem;
+    background-color: hsl(217 80% 55% / 0.08);
+    border: 1px solid hsl(217 80% 55% / 0.25);
+    border-radius: var(--radius-sm);
+    color: hsl(217 80% 78%);
+    font-size: 1.2rem;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ════════════════════════════════════════════════════
+     BRAND FOOTER (below the card)
+     ════════════════════════════════════════════════════ */
+  .login__brand {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    margin: 0;
+    opacity: 0.7;
+  }
+
+  /* ════════════════════════════════════════════════════
+     RESPONSIVE
+     ════════════════════════════════════════════════════ */
+  @media (max-width: 480px) {
+    .login__card {
+      padding: 3.2rem 2.0rem;
+    }
+    .login__title {
+      font-size: 2.4rem;
+    }
+    .login__logo {
+      width: 5.6rem;
+      height: 5.6rem;
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     REDUCED MOTION
+     ════════════════════════════════════════════════════ */
+  @media (prefers-reduced-motion: reduce) {
+    .login__input,
+    .login__toggle,
+    .login__toggle:hover,
+    .login__submit,
+    .login__submit:hover:not(:disabled),
+    .login__submit:active:not(:disabled),
+    .login__signup-link,
+    .login__dev-btn,
+    .login__spinner {
+      transition: none;
+      animation: none;
+    }
+  }
+</style>

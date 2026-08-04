@@ -111,7 +111,56 @@ const categories = [
         <template x-for="ex in filtered" :key="ex.id">
           <article class="exo__card">
             <header class="exo__card-head">
-              <h3 class="exo__card-name" x-text="ex.name"></h3>
+              <div class="exo__card-title">
+                <svg
+                  class="exo__card-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6.5 6.5h11v11h-11z"></path>
+                  <path d="M2 9v6"></path>
+                  <path d="M22 9v6"></path>
+                  <path d="M6.5 6.5L2 9"></path>
+                  <path d="M17.5 6.5L22 9"></path>
+                  <path d="M6.5 17.5L2 15"></path>
+                  <path d="M17.5 17.5L22 15"></path>
+                </svg>
+                <h3 class="exo__card-name" x-text="ex.name"></h3>
+              </div>
+              <span
+                class="exo__set-badge"
+                x-show="getSetCount(ex.id) > 0"
+                x-cloak
+                x-transition.opacity.duration.200ms
+                :title="getSetCount(ex.id) + ' série' + (getSetCount(ex.id) > 1 ? 's' : '') + ' enregistrée' + (getSetCount(ex.id) > 1 ? 's' : '')"
+              >
+                <svg
+                  class="exo__set-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span x-text="getSetCount(ex.id)"></span>
+                <span class="exo__set-label">séries</span>
+              </span>
             </header>
 
             <div class="exo__card-badges">
@@ -140,6 +189,29 @@ const categories = [
                 >
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="exo__icon-btn exo__icon-btn--accent"
+                @click="openAddToSession(ex)"
+                aria-label="Ajouter à une séance"
+                title="Ajouter à une séance"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="exo__icon"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
                 </svg>
               </button>
               <button
@@ -267,7 +339,7 @@ const categories = [
           </div>
         </div>
 
-        <div class="exo__field" x-show="form.muscle === '__custom__'" x-cloak>
+        <div class="exo__field" x-show="form.muscle === '__custom__'" x-cloak x-transition.opacity.duration.200ms>
           <label for="exo-muscle-custom" class="exo__label">
             Nouveau groupe musculaire
             <span class="exo__label-req" aria-hidden="true">*</span>
@@ -315,7 +387,7 @@ const categories = [
           </div>
         </div>
 
-        <div class="exo__form-error" x-show="formError" x-text="formError" x-cloak></div>
+        <div class="exo__form-error" x-show="formError" x-text="formError" x-cloak x-transition.opacity.duration.200ms></div>
 
         <div class="exo__form-actions">
           <button
@@ -361,11 +433,267 @@ const categories = [
         </button>
       </div>
     </Dialog>
+
+    {/* ════════════════════════════════════════════════════
+        ADD TO SESSION DIALOG
+        ════════════════════════════════════════════════════ */}
+    <Dialog id="exo-add-to-session-dialog" class="exo__add-dialog-host">
+      <div class="exo__add-dialog">
+        <header class="exo__add-header">
+          <div class="exo__add-header-text">
+            <h2 class="exo__add-title" x-text="addingExercise?.name"></h2>
+            <p class="exo__add-muscle" x-text="addingExercise?.muscle"></p>
+          </div>
+          <button
+            type="button"
+            class="exo__add-close"
+            data-dialog-close
+            aria-label="Fermer"
+            @click="closeAddToSession()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </header>
+
+        {/* ── Session picker ── */}
+        <div class="exo__add-field">
+          <label for="exo-add-session" class="exo__label">Séance</label>
+          <div class="exo__select-wrap">
+            <select
+              id="exo-add-session"
+              class="exo__select"
+              x-model="addToSessionId"
+            >
+              <option value="">Choisir une séance…</option>
+              <option value="new">+ Nouvelle séance</option>
+              <template x-for="s in sessions" :key="s.id">
+                <option :value="s.id" x-text="s.name + ' (' + s.date + ')'"></option>
+              </template>
+            </select>
+            <svg
+              class="exo__select-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        {/* ── New session name (conditional) ── */}
+        <div
+          class="exo__add-field"
+          x-show="addToSessionId === 'new'"
+          x-cloak
+          x-transition.opacity.duration.180ms
+        >
+          <label for="exo-add-session-name" class="exo__label">
+            Nom de la nouvelle séance
+          </label>
+          <input
+            id="exo-add-session-name"
+            type="text"
+            class="exo__input"
+            x-model="newSessionName"
+            placeholder="Ex. Push day"
+            autocomplete="off"
+          />
+        </div>
+
+        {/* ── Sets table ── */}
+        <div class="exo__add-sets">
+          <div class="exo__add-sets-header" aria-hidden="true">
+            <span>#</span>
+            <span>Type</span>
+            <span>Charge (kg)</span>
+            <span>Reps</span>
+            <span></span>
+          </div>
+          <template x-for="(set, i) in addSets" :key="i">
+            <div class="exo__add-sets-row">
+              <span class="exo__add-sets-num" x-text="i + 1"></span>
+              <div class="exo__add-sets-type">
+                <span class="exo__add-sets-label">Type</span>
+                <div class="exo__select-wrap">
+                  <select class="exo__select exo__select--compact" x-model="set.type">
+                    <option value="warmup">Échauffement</option>
+                    <option value="work">Travail</option>
+                    <option value="top">Top set</option>
+                    <option value="drop">Drop set</option>
+                    <option value="failure">Échec</option>
+                  </select>
+                  <svg
+                    class="exo__select-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="exo__add-sets-weight">
+                <span class="exo__add-sets-label">Charge (kg)</span>
+                <input
+                  type="number"
+                  class="exo__input exo__input--compact"
+                  x-model.number="set.weight"
+                  min="0"
+                  step="0.5"
+                  inputmode="decimal"
+                />
+              </div>
+              <div class="exo__add-sets-reps">
+                <span class="exo__add-sets-label">Reps</span>
+                <input
+                  type="number"
+                  class="exo__input exo__input--compact"
+                  x-model.number="set.reps"
+                  min="0"
+                  inputmode="numeric"
+                />
+              </div>
+              <button
+                type="button"
+                class="exo__add-sets-remove"
+                @click="removeSetFromConfig(i)"
+                :disabled="addSets.length <= 1"
+                :aria-label="'Supprimer la série ' + (i + 1)"
+                title="Supprimer cette série"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </template>
+          <div class="exo__add-sets-actions">
+            <button
+              type="button"
+              class="exo__add-sets-warmup"
+              @click="generateWarmup()"
+              :disabled="!hasWorkingWeight()"
+              :title="hasWorkingWeight() ? 'Générer 3 séries d\u2019échauffement basées sur la charge de travail max' : 'Renseignez d\u2019abord le poids d\u2019une série de travail'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+              </svg>
+              <span>Générer échauffement</span>
+            </button>
+            <button
+              type="button"
+              class="exo__add-sets-add"
+              @click="addSetToConfig()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Ajouter une série</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div slot="footer" class="exo__add-actions">
+        <button
+          type="button"
+          class="exo__btn exo__btn--secondary"
+          data-dialog-close
+          @click="closeAddToSession()"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="exo__btn exo__btn--primary"
+          @click="submitAddToSession()"
+          :disabled="!addToSessionId"
+        >
+          Ajouter à la séance
+        </button>
+      </div>
+    </Dialog>
+
+    {/* ════════════════════════════════════════════════════
+        SUCCESS TOAST
+        ════════════════════════════════════════════════════ */}
+    <div
+      class="exo__toast"
+      x-show="toast.visible"
+      x-cloak
+      x-transition.opacity.duration.200ms
+      role="status"
+      aria-live="polite"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="exo__toast-icon"
+        aria-hidden="true"
+      >
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span x-text="toast.message"></span>
+    </div>
   </div>
 </AppLayout>
-
-{/* Alpine.js via CDN (defer — runs after DOM is parsed) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <script>
   import {
@@ -373,18 +701,30 @@ const categories = [
     saveExercise,
     updateExercise,
     deleteExercise,
+    getSessions,
+    saveSession,
+    updateSession,
     type Exercise,
+    type Session,
+    type SessionExercise,
+    type SessionSet,
+    type SetType,
   } from '../../lib/storage';
 
   // Default muscle groups always surfaced in the filter bar
   // (mirrors the seed list in src/lib/storage.ts).
   const EXO_DEFAULT_MUSCLES = [
     'Pectoraux',
-    'Quadriceps',
     'Dos',
     'Épaules',
     'Biceps',
     'Triceps',
+    'Quadriceps',
+    'Ischio-jambiers',
+    'Fessiers',
+    'Abdominaux',
+    'Mollets',
+    'Avant-bras',
   ];
 
   // Sentinel value used by the muscle <select> to reveal the
@@ -396,6 +736,12 @@ const categories = [
     muscle: string;
     customMuscle: string;
     category: string;
+  }
+
+  interface AddSetRow {
+    type: SetType;
+    weight: number;
+    reps: number;
   }
 
   function resolveForm(form: AlpineFormState): { name: string; muscle: string; category: string } | null {
@@ -413,13 +759,27 @@ const categories = [
     Alpine.data('exercisesApp', () => ({
       // ── State ──
       exercises: [] as Exercise[],
+      sessions: [] as Session[],
+      setCounts: {} as Record<string, number>,
       search: '',
       muscleFilter: '',
       form: { name: '', muscle: '', customMuscle: '', category: '' } as AlpineFormState,
       formError: '',
       editingId: '' as string,
       deletingExercise: null as Exercise | null,
-      deletingName: '' as string,
+      deletingName: '',
+
+      // ── Add-to-session state ──
+      addingExercise: null as Exercise | null,
+      addToSessionId: '' as string,
+      newSessionName: '' as string,
+      addSets: [
+        { type: 'work', weight: 0, reps: 0 },
+        { type: 'work', weight: 0, reps: 0 },
+        { type: 'work', weight: 0, reps: 0 },
+      ] as AddSetRow[],
+      toast: { visible: false, message: '' },
+      _toastTimer: 0,
 
       // ── Init ──
       init() {
@@ -428,6 +788,22 @@ const categories = [
 
       refresh() {
         this.exercises = getExercises();
+        this.sessions = getSessions();
+        this.recomputeSetCounts();
+      },
+
+      recomputeSetCounts() {
+        const counts: Record<string, number> = {};
+        for (const session of this.sessions) {
+          for (const ex of session.exercises) {
+            counts[ex.exerciseId] = (counts[ex.exerciseId] ?? 0) + ex.sets.length;
+          }
+        }
+        this.setCounts = counts;
+      },
+
+      getSetCount(exerciseId: string): number {
+        return this.setCounts[exerciseId] ?? 0;
       },
 
       // ── Derived ──
@@ -523,6 +899,120 @@ const categories = [
         this.closeDialogById('exo-delete-dialog');
       },
 
+      // ── Add-to-session actions ──
+      openAddToSession(exercise: Exercise) {
+        this.addingExercise = exercise;
+        this.addToSessionId = '';
+        this.newSessionName = '';
+        this.addSets = [
+          { type: 'work', weight: 0, reps: 0 },
+          { type: 'work', weight: 0, reps: 0 },
+          { type: 'work', weight: 0, reps: 0 },
+        ];
+        // Refresh the sessions list so the picker is up to date.
+        this.sessions = getSessions();
+        this.openDialogById('exo-add-to-session-dialog');
+      },
+
+      closeAddToSession() {
+        this.addingExercise = null;
+        this.addToSessionId = '';
+        this.newSessionName = '';
+        this.closeDialogById('exo-add-to-session-dialog');
+      },
+
+      addSetToConfig() {
+        this.addSets.push({ type: 'work', weight: 0, reps: 0 });
+      },
+
+      removeSetFromConfig(index: number) {
+        if (this.addSets.length <= 1) return;
+        this.addSets.splice(index, 1);
+      },
+
+      hasWorkingWeight(): boolean {
+        return this.addSets.some((s) => s.type === 'work' && s.weight > 0);
+      },
+
+      generateWarmup() {
+        // Find the max working weight from existing sets.
+        const workingSets = this.addSets.filter((s) => s.type === 'work' && s.weight > 0);
+        if (workingSets.length === 0) {
+          this.showToast('Renseignez d\u2019abord le poids d\u2019une série de travail');
+          return;
+        }
+
+        const maxWeight = Math.max(...workingSets.map((s) => s.weight));
+
+        // Generate warmup sets: 40%, 60%, 80% of working weight.
+        const warmupPercents = [0.4, 0.6, 0.8] as const;
+        const warmupReps = [12, 8, 5] as const;
+        const warmups: AddSetRow[] = warmupPercents.map((p, i) => ({
+          type: 'warmup',
+          weight: Math.round(maxWeight * p),
+          reps: warmupReps[i],
+        }));
+
+        // Prepend warmups to the working sets.
+        this.addSets = [...warmups, ...this.addSets];
+      },
+
+      showToast(message: string) {
+        this.toast = { visible: true, message };
+        if (this._toastTimer) window.clearTimeout(this._toastTimer);
+        this._toastTimer = window.setTimeout(() => {
+          this.toast = { visible: false, message: '' };
+        }, 2800);
+      },
+
+      submitAddToSession() {
+        if (!this.addingExercise) return;
+        if (!this.addToSessionId) return;
+
+        let sessionId = this.addToSessionId;
+
+        // Create a new session if requested.
+        if (sessionId === 'new') {
+          const name =
+            this.newSessionName.trim() ||
+            `Séance ${new Date().toLocaleDateString('fr-FR')}`;
+          const created = saveSession({
+            name,
+            date: new Date().toISOString().split('T')[0],
+            exercises: [],
+            status: 'planned',
+          });
+          sessionId = created.id;
+        }
+
+        const sessions = getSessions();
+        const session = sessions.find((s) => s.id === sessionId);
+        if (!session) return;
+
+        const exerciseId = this.addingExercise.id;
+        const exerciseEntry: SessionExercise = {
+          exerciseId,
+          name: this.addingExercise.name,
+          muscle: this.addingExercise.muscle,
+          sets: this.addSets.map<SessionSet>((s, i) => ({
+            exerciseId,
+            setNumber: i + 1,
+            type: s.type,
+            weight: s.weight,
+            reps: s.reps,
+            completed: false,
+          })),
+        };
+
+        session.exercises.push(exerciseEntry);
+        updateSession(session.id, { exercises: session.exercises });
+
+        const exerciseName = this.addingExercise.name;
+        this.closeAddToSession();
+        this.refresh();
+        this.showToast(`« ${exerciseName} » ajouté à la séance`);
+      },
+
       // ── Dialog helpers (wrap the global Dialog API) ──
       openDialogById(id: string) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -538,12 +1028,10 @@ const categories = [
   });
 </script>
 
-<style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
+{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
+<style>
   /* ════════════════════════════════════════════════════
      CONTAINER
      ════════════════════════════════════════════════════ */
@@ -619,7 +1107,7 @@ const categories = [
   }
 
   .exo__filter {
-    height: 3.6rem;
+    height: 4.0rem;
     padding: 0 1.4rem;
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
@@ -675,7 +1163,7 @@ const categories = [
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    height: 3.8rem;
+    height: 4.4rem;
     padding: 0 1.6rem;
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
@@ -748,13 +1236,64 @@ const categories = [
   }
 
   .exo__card:hover {
+    background-color: var(--color-surface-2);
     border-color: hsl(0 0% 100% / 0.18);
     box-shadow: 0 6px 20px hsl(0 0% 0% / 0.40);
     transform: translateY(-2px);
   }
 
   .exo__card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     min-width: 0;
+  }
+
+  .exo__card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .exo__card-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .exo__set-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.4rem;
+    padding: 0 0.9rem;
+    background-color: hsl(142 70% 45% / 0.10);
+    border: 1px solid hsl(142 70% 45% / 0.30);
+    border-radius: var(--radius-pill);
+    color: var(--color-success);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .exo__set-icon {
+    width: 1.3rem;
+    height: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .exo__set-label {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   .exo__card-name {
@@ -809,8 +1348,8 @@ const categories = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
@@ -837,6 +1376,12 @@ const categories = [
     color: var(--color-destructive);
   }
 
+  .exo__icon-btn--accent:hover {
+    background-color: hsl(32 95% 50% / 0.12);
+    border-color: hsl(32 95% 50% / 0.35);
+    color: var(--color-accent);
+  }
+
   .exo__icon {
     width: 1.6rem;
     height: 1.6rem;
@@ -857,7 +1402,7 @@ const categories = [
   .exo__reset-btn {
     display: inline-flex;
     align-items: center;
-    height: 3.8rem;
+    height: 4.4rem;
     padding: 0 1.6rem;
     background-color: transparent;
     border: 1px solid var(--color-border);
@@ -1060,9 +1605,9 @@ const categories = [
       font-size: 1.3rem;
     }
     .exo__filter {
-      height: 3.2rem;
-      font-size: 1.1rem;
-      padding: 0 1.2rem;
+      height: 4.0rem;
+      font-size: 1.2rem;
+      padding: 0 1.4rem;
     }
     .exo__card {
       padding: 1.6rem;
@@ -1073,13 +1618,384 @@ const categories = [
   }
 
   /* ════════════════════════════════════════════════════
+     ADD-TO-SESSION DIALOG
+     ════════════════════════════════════════════════════ */
+  :global(#exo-add-to-session-dialog) {
+    max-width: 56rem;
+    width: auto;
+  }
+
+  .exo__add-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .exo__add-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .exo__add-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .exo__add-title {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+    word-break: break-word;
+  }
+
+  .exo__add-muscle {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    height: 2.4rem;
+    padding: 0 1rem;
+    background-color: hsl(32 95% 50% / 0.12);
+    border: 1px solid hsl(32 95% 50% / 0.30);
+    border-radius: var(--radius-pill);
+    color: var(--color-accent);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .exo__add-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    flex-shrink: 0;
+    background-color: hsl(0 0% 100% / 0.05);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .exo__add-close:hover {
+    background-color: hsl(0 0% 100% / 0.10);
+    color: var(--color-text);
+  }
+
+  .exo__add-close svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .exo__add-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SETS TABLE — desktop grid, mobile stacked cards
+     ════════════════════════════════════════════════════ */
+  .exo__add-sets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .exo__add-sets-header {
+    display: grid;
+    grid-template-columns: 3.2rem 1fr 8rem 6rem 3.2rem;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0 0.2rem;
+    font-family: var(--font-body);
+    font-size: 1.0rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--color-muted);
+    line-height: 1.2;
+  }
+
+  .exo__add-sets-header span:nth-child(3),
+  .exo__add-sets-header span:nth-child(4) {
+    text-align: center;
+  }
+
+  .exo__add-sets-row {
+    display: grid;
+    grid-template-columns: 3.2rem 1fr 8rem 6rem 3.2rem;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .exo__add-sets-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.8rem;
+    height: 2.8rem;
+    margin-left: 0.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .exo__add-sets-type,
+  .exo__add-sets-weight,
+  .exo__add-sets-reps {
+    min-width: 0;
+  }
+
+  .exo__add-sets-label {
+    display: none;
+    font-size: 1.0rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .exo__select--compact,
+  .exo__input--compact {
+    height: 4.0rem;
+    font-size: 1.3rem;
+    padding: 0 1.2rem;
+  }
+
+  .exo__select--compact {
+    padding-right: 3.4rem;
+  }
+
+  .exo__add-sets-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .exo__add-sets-remove:hover:not(:disabled) {
+    background-color: hsl(0 80% 55% / 0.12);
+    border-color: hsl(0 80% 55% / 0.40);
+    color: var(--color-destructive);
+  }
+
+  .exo__add-sets-remove:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .exo__add-sets-remove svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .exo__add-sets-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    height: 4.0rem;
+    margin-top: 0.4rem;
+    background-color: transparent;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .exo__add-sets-add:hover {
+    background-color: hsl(0 0% 100% / 0.04);
+    border-color: hsl(0 0% 100% / 0.20);
+    border-style: solid;
+    color: var(--color-text);
+  }
+
+  .exo__add-sets-add svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  /* ── Sets table action row (warmup + add) ── */
+  .exo__add-sets-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  @media (min-width: 640px) {
+    .exo__add-sets-actions {
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .exo__add-sets-actions .exo__add-sets-warmup {
+      flex: 0 0 auto;
+    }
+    .exo__add-sets-actions .exo__add-sets-add {
+      flex: 1 1 auto;
+      margin-top: 0;
+    }
+  }
+
+  /* ── Warmup auto-generation button (dashed accent) ── */
+  .exo__add-sets-warmup {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    height: 4.0rem;
+    padding: 0 1.4rem;
+    background-color: transparent;
+    border: 1px dashed var(--color-accent);
+    border-radius: var(--radius-sm);
+    color: var(--color-accent);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                border-style var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .exo__add-sets-warmup:hover:not(:disabled) {
+    background-color: hsl(32 95% 50% / 0.10);
+    border-style: solid;
+  }
+
+  .exo__add-sets-warmup:disabled {
+    opacity: 0.40;
+    cursor: not-allowed;
+    background-color: transparent;
+    color: var(--color-muted);
+    border-color: var(--color-border);
+  }
+
+  .exo__add-sets-warmup svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Sets table: mobile (stacked cards) ── */
+  @media (max-width: 640px) {
+    .exo__add-sets-header {
+      display: none;
+    }
+    .exo__add-sets-row {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "num    remove"
+        "type   type"
+        "weight reps";
+      gap: 0.8rem;
+      padding: 1rem;
+      background-color: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+    .exo__add-sets-num { grid-area: num; justify-self: start; }
+    .exo__add-sets-remove { grid-area: remove; justify-self: end; }
+    .exo__add-sets-type { grid-area: type; }
+    .exo__add-sets-weight { grid-area: weight; }
+    .exo__add-sets-reps { grid-area: reps; }
+    .exo__add-sets-label { display: block; }
+  }
+
+  .exo__add-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 0.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* ════════════════════════════════════════════════════
+     SUCCESS TOAST
+     ════════════════════════════════════════════════════ */
+  .exo__toast {
+    position: fixed;
+    left: 50%;
+    bottom: 2.4rem;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    max-width: calc(100vw - 3.2rem);
+    padding: 1.0rem 1.6rem;
+    background-color: var(--color-surface-3);
+    border: 1px solid var(--color-success);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.2;
+    box-shadow: 0 10px 30px hsl(0 0% 0% / 0.5),
+                0 0 0 1px hsl(142 70% 45% / 0.15);
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  .exo__toast-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    color: var(--color-success);
+    flex-shrink: 0;
+  }
+
+  /* ════════════════════════════════════════════════════
      REDUCED MOTION
      ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
     .exo__card,
     .exo__add-btn,
     .exo__filter,
-    .exo__icon-btn {
+    .exo__icon-btn,
+    .exo__add-sets-warmup,
+    .exo__add-sets-add {
       transition: none;
     }
     .exo__card:hover {

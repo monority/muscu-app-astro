@@ -1,17 +1,11 @@
 {
-  "name": "Muscu App",
-  "short_name": "Muscu",
-  "description": "Application de suivi d'entraînement",
+  "name": "muscu.app — Training Log",
+  "short_name": "muscu.app",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#050505",
-  "theme_color": "#050505",
+  "theme_color": "#D97706",
   "icons": [
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
   ]
 }

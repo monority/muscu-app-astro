@@ -25,7 +25,21 @@ import PageHeader from '../../components/layout/PageHeader.astro';
         :aria-selected="mode === 'countdown'"
         @click="setMode('countdown')"
       >
-        Minuterie
+        <svg
+          class="timer__mode-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Minuterie</span>
       </button>
       <button
         type="button"
@@ -35,14 +49,29 @@ import PageHeader from '../../components/layout/PageHeader.astro';
         :aria-selected="mode === 'stopwatch'"
         @click="setMode('stopwatch')"
       >
-        Chronomètre
+        <svg
+          class="timer__mode-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="10" y1="2" x2="14" y2="2"></line>
+          <line x1="12" y1="14" x2="12" y2="10"></line>
+          <circle cx="12" cy="14" r="8"></circle>
+        </svg>
+        <span>Chronomètre</span>
       </button>
     </div>
 
     {/* ════════════════════════════════════════════════════
         COUNTDOWN MODE
         ════════════════════════════════════════════════════ */}
-    <div class="timer__panel" x-show="mode === 'countdown'">
+    <div class="timer__panel" x-show="mode === 'countdown'" x-transition.opacity.duration.200ms>
       {/* ── Preset buttons ── */}
       <div class="timer__presets" role="group" aria-label="Durées prédéfinies">
         <template x-for="preset in presets" :key="preset">
@@ -144,6 +173,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           class="timer__btn timer__btn--primary"
           @click="start()"
           x-show="!running"
+          x-transition.opacity.duration.150ms
           x-text="remaining === 0 ? 'Redémarrer' : 'Démarrer'"
         >
           Démarrer
@@ -153,6 +183,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           class="timer__btn timer__btn--secondary"
           @click="pause()"
           x-show="running"
+          x-transition.opacity.duration.150ms
         >
           Pause
         </button>
@@ -165,23 +196,38 @@ import PageHeader from '../../components/layout/PageHeader.astro';
         </button>
       </div>
 
-      {/* ── Sound toggle ── */}
-      <div class="timer__sound">
-        <label class="timer__sound-label">
-          <input
-            type="checkbox"
-            x-model="soundEnabled"
-            class="timer__sound-input"
-          />
-          <span>Alerte sonore</span>
-        </label>
-      </div>
+    {/* ── Sound toggle ── */}
+    <div class="timer__sound">
+      <label class="timer__sound-label">
+        <input
+          type="checkbox"
+          x-model="soundEnabled"
+          class="timer__sound-input"
+        />
+        <svg
+          class="timer__sound-icon"
+          :class="{ 'is-on': soundEnabled }"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+        </svg>
+        <span>Alerte sonore</span>
+      </label>
+    </div>
     </div>
 
     {/* ════════════════════════════════════════════════════
         STOPWATCH MODE
         ════════════════════════════════════════════════════ */}
-    <div class="timer__panel" x-show="mode === 'stopwatch'">
+    <div class="timer__panel" x-show="mode === 'stopwatch'" x-transition.opacity.duration.200ms>
       {/* ── Stopwatch display (no ring) ── */}
       <div class="timer__stage timer__stage--sw">
         <div class="timer__readout">
@@ -205,6 +251,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           class="timer__btn timer__btn--primary"
           @click="swStart()"
           x-show="!sw.running"
+          x-transition.opacity.duration.150ms
           x-text="sw.elapsed === 0 ? 'Démarrer' : 'Reprendre'"
         >
           Démarrer
@@ -214,6 +261,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           class="timer__btn timer__btn--secondary"
           @click="swPause()"
           x-show="sw.running"
+          x-transition.opacity.duration.150ms
         >
           Pause
         </button>
@@ -235,7 +283,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
       </div>
 
       {/* ── Lap list ── */}
-      <div class="timer__laps" x-show="sw.laps.length > 0">
+      <div class="timer__laps" x-show="sw.laps.length > 0" x-transition.opacity.duration.200ms>
         <div class="timer__laps-header">
           <span class="timer__laps-col-label">Tour</span>
           <span class="timer__laps-col-label">Temps du tour</span>
@@ -254,9 +302,6 @@ import PageHeader from '../../components/layout/PageHeader.astro';
     </div>
   </div>
 </AppLayout>
-
-{/* ── Alpine.js via CDN (defer — runs after DOM is parsed) ── */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <script is:inline>
   document.addEventListener('alpine:init', () => {
@@ -519,12 +564,10 @@ import PageHeader from '../../components/layout/PageHeader.astro';
   });
 </script>
 
-<style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
+{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
+<style>
   /* ════════════════════════════════════════════════════
      CONTAINER
      ════════════════════════════════════════════════════ */
@@ -554,6 +597,10 @@ import PageHeader from '../../components/layout/PageHeader.astro';
   }
 
   .timer__mode-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
     min-width: 14rem;
     height: 4.4rem;
     padding: 0 2.4rem;
@@ -571,6 +618,13 @@ import PageHeader from '../../components/layout/PageHeader.astro';
                 background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
                 box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1),
                 transform 160ms ease;
+  }
+
+  .timer__mode-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+    color: currentColor;
   }
 
   .timer__mode-btn:hover:not(.is-active) {
@@ -761,7 +815,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
   }
 
   .timer__custom-label {
-    font-size: 1.0rem;
+    font-size: 1.1rem;
     color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.14em;
@@ -966,7 +1020,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
     background-color: var(--color-surface-3);
     color: var(--color-muted);
     font-family: var(--font-display);
-    font-size: 1.0rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.16em;
@@ -1061,6 +1115,18 @@ import PageHeader from '../../components/layout/PageHeader.astro';
     cursor: pointer;
   }
 
+  .timer__sound-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--color-muted);
+    flex-shrink: 0;
+    transition: color 200ms ease;
+  }
+
+  .timer__sound-icon.is-on {
+    color: var(--color-accent);
+  }
+
   /* ════════════════════════════════════════════════════
      REDUCED MOTION
      ════════════════════════════════════════════════════ */
@@ -1089,7 +1155,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
     }
     .timer__mode-btn {
       min-width: 11rem;
-      height: 4rem;
+      height: 4.4rem;
       font-size: 1.2rem;
       padding: 0 1.6rem;
     }
@@ -1112,7 +1178,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
       font-size: 1.2rem;
     }
     .timer__laps-header {
-      font-size: 0.9rem;
+      font-size: 1.0rem;
     }
   }
 </style>

@@ -78,24 +78,115 @@ import Dialog from '../../components/ui/Dialog.astro';
           ></div>
         </header>
 
+        <div class="detail__status-picker">
+          <label class="detail__status-label">Statut</label>
+          <div class="detail__status-options" role="radiogroup" aria-label="Statut de la séance">
+            <button
+              type="button"
+              class="detail__status-btn"
+              :class="{ 'is-active': session.status === 'planned' }"
+              :aria-pressed="session.status === 'planned'"
+              @click="updateStatus('planned')"
+            >
+              <span class="detail__status-dot detail__status-dot--planned" aria-hidden="true"></span>
+              <span>Planifiée</span>
+            </button>
+            <button
+              type="button"
+              class="detail__status-btn"
+              :class="{ 'is-active': session.status === 'in-progress' }"
+              :aria-pressed="session.status === 'in-progress'"
+              @click="updateStatus('in-progress')"
+            >
+              <span class="detail__status-dot detail__status-dot--in-progress" aria-hidden="true"></span>
+              <span>En cours</span>
+            </button>
+            <button
+              type="button"
+              class="detail__status-btn"
+              :class="{ 'is-active': session.status === 'completed' }"
+              :aria-pressed="session.status === 'completed'"
+              @click="updateStatus('completed')"
+            >
+              <span class="detail__status-dot detail__status-dot--completed" aria-hidden="true"></span>
+              <span>Terminée</span>
+            </button>
+          </div>
+        </div>
+
         {/* Stats grid */}
         <div class="detail__stats">
           <div class="detail__stat">
-            <div class="detail__stat-label">Durée</div>
+            <div class="detail__stat-label">
+              <svg
+                class="detail__stat-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>Durée</span>
+            </div>
             <div
               class="detail__stat-value"
               x-text="formatDuration(session.duration)"
             ></div>
           </div>
           <div class="detail__stat">
-            <div class="detail__stat-label">Volume total</div>
+            <div class="detail__stat-label">
+              <svg
+                class="detail__stat-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6.5 6.5h11"></path>
+                <path d="M6.5 17.5h11"></path>
+                <path d="M3 9v6"></path>
+                <path d="M21 9v6"></path>
+                <path d="M6.5 6.5 3 9v6l3.5 2.5h11L21 15V9l-3.5-2.5Z"></path>
+              </svg>
+              <span>Volume total</span>
+            </div>
             <div
               class="detail__stat-value"
               x-text="formatVolume(sessionTotalVolume)"
             ></div>
           </div>
           <div class="detail__stat">
-            <div class="detail__stat-label">Exercices</div>
+            <div class="detail__stat-label">
+              <svg
+                class="detail__stat-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              <span>Exercices</span>
+            </div>
             <div
               class="detail__stat-value"
               x-text="session.exercises.length"
@@ -105,6 +196,57 @@ import Dialog from '../../components/ui/Dialog.astro';
 
         {/* Actions */}
         <div class="detail__actions">
+          {/* ── Partager (génère une image téléchargeable) ── */}
+          <button
+            type="button"
+            class="detail__btn detail__btn--accent"
+            @click="generateShareCard()"
+            aria-label="Partager la séance"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="detail__btn-icon"
+              aria-hidden="true"
+            >
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            Partager
+          </button>
+
+          {/* ── Comparer (lien vers la page de comparaison) ── */}
+          <a
+            class="detail__btn detail__btn--secondary"
+            :href="`/seances/comparer?id1=${session?.id || ''}`"
+            :aria-disabled="!session?.id"
+            aria-label="Comparer avec une autre séance"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="detail__btn-icon"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="12" y1="3" x2="12" y2="21"></line>
+            </svg>
+            Comparer
+          </a>
+
           <button
             type="button"
             class="detail__btn detail__btn--secondary"
@@ -154,6 +296,73 @@ import Dialog from '../../components/ui/Dialog.astro';
             Supprimer
           </button>
         </div>
+
+        {/* Session notes (RPE / fatigue / mood / free text) */}
+        <template x-if="hasNotes">
+          <section class="detail__notes">
+            <h2 class="detail__section-title">Notes de séance</h2>
+            <Card>
+              <div class="notes">
+                {/* RPE badge */}
+                <div class="notes__item" x-show="session.rpe != null">
+                  <div class="notes__label">Effort perçu (RPE)</div>
+                  <div class="notes__value">
+                    <span
+                      class="notes__rpe"
+                      :class="'notes__rpe--' + rpeTone(session.rpe)"
+                    >
+                      <span class="notes__rpe-num" x-text="session.rpe"></span>
+                      <span class="notes__rpe-sep">/ 10</span>
+                    </span>
+                    <span
+                      class="notes__rpe-label"
+                      x-text="rpeLabel(session.rpe)"
+                    ></span>
+                  </div>
+                </div>
+
+                {/* Fatigue */}
+                <div class="notes__item" x-show="session.fatigue && session.fatigue > 0">
+                  <div class="notes__label">Fatigue</div>
+                  <div class="notes__value">
+                    <div class="notes__fatigue" aria-label="Niveau de fatigue">
+                      <template x-for="i in 5" :key="'d-fat-' + i">
+                        <span
+                          class="notes__fatigue-icon"
+                          :class="{ 'is-active': session.fatigue >= i }"
+                          aria-hidden="true"
+                        >
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                        </span>
+                      </template>
+                    </div>
+                    <span class="notes__fatigue-label" x-text="fatigueLabel(session.fatigue)"></span>
+                  </div>
+                </div>
+
+                {/* Mood */}
+                <div class="notes__item" x-show="session.mood">
+                  <div class="notes__label">Humeur</div>
+                  <div class="notes__value">
+                    <span
+                      class="notes__mood"
+                      :class="'notes__mood--' + session.mood"
+                    >
+                      <span class="notes__mood-emoji" x-html="moodEmoji(session.mood)"></span>
+                      <span class="notes__mood-label" x-text="moodLabel(session.mood)"></span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Free-text notes */}
+                <div class="notes__item notes__item--text" x-show="session.notes && session.notes.trim() !== ''">
+                  <div class="notes__label">Notes</div>
+                  <p class="notes__text" x-text="session.notes"></p>
+                </div>
+              </div>
+            </Card>
+          </section>
+        </template>
 
         {/* Exercises */}
         <section class="detail__exercises">
@@ -300,19 +509,76 @@ import Dialog from '../../components/ui/Dialog.astro';
         </button>
       </div>
     </Dialog>
+
+    {/* ════════════════════════════════════════════════════
+        HIDDEN SHARE CARD
+        DOM reference for the shareable image. The actual PNG
+        is generated by generateShareCard() via the canvas API,
+        but this hidden element keeps the markup in one place
+        and lets the structure be inspected/edited.
+        ════════════════════════════════════════════════════ */}
+    <div
+      id="share-card"
+      class="share-card"
+      x-show="false"
+      aria-hidden="true"
+    >
+      <div class="share-card__inner">
+        <header class="share-card__header">
+          <span class="share-card__logo">muscu.app</span>
+          <span
+            class="share-card__date"
+            x-text="formatShareDate(session?.date)"
+          ></span>
+        </header>
+        <h2 class="share-card__title" x-text="session?.name"></h2>
+        <div class="share-card__stats">
+          <div class="share-card__stat">
+            <span
+              class="share-card__stat-value"
+              x-text="session?.exercises?.length || 0"
+            ></span>
+            <span class="share-card__stat-label">Exercices</span>
+          </div>
+          <div class="share-card__stat">
+            <span class="share-card__stat-value" x-text="totalSets"></span>
+            <span class="share-card__stat-label">Séries</span>
+          </div>
+          <div class="share-card__stat">
+            <span
+              class="share-card__stat-value"
+              x-text="formatVolume(sessionTotalVolume)"
+            ></span>
+            <span class="share-card__stat-label">Volume</span>
+          </div>
+        </div>
+        <div class="share-card__exercises">
+          <template x-for="ex in session?.exercises || []" :key="ex.exerciseId">
+            <div class="share-card__exercise">
+              <span x-text="ex.name"></span>
+              <span
+                x-text="`${ex.sets.length} série${ex.sets.length > 1 ? 's' : ''}`"
+              ></span>
+            </div>
+          </template>
+        </div>
+        <div class="share-card__footer">
+          muscu.app — Training Log
+        </div>
+      </div>
+    </div>
   </div>
 </AppLayout>
-
-{/* Alpine.js via CDN (defer — runs after DOM is parsed) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <script>
   import {
     getSessionById,
+    updateSession,
     deleteSession,
     calculate1RM,
     type Session,
     type SessionExercise,
+    type SessionMood,
     type SessionStatus,
     type SetType,
   } from '../../lib/storage';
@@ -382,6 +648,71 @@ import Dialog from '../../components/ui/Dialog.astro';
     return rpe.toString();
   }
 
+  // ── Notes helpers (added 2026-08-04) ───────────────────────
+  function rpeToneFn(rpe: number | undefined | null): 'easy' | 'moderate' | 'hard' | 'max' | 'none' {
+    if (rpe == null || !Number.isFinite(rpe)) return 'none';
+    if (rpe <= 3) return 'easy';
+    if (rpe <= 6) return 'moderate';
+    if (rpe <= 8) return 'hard';
+    return 'max';
+  }
+
+  function rpeLabelFn(rpe: number | undefined | null): string {
+    const tone = rpeToneFn(rpe);
+    if (tone === 'easy') return 'Très facile';
+    if (tone === 'moderate') return 'Modéré';
+    if (tone === 'hard') return 'Dur';
+    if (tone === 'max') return 'Maximum';
+    return '—';
+  }
+
+  function fatigueLabelFn(level: number | undefined | null): string {
+    if (!level || level <= 0) return '—';
+    if (level === 1) return 'Très frais';
+    if (level === 2) return 'Frais';
+    if (level === 3) return 'Normal';
+    if (level === 4) return 'Fatigué';
+    return 'Épuisé';
+  }
+
+  // Mood helpers return inline Lucide SVG markup so they can be
+  // rendered via x-html. Stroke + color are inherited from
+  // the .notes__mood--* modifier on the parent pill.
+  const MOOD_SVG_ATTRS = 'viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  const MOOD_SMILE  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+  const MOOD_HEART  = `<svg ${MOOD_SVG_ATTRS}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+  const MOOD_MEH    = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+  const MOOD_FROWN  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+  const MOOD_BED    = `<svg ${MOOD_SVG_ATTRS}><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
+
+  function moodEmojiFn(mood: SessionMood | undefined | null): string {
+    if (!mood) return '';
+    if (mood === 'great') return MOOD_SMILE;
+    if (mood === 'good') return MOOD_HEART;
+    if (mood === 'ok') return MOOD_MEH;
+    if (mood === 'tired') return MOOD_FROWN;
+    return MOOD_BED;
+  }
+
+  function moodLabelFn(mood: SessionMood | undefined | null): string {
+    if (!mood) return '';
+    if (mood === 'great') return 'Très bonne';
+    if (mood === 'good') return 'Bonne';
+    if (mood === 'ok') return 'Moyenne';
+    if (mood === 'tired') return 'Fatiguée';
+    return 'Mauvaise';
+  }
+
+  function hasNotesFn(s: Session | null): boolean {
+    if (!s) return false;
+    return (
+      (s.rpe != null && Number.isFinite(s.rpe)) ||
+      (s.fatigue != null && s.fatigue > 0) ||
+      (s.mood != null && s.mood !== '') ||
+      (s.notes != null && s.notes.trim() !== '')
+    );
+  }
+
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
@@ -415,6 +746,18 @@ import Dialog from '../../components/ui/Dialog.astro';
           (sum, ex) => sum + this.exerciseVolume(ex),
           0,
         );
+      },
+
+      get totalSets(): number {
+        if (!this.session) return 0;
+        return this.session.exercises.reduce(
+          (sum, ex) => sum + ex.sets.length,
+          0,
+        );
+      },
+
+      get hasNotes(): boolean {
+        return hasNotesFn(this.session);
       },
 
       // ── Helpers ──
@@ -463,7 +806,50 @@ import Dialog from '../../components/ui/Dialog.astro';
         return formatRpeFn(rpe);
       },
 
+      /**
+       * Long-form French date for the share card (no time, capitalised).
+       * Falls back to the raw string if the input isn't a valid date.
+       */
+      formatShareDate(iso?: string): string {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return iso;
+        const formatted = d.toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      },
+
+      rpeTone(rpe: number | undefined | null) {
+        return rpeToneFn(rpe);
+      },
+
+      rpeLabel(rpe: number | undefined | null) {
+        return rpeLabelFn(rpe);
+      },
+
+      fatigueLabel(level: number | undefined | null) {
+        return fatigueLabelFn(level);
+      },
+
+      moodEmoji(mood: SessionMood | undefined | null) {
+        return moodEmojiFn(mood);
+      },
+
+      moodLabel(mood: SessionMood | undefined | null) {
+        return moodLabelFn(mood);
+      },
+
       // ── Actions ──
+      updateStatus(status: SessionStatus) {
+        if (!this.session) return;
+        this.session.status = status;
+        updateSession(this.session.id, { status });
+      },
+
       openDeleteDialog() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fn = (window as any).openDialog as
@@ -483,9 +869,266 @@ import Dialog from '../../components/ui/Dialog.astro';
         if (fn) fn('delete-session-dialog');
         window.location.href = '/seances';
       },
+
+      // ── Share image generation ──────────────────────
+      // Builds a 1080×1080 PNG summary of the current session
+      // and triggers a browser download. Pure canvas API — no
+      // external dependencies. Font fallback chain uses Barlow
+      // (loaded via globals.css) and falls back to system sans.
+      async generateShareCard(): Promise<void> {
+        if (!this.session) return;
+
+        const session = this.session;
+        const W = 1080;
+        const H = 1080;
+        const PAD = 80;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // ── Palette (matches the dark theme) ──
+        const bg = '#050505';
+        const surface = '#0F0F0F';
+        const text = '#F6F6F6';
+        const muted = '#9CA3AF';
+        const accent = '#D97706';
+        const border = 'rgba(255, 255, 255, 0.08)';
+        const accentSoft = 'rgba(217, 119, 6, 0.15)';
+        const fontCond = '"Barlow Condensed", "Barlow", sans-serif';
+        const fontBody = '"Barlow", sans-serif';
+
+        // ── Background ──
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // ── Header: logo (left) + date (right) ──
+        ctx.textBaseline = 'alphabetic';
+
+        ctx.fillStyle = accent;
+        ctx.font = `bold 42px ${fontCond}`;
+        ctx.textAlign = 'left';
+        ctx.fillText('muscu.app', PAD, 100);
+
+        ctx.fillStyle = muted;
+        ctx.font = `28px ${fontBody}`;
+        ctx.textAlign = 'right';
+        ctx.fillText(this.formatShareDate(session.date), W - PAD, 100);
+
+        // Accent underline
+        ctx.fillStyle = accent;
+        ctx.fillRect(PAD, 130, 80, 4);
+
+        // ── Title (truncated if too long) ──
+        ctx.fillStyle = text;
+        ctx.font = `bold 64px ${fontCond}`;
+        ctx.textAlign = 'left';
+        const title = this.truncateForCanvas(
+          ctx,
+          session.name,
+          W - 2 * PAD,
+        );
+        ctx.fillText(title, PAD, 220);
+
+        // ── Status badge ──
+        const statusText = this.statusLabel(session.status).toUpperCase();
+        ctx.font = `600 22px ${fontCond}`;
+        const statusW = ctx.measureText(statusText).width;
+        const badgeW = statusW + 32;
+        const badgeH = 40;
+        const badgeX = PAD;
+        const badgeY = 248;
+
+        ctx.fillStyle = accentSoft;
+        this.drawRoundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20);
+        ctx.fill();
+
+        ctx.fillStyle = accent;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(statusText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+
+        // Reset alignment for the rest of the layout
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+
+        // ── Stat cards (3 across) ──
+        const statsY = 360;
+        const statsH = 150;
+        const cardGap = 20;
+        const cardW = (W - 2 * PAD - 2 * cardGap) / 3;
+
+        const stats: ReadonlyArray<{ value: string; label: string }> = [
+          { value: String(session.exercises.length), label: 'EXERCICES' },
+          { value: String(this.totalSets), label: 'SÉRIES' },
+          { value: formatVolumeFn(this.sessionTotalVolume), label: 'VOLUME' },
+        ];
+
+        stats.forEach((stat, i) => {
+          const x = PAD + i * (cardW + cardGap);
+
+          // Card background
+          ctx.fillStyle = surface;
+          this.drawRoundRect(ctx, x, statsY, cardW, statsH, 14);
+          ctx.fill();
+
+          // Card border
+          ctx.strokeStyle = border;
+          ctx.lineWidth = 1;
+          this.drawRoundRect(ctx, x, statsY, cardW, statsH, 14);
+          ctx.stroke();
+
+          // Value (truncate to fit)
+          ctx.fillStyle = accent;
+          ctx.font = `bold 56px ${fontCond}`;
+          ctx.textAlign = 'center';
+          const value = this.truncateForCanvas(
+            ctx,
+            stat.value,
+            cardW - 32,
+          );
+          ctx.fillText(value, x + cardW / 2, statsY + 78);
+
+          // Label
+          ctx.fillStyle = muted;
+          ctx.font = `600 18px ${fontCond}`;
+          ctx.fillText(stat.label, x + cardW / 2, statsY + 118);
+        });
+
+        ctx.textAlign = 'left';
+
+        // ── Exercise list ──
+        const sectionY = 580;
+
+        ctx.fillStyle = muted;
+        ctx.font = `700 22px ${fontCond}`;
+        ctx.fillText('EXERCICES', PAD, sectionY);
+
+        // Divider line
+        ctx.fillStyle = border;
+        ctx.fillRect(PAD, sectionY + 16, W - 2 * PAD, 1);
+
+        const listY = sectionY + 64;
+        const rowH = 50;
+        const maxVisible = 7;
+        const visible = session.exercises.slice(0, maxVisible);
+        const remaining = session.exercises.length - visible.length;
+
+        ctx.font = `30px ${fontBody}`;
+
+        visible.forEach((ex, i) => {
+          const y = listY + i * rowH;
+
+          // Name
+          ctx.fillStyle = text;
+          const name = this.truncateForCanvas(
+            ctx,
+            ex.name,
+            W - 2 * PAD - 220,
+          );
+          ctx.fillText(name, PAD, y);
+
+          // Sets count
+          const n = ex.sets.length;
+          ctx.fillStyle = muted;
+          ctx.textAlign = 'right';
+          ctx.fillText(
+            `${n} série${n > 1 ? 's' : ''}`,
+            W - PAD,
+            y,
+          );
+          ctx.textAlign = 'left';
+        });
+
+        if (remaining > 0) {
+          const y = listY + visible.length * rowH;
+          ctx.fillStyle = muted;
+          ctx.font = `italic 28px ${fontBody}`;
+          ctx.fillText(
+            `+ ${remaining} autre${remaining > 1 ? 's' : ''}`,
+            PAD,
+            y,
+          );
+        }
+
+        // ── Footer ──
+        ctx.fillStyle = muted;
+        ctx.font = `24px ${fontBody}`;
+        ctx.textAlign = 'center';
+        ctx.fillText('muscu.app — Training Log', W / 2, 1030);
+        ctx.textAlign = 'left';
+
+        // ── Download ──
+        const datePart = (session.date || '').split('T')[0] || 'seance';
+        const filename = `muscu-${datePart}.png`;
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          // Release the blob URL once the download has had time to start
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }, 'image/png');
+      },
+
+      /**
+       * Truncates `text` with an ellipsis until it fits within
+       * `maxWidth` according to the canvas's current font.
+       */
+      truncateForCanvas(
+        ctx: CanvasRenderingContext2D,
+        text: string,
+        maxWidth: number,
+      ): string {
+        if (ctx.measureText(text).width <= maxWidth) return text;
+        let truncated = text;
+        while (
+          truncated.length > 0 &&
+          ctx.measureText(truncated + '\u2026').width > maxWidth
+        ) {
+          truncated = truncated.slice(0, -1);
+        }
+        return truncated + '\u2026';
+      },
+
+      /**
+       * Helper that traces a rounded rectangle path on the canvas.
+       * Caller is responsible for fill() / stroke() after the call.
+       */
+      drawRoundRect(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        r: number,
+      ): void {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h - radius);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+        ctx.lineTo(x + radius, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      },
     }));
   });
 </script>
+
+{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
   /* Hide Alpine elements until initialized (prevents flash) */
@@ -613,6 +1256,123 @@ import Dialog from '../../components/ui/Dialog.astro';
   }
 
   /* ════════════════════════════════════════════════════
+     STATUS PICKER — manual override (planned / in-progress / completed)
+     Sits right under the header so the user can flip the session
+     between the three states. The active option uses the same colour
+     family as the corresponding badge above.
+     ════════════════════════════════════════════════════ */
+  .detail__status-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .detail__status-label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .detail__status-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  @media (min-width: 480px) {
+    .detail__status-options {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .detail__status-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 4.4rem;
+    padding: 0 1.2rem;
+    background-color: var(--color-surface);
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .detail__status-btn:hover:not(.is-active) {
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border-color: hsl(0 0% 100% / 0.18);
+  }
+
+  .detail__status-btn:active {
+    transform: scale(0.98);
+  }
+
+  .detail__status-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .detail__status-btn.is-active {
+    cursor: default;
+  }
+
+  /* Active variants — colour match the badge palette. */
+  .detail__status-btn:has(.detail__status-dot--planned).is-active {
+    background-color: hsl(0 0% 100% / 0.05);
+    color: var(--color-text);
+    border-color: hsl(0 0% 100% / 0.30);
+  }
+
+  .detail__status-btn:has(.detail__status-dot--in-progress).is-active {
+    background-color: hsl(217 80% 55% / 0.12);
+    color: hsl(217 80% 65%);
+    border-color: hsl(217 80% 55% / 0.40);
+  }
+
+  .detail__status-btn:has(.detail__status-dot--completed).is-active {
+    background-color: hsl(142 70% 45% / 0.12);
+    color: var(--color-success);
+    border-color: hsl(142 70% 45% / 0.40);
+  }
+
+  .detail__status-dot {
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background-color: var(--color-muted);
+    box-shadow: 0 0 0 2px hsl(0 0% 0% / 0.45);
+  }
+
+  .detail__status-dot--planned {
+    background-color: hsl(0 0% 100% / 0.55);
+  }
+
+  .detail__status-dot--in-progress {
+    background-color: hsl(217 80% 65%);
+  }
+
+  .detail__status-dot--completed {
+    background-color: var(--color-success);
+  }
+
+  /* ════════════════════════════════════════════════════
      STATS GRID — 3 cards
      ════════════════════════════════════════════════════ */
   .detail__stats {
@@ -638,11 +1398,21 @@ import Dialog from '../../components/ui/Dialog.astro';
   }
 
   .detail__stat-label {
-    font-size: 1.0rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.1rem;
     color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.14em;
     font-weight: 700;
+  }
+
+  .detail__stat-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--color-accent);
+    flex-shrink: 0;
   }
 
   .detail__stat-value {
@@ -709,6 +1479,19 @@ import Dialog from '../../components/ui/Dialog.astro';
     background-color: var(--color-surface-3);
     color: var(--color-text);
     border-color: hsl(0 0% 100% / 0.20);
+  }
+
+  .detail__btn--accent {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px hsl(32 95% 50% / 0.25);
+  }
+
+  .detail__btn--accent:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    box-shadow: 0 4px 14px hsl(32 95% 50% / 0.40);
   }
 
   .detail__btn--destructive {
@@ -879,7 +1662,7 @@ import Dialog from '../../components/ui/Dialog.astro';
   }
 
   .exo-row__stat-label {
-    font-size: 1.0rem;
+    font-size: 1.1rem;
     color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -912,7 +1695,7 @@ import Dialog from '../../components/ui/Dialog.astro';
     background-color: var(--color-surface-3);
     color: var(--color-muted);
     font-family: var(--font-display);
-    font-size: 1.0rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.14em;
@@ -961,7 +1744,7 @@ import Dialog from '../../components/ui/Dialog.astro';
     height: 2.4rem;
     padding: 0 0.8rem;
     border-radius: var(--radius-pill);
-    font-size: 1.0rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -1016,6 +1799,218 @@ import Dialog from '../../components/ui/Dialog.astro';
   }
 
   /* ════════════════════════════════════════════════════
+     NOTES SECTION (RPE / fatigue / mood / free text)
+     ════════════════════════════════════════════════════ */
+  .detail__notes {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .notes {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+  }
+
+  @media (min-width: 640px) {
+    .notes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .notes__item--text {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .notes__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    min-width: 0;
+  }
+
+  .notes__label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+  }
+
+  .notes__value {
+    display: flex;
+    align-items: center;
+    gap: 1.0rem;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  /* ── RPE badge ── */
+  .notes__rpe {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    height: 4.2rem;
+    padding: 0 1.4rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    background-color: hsl(142 70% 45% / 0.12);
+    color: var(--color-success);
+    border: 1px solid hsl(142 70% 45% / 0.30);
+  }
+
+  .notes__rpe-num {
+    font-size: 2.4rem;
+    font-weight: 700;
+  }
+
+  .notes__rpe-sep {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .notes__rpe--easy {
+    background-color: hsl(142 70% 45% / 0.12);
+    color: var(--color-success);
+    border-color: hsl(142 70% 45% / 0.30);
+  }
+  .notes__rpe--moderate {
+    background-color: hsl(48 95% 55% / 0.14);
+    color: var(--color-warning);
+    border-color: hsl(48 95% 55% / 0.32);
+  }
+  .notes__rpe--hard {
+    background-color: hsl(32 95% 50% / 0.14);
+    color: var(--color-accent);
+    border-color: hsl(32 95% 50% / 0.34);
+  }
+  .notes__rpe--max {
+    background-color: hsl(0 80% 55% / 0.14);
+    color: var(--color-destructive);
+    border-color: hsl(0 80% 55% / 0.34);
+  }
+
+  .notes__rpe-label {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--color-muted);
+  }
+
+  /* ── Fatigue (5 flame icons) ── */
+  .notes__fatigue {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .notes__fatigue-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text);
+    filter: grayscale(1) opacity(0.30);
+    transition: filter var(--transition-fast);
+  }
+
+  .notes__fatigue-icon svg {
+    display: block;
+  }
+
+  .notes__fatigue-icon.is-active {
+    filter: none;
+  }
+
+  .notes__fatigue-label {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--color-muted);
+  }
+
+  /* ── Mood ── */
+  .notes__mood {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    height: 4.2rem;
+    padding: 0 1.4rem;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+  }
+
+  .notes__mood-emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .notes__mood-emoji svg {
+    display: block;
+  }
+
+  .notes__mood-label {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--color-text);
+  }
+
+  /* Mood colour variants — applied to the entire pill (border + icon). */
+  .notes__mood--great {
+    background-color: hsl(142 71% 45% / 0.12);
+    border-color: hsl(142 71% 45% / 0.40);
+    color: var(--color-success);
+  }
+  .notes__mood--good {
+    background-color: hsl(170 70% 45% / 0.10);
+    border-color: hsl(170 70% 45% / 0.35);
+    color: hsl(170 70% 55%);
+  }
+  .notes__mood--ok {
+    background-color: hsl(48 95% 55% / 0.10);
+    border-color: hsl(48 95% 55% / 0.32);
+    color: var(--color-warning);
+  }
+  .notes__mood--tired {
+    background-color: hsl(32 95% 50% / 0.12);
+    border-color: hsl(32 95% 50% / 0.40);
+    color: var(--color-accent);
+  }
+  .notes__mood--bad {
+    background-color: hsl(0 80% 55% / 0.12);
+    border-color: hsl(0 80% 55% / 0.40);
+    color: var(--color-destructive);
+  }
+
+  /* ── Free text ── */
+  .notes__text {
+    margin: 0;
+    padding: 1.2rem 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: 1.4rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ════════════════════════════════════════════════════
      RESPONSIVE — small screens
      ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
@@ -1051,8 +2046,140 @@ import Dialog from '../../components/ui/Dialog.astro';
       font-size: 1.2rem;
     }
     .exo-row__table thead th {
-      font-size: 0.9rem;
+      font-size: 1.0rem;
     }
+  }
+
+  /* ════════════════════════════════════════════════════
+     SHARE CARD (hidden DOM reference)
+     The actual PNG export is drawn on a canvas by
+     generateShareCard(); this markup is kept in sync so the
+     design is inspectable and any future "preview before
+     download" can render it directly. `x-show="false"` keeps
+     it out of the layout — these styles only matter when
+     someone toggles visibility for debugging.
+     ════════════════════════════════════════════════════ */
+  .share-card {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    width: 1080px;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    border-radius: var(--radius-xl);
+    padding: 8rem 7rem;
+    pointer-events: none;
+  }
+
+  .share-card__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 3.6rem;
+    min-height: 920px;
+  }
+
+  .share-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 1.6rem;
+    border-bottom: 2px solid var(--color-accent);
+  }
+
+  .share-card__logo {
+    font-family: var(--font-display);
+    font-size: 4.2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .share-card__date {
+    font-size: 2.4rem;
+    color: var(--color-muted);
+    text-transform: capitalize;
+  }
+
+  .share-card__title {
+    font-family: var(--font-display);
+    font-size: 6rem;
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--color-text);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .share-card__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.6rem;
+  }
+
+  .share-card__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 2rem 2.2rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .share-card__stat-value {
+    font-family: var(--font-display);
+    font-size: 4.8rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .share-card__stat-label {
+    font-size: 1.6rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+  }
+
+  .share-card__exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .share-card__exercise {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 2rem;
+    font-size: 2.6rem;
+    color: var(--color-text);
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid hsl(0 0% 100% / 0.04);
+  }
+
+  .share-card__exercise span:last-child {
+    color: var(--color-muted);
+    font-size: 2.2rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .share-card__footer {
+    margin-top: auto;
+    padding-top: 2rem;
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 600;
   }
 
   /* ════════════════════════════════════════════════════
@@ -1061,7 +2188,8 @@ import Dialog from '../../components/ui/Dialog.astro';
   @media (prefers-reduced-motion: reduce) {
     .detail__btn,
     .detail__back,
-    .detail__error-link {
+    .detail__error-link,
+    .notes__fatigue-icon {
       transition: none;
     }
     .detail__btn:active:not(:disabled) {

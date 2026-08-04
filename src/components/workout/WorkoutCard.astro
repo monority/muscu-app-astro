@@ -59,10 +59,12 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
 
 <Card variant="interactive" class={className}>
   <CardHeader>
-    <CardTitle>{name}</CardTitle>
-    <Badge variant={config.variant} size="sm">
-      {config.label}
-    </Badge>
+    <div class="flex flex-row items-center justify-between gap-[var(--spacing-3)]">
+      <CardTitle>{name}</CardTitle>
+      <Badge variant={config.variant} size="sm">
+        {config.label}
+      </Badge>
+    </div>
   </CardHeader>
 
   <CardContent>

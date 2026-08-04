@@ -39,7 +39,14 @@ const trendArrow = trend ? trendArrowMap[trend] : '';
 <Card class={className}>
   <div class="flex flex-col gap-1">
     <div class="flex items-center gap-2">
-      {icon && <span class="text-[1.3rem] text-[var(--color-muted)]">{icon}</span>}
+      {icon && (
+        <span
+          class="text-[var(--color-muted)] inline-flex items-center justify-center"
+          style="width: 1.8rem; height: 1.8rem;"
+          aria-hidden="true"
+          set:html={icon}
+        />
+      )}
       <span class="text-[1.1rem] text-[var(--color-muted)] uppercase tracking-wider">
         {label}
       </span>
