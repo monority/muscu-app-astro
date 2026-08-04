@@ -3,13 +3,16 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import Card from '../../components/ui/Card.astro';
+import { t } from '../../i18n';
+
+const L = t();
 ---
 
-<AppLayout title="Séances">
+<AppLayout title={L.sessions.title}>
   <PageHeader
-    title="Séances"
+    title={L.sessions.title}
     description="Historique de vos séances d'entraînement."
-    actionLabel="Nouvelle séance"
+    actionLabel={L.dashboard.newSession}
     actionHref="/seances/creer"
   />
 
@@ -39,9 +42,9 @@ import Card from '../../components/ui/Card.astro';
         <input
           type="search"
           class="sess__search-input"
-          placeholder="Rechercher une séance…"
+          placeholder={L.sessions.search}
           x-model="search"
-          aria-label="Rechercher une séance"
+          aria-label={L.sessions.search}
         />
       </div>
     </div>
@@ -63,7 +66,7 @@ import Card from '../../components/ui/Card.astro';
             @keydown.space.prevent="navigateTo(session.id)"
             tabindex="0"
             role="link"
-            :aria-label="'Voir les détails de ' + session.name"
+            :aria-label="labels.seenAriaPrefix + session.name"
           >
             <header class="sess__card-head">
               <div class="sess__card-title">
@@ -90,8 +93,8 @@ import Card from '../../components/ui/Card.astro';
                 <span
                   class="sess__mood-indicator"
                   x-show="session.mood"
-                  :title="'Humeur : ' + moodLabel(session.mood)"
-                  :aria-label="'Humeur : ' + moodLabel(session.mood)"
+                  :title="labels.moodLabel + ' : ' + moodLabel(session.mood)"
+                  :aria-label="labels.moodLabel + ' : ' + moodLabel(session.mood)"
                 >
                   <span class="sess__mood-emoji" x-html="moodEmoji(session.mood)" aria-hidden="true"></span>
                 </span>
@@ -128,7 +131,7 @@ import Card from '../../components/ui/Card.astro';
                   <path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"></path>
                 </svg>
                 <span class="sess__meta-value" x-text="session.exercises.length"></span>
-                <span class="sess__meta-label" x-text="session.exercises.length > 1 ? 'exercices' : 'exercice'"></span>
+                <span class="sess__meta-label" x-text="session.exercises.length > 1 ? labels.exoPlural : labels.exoSingular"></span>
               </div>
               <div class="sess__volume-badge">
                 <svg
@@ -159,8 +162,8 @@ import Card from '../../components/ui/Card.astro';
                 @click.stop="deleteSession(session.id)"
                 @keydown.enter.stop
                 @keydown.space.stop
-                aria-label="Supprimer la séance"
-                title="Supprimer"
+                aria-label={L.sessions.delete}
+                title={L.sessions.delete}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -202,14 +205,15 @@ import Card from '../../components/ui/Card.astro';
     <template x-if="hasSessions && filtered.length === 0">
       <Card>
         <div class="sess__empty-cta">
-          <h3 class="sess__empty-title">Aucun résultat</h3>
-          <p class="sess__empty-text">
+          <h3 class="sess__empty-title" x-text="labels.noResult">Aucun résultat</h3>
+          <p class="sess__empty-text" x-text="labels.noMatchPrefix + ' « ' + search + ' ».'">
             Aucune séance ne correspond à « <span x-text="search"></span> ».
           </p>
           <button
             type="button"
             class="sess__reset-btn"
             @click="search = ''"
+            x-text="labels.resetSearch"
           >
             Réinitialiser la recherche
           </button>
@@ -227,12 +231,15 @@ import Card from '../../components/ui/Card.astro';
     type SessionMood,
     type SessionStatus,
   } from '../../lib/storage';
+  import { t } from '../../i18n';
+
+  const LABELS = t();
 
   // ── Pure helpers (module scope) ────────────────────────────
   function statusLabel(status: SessionStatus): string {
-    if (status === 'completed') return 'Terminée';
-    if (status === 'in-progress') return 'En cours';
-    return 'Planifiée';
+    if (status === 'completed') return LABELS.sessions.completed;
+    if (status === 'in-progress') return LABELS.sessions.inProgress;
+    return LABELS.sessions.planned;
   }
 
   function formatDate(iso: string): string {
@@ -292,6 +299,21 @@ import Card from '../../components/ui/Card.astro';
       // ── State ──
       sessions: [] as Session[],
       search: '',
+      labels: {
+        exoPlural: 'exercices',
+        exoSingular: 'exercice',
+        moodLabel: 'Humeur',
+        noResult: 'Aucun résultat',
+        noMatchPrefix: 'Aucune séance ne correspond à',
+        resetSearch: 'Réinitialiser la recherche',
+        noSession: 'Aucune séance',
+        noMatch: 'Aucun résultat',
+        seanceSingular: 'séance',
+        seancePlural: 'séances',
+        pluralS: 's',
+        deleteConfirm: 'Supprimer cette séance ?',
+        seenAriaPrefix: 'Voir les détails de ',
+      },
 
       // ── Init ──
       init() {
@@ -315,8 +337,8 @@ import Card from '../../components/ui/Card.astro';
 
       get countLabel(): string {
         const n = this.filtered.length;
-        if (n === 0) return this.sessions.length === 0 ? 'Aucune séance' : 'Aucun résultat';
-        return `${n} séance${n > 1 ? 's' : ''}`;
+        if (n === 0) return this.sessions.length === 0 ? this.labels.noSession : this.labels.noMatch;
+        return `${n} ${this.labels.seanceSingular}${n > 1 ? this.labels.pluralS : ''}`;
       },
 
       get hasSessions(): boolean {
@@ -362,7 +384,7 @@ import Card from '../../components/ui/Card.astro';
 
       deleteSession(id: string) {
         // eslint-disable-next-line no-alert
-        if (window.confirm('Supprimer cette séance ?')) {
+        if (window.confirm(this.labels.deleteConfirm)) {
           deleteSession(id);
           this.sessions = this.sessions.filter((s) => s.id !== id);
         }

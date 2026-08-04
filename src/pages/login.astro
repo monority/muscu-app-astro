@@ -1,5 +1,8 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
+import { t } from '../i18n';
+
+const L = t();
 
 /**
  * Login page — fake auth (any email/password works).
@@ -12,7 +15,7 @@ import AppLayout from '../layouts/AppLayout.astro';
  */
 ---
 
-<AppLayout title="Connexion" groups={[]}>
+<AppLayout title={L.login.title} groups={[]}>
   <div
     class="login"
     x-data="loginApp()"
@@ -44,15 +47,15 @@ import AppLayout from '../layouts/AppLayout.astro';
         </svg>
       </div>
 
-      <h1 id="login-title" class="login__title">Bon retour</h1>
+      <h1 id="login-title" class="login__title">{L.login.title}</h1>
       <p class="login__subtitle">
-        Connectez-vous à votre espace d'entraînement.
+        {L.login.subtitle}
       </p>
 
       {/* ── Form ── */}
       <form class="login__form" @submit.prevent="submit" novalidate>
         <div class="login__field">
-          <label for="login-email" class="login__label">Email</label>
+          <label for="login-email" class="login__label">{L.login.email}</label>
           <input
             type="email"
             id="login-email"
@@ -67,7 +70,7 @@ import AppLayout from '../layouts/AppLayout.astro';
         </div>
 
         <div class="login__field">
-          <label for="login-password" class="login__label">Mot de passe</label>
+          <label for="login-password" class="login__label">{L.login.password}</label>
           <div class="login__password">
             <input
               :type="showPassword ? 'text' : 'password'"
@@ -83,7 +86,7 @@ import AppLayout from '../layouts/AppLayout.astro';
               type="button"
               class="login__toggle"
               @click="showPassword = !showPassword"
-              :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              :aria-label="showPassword ? labels.hidePassword : labels.showPassword"
               :aria-pressed="showPassword ? 'true' : 'false'"
             >
               {/* Eye icon */}
@@ -144,7 +147,7 @@ import AppLayout from '../layouts/AppLayout.astro';
         >
           {/* Always-present label (visible whether Alpine is loaded
               or not, before/after submit). */}
-          <span class="login__submit-label">Se connecter</span>
+          <span class="login__submit-label" x-text="labels.submit">{L.login.submit}</span>
           {/* Loading overlay — only shown while the form is in flight. */}
           <span class="login__submit-loading" x-show="loading" x-cloak>
             <svg
@@ -159,7 +162,7 @@ import AppLayout from '../layouts/AppLayout.astro';
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25" />
               <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
             </svg>
-            Connexion…
+            <span x-text="labels.loading">{L.login.loading}</span>
           </span>
         </button>
       </form>
@@ -174,14 +177,14 @@ import AppLayout from '../layouts/AppLayout.astro';
         <div class="login__dev-head">
           <span class="login__dev-badge" aria-hidden="true">DEV</span>
           <h2 id="login-dev-title" class="login__dev-title">
-            Mode développement
+            {L.login.devMode}
           </h2>
         </div>
         <p class="login__dev-warning" role="note">
           <span aria-hidden="true" class="login__dev-warning-icon">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
           </span>
-          Ceci est un compte de développement
+          {L.login.devWarning}
         </p>
         <button
           type="button"
@@ -202,19 +205,19 @@ import AppLayout from '../layouts/AppLayout.astro';
           >
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
           </svg>
-          <span>Connexion rapide (dev)</span>
+          <span>{L.login.devLogin}</span>
         </button>
       </section>
 
       {/* ── Signup link ── */}
       <p class="login__signup">
-        Pas de compte ?
+        {L.login.createAccount}
         <button
           type="button"
           class="login__signup-link"
           @click="showSignupMessage = !showSignupMessage"
         >
-          Créer un compte
+          {L.login.createAccountLink}
         </button>
       </p>
 
@@ -223,10 +226,9 @@ import AppLayout from '../layouts/AppLayout.astro';
         x-show="showSignupMessage"
         x-cloak
         x-transition.opacity.duration.200ms
+        x-text="labels.signupMessage"
       >
-        L'inscription arrive bientôt. En attendant, utilisez n'importe
-        quel email et mot de passe pour vous connecter — c'est un espace
-        de dev.
+        {L.login.signupMessage}
       </p>
     </div>
 
@@ -236,6 +238,9 @@ import AppLayout from '../layouts/AppLayout.astro';
 
 <script>
   import { setAuth, isAuthenticated } from '../lib/auth';
+  import { t } from '../i18n';
+
+  const LABELS = t();
 
   function nameFromEmail(email: string): string {
     const local = email.split('@')[0] ?? '';
@@ -262,6 +267,13 @@ import AppLayout from '../layouts/AppLayout.astro';
       showPassword: false,
       showSignupMessage: false,
       loading: false,
+      labels: {
+        submit: LABELS.login.submit,
+        loading: LABELS.login.loading,
+        showPassword: 'Afficher le mot de passe',
+        hidePassword: 'Masquer le mot de passe',
+        signupMessage: LABELS.login.signupMessage,
+      },
 
       init() {
         if (isAuthenticated()) {
@@ -274,9 +286,9 @@ import AppLayout from '../layouts/AppLayout.astro';
         const email = this.email.trim();
         const password = this.password;
 
-        if (!email) { this.error = 'Veuillez saisir votre email.'; return; }
-        if (!isValidEmail(email)) { this.error = "Format d'email invalide."; return; }
-        if (!password) { this.error = 'Veuillez saisir votre mot de passe.'; return; }
+        if (!email) { this.error = LABELS.login.errors.emailRequired; return; }
+        if (!isValidEmail(email)) { this.error = LABELS.login.errors.emailInvalid; return; }
+        if (!password) { this.error = LABELS.login.errors.passwordRequired; return; }
 
         this.loading = true;
         const name = nameFromEmail(email);

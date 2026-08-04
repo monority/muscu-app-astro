@@ -41,7 +41,9 @@ const defaultGroups: NavTree = [
           { label: "Nouvelle séance", href: "/seances/creer" },
         ],
       },
+      { label: "Séance rapide", href: "/seances/rapide", icon: "zap" },
       { label: "Timer", href: "/timer", icon: "timer" },
+      { label: "Calendrier", href: "/calendrier", icon: "calendar" },
     ],
   },
   {
@@ -55,6 +57,8 @@ const defaultGroups: NavTree = [
         children: [
           { label: "Force", href: "/progression" },
           { label: "Poids & mesures", href: "/progression/poids" },
+          { label: "Records", href: "/progression/records" },
+          { label: "Statistiques", href: "/progression/stats" },
         ],
       },
     ],
@@ -114,6 +118,25 @@ const groupsWithActive = groups.map((g) => ({
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="muscu.app" />
+
+    {/* ── Theme bootstrap (added 2026-08-04) ──
+        Runs synchronously in the head, BEFORE first paint, so the
+        page never flashes the wrong palette when the user has
+        chosen the light theme. The Alpine-side toggle lives in
+        AppShell.astro; this block is the only thing that needs to
+        be inline to avoid a flash. */}
+    <script is:inline>
+      (function () {
+        try {
+          var theme = localStorage.getItem('muscu-theme') || 'dark';
+          if (theme !== 'light' && theme !== 'dark') theme = 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          /* localStorage unavailable (SSR / private mode) — keep
+             the default dark theme via the @theme block. */
+        }
+      })();
+    </script>
   </head>
   <body>
     {

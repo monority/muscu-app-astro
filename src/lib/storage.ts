@@ -433,6 +433,30 @@ export function getSessionsByExercise(exerciseId: string): Session[] {
 }
 
 /**
+ * Returns all sessions whose `date` field exactly matches the given
+ * YYYY-MM-DD string. Comparison is strict (no prefix matching) — the
+ * app consistently stores session dates as `YYYY-MM-DD` via
+ * `new Date().toISOString().split('T')[0]`, so this works for every
+ * session produced by the rest of the codebase. Used by the
+ * /calendrier page to list the sessions for a clicked day.
+ */
+export function getSessionsByDate(date: string): Session[] {
+  return getSessions().filter((s) => s.date === date);
+}
+
+/**
+ * Returns all sessions whose local-time year/month match the provided
+ * values. `month` is zero-indexed (0 = January) to match `Date#getMonth`.
+ * Used by the /calendrier page to build the monthly summary stats.
+ */
+export function getSessionsByMonth(year: number, month: number): Session[] {
+  return getSessions().filter((s) => {
+    const d = new Date(s.date);
+    return d.getFullYear() === year && d.getMonth() === month;
+  });
+}
+
+/**
  * Returns the completed sessions whose date falls in the current week.
  * "Week" is anchored to Sunday (getDay() === 0) at 00:00 local time,
  * matching the dashboard's weekly-goal cadence.

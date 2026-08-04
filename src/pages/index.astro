@@ -3,11 +3,14 @@ import AppLayout from '../layouts/AppLayout.astro';
 import PageHeader from '../components/layout/PageHeader.astro';
 import Card from '../components/ui/Card.astro';
 import EmptyState from '../components/ui/EmptyState.astro';
+import { t } from '../i18n';
+
+const L = t();
 ---
 
-<AppLayout title="Dashboard">
+<AppLayout title={L.dashboard.title}>
   <PageHeader
-    title="Dashboard"
+    title={L.dashboard.title}
     description="Vue d'ensemble de votre progression."
   />
 
@@ -29,7 +32,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        <span>Nouvelle séance</span>
+        <span>{L.dashboard.newSession}</span>
       </a>
       <a href="/timer" class="dash__action dash__action--secondary">
         <svg
@@ -50,7 +53,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
           <path d="M6.38 18.7 4 21"></path>
           <path d="M17.64 18.67 20 21"></path>
         </svg>
-        <span>Chronomètre</span>
+        <span>{L.dashboard.stopwatch}</span>
       </a>
     </div>
 
@@ -58,7 +61,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
     <section class="dash__goal-card" aria-label="Objectif hebdomadaire">
       <div class="dash__goal-head">
         <div class="dash__goal-head-text">
-          <span class="dash__goal-eyebrow">Objectif hebdomadaire</span>
+          <span class="dash__goal-eyebrow" x-text="labels.weeklyGoalEyebrow">Objectif hebdomadaire</span>
           <h2 class="dash__goal-title">
             <span
               class="dash__goal-done"
@@ -69,7 +72,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
             >3</span>
             <span
               class="dash__goal-unit"
-              x-text="settings.weeklyGoal > 1 ? 'séances cette semaine' : 'séance cette semaine'"
+              x-text="settings.weeklyGoal > 1 ? labels.weeklyThisWeek : labels.weeklyThisWeekOne"
             >séances cette semaine</span>
           </h2>
         </div>
@@ -107,17 +110,16 @@ import EmptyState from '../components/ui/EmptyState.astro';
         x-show="weeklyDone >= settings.weeklyGoal"
         x-transition.opacity
         x-cloak
-      >
-        Bravo — objectif atteint pour cette semaine !
-      </p>
+        x-text="labels.weeklyGoalDone"
+      ></p>
       <p
         class="dash__goal-hint dash__goal-hint--muted"
         x-show="weeklyDone < settings.weeklyGoal && settings.weeklyGoal > 0"
       >
         Encore
         <strong x-text="settings.weeklyGoal - weeklyDone"></strong>
-        <span x-text="(settings.weeklyGoal - weeklyDone) > 1 ? 'séances' : 'séance'"></span>
-        pour atteindre votre objectif.
+        <span x-text="(settings.weeklyGoal - weeklyDone) > 1 ? labels.weeklyMorePlural : labels.weeklyMoreSingular"></span>
+        <span x-text="labels.forGoal"></span>
       </p>
     </section>
 
@@ -130,7 +132,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
             <span class="dash__kpi-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
             </span>
-            <span class="dash__kpi-label">Volume total</span>
+            <span class="dash__kpi-label">{L.dashboard.totalVolume}</span>
           </div>
           <div class="flex items-baseline">
             <span class="dash__kpi-value" x-text="formatVolume(kpis.totalVolume)">0</span>
@@ -146,7 +148,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
             <span class="dash__kpi-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
             </span>
-            <span class="dash__kpi-label">Séances</span>
+            <span class="dash__kpi-label">{L.dashboard.totalSessions}</span>
           </div>
           <div class="flex items-baseline">
             <span class="dash__kpi-value" x-text="kpis.totalSessions">0</span>
@@ -177,7 +179,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
           <div
             class="dash__kpi-sub"
             x-show="kpis.top1RM > 0"
-            x-text="'Top 1RM : ' + formatVolume(kpis.top1RM) + ' kg'"
+            x-text="labels.top1RM + ' ' + formatVolume(kpis.top1RM) + ' kg'"
           ></div>
         </div>
       </Card>
@@ -201,9 +203,8 @@ import EmptyState from '../components/ui/EmptyState.astro';
           <div
             class="dash__kpi-sub"
             x-show="kpis.streak === 0 && kpis.totalSessions > 0"
-          >
-            Aucune séance récente
-          </div>
+            x-text="labels.noRecent"
+          ></div>
         </div>
       </Card>
     </section>
@@ -211,12 +212,13 @@ import EmptyState from '../components/ui/EmptyState.astro';
     {/* ── Recent sessions ── */}
     <section class="dash__recent" aria-label="Séances récentes">
       <header class="dash__section-head">
-        <h2>Séances récentes</h2>
+        <h2 x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
         <a
           href="/seances"
           class="dash__see-all"
           x-show="hasSessions"
-        >Voir tout →</a>
+          x-text="labels.viewAll"
+        >{L.dashboard.viewAll} →</a>
       </header>
 
       {/* List of recent sessions (when there are any) */}
@@ -241,7 +243,7 @@ import EmptyState from '../components/ui/EmptyState.astro';
               <span class="dash__session-sep" aria-hidden="true">·</span>
               <span>
                 <span x-text="sessionExercisesCount(s)"></span>
-                <span x-text="sessionExercisesCount(s) > 1 ? ' exercices' : ' exercice'"></span>
+                <span x-text="sessionExercisesCount(s) > 1 ? labels.exoPlural : labels.exoSingular"></span>
               </span>
               <span class="dash__session-sep" aria-hidden="true">·</span>
               <span class="dash__session-volume" x-text="formatVolume(sessionVolume(s)) + ' kg'">0 kg</span>
@@ -254,9 +256,9 @@ import EmptyState from '../components/ui/EmptyState.astro';
       <div x-show="!hasSessions">
         <Card>
           <EmptyState
-            title="Aucune séance pour le moment"
+            title={L.dashboard.noSessions}
             description="Commencez par créer votre première séance pour suivre vos performances et mesurer votre progression."
-            actionLabel="Créer ma première séance"
+            actionLabel={L.dashboard.createFirst}
             actionHref="/seances/creer"
           />
         </Card>
@@ -276,12 +278,15 @@ import EmptyState from '../components/ui/EmptyState.astro';
     type Session,
     type SessionStatus,
   } from '../lib/storage';
+  import { t } from '../i18n';
+
+  const LABELS = t();
 
   // ── Pure helpers (module scope) ────────────────────────────
   function statusLabel(status: SessionStatus): string {
-    if (status === 'completed') return 'Terminée';
-    if (status === 'in-progress') return 'En cours';
-    return 'Planifiée';
+    if (status === 'completed') return LABELS.sessions.completed;
+    if (status === 'in-progress') return LABELS.sessions.inProgress;
+    return LABELS.sessions.planned;
   }
 
   function formatDate(iso: string): string {
@@ -316,6 +321,22 @@ import EmptyState from '../components/ui/EmptyState.astro';
       sessions: [] as Session[],
       settings: getSettings(),
       weeklyDone: 0,
+      labels: {
+        top1RM: 'Top 1RM :',
+        weeklyThisWeek: 'séances cette semaine',
+        weeklyThisWeekOne: 'séance cette semaine',
+        weeklyMorePlural: 'séances',
+        weeklyMoreSingular: 'séance',
+        forGoal: 'pour atteindre votre objectif.',
+        noRecent: 'Aucune séance récente',
+        viewAll: 'Voir tout →',
+        recentSessions: 'Séances récentes',
+        weeklyGoalEyebrow: 'Objectif hebdomadaire',
+        weeklyGoalDone: 'Bravo — objectif atteint pour cette semaine !',
+        indicLabel: 'Indicateurs clés',
+        exoPlural: ' exercices',
+        exoSingular: ' exercice',
+      },
 
       // ── Init ──
       init() {

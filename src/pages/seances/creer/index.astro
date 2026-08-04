@@ -8,21 +8,24 @@ import CardContent from '../../../components/ui/CardContent.astro';
 import Badge from '../../../components/ui/Badge.astro';
 import Dialog from '../../../components/ui/Dialog.astro';
 import { TRAINING_TEMPLATES } from '../../../lib/templates';
+import { t } from '../../../i18n';
+
+const L = t();
 
 /**
  * Set types (mirrors SessionSet['type'] in src/lib/storage.ts).
  * Labels are localised to French for the in-row selector.
  */
 const setTypes = [
-  { value: 'warmup', label: 'Échauffement' },
-  { value: 'work', label: 'Travail' },
-  { value: 'top', label: 'Top set' },
-  { value: 'drop', label: 'Drop set' },
-  { value: 'failure', label: 'Échec' },
+  { value: 'warmup', label: L.builder.types.warmup },
+  { value: 'work', label: L.builder.types.work },
+  { value: 'top', label: L.builder.types.top },
+  { value: 'drop', label: L.builder.types.drop },
+  { value: 'failure', label: L.builder.types.failure },
 ] as const;
 ---
 
-<AppLayout title="Nouvelle séance">
+<AppLayout title={L.builder.title}>
   <div
     class="ses"
     x-data="sessionBuilder()"
@@ -30,7 +33,7 @@ const setTypes = [
     x-cloak
   >
     <PageHeader
-      title="Nouvelle séance"
+      title={L.builder.title}
       description="Construisez votre séance, ajoutez vos exercices et enregistrez vos séries."
     />
 
@@ -43,7 +46,7 @@ const setTypes = [
         class="ses__btn ses__btn--secondary"
         @click="discard()"
       >
-        Annuler
+        {L.common.cancel}
       </button>
       <button
         type="button"
@@ -67,7 +70,7 @@ const setTypes = [
           <polyline points="17 21 17 13 7 13 7 21"></polyline>
           <polyline points="7 3 7 8 15 8"></polyline>
         </svg>
-        <span>Enregistrer la séance</span>
+        <span x-text="labels.saveSession">Enregistrer la séance</span>
       </button>
     </div>
 
@@ -82,7 +85,7 @@ const setTypes = [
         <div class="ses__info-grid">
           <div class="ses__field">
             <label for="ses-name" class="ses__label">
-              Nom de la séance
+              {L.builder.name}
               <span class="ses__req" aria-hidden="true">*</span>
             </label>
             <input
@@ -98,7 +101,7 @@ const setTypes = [
           </div>
 
           <div class="ses__field">
-            <label for="ses-date" class="ses__label">Date</label>
+            <label for="ses-date" class="ses__label">{L.builder.date}</label>
             <input
               id="ses-date"
               type="date"
@@ -135,8 +138,8 @@ const setTypes = [
               <path d="M17.5 17.5L22 15"></path>
             </svg>
           </div>
-          <h3 class="ses__empty-title">Aucun exercice ajouté</h3>
-          <p class="ses__empty-desc">
+          <h3 class="ses__empty-title" x-text="labels.noExoAdded">Aucun exercice ajouté</h3>
+          <p class="ses__empty-desc" x-text="labels.noExoDesc">
             Commencez par sélectionner des exercices depuis votre bibliothèque
             pour construire votre séance.
           </p>
@@ -159,7 +162,7 @@ const setTypes = [
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            <span>Ajouter un exercice</span>
+            <span>{L.builder.addExercise}</span>
           </button>
         </div>
       </Card>
@@ -191,7 +194,7 @@ const setTypes = [
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
-          <span>Superset <span x-text="ex.supersetId"></span></span>
+          <span x-text="labels.supersetLabel + ' ' + ex.supersetId">Superset <span x-text="ex.supersetId"></span></span>
           <button
             type="button"
             class="ses__ex-superset-remove"
@@ -254,14 +257,14 @@ const setTypes = [
             class="ses__ex-superset-select"
             x-model.number="ex.supersetId"
             @change="onSupersetChange(exIdx)"
-            :aria-label="'Superset pour ' + ex.name"
+            :aria-label="labels.supersetFor + ' ' + ex.name"
             title="Déplacer dans un superset"
           >
             <option :value="null">—</option>
             <template x-for="gId in availableSupersetIds()" :key="gId">
-              <option :value="gId" x-text="'Superset ' + gId"></option>
+              <option :value="gId" x-text="labels.supersetLabel + ' ' + gId"></option>
             </template>
-            <option :value="nextSupersetId()">+ Nouveau superset</option>
+            <option :value="nextSupersetId()" x-text="labels.newSuperset">+ Nouveau superset</option>
           </select>
           <button
             type="button"
@@ -298,7 +301,7 @@ const setTypes = [
         >
           <CardContent>
             {/* ── Sets table ── */}
-            <div class="ses__table" role="table" :aria-label="'Séries pour ' + ex.name">
+            <div class="ses__table" role="table" :aria-label="labels.setsFor + ' ' + ex.name">
               <div class="ses__table-head" role="row">
                 <div class="ses__cell ses__cell--num" role="columnheader">#</div>
                 <div class="ses__cell ses__cell--type" role="columnheader">Type</div>
@@ -313,7 +316,7 @@ const setTypes = [
                     <select
                       class="ses__select ses__select--inline"
                       x-model="set.type"
-                      :aria-label="'Type de la série ' + (setIdx + 1)"
+                      :aria-label="labels.setTypeLabel + ' ' + (setIdx + 1)"
                     >
                       {setTypes.map((t) => (
                         <option value={t.value}>{t.label}</option>
@@ -328,7 +331,7 @@ const setTypes = [
                       step="0.5"
                       x-model.number="set.weight"
                       inputmode="decimal"
-                      :aria-label="'Poids de la série ' + (setIdx + 1)"
+                      :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
                     />
                   </div>
                   <div class="ses__cell ses__cell--num" role="cell">
@@ -339,15 +342,37 @@ const setTypes = [
                       step="1"
                       x-model.number="set.reps"
                       inputmode="numeric"
-                      :aria-label="'Reps de la série ' + (setIdx + 1)"
+                      :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
                     />
                   </div>
                   <div class="ses__cell ses__cell--action" role="cell">
                     <button
                       type="button"
+                      class="ses__set-complete"
+                      :class="{ 'is-complete': set.completed }"
+                      @click="toggleSetComplete(exIdx, setIdx)"
+                      :aria-label="(set.completed ? labels.markUndone + ' ' + (setIdx + 1) : labels.markDone + ' ' + (setIdx + 1) + ' ' + labels.andStartRest)"
+                      :aria-pressed="set.completed"
+                      :title="set.completed ? labels.unmarkTitle : labels.markTitle"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.4"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
                       class="ses__icon-btn ses__icon-btn--danger ses__icon-btn--sm"
                       @click="removeSet(exIdx, setIdx)"
-                      :aria-label="'Supprimer la série ' + (setIdx + 1)"
+                      :aria-label="labels.deleteSet + ' ' + (setIdx + 1)"
                       title="Supprimer la série"
                     >
                       <svg
@@ -390,7 +415,7 @@ const setTypes = [
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                <span>Ajouter une série</span>
+                <span>{L.builder.addSet}</span>
               </button>
               <button
                 type="button"
@@ -398,7 +423,7 @@ const setTypes = [
                 @click="generateWarmup(exIdx)"
                 :disabled="!hasWorkingWeight(ex)"
                 :class="{ 'is-disabled': !hasWorkingWeight(ex) }"
-                :title="hasWorkingWeight(ex) ? 'Générer 3 séries d\u2019échauffement basées sur la charge de travail max' : 'Renseignez d\u2019abord le poids d\u2019une série de travail'"
+                :title="hasWorkingWeight(ex) ? labels.warmupTitle : labels.warmupHint"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -413,7 +438,7 @@ const setTypes = [
                 >
                   <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
                 </svg>
-                <span>Générer échauffement</span>
+                <span x-text="labels.warmupBtn">Générer échauffement</span>
               </button>
             </div>
           </CardContent>
@@ -445,7 +470,7 @@ const setTypes = [
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          <span>Ajouter un exercice</span>
+          <span>{L.builder.addExercise}</span>
         </button>
       </div>
     </template>
@@ -498,7 +523,7 @@ const setTypes = [
                     class="ses__fatigue-btn"
                     :class="{ 'is-active': sessionFatigue >= i }"
                     :aria-pressed="sessionFatigue >= i"
-                    :aria-label="'Fatigue ' + i + ' sur 5'"
+                    :aria-label="labels.fatigueOn + ' ' + i + ' ' + labels.fatigueOutOf5"
                     @click="setFatigue(i)"
                   >
                     <svg
@@ -528,7 +553,7 @@ const setTypes = [
                   class="ses__mood-btn"
                   :class="{ 'is-active': sessionMood === 'great' }"
                   :aria-pressed="sessionMood === 'great'"
-                  aria-label="Humeur : très bonne"
+                  :aria-label="labels.moodLabel + ' : ' + labels.moodGreat"
                   @click="setMood('great')"
                 >
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
@@ -538,7 +563,7 @@ const setTypes = [
                   class="ses__mood-btn"
                   :class="{ 'is-active': sessionMood === 'good' }"
                   :aria-pressed="sessionMood === 'good'"
-                  aria-label="Humeur : bonne"
+                  :aria-label="labels.moodLabel + ' : ' + labels.moodGood"
                   @click="setMood('good')"
                 >
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
@@ -548,7 +573,7 @@ const setTypes = [
                   class="ses__mood-btn"
                   :class="{ 'is-active': sessionMood === 'ok' }"
                   :aria-pressed="sessionMood === 'ok'"
-                  aria-label="Humeur : moyenne"
+                  :aria-label="labels.moodLabel + ' : ' + labels.moodOk"
                   @click="setMood('ok')"
                 >
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
@@ -558,7 +583,7 @@ const setTypes = [
                   class="ses__mood-btn"
                   :class="{ 'is-active': sessionMood === 'tired' }"
                   :aria-pressed="sessionMood === 'tired'"
-                  aria-label="Humeur : fatiguée"
+                  :aria-label="labels.moodLabel + ' : ' + labels.moodTired"
                   @click="setMood('tired')"
                 >
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
@@ -568,7 +593,7 @@ const setTypes = [
                   class="ses__mood-btn"
                   :class="{ 'is-active': sessionMood === 'bad' }"
                   :aria-pressed="sessionMood === 'bad'"
-                  aria-label="Humeur : mauvaise"
+                  :aria-label="labels.moodLabel + ' : ' + labels.moodBad"
                   @click="setMood('bad')"
                 >
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
@@ -602,10 +627,10 @@ const setTypes = [
       x-cloak
     >
       <template x-if="!sessionName.trim()">
-        <span>Ajoutez un nom à la séance pour pouvoir l'enregistrer.</span>
+        <span x-text="labels.needName">Ajoutez un nom à la séance pour pouvoir l'enregistrer.</span>
       </template>
       <template x-if="sessionName.trim() && exercises.length === 0">
-        <span>Ajoutez au moins un exercice pour enregistrer la séance.</span>
+        <span x-text="labels.needExo">Ajoutez au moins un exercice pour enregistrer la séance.</span>
       </template>
     </div>
 
@@ -667,8 +692,8 @@ const setTypes = [
           {/* ── Library empty ── */}
           <template x-if="availableExercises.length === 0">
             <div class="ses__picker-empty">
-              <p>Votre bibliothèque d'exercices est vide.</p>
-              <a href="/exercices" class="ses__picker-link">
+              <p x-text="labels.emptyLibrary">Votre bibliothèque d'exercices est vide.</p>
+              <a href="/exercices" class="ses__picker-link" x-text="labels.createExoLink">
                 Créer des exercices →
               </a>
             </div>
@@ -677,14 +702,14 @@ const setTypes = [
           {/* ── All exercises already added ── */}
           <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() === ''">
             <div class="ses__picker-empty">
-              <p>Tous vos exercices sont déjà dans cette séance.</p>
+              <p x-text="labels.allAdded">Tous vos exercices sont déjà dans cette séance.</p>
             </div>
           </template>
 
           {/* ── No match for search ── */}
           <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() !== ''">
             <div class="ses__picker-empty">
-              <p>Aucun exercice ne correspond à votre recherche.</p>
+              <p x-text="labels.noSearchMatch">Aucun exercice ne correspond à votre recherche.</p>
             </div>
           </template>
 
@@ -698,7 +723,7 @@ const setTypes = [
                 type="button"
                 class="ses__picker-item-main"
                 @click="addExercise(ex)"
-                :aria-label="'Ajouter ' + ex.name + ' à la séance'"
+                :aria-label="labels.addExoAria + ' ' + ex.name + ' ' + labels.toSession"
               >
                 <span class="ses__picker-name" x-text="ex.name"></span>
                 <span class="ses__picker-muscle" x-text="ex.muscle"></span>
@@ -708,7 +733,7 @@ const setTypes = [
                 class="ses__picker-tip-toggle"
                 @click="toggleTip(ex.id)"
                 :aria-expanded="isTipOpen(ex.id).toString()"
-                :aria-label="'Afficher les conseils pour ' + ex.name"
+                :aria-label="labels.showTipAria + ' ' + ex.name"
                 title="Conseils"
                 x-show="hasTip(ex.name)"
               >
@@ -731,8 +756,31 @@ const setTypes = [
                 class="ses__picker-tip"
                 x-show="isTipOpen(ex.id) && hasTip(ex.name)"
                 x-cloak
-                x-text="getTip(ex.name)"
-              ></p>
+              >
+                <span x-text="getTip(ex.name)"></span>
+                <a
+                  class="ses__tip-video"
+                  :href="getVideoUrl(ex.name)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :aria-label="labels.videoAria + ' ' + ex.name + ' ' + labels.onYoutube"
+                  title="Voir la technique sur YouTube"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polygon points="6 4 20 12 6 20 6 4"></polygon>
+                  </svg>
+                  <span x-text="labels.seeTechnique">Voir la technique</span>
+                </a>
+              </p>
             </div>
           </template>
         </div>
@@ -748,6 +796,69 @@ const setTypes = [
         </button>
       </div>
     </Dialog>
+
+    {/* ════════════════════════════════════════════════════
+        REST TIMER WIDGET (added 2026-08-04)
+        Sticky bar that appears when the user marks a set as
+        complete. The duration is sourced per-exercise from
+        `getRestTime(name)` so each lift gets a tailored rest
+        (compound lifts rest longer, isolation work rests
+        shorter). The label shows "Repos — <name> (M:SS)" and
+        the countdown ticks down every second; a Skip button
+        dismisses the widget before the timer elapses.
+        ════════════════════════════════════════════════════ */}
+    <div
+      class="ses__rest-timer"
+      x-show="restTimer.active"
+      x-cloak
+      x-transition.opacity.duration.180ms
+      role="status"
+      aria-live="polite"
+    >
+      <div class="ses__rest-timer-icon" aria-hidden="true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      <div class="ses__rest-timer-body">
+        <div class="ses__rest-timer-label" x-text="restTimerLabel()"></div>
+        <div
+          class="ses__rest-timer-readout"
+          :class="{ 'is-done': restTimerDone }"
+          x-text="restTimerDisplay()"
+        ></div>
+      </div>
+      <button
+        type="button"
+        class="ses__rest-timer-skip"
+        @click="dismissRestTimer()"
+        :aria-label="restTimerDone ? labels.closeRest : labels.skipRest"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        <span x-text="restTimerDone ? labels.close : labels.skip"></span>
+      </button>
+    </div>
   </div>
 </AppLayout>
 
@@ -763,6 +874,10 @@ const setTypes = [
   } from '../../../lib/storage';
   import { TRAINING_TEMPLATES, getTemplateById, type TemplateExercise } from '../../../lib/templates';
   import { getExerciseTip } from '../../../lib/exercise-tips';
+  import { getRestTime, formatRestTime } from '../../../lib/rest-times';
+  import { t } from '../../../i18n';
+
+  const LABELS = t();
 
   // Default set type for newly created sets (mirrors spec).
   const DEFAULT_SET_TYPE: SetType = 'work';
@@ -815,6 +930,73 @@ const setTypes = [
       // ── Picker tips (added 2026-08-04) ──
       // Set of exercise ids whose tip is currently expanded.
       openTips: [] as string[],
+
+      // ── Rest timer (added 2026-08-04) ──
+      // Sticky widget that appears when a set is marked complete.
+      // Duration is sourced from `getRestTime(ex.name)` so each
+      // exercise gets a tailored default (compound lifts rest
+      // longer, isolation work rests shorter). User can Skip the
+      // timer to dismiss it before it elapses.
+      restTimer: {
+        active: false,
+        exerciseName: '' as string,
+        duration: 0, // total seconds for the current run
+        remaining: 0, // seconds left
+        intervalId: null as number | null,
+        endTime: 0,
+      },
+
+      // ── i18n labels (dynamic strings used in the template) ──
+      labels: {
+        saveSession: 'Enregistrer la séance',
+        noExoAdded: 'Aucun exercice ajouté',
+        noExoDesc: 'Commencez par sélectionner des exercices depuis votre bibliothèque pour construire votre séance.',
+        needName: "Ajoutez un nom à la séance pour pouvoir l'enregistrer.",
+        needExo: 'Ajoutez au moins un exercice pour enregistrer la séance.',
+        emptyLibrary: 'Votre bibliothèque d\'exercices est vide.',
+        createExoLink: 'Créer des exercices →',
+        allAdded: 'Tous vos exercices sont déjà dans cette séance.',
+        noSearchMatch: 'Aucun exercice ne correspond à votre recherche.',
+        addExoAria: 'Ajouter',
+        toSession: 'à la séance',
+        showTipAria: 'Afficher les conseils pour',
+        seeTechnique: 'Voir la technique',
+        videoAria: 'Voir des vidéos de technique pour',
+        onYoutube: 'sur YouTube',
+        closeRest: 'Fermer le minuteur de repos',
+        skipRest: 'Passer le repos',
+        close: 'Fermer',
+        skip: 'Passer',
+        supersetLabel: 'Superset',
+        supersetFor: 'Superset pour',
+        newSuperset: '+ Nouveau superset',
+        setsFor: 'Séries pour',
+        setTypeLabel: 'Type de la série',
+        weightForSet: 'Poids de la série',
+        repsForSet: 'Reps de la série',
+        deleteSet: 'Supprimer la série',
+        markUndone: 'Marquer la série',
+        markDone: 'Marquer la série',
+        andStartRest: 'terminée et démarrer le repos',
+        unmarkTitle: 'Série terminée — cliquer pour annuler',
+        markTitle: 'Marquer terminée et démarrer le repos',
+        warmupTitle: 'Générer 3 séries d’échauffement basées sur la charge de travail max',
+        warmupHint: 'Renseignez d’abord le poids d’une série de travail',
+        warmupBtn: 'Générer échauffement',
+        fatigueOn: 'Fatigue',
+        fatigueOutOf5: 'sur 5',
+        moodLabel: 'Humeur',
+        moodGreat: 'très bonne',
+        moodGood: 'bonne',
+        moodOk: 'moyenne',
+        moodTired: 'fatiguée',
+        moodBad: 'mauvaise',
+        discardConfirm: 'Annuler la séance en cours ? Les modifications non enregistrées seront perdues.',
+        top: 'top',
+        units: 'unités',
+        rest: 'Repos',
+        discardTitle: 'Annuler la séance ?',
+      },
 
       // ── Init ──
       init() {
@@ -897,7 +1079,7 @@ const setTypes = [
         const setLabel = exercise.sets.length > 1 ? 'séries' : 'série';
         const volume = Math.round(totalVolume);
         const topLine = top && top.weight > 0
-          ? ` · top ${top.weight} kg × ${top.reps}`
+          ? ` · ${this.labels.top} ${top.weight} kg × ${top.reps}`
           : '';
         return `${exercise.sets.length} ${setLabel} · ${totalReps} reps · ${volume} kg${topLine}`;
       },
@@ -1003,7 +1185,10 @@ const setTypes = [
         return getExerciseTip(name) != null;
       },
       getTip(name: string): string {
-        return getExerciseTip(name) ?? '';
+        return getExerciseTip(name)?.description ?? '';
+      },
+      getVideoUrl(name: string): string {
+        return getExerciseTip(name)?.videoUrl ?? '';
       },
       isTipOpen(exId: string): boolean {
         return this.openTips.includes(exId);
@@ -1127,6 +1312,156 @@ const setTypes = [
         this.exercises.splice(exerciseIndex, 1);
       },
 
+      // ── Set completion (added 2026-08-04) ──
+      /**
+       * Toggle a set's `completed` flag. When the set becomes complete
+       * we start the rest timer using the per-exercise default from
+       * `getRestTime(name)` (longer for compound lifts, shorter for
+       * isolation). Unchecking stops the timer only if it was started
+       * for that same set — otherwise the timer keeps running.
+       */
+      toggleSetComplete(exerciseIndex: number, setIndex: number) {
+        const ex = this.exercises[exerciseIndex];
+        if (!ex) return;
+        const set = ex.sets[setIndex];
+        if (!set) return;
+        set.completed = !set.completed;
+        if (set.completed) {
+          this.startRestTimer(ex.name);
+        }
+      },
+
+      // ── Rest timer (added 2026-08-04) ──
+      /**
+       * Starts (or restarts) the rest timer for the given exercise.
+       * Duration is computed from `getRestTime(name)` so the user
+       * doesn't have to configure anything. Cancels any previous
+       * timer first so the widget always reflects the latest action.
+       */
+      startRestTimer(exerciseName: string) {
+        this.cancelRestTimerTick();
+        const duration = getRestTime(exerciseName);
+        this.restTimer = {
+          active: true,
+          exerciseName,
+          duration,
+          remaining: duration,
+          intervalId: null,
+          endTime: Date.now() + duration * 1000,
+        };
+        this.restTimer.intervalId = window.setInterval(
+          () => this.tickRestTimer(),
+          1000,
+        );
+        // First tick happens immediately so the display updates from
+        // the very first second instead of waiting up to a full second.
+        this.tickRestTimer();
+      },
+
+      /**
+       * Internal — decrements the remaining seconds and stops the
+       * interval when the timer hits zero. Beep on completion if
+       * the user enabled sound alerts in their settings (we re-read
+       * the flag at tick time so a settings change is picked up).
+       */
+      tickRestTimer() {
+        const remainingMs = Math.max(0, this.restTimer.endTime - Date.now());
+        const remainingSec = Math.ceil(remainingMs / 1000);
+        this.restTimer.remaining = remainingSec;
+        if (remainingMs <= 0) {
+          this.cancelRestTimerTick();
+          this.restTimer.remaining = 0;
+          if (this.isSoundEnabled()) this.beep();
+        }
+      },
+
+      cancelRestTimerTick() {
+        if (this.restTimer.intervalId != null) {
+          window.clearInterval(this.restTimer.intervalId);
+        }
+      },
+
+      dismissRestTimer() {
+        this.cancelRestTimerTick();
+        this.restTimer = {
+          active: false,
+          exerciseName: '',
+          duration: 0,
+          remaining: 0,
+          intervalId: null,
+          endTime: 0,
+        };
+      },
+
+      /**
+       * "Repos — <name> (<mm:ss>)" label for the timer widget.
+       * Returns the empty string when the timer is not active so
+       * the binding is always safe to render.
+       */
+      restTimerLabel(): string {
+        if (!this.restTimer.active) return '';
+        return `${this.labels.rest} — ${this.restTimer.exerciseName} (${formatRestTime(this.restTimer.duration)})`;
+      },
+
+      restTimerDisplay(): string {
+        if (!this.restTimer.active) return '0:00';
+        return formatRestTime(this.restTimer.remaining);
+      },
+
+      get restTimerDone(): boolean {
+        return this.restTimer.active && this.restTimer.remaining <= 0;
+      },
+
+      /**
+       * Mirrors the sound-alert flag from settings (default true
+       * when the user hasn't saved settings yet). Read on every
+       * tick so the change is picked up without a full reload.
+       */
+      isSoundEnabled(): boolean {
+        try {
+          const raw = localStorage.getItem('muscu-settings');
+          if (!raw) return true;
+          const parsed = JSON.parse(raw);
+          return parsed.soundAlerts !== false;
+        } catch {
+          return true;
+        }
+      },
+
+      /**
+       * Reused audio-cue logic from /timer. Plays a short
+       * three-note rising arpeggio so the user knows the
+       * rest is over. Silent fallback if the WebAudio API
+       * is unavailable.
+       */
+      beep(): void {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const ctx = new AudioCtx();
+          const playTone = (freq: number, startOffset: number, duration: number) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            const t0 = ctx.currentTime + startOffset;
+            gain.gain.setValueAtTime(0.0001, t0);
+            gain.gain.exponentialRampToValueAtTime(0.35, t0 + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+            osc.start(t0);
+            osc.stop(t0 + duration + 0.02);
+          };
+          playTone(660, 0.0, 0.18);
+          playTone(780, 0.22, 0.18);
+          playTone(990, 0.44, 0.35);
+          window.setTimeout(() => ctx.close(), 1100);
+        } catch {
+          // Audio not available — silent fallback
+        }
+      },
+
       // ── Notes actions ──
       setFatigue(level: number) {
         // Toggle: clicking the currently active level unsets fatigue.
@@ -1144,9 +1479,7 @@ const setTypes = [
 
       discard() {
         if (this.exercises.length > 0 || this.sessionName.trim()) {
-          const ok = window.confirm(
-            'Annuler la séance en cours ? Les modifications non enregistrées seront perdues.',
-          );
+          const ok = window.confirm(this.labels.discardConfirm);
           if (!ok) return;
         }
         window.location.href = '/seances';
@@ -1672,6 +2005,54 @@ const setTypes = [
     height: 1.6rem;
   }
 
+  /* ── Set completion toggle (added 2026-08-04) ──
+     Inline check button on the right side of each set row. Outlined
+     when incomplete, filled accent when complete. Clicking it also
+     starts the per-exercise rest timer. */
+  .ses__set-complete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    background-color: transparent;
+    border: 1.5px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .ses__set-complete:hover {
+    background-color: hsl(142 70% 45% / 0.10);
+    border-color: var(--color-success);
+    color: var(--color-success);
+  }
+
+  .ses__set-complete:active {
+    transform: scale(0.92);
+  }
+
+  .ses__set-complete.is-complete {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+    color: hsl(0 0% 5%);
+  }
+
+  .ses__set-complete.is-complete:hover {
+    background-color: hsl(142 70% 50%);
+    border-color: hsl(142 70% 50%);
+  }
+
+  .ses__set-complete svg {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
   /* ════════════════════════════════════════════════════
      ADD EXERCISE — empty state + bottom row
      ════════════════════════════════════════════════════ */
@@ -1936,6 +2317,51 @@ const setTypes = [
     color: var(--color-muted);
     font-size: 1.2rem;
     line-height: 1.5;
+  }
+
+  /* ── YouTube technique link (added 2026-08-04) ── */
+  .ses__tip-video {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+    padding: 0.5rem 0.9rem;
+    background-color: hsl(0 80% 55% / 0.10);
+    border: 1px solid hsl(0 80% 55% / 0.32);
+    border-radius: var(--radius-pill);
+    color: hsl(0 80% 60%);
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .ses__tip-video:hover {
+    background-color: hsl(0 80% 55% / 0.18);
+    border-color: hsl(0 80% 55% / 0.50);
+    color: hsl(0 80% 65%);
+  }
+
+  .ses__tip-video:active {
+    transform: scale(0.97);
+  }
+
+  .ses__tip-video svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: currentColor;
+    stroke: currentColor;
+    flex-shrink: 0;
+  }
+
+  .ses__tip-video svg polygon {
+    fill: currentColor;
+    stroke: none;
   }
 
   .ses__picker-name {
@@ -2525,6 +2951,135 @@ const setTypes = [
     .ses__mood-btn {
       width: 4.4rem;
       height: 4.4rem;
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     REST TIMER WIDGET (added 2026-08-04)
+     Sticky bar that pops up at the bottom of the page when
+     the user marks a set as complete. Shows the exercise
+     name + total rest time and counts down every second.
+     ════════════════════════════════════════════════════ */
+  .ses__rest-timer {
+    position: fixed;
+    left: 50%;
+    bottom: 1.6rem;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    width: min(48rem, calc(100% - 3.2rem));
+    padding: 1.0rem 1.2rem;
+    background-color: hsl(0 0% 5% / 0.92);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 12px 36px hsl(0 0% 0% / 0.55),
+                0 0 0 1px hsl(0 0% 100% / 0.04);
+  }
+
+  .ses__rest-timer-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.0rem;
+    height: 4.0rem;
+    border-radius: 50%;
+    background-color: hsl(32 95% 50% / 0.18);
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .ses__rest-timer-icon svg {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .ses__rest-timer-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .ses__rest-timer-label {
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ses__rest-timer-readout {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .ses__rest-timer-readout.is-done {
+    color: var(--color-success);
+  }
+
+  .ses__rest-timer-skip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 3.6rem;
+    padding: 0 1.2rem;
+    background-color: hsl(0 0% 100% / 0.06);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .ses__rest-timer-skip:hover {
+    background-color: hsl(0 0% 100% / 0.10);
+    border-color: hsl(0 0% 100% / 0.20);
+    color: var(--color-text);
+  }
+
+  .ses__rest-timer-skip:active {
+    transform: scale(0.97);
+  }
+
+  .ses__rest-timer-skip svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  @media (max-width: 480px) {
+    .ses__rest-timer {
+      width: calc(100% - 2rem);
+      bottom: 1.0rem;
+      gap: 0.8rem;
+      padding: 0.8rem 1.0rem;
+    }
+    .ses__rest-timer-icon {
+      width: 3.4rem;
+      height: 3.4rem;
+    }
+    .ses__rest-timer-readout {
+      font-size: 2.0rem;
     }
   }
 

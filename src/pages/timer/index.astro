@@ -1,11 +1,14 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
+import { t } from '../../i18n';
+
+const L = t();
 ---
 
-<AppLayout title="Timer">
+<AppLayout title={L.timer.title}>
   <PageHeader
-    title="Timer"
+    title={L.timer.title}
     description="Minuteur de repos entre les séries ou chronomètre."
   />
 
@@ -39,7 +42,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
-        <span>Minuterie</span>
+        <span>{L.timer.countdown}</span>
       </button>
       <button
         type="button"
@@ -64,7 +67,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           <line x1="12" y1="14" x2="12" y2="10"></line>
           <circle cx="12" cy="14" r="8"></circle>
         </svg>
-        <span>Chronomètre</span>
+        <span>{L.timer.stopwatch}</span>
       </button>
     </div>
 
@@ -131,7 +134,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
 
       {/* ── Custom time input ── */}
       <div class="timer__custom">
-        <label for="custom-seconds" class="timer__custom-label">
+        <label for="custom-seconds" class="timer__custom-label" x-text="labels.custom">
           Durée personnalisée
         </label>
         <div class="timer__custom-row">
@@ -174,7 +177,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           @click="start()"
           x-show="!running"
           x-transition.opacity.duration.150ms
-          x-text="remaining === 0 ? 'Redémarrer' : 'Démarrer'"
+          x-text="remaining === 0 ? labels.restart : labels.start"
         >
           Démarrer
         </button>
@@ -184,6 +187,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           @click="pause()"
           x-show="running"
           x-transition.opacity.duration.150ms
+          x-text="labels.pause"
         >
           Pause
         </button>
@@ -191,6 +195,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           type="button"
           class="timer__btn timer__btn--ghost"
           @click="reset()"
+          x-text="labels.reset"
         >
           Reset
         </button>
@@ -219,7 +224,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
           <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
         </svg>
-        <span>Alerte sonore</span>
+        <span x-text="labels.soundAlert">Alerte sonore</span>
       </label>
     </div>
     </div>
@@ -252,7 +257,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           @click="swStart()"
           x-show="!sw.running"
           x-transition.opacity.duration.150ms
-          x-text="sw.elapsed === 0 ? 'Démarrer' : 'Reprendre'"
+          x-text="sw.elapsed === 0 ? labels.start : labels.resume"
         >
           Démarrer
         </button>
@@ -262,6 +267,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           @click="swPause()"
           x-show="sw.running"
           x-transition.opacity.duration.150ms
+          x-text="labels.pause"
         >
           Pause
         </button>
@@ -270,6 +276,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           class="timer__btn timer__btn--accent-ghost"
           @click="swRecordLap()"
           :disabled="!sw.running"
+          x-text="labels.lap"
         >
           Tour
         </button>
@@ -277,6 +284,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
           type="button"
           class="timer__btn timer__btn--ghost"
           @click="swReset()"
+          x-text="labels.reset"
         >
           Reset
         </button>
@@ -285,9 +293,9 @@ import PageHeader from '../../components/layout/PageHeader.astro';
       {/* ── Lap list ── */}
       <div class="timer__laps" x-show="sw.laps.length > 0" x-transition.opacity.duration.200ms>
         <div class="timer__laps-header">
-          <span class="timer__laps-col-label">Tour</span>
-          <span class="timer__laps-col-label">Temps du tour</span>
-          <span class="timer__laps-col-label timer__laps-col-label--end">Total</span>
+          <span class="timer__laps-col-label" x-text="labels.lap">Tour</span>
+          <span class="timer__laps-col-label" x-text="labels.lapTime">Temps du tour</span>
+          <span class="timer__laps-col-label timer__laps-col-label--end" x-text="labels.total">Total</span>
         </div>
         <div class="timer__laps-body">
           <template x-for="(lap, revIdx) in swLapsReversed" :key="lap.totalTime + '-' + revIdx">
@@ -322,13 +330,22 @@ import PageHeader from '../../components/layout/PageHeader.astro';
       endTime: 0,
       lastTick: 0,
 
-      // ── Stopwatch state ──
-      sw: {
-        elapsed: 0,           // accumulated ms
-        running: false,
-        intervalId: null,
-        startTimestamp: 0,    // wall-clock ms when (re)started
-        laps: [],             // [{ lapTime, totalTime }] in ms
+      // ── Translations ──
+      labels: {
+        custom: 'Durée personnalisée',
+        start: 'Démarrer',
+        restart: 'Redémarrer',
+        resume: 'Reprendre',
+        pause: 'Pause',
+        reset: 'Reset',
+        lap: 'Tour',
+        lapTime: 'Temps du tour',
+        total: 'Total',
+        soundAlert: 'Alerte sonore',
+        running: 'En cours',
+        paused: 'En pause',
+        ready: 'Prêt',
+        done: 'Terminé',
       },
 
       init() {
@@ -366,10 +383,10 @@ import PageHeader from '../../components/layout/PageHeader.astro';
       },
 
       get statusLabel() {
-        if (this.running) return 'En cours';
-        if (this.remaining === 0) return 'Terminé';
-        if (this.remaining < this.totalTime) return 'En pause';
-        return 'Prêt';
+        if (this.running) return this.labels.running;
+        if (this.remaining === 0) return this.labels.done;
+        if (this.remaining < this.totalTime) return this.labels.paused;
+        return this.labels.ready;
       },
 
       setPreset(seconds) {
@@ -441,9 +458,9 @@ import PageHeader from '../../components/layout/PageHeader.astro';
       // STOPWATCH
       // ════════════════════════════════════════════════
       get swStatusLabel() {
-        if (this.sw.running) return 'En cours';
-        if (this.sw.elapsed > 0) return 'En pause';
-        return 'Prêt';
+        if (this.sw.running) return this.labels.running;
+        if (this.sw.elapsed > 0) return this.labels.paused;
+        return this.labels.ready;
       },
 
       // Display laps in reverse order (latest on top) without mutating source

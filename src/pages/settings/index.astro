@@ -9,6 +9,9 @@ import Input from '../../components/ui/Input.astro';
 import Select from '../../components/ui/Select.astro';
 import Button from '../../components/ui/Button.astro';
 import Dialog from '../../components/ui/Dialog.astro';
+import { t } from '../../i18n';
+
+const L = t();
 
 /**
  * Static rest-time presets (seconds). Used by the Timer settings select
@@ -27,9 +30,9 @@ const restOptions = REST_PRESETS.map((s) => {
 const APP_VERSION = '0.0.1';
 ---
 
-<AppLayout title="Réglages">
+<AppLayout title={L.settings.title}>
   <PageHeader
-    title="Réglages"
+    title={L.settings.title}
     description="Personnalisez votre application et gérez vos préférences."
   />
 
@@ -60,7 +63,7 @@ const APP_VERSION = '0.0.1';
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </span>
-            <CardTitle>Profil</CardTitle>
+            <CardTitle>{L.settings.profile}</CardTitle>
           </div>
           <p class="set__heading-sub">Votre identité dans l'application.</p>
         </CardHeader>
@@ -70,21 +73,21 @@ const APP_VERSION = '0.0.1';
           <div class="set__rows" x-show="!editingProfile" x-cloak x-transition.opacity.duration.200ms>
             <div class="set__row">
               <div class="set__row-label">
-                <span class="set__row-title">Pseudo</span>
+                <span class="set__row-title">{L.settings.pseudo}</span>
                 <span class="set__row-hint">Affiché dans vos séances.</span>
               </div>
-              <div class="set__row-value" x-text="display.pseudo || 'Non défini'"></div>
+              <div class="set__row-value" x-text="display.pseudo || labels.notSet"></div>
             </div>
             <div class="set__row">
               <div class="set__row-label">
-                <span class="set__row-title">Email</span>
+                <span class="set__row-title">{L.settings.email}</span>
                 <span class="set__row-hint">Pour les futures notifications.</span>
               </div>
-              <div class="set__row-value" x-text="display.email || 'Non défini'"></div>
+              <div class="set__row-value" x-text="display.email || labels.notSet"></div>
             </div>
             <div class="set__actions">
               <Button type="button" variant="secondary" @click="startEditProfile()">
-                Modifier
+                {L.common.edit}
               </Button>
             </div>
           </div>
@@ -99,7 +102,7 @@ const APP_VERSION = '0.0.1';
           >
             <div class="set__form-field">
               <Input
-                label="Pseudo"
+                label={L.settings.pseudo}
                 id="set-pseudo"
                 type="text"
                 placeholder="Ex. Alex"
@@ -110,7 +113,7 @@ const APP_VERSION = '0.0.1';
             </div>
             <div class="set__form-field">
               <Input
-                label="Email"
+                label={L.settings.email}
                 id="set-email"
                 type="email"
                 placeholder="exemple@email.com"
@@ -120,10 +123,10 @@ const APP_VERSION = '0.0.1';
             </div>
             <div class="set__actions">
               <Button type="button" variant="ghost" @click="cancelEditProfile()">
-                Annuler
+                {L.common.cancel}
               </Button>
               <Button type="submit" variant="primary">
-                Enregistrer
+                {L.common.save}
               </Button>
             </div>
           </form>
@@ -232,7 +235,7 @@ const APP_VERSION = '0.0.1';
                   <span class="set__goal-progress-num" x-text="weeklyDone"></span>
                   <span class="set__goal-progress-sep" aria-hidden="true">/</span>
                   <span class="set__goal-progress-target" x-text="display.weeklyGoal"></span>
-                  <span class="set__goal-progress-label">séance</span>
+                  <span class="set__goal-progress-label" x-text="labels.seanceSingular">séance</span>
                   <span
                     class="set__goal-progress-label"
                     x-text="display.weeklyGoal > 1 ? 's' : ''"
@@ -283,7 +286,7 @@ const APP_VERSION = '0.0.1';
                 <path d="M3 12h18"></path>
               </svg>
             </span>
-            <CardTitle>Unités</CardTitle>
+            <CardTitle>{L.settings.units}</CardTitle>
           </div>
           <p class="set__heading-sub">Préférences d'affichage des charges et répétitions.</p>
         </CardHeader>
@@ -292,10 +295,10 @@ const APP_VERSION = '0.0.1';
           <div class="set__rows">
             <div class="set__row">
               <div class="set__row-label">
-                <span class="set__row-title">Unité de poids</span>
+                <span class="set__row-title">{L.settings.weightUnit}</span>
                 <span class="set__row-hint">Affichée dans toutes les séances.</span>
               </div>
-              <div class="set__seg" role="group" aria-label="Unité de poids">
+              <div class="set__seg" role="group" aria-label={L.settings.weightUnit}>
                 <button
                   type="button"
                   class="set__seg-btn"
@@ -319,10 +322,10 @@ const APP_VERSION = '0.0.1';
 
             <div class="set__row">
               <div class="set__row-label">
-                <span class="set__row-title">Format des répétitions</span>
+                <span class="set__row-title">{L.settings.repsFormat}</span>
                 <span class="set__row-hint">Comment les répétitions sont saisies.</span>
               </div>
-              <div class="set__seg" role="group" aria-label="Format des répétitions">
+              <div class="set__seg" role="group" aria-label={L.settings.repsFormat}>
                 <button
                   type="button"
                   class="set__seg-btn"
@@ -330,7 +333,7 @@ const APP_VERSION = '0.0.1';
                   :aria-pressed="display.repsFormat === 'simple'"
                   @click="setRepsFormat('simple')"
                 >
-                  Simple
+                  {L.settings.simple}
                 </button>
                 <button
                   type="button"
@@ -339,7 +342,7 @@ const APP_VERSION = '0.0.1';
                   :aria-pressed="display.repsFormat === 'range'"
                   @click="setRepsFormat('range')"
                 >
-                  Plage
+                  {L.settings.range}
                 </button>
               </div>
             </div>
@@ -386,7 +389,7 @@ const APP_VERSION = '0.0.1';
                 <path d="m22 6-3-3"></path>
               </svg>
             </span>
-            <CardTitle>Timer</CardTitle>
+            <CardTitle>{L.settings.timerSettings}</CardTitle>
           </div>
           <p class="set__heading-sub">Comportement par défaut du chronomètre de repos.</p>
         </CardHeader>
@@ -396,7 +399,7 @@ const APP_VERSION = '0.0.1';
             <div class="set__rows">
               <div class="set__row set__row--form">
                 <div class="set__row-label">
-                  <span class="set__row-title">Temps de repos par défaut</span>
+                  <span class="set__row-title">{L.settings.defaultRestTime}</span>
                   <span class="set__row-hint">Présélection au lancement du timer.</span>
                 </div>
                 <div class="set__row-value set__row-value--control">
@@ -411,7 +414,7 @@ const APP_VERSION = '0.0.1';
 
               <div class="set__row set__row--form">
                 <div class="set__row-label">
-                  <span class="set__row-title">Alertes sonores</span>
+                  <span class="set__row-title">{L.settings.soundAlerts}</span>
                   <span class="set__row-hint">Bip à la fin du décompte.</span>
                 </div>
                 <div class="set__row-value set__row-value--control">
@@ -436,6 +439,7 @@ const APP_VERSION = '0.0.1';
               class="set__hint"
               x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
               x-cloak
+              x-text="labels.unsavedChanges"
             >
               Modifications non enregistrées.
             </p>
@@ -448,14 +452,14 @@ const APP_VERSION = '0.0.1';
                 x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
                 x-cloak
               >
-                Annuler
+                {L.common.cancel}
               </Button>
               <Button
                 type="submit"
                 variant="primary"
                 x-bind:disabled="form.defaultRestTime === String(display.defaultRestTime) && form.soundAlerts === display.soundAlerts"
               >
-                Enregistrer
+                {L.common.save}
               </Button>
             </div>
           </form>
@@ -485,7 +489,7 @@ const APP_VERSION = '0.0.1';
                 <path d="M3 12a9 3 0 0 0 18 0"></path>
               </svg>
             </span>
-            <CardTitle>Données</CardTitle>
+            <CardTitle>{L.settings.data}</CardTitle>
           </div>
           <p class="set__heading-sub">Sauvegarde, restauration et réinitialisation.</p>
         </CardHeader>
@@ -510,9 +514,9 @@ const APP_VERSION = '0.0.1';
                   </svg>
                 </div>
                 <div class="set__data-tile-text">
-                  <h4 class="set__data-tile-title">Exporter</h4>
+                  <h4 class="set__data-tile-title">{L.settings.exportJSON}</h4>
                   <p class="set__data-tile-desc">
-                    Télécharger une sauvegarde JSON de vos exercices, séances et réglages.
+                    {L.settings.exportJSONDesc}
                   </p>
                 </div>
               </div>
@@ -522,8 +526,8 @@ const APP_VERSION = '0.0.1';
                 @click="exportData()"
                 :disabled="exporting"
               >
-                <span x-show="!exporting" x-cloak>Télécharger</span>
-                <span x-show="exporting" x-cloak>Préparation…</span>
+                <span x-show="!exporting" x-cloak x-text="labels.download">Télécharger</span>
+                <span x-show="exporting" x-cloak x-text="labels.preparing">Préparation…</span>
               </button>
             </div>
 
@@ -545,9 +549,9 @@ const APP_VERSION = '0.0.1';
                   </svg>
                 </div>
                 <div class="set__data-tile-text">
-                  <h4 class="set__data-tile-title">Exporter en CSV</h4>
+                  <h4 class="set__data-tile-title">{L.settings.exportCSV}</h4>
                   <p class="set__data-tile-desc">
-                    Télécharger vos séances au format CSV, compatibles avec un tableur.
+                    {L.settings.exportCSVDesc}
                   </p>
                 </div>
               </div>
@@ -557,8 +561,8 @@ const APP_VERSION = '0.0.1';
                 @click="exportCSV()"
                 :disabled="exportingCsv"
               >
-                <span x-show="!exportingCsv" x-cloak>Télécharger</span>
-                <span x-show="exportingCsv" x-cloak>Préparation…</span>
+                <span x-show="!exportingCsv" x-cloak x-text="labels.download">Télécharger</span>
+                <span x-show="exportingCsv" x-cloak x-text="labels.preparing">Préparation…</span>
               </button>
             </div>
 
@@ -580,9 +584,9 @@ const APP_VERSION = '0.0.1';
                   </svg>
                 </div>
                 <div class="set__data-tile-text">
-                  <h4 class="set__data-tile-title">Importer</h4>
+                  <h4 class="set__data-tile-title">{L.settings.import}</h4>
                   <p class="set__data-tile-desc">
-                    Restaurer une sauvegarde JSON existante. Les données actuelles seront remplacées.
+                    {L.settings.importDesc}
                   </p>
                 </div>
               </div>
@@ -593,7 +597,7 @@ const APP_VERSION = '0.0.1';
                 :disabled="importing"
               >
                 <span x-show="!importing" x-cloak>Choisir un fichier</span>
-                <span x-show="importing" x-cloak>Import…</span>
+                <span x-show="importing" x-cloak x-text="labels.importing">Import…</span>
               </button>
               <input
                 type="file"
@@ -631,11 +635,10 @@ const APP_VERSION = '0.0.1';
           <div class="set__danger">
             <div class="set__danger-head">
               <span class="set__danger-badge">DANGER</span>
-              <h4 class="set__danger-title">Réinitialiser toutes les données</h4>
+              <h4 class="set__danger-title">{L.settings.resetAll}</h4>
             </div>
             <p class="set__danger-desc">
-              Supprime définitivement vos exercices, séances, progression et réglages.
-              Cette action est irréversible — pensez à exporter une sauvegarde avant.
+              {L.settings.resetDesc}
             </p>
             <button
               type="button"
@@ -671,7 +674,7 @@ const APP_VERSION = '0.0.1';
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
               </svg>
             </span>
-            <CardTitle>À propos</CardTitle>
+            <CardTitle>{L.settings.about}</CardTitle>
           </div>
           <p class="set__heading-sub">Informations sur l'application.</p>
         </CardHeader>
@@ -679,21 +682,21 @@ const APP_VERSION = '0.0.1';
         <CardContent>
           <dl class="set__about">
             <div class="set__about-row">
-              <dt class="set__about-key">Version</dt>
+              <dt class="set__about-key">{L.settings.version}</dt>
               <dd class="set__about-val">
                 <span class="set__about-pill">v{APP_VERSION}</span>
               </dd>
             </div>
             <div class="set__about-row">
-              <dt class="set__about-key">Stockage</dt>
+              <dt class="set__about-key">{L.settings.storage}</dt>
               <dd class="set__about-val">Local (navigateur)</dd>
             </div>
             <div class="set__about-row">
-              <dt class="set__about-key">Mode</dt>
+              <dt class="set__about-key">{L.settings.mode}</dt>
               <dd class="set__about-val">100% hors-ligne</dd>
             </div>
             <div class="set__about-row">
-              <dt class="set__about-key">Polices</dt>
+              <dt class="set__about-key">{L.settings.fonts}</dt>
               <dd class="set__about-val">Barlow · Barlow Condensed</dd>
             </div>
             <div class="set__about-row">
@@ -701,15 +704,13 @@ const APP_VERSION = '0.0.1';
               <dd class="set__about-val">Lucide</dd>
             </div>
             <div class="set__about-row">
-              <dt class="set__about-key">Framework</dt>
+              <dt class="set__about-key">{L.settings.framework}</dt>
               <dd class="set__about-val">Astro 7</dd>
             </div>
           </dl>
 
           <p class="set__credits">
-            Conçu et développé pour les pratiquants de musculation qui veulent
-            suivre leurs performances sans dépendre du cloud. Toutes vos données
-            restent sur votre appareil.
+            {L.settings.credits}
           </p>
         </CardContent>
       </Card>
@@ -718,7 +719,7 @@ const APP_VERSION = '0.0.1';
     {/* ═════════════════════════════════════════════════════
         RESET CONFIRMATION DIALOG
         ═════════════════════════════════════════════════════ */}
-    <Dialog id="set-reset-dialog" title="Réinitialiser toutes les données ?">
+    <Dialog id="set-reset-dialog" title={`${L.settings.resetAll} ?`}>
       <p class="set__confirm-text">
         Vous êtes sur le point de supprimer
         <strong> l'intégralité de vos données</strong> —
@@ -735,7 +736,7 @@ const APP_VERSION = '0.0.1';
           placeholder="SUPPRIMER"
           x-model="resetConfirmText"
           autocomplete="off"
-          aria-label="Tapez SUPPRIMER pour confirmer"
+          aria-label={L.settings.resetConfirm}
         />
       </div>
 
@@ -745,7 +746,7 @@ const APP_VERSION = '0.0.1';
           data-dialog-close
           type="button"
         >
-          Annuler
+          {L.common.cancel}
         </Button>
         <Button
           variant="destructive"
@@ -771,6 +772,9 @@ const APP_VERSION = '0.0.1';
     getSessionsThisWeek,
     type Settings,
   } from '../../lib/storage';
+  import { t } from '../../i18n';
+
+  const LABELS = t();
 
   interface SettingsAppState {
     // Source of truth (persisted)
@@ -862,6 +866,24 @@ const APP_VERSION = '0.0.1';
       dataMessage: '',
       resetConfirmText: '',
       weeklyDone: 0,
+      labels: {
+        notSet: 'Non défini',
+        download: 'Télécharger',
+        preparing: 'Préparation…',
+        importing: 'Import…',
+        seanceSingular: 'séance',
+        unsavedChanges: 'Modifications non enregistrées.',
+        storageError: 'Stockage local indisponible.',
+        exportFailed: 'Échec de l\u2019export.',
+        exportCsvFailed: 'Échec de l\u2019export CSV.',
+        backupDownloaded: 'Sauvegarde téléchargée.',
+        exportCsvDownloaded: 'Export CSV téléchargé.',
+        backupRestored: 'Sauvegarde restaurée avec succès.',
+        invalidFile: 'Fichier de sauvegarde invalide.',
+        readError: 'Impossible de lire le fichier.',
+        allDataReset: 'Toutes les données ont été réinitialisées.',
+        savedAtPrefix: 'Enregistré à ',
+      },
 
       // ── Init ──
       init() {
@@ -945,7 +967,7 @@ const APP_VERSION = '0.0.1';
         try {
           const snapshot = exportAllData();
           if (!snapshot) {
-            this.dataMessage = 'Stockage local indisponible.';
+            this.dataMessage = this.labels.storageError;
             return;
           }
           const date = new Date().toISOString().slice(0, 10);
@@ -954,10 +976,10 @@ const APP_VERSION = '0.0.1';
             JSON.stringify(snapshot, null, 2),
             'application/json',
           );
-          this.dataMessage = 'Sauvegarde téléchargée.';
+          this.dataMessage = this.labels.backupDownloaded;
         } catch (err) {
           this.dataMessage =
-            err instanceof Error ? err.message : 'Échec de l\u2019export.';
+            err instanceof Error ? err.message : this.labels.exportFailed;
         } finally {
           this.exporting = false;
         }
@@ -973,12 +995,12 @@ const APP_VERSION = '0.0.1';
             csv,
             'text/csv;charset=utf-8',
           );
-          this.dataMessage = 'Export CSV téléchargé.';
+          this.dataMessage = this.labels.exportCsvDownloaded;
         } catch (err) {
           this.dataMessage =
             err instanceof Error
               ? err.message
-              : 'Échec de l\u2019export CSV.';
+              : this.labels.exportCsvFailed;
         } finally {
           this.exportingCsv = false;
         }
@@ -1009,20 +1031,20 @@ const APP_VERSION = '0.0.1';
             importAllData(parsed);
             this.display = getSettings();
             this.form = cloneForm(this.display);
-            this.dataMessage = 'Sauvegarde restaurée avec succès.';
+            this.dataMessage = this.labels.backupRestored;
             this.flashSaved();
           } catch (err) {
             this.dataMessage =
               err instanceof Error
                 ? err.message
-                : 'Fichier de sauvegarde invalide.';
+                : this.labels.invalidFile;
           } finally {
             this.importing = false;
             input.value = '';
           }
         };
         reader.onerror = () => {
-          this.dataMessage = 'Impossible de lire le fichier.';
+          this.dataMessage = this.labels.readError;
           this.importing = false;
           input.value = '';
         };
@@ -1042,7 +1064,7 @@ const APP_VERSION = '0.0.1';
         this.editingProfile = false;
         this.resetConfirmText = '';
         this.closeDialogById('set-reset-dialog');
-        this.dataMessage = 'Toutes les données ont été réinitialisées.';
+        this.dataMessage = this.labels.allDataReset;
         this.flashSaved();
       },
 
@@ -1052,10 +1074,10 @@ const APP_VERSION = '0.0.1';
         const hh = now.getHours().toString().padStart(2, '0');
         const mm = now.getMinutes().toString().padStart(2, '0');
         const ss = now.getSeconds().toString().padStart(2, '0');
-        this.autoSavedAt = `Enregistré à ${hh}:${mm}:${ss}`;
+        this.autoSavedAt = `${this.labels.savedAtPrefix}${hh}:${mm}:${ss}`;
         // Clear after 3s so it doesn't linger.
         setTimeout(() => {
-          if (this.autoSavedAt.startsWith('Enregistré à ')) {
+          if (this.autoSavedAt.startsWith(this.labels.savedAtPrefix)) {
             this.autoSavedAt = '';
           }
         }, 3000);

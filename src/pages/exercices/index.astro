@@ -193,8 +193,31 @@ const categories = [
                   x-show="isTipOpen(ex.id) && hasTip(ex.name)"
                   x-cloak
                   x-transition.opacity.duration.180ms
-                  x-text="getTip(ex.name)"
-                ></p>
+                >
+                  <span x-text="getTip(ex.name)"></span>
+                  <a
+                    class="exo__tip-video"
+                    :href="getVideoUrl(ex.name)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :aria-label="'Voir des vidéos de technique pour ' + ex.name + ' sur YouTube'"
+                    title="Voir la technique sur YouTube"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polygon points="6 4 20 12 6 20 6 4"></polygon>
+                    </svg>
+                    <span>Voir la technique</span>
+                  </a>
+                </p>
 
             <div class="exo__card-badges">
               <span class="exo__badge exo__badge--muscle" x-text="ex.muscle"></span>
@@ -963,7 +986,10 @@ const categories = [
         return getExerciseTip(name) != null;
       },
       getTip(name: string): string {
-        return getExerciseTip(name) ?? '';
+        return getExerciseTip(name)?.description ?? '';
+      },
+      getVideoUrl(name: string): string {
+        return getExerciseTip(name)?.videoUrl ?? '';
       },
       isTipOpen(exId: string): boolean {
         return this.openTips.includes(exId);
@@ -1403,6 +1429,51 @@ const categories = [
     color: var(--color-muted);
     font-size: 1.2rem;
     line-height: 1.5;
+  }
+
+  /* ── YouTube technique link (added 2026-08-04) ── */
+  .exo__tip-video {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+    padding: 0.5rem 0.9rem;
+    background-color: hsl(0 80% 55% / 0.10);
+    border: 1px solid hsl(0 80% 55% / 0.32);
+    border-radius: var(--radius-pill);
+    color: hsl(0 80% 60%);
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .exo__tip-video:hover {
+    background-color: hsl(0 80% 55% / 0.18);
+    border-color: hsl(0 80% 55% / 0.50);
+    color: hsl(0 80% 65%);
+  }
+
+  .exo__tip-video:active {
+    transform: scale(0.97);
+  }
+
+  .exo__tip-video svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: currentColor;
+    stroke: currentColor;
+    flex-shrink: 0;
+  }
+
+  .exo__tip-video svg polygon {
+    fill: currentColor;
+    stroke: none;
   }
 
   .exo__card-badges {

@@ -61,4 +61,27 @@
   --page-padding-mobile: 1.2rem;
   --gap-card: 1.2rem;
   --gap-section: 1.6rem;
+
+  /* Secondary text — referenced by some components. Falls back to
+     --color-muted when no override is provided. */
+  --color-text-secondary: var(--color-muted);
+}
+
+/* ── Light theme override ────────────────────────────────────
+ * Activated by setting `data-theme="light"` on <html> (see
+ * AppLayout.astro init script + AppShell toggle button). Keeps
+ * the same variable names as the dark default so every component
+ * switches automatically. The accent is unchanged — orange reads
+ * well on both surfaces. */
+[data-theme="light"] {
+  --color-bg: #FFFFFF;
+  --color-surface: #F8F9FA;
+  --color-surface-2: #F0F1F3;
+  --color-surface-3: #E5E7EB;
+  --color-border: #D1D5DB;
+  --color-text: #111827;
+  --color-text-secondary: #4B5563;
+  --color-muted: #6B7280;
+  /* Accent + state colors stay the same — they have enough contrast
+     on either surface to remain readable. */
 }

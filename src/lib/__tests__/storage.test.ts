@@ -13,6 +13,8 @@ import {
   generateId,
   getExercises,
   getSessions,
+  getSessionsByDate,
+  getSessionsByMonth,
   getSettings,
   saveExercise,
   saveSession,
@@ -235,4 +237,90 @@ describe('exportSessionsAsCSV', () => {
 
 afterEach(() => {
   clearLocalStorage();
+});
+
+describe('getSessionsByDate', () => {
+  beforeEach(() => {
+    clearLocalStorage();
+  });
+
+  it('returns only sessions matching the exact YYYY-MM-DD prefix', () => {
+    saveSession({
+      name: 'A',
+      date: '2026-08-04',
+      exercises: [],
+      status: 'completed',
+    });
+    saveSession({
+      name: 'B',
+      date: '2026-08-04T18:30:00.000Z',
+      exercises: [],
+      status: 'planned',
+    });
+    saveSession({
+      name: 'C',
+      date: '2026-08-05',
+      exercises: [],
+      status: 'completed',
+    });
+
+    const matches = getSessionsByDate('2026-08-04');
+    expect(matches).toHaveLength(1);
+    expect(matches.map((s) => s.name)).toEqual(['A']);
+  });
+
+  it('returns an empty array when no session matches', () => {
+    saveSession({
+      name: 'A',
+      date: '2026-08-04',
+      exercises: [],
+      status: 'completed',
+    });
+    expect(getSessionsByDate('2030-01-01')).toEqual([]);
+  });
+});
+
+describe('getSessionsByMonth', () => {
+  beforeEach(() => {
+    clearLocalStorage();
+  });
+
+  it('returns sessions whose local year+month match the given values', () => {
+    saveSession({
+      name: 'July',
+      date: '2026-07-15',
+      exercises: [],
+      status: 'completed',
+    });
+    saveSession({
+      name: 'Aug-a',
+      date: '2026-08-01',
+      exercises: [],
+      status: 'completed',
+    });
+    saveSession({
+      name: 'Aug-b',
+      date: '2026-08-31',
+      exercises: [],
+      status: 'planned',
+    });
+    saveSession({
+      name: 'Sep',
+      date: '2026-09-01',
+      exercises: [],
+      status: 'completed',
+    });
+
+    const july = getSessionsByMonth(2026, 6);
+    expect(july.map((s) => s.name)).toEqual(['July']);
+
+    const aug = getSessionsByMonth(2026, 7);
+    expect(aug.map((s) => s.name).sort()).toEqual(['Aug-a', 'Aug-b']);
+
+    expect(getSessionsByMonth(2026, 8).map((s) => s.name)).toEqual(['Sep']);
+  });
+
+  it('returns an empty array when the month has no sessions', () => {
+    expect(getSessionsByMonth(2025, 0)).toEqual([]);
+  });
 });
