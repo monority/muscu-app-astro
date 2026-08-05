@@ -1,11 +1,11 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
-import AppLayout from '../../layouts/AppLayout.astro';
-import PageHeader from '../../components/layout/PageHeader.astro';
-import Card from '../../components/ui/Card.astro';
-import Dialog from '../../components/ui/Dialog.astro';
-import EmptyState from '../../components/ui/EmptyState.astro';
+import { t, setLocale, defaultLocale } from '../../../i18n';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PageHeader from '../../../components/layout/PageHeader.astro';
+import Card from '../../../components/ui/Card.astro';
+import Dialog from '../../../components/ui/Dialog.astro';
+import EmptyState from '../../../components/ui/EmptyState.astro';
 
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
@@ -760,7 +760,7 @@ const categories = [
 </AppLayout>
 
 <script>
-  import { t, getLocale } from '../../i18n';
+  import { t, getLocale } from '../../../i18n';
   import {
     getExercises,
     saveExercise,
@@ -774,8 +774,8 @@ const categories = [
     type SessionExercise,
     type SessionSet,
     type SetType,
-  } from '../../lib/storage';
-  import { getExerciseTip } from '../../lib/exercise-tips';
+  } from '../../../lib/storage';
+  import { getExerciseTip } from '../../../lib/exercise-tips';
 
   const LABELS = t();
 

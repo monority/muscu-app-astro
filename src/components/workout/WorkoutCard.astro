@@ -9,6 +9,9 @@ import CardHeader from '../ui/CardHeader.astro';
 import CardTitle from '../ui/CardTitle.astro';
 import CardContent from '../ui/CardContent.astro';
 import Badge from '../ui/Badge.astro';
+import { t } from '../../i18n';
+
+const L = t();
 
 interface Props {
   name: string;
@@ -36,9 +39,9 @@ const statusConfig: Record<
   NonNullable<Props['status']>,
   { variant: 'success' | 'accent' | 'default'; label: string }
 > = {
-  completed: { variant: 'success', label: 'Terminée' },
-  'in-progress': { variant: 'accent', label: 'En cours' },
-  planned: { variant: 'default', label: 'Planifiée' },
+  completed: { variant: 'success', label: L.sessions.completed },
+  'in-progress': { variant: 'accent', label: L.sessions.inProgress },
+  planned: { variant: 'default', label: L.sessions.planned },
 };
 
 const config = statusConfig[status];
@@ -71,7 +74,7 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
     <dl class="grid grid-cols-2 gap-x-4 gap-y-3 pb-3 sm:grid-cols-4">
       <div class="flex flex-col gap-0.5">
         <dt class="text-[1.1rem] uppercase tracking-wider text-[var(--color-muted)]">
-          Date
+          {L.common.date}
         </dt>
         <dd class="text-[1.3rem] font-semibold text-[var(--color-text)]">
           {formattedDate}
@@ -80,7 +83,7 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
 
       <div class="flex flex-col gap-0.5">
         <dt class="text-[1.1rem] uppercase tracking-wider text-[var(--color-muted)]">
-          Exercices
+          {L.common.exercises}
         </dt>
         <dd
           class="text-[1.3rem] font-semibold text-[var(--color-text)] tabular-nums"
@@ -92,7 +95,7 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
       {duration && (
         <div class="flex flex-col gap-0.5">
           <dt class="text-[1.1rem] uppercase tracking-wider text-[var(--color-muted)]">
-            Durée
+            {L.common.duration}
           </dt>
           <dd
             class="text-[1.3rem] font-semibold text-[var(--color-text)] tabular-nums"
@@ -105,7 +108,7 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
       {totalVolume && (
         <div class="flex flex-col gap-0.5">
           <dt class="text-[1.1rem] uppercase tracking-wider text-[var(--color-muted)]">
-            Volume
+            {L.sessions.volume}
           </dt>
           <dd
             class="text-[1.3rem] font-semibold text-[var(--color-text)] tabular-nums"
@@ -131,7 +134,7 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
               </Badge>
               <span
                 class="text-[1.1rem] tabular-nums text-[var(--color-muted)]"
-                aria-label={`${ex.setCount} séries`}
+                aria-label={`${ex.setCount} ${L.common.sets}`}
               >
                 {ex.setCount} sets
               </span>
@@ -143,7 +146,7 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
           <div
             class="pt-1 text-center text-[1.2rem] text-[var(--color-muted)]"
           >
-            +{hiddenCount} autre{hiddenCount > 1 ? 's' : ''} exercice{hiddenCount > 1 ? 's' : ''}
+            +{hiddenCount} {hiddenCount > 1 ? L.common.otherPlural : L.common.otherSingular} {L.common.exercises}
           </div>
         )}
       </div>

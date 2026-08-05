@@ -1,9 +1,9 @@
 ---
-import AppLayout from '../../layouts/AppLayout.astro';
-import PageHeader from '../../components/layout/PageHeader.astro';
-import EmptyState from '../../components/ui/EmptyState.astro';
-import Card from '../../components/ui/Card.astro';
-import { t, setLocale, defaultLocale } from '../../i18n';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PageHeader from '../../../components/layout/PageHeader.astro';
+import EmptyState from '../../../components/ui/EmptyState.astro';
+import Card from '../../../components/ui/Card.astro';
+import { t, setLocale, defaultLocale } from '../../../i18n';
 
 
 
@@ -233,8 +233,8 @@ const L = t();
     type Session,
     type SessionMood,
     type SessionStatus,
-  } from '../../lib/storage';
-  import { t, defaultLocale, getLocale } from '../../i18n';
+  } from '../../../lib/storage';
+  import { t, defaultLocale, getLocale } from '../../../i18n';
 
   const LABELS = t();
   const DATE_LOCALE = getLocale() === 'en' ? 'en-GB' : 'fr-FR';

@@ -1,16 +1,41 @@
 import fr from './fr';
+import en from './en';
 
-export type Locale = 'fr';
-export type TranslationKey = typeof fr;
+export const locales = ['fr', 'en'] as const;
+export type Locale = (typeof locales)[number];
+export const defaultLocale: Locale = 'fr';
+export type Dictionary = typeof fr;
 
-let currentLocale: Locale = 'fr';
+export const dictionaries: Record<Locale, Dictionary> = { fr, en };
 
-export function setLocale(locale: Locale) {
-  currentLocale = locale;
+let currentLocale: Locale = defaultLocale;
+
+export function setLocale(locale: string) {
+  if (locale === 'fr' || locale === 'en') {
+    currentLocale = locale;
+  }
 }
 
-export function t(): typeof fr {
-  return fr;
+export function getLocale(): Locale {
+  if (typeof window !== 'undefined') {
+    const l = (window as { __LOCALE__?: string }).__LOCALE__;
+    if (l === 'fr' || l === 'en') return l;
+  }
+  return currentLocale;
 }
 
-export default { t, setLocale };
+export function t(): Dictionary {
+  return dictionaries[getLocale()];
+}
+
+export function localizedPath(path: string): string {
+  const locale = getLocale();
+  if (locale === defaultLocale) return path;
+  return `/${locale}${path}`;
+}
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang } }));
+}
+
+export default { t, setLocale, getLocale, localizedPath, getStaticPaths };

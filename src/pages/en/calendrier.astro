@@ -1,12 +1,12 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../i18n';
-import AppLayout from '../layouts/AppLayout.astro';
-import PageHeader from '../components/layout/PageHeader.astro';
-import Card from '../components/ui/Card.astro';
-import CardHeader from '../components/ui/CardHeader.astro';
-import CardTitle from '../components/ui/CardTitle.astro';
-import CardContent from '../components/ui/CardContent.astro';
+import { t, setLocale, defaultLocale } from '../../i18n';
+import AppLayout from '../../layouts/AppLayout.astro';
+import PageHeader from '../../components/layout/PageHeader.astro';
+import Card from '../../components/ui/Card.astro';
+import CardHeader from '../../components/ui/CardHeader.astro';
+import CardTitle from '../../components/ui/CardTitle.astro';
+import CardContent from '../../components/ui/CardContent.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -212,8 +212,8 @@ const L = t();
 </AppLayout>
 
 <script>
-  import { getSessions, type Session } from '../lib/storage';
-  import { t, getLocale } from '../i18n';
+  import { getSessions, type Session } from '../../lib/storage';
+  import { t, getLocale } from '../../i18n';
 
   const LABELS = t();
   const DATE_LOCALE = getLocale() === 'en' ? 'en-GB' : 'fr-FR';

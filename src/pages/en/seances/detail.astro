@@ -1,8 +1,8 @@
 ---
-import AppLayout from '../../layouts/AppLayout.astro';
-import Card from '../../components/ui/Card.astro';
-import Dialog from '../../components/ui/Dialog.astro';
-import { t, setLocale, defaultLocale } from '../../i18n';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Dialog from '../../../components/ui/Dialog.astro';
+import { t, setLocale, defaultLocale } from '../../../i18n';
 
 
 
@@ -722,9 +722,9 @@ const L = t();
     type SessionMood,
     type SessionStatus,
     type SetType,
-  } from '../../lib/storage';
-  import { getRestTime, formatRestTime } from '../../lib/rest-times';
-  import { t } from '../../i18n';
+  } from '../../../lib/storage';
+  import { getRestTime, formatRestTime } from '../../../lib/rest-times';
+  import { t } from '../../../i18n';
 
   const LABELS = t();
 

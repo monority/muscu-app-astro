@@ -1,7 +1,7 @@
 ---
-import AppLayout from '../../layouts/AppLayout.astro';
-import PageHeader from '../../components/layout/PageHeader.astro';
-import { t, setLocale, defaultLocale } from '../../i18n';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PageHeader from '../../../components/layout/PageHeader.astro';
+import { t, setLocale, defaultLocale } from '../../../i18n';
 
 
 setLocale(Astro.currentLocale ?? defaultLocale);
@@ -314,7 +314,7 @@ const L = t();
 </AppLayout>
 
 <script>
-  import { t, defaultLocale } from '../../i18n';
+  import { t, defaultLocale } from '../../../i18n';
 
   const LABELS = t();
 

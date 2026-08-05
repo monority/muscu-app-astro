@@ -1,12 +1,12 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
-import AppLayout from '../../layouts/AppLayout.astro';
-import PageHeader from '../../components/layout/PageHeader.astro';
-import Card from '../../components/ui/Card.astro';
-import CardHeader from '../../components/ui/CardHeader.astro';
-import CardTitle from '../../components/ui/CardTitle.astro';
-import CardContent from '../../components/ui/CardContent.astro';
+import { t, setLocale, defaultLocale } from '../../../i18n';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PageHeader from '../../../components/layout/PageHeader.astro';
+import Card from '../../../components/ui/Card.astro';
+import CardHeader from '../../../components/ui/CardHeader.astro';
+import CardTitle from '../../../components/ui/CardTitle.astro';
+import CardContent from '../../../components/ui/CardContent.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -622,8 +622,8 @@ const L = t();
     type SessionExercise,
     type SessionStatus,
     type SetType,
-    } from '../../lib/storage';
-  import { t } from '../../i18n';
+    } from '../../../lib/storage';
+  import { t } from '../../../i18n';
 
   const LABELS = t();
 

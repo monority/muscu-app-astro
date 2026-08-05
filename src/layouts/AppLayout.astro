@@ -1,6 +1,7 @@
 ---
 import "../styles/globals.css";
 import AppShell from "../components/layout/AppShell.astro";
+import { t, setLocale, getLocale, localizedPath } from "../i18n";
 
 /**
  * Nav structure for the sidebar (palworld.tools style).
@@ -27,47 +28,49 @@ interface Props {
   groups?: NavTree;
 }
 
+const L = t();
+
 const defaultGroups: NavTree = [
   {
-    label: "Entraînement",
+    label: L.nav.groups.workout,
     items: [
-      { label: "Dashboard", href: "/", icon: "dashboard" },
+      { label: L.nav.dashboard, href: localizedPath("/"), icon: "dashboard" },
       {
-        label: "Séances",
-        href: "/seances",
+        label: L.nav.seances,
+        href: localizedPath("/seances"),
         icon: "clipboard",
         children: [
-          { label: "Historique", href: "/seances" },
-          { label: "Nouvelle séance", href: "/seances/creer" },
+          { label: L.nav.historique, href: localizedPath("/seances") },
+          { label: L.nav.creer, href: localizedPath("/seances/creer") },
         ],
       },
-      { label: "Séance rapide", href: "/seances/rapide", icon: "zap" },
-      { label: "Timer", href: "/timer", icon: "timer" },
-      { label: "Calendrier", href: "/calendrier", icon: "calendar" },
+      { label: L.nav.rapide, href: localizedPath("/seances/rapide"), icon: "zap" },
+      { label: L.nav.timer, href: localizedPath("/timer"), icon: "timer" },
+      { label: L.nav.calendrier, href: localizedPath("/calendrier"), icon: "calendar" },
     ],
   },
   {
-    label: "Données",
+    label: L.nav.groups.data,
     items: [
-      { label: "Exercices", href: "/exercices", icon: "dumbbell" },
+      { label: L.nav.exercices, href: localizedPath("/exercices"), icon: "dumbbell" },
       {
-        label: "Progression",
-        href: "/progression",
+        label: L.nav.progression,
+        href: localizedPath("/progression"),
         icon: "trending-up",
         children: [
-          { label: "Force", href: "/progression" },
-          { label: "Poids & mesures", href: "/progression/poids" },
-          { label: "Records", href: "/progression/records" },
-          { label: "Statistiques", href: "/progression/stats" },
+          { label: L.nav.force, href: localizedPath("/progression") },
+          { label: L.nav.poidsMesures, href: localizedPath("/progression/poids") },
+          { label: L.nav.records, href: localizedPath("/progression/records") },
+          { label: L.nav.statistiques, href: localizedPath("/progression/stats") },
         ],
       },
     ],
   },
   {
-    label: "Outils",
+    label: L.nav.groups.tools,
     items: [
-      { label: "Calculateur", href: "/calculateur", icon: "calculator" },
-      { label: "Réglages", href: "/settings", icon: "settings" },
+      { label: L.nav.calculateur, href: localizedPath("/calculateur"), icon: "calculator" },
+      { label: L.nav.settings, href: localizedPath("/settings"), icon: "settings" },
     ],
   },
 ];
@@ -79,6 +82,11 @@ const {
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
+
+// Derive the active locale from the URL so the nav tree (and the
+// <html lang>) always match the page being rendered.
+const currentLocale = currentPath.startsWith("/en") ? "en" : "fr";
+setLocale(currentLocale);
 
 // Mark active state on each item (and its children when present)
 // so the Sidebar and the mobile drawer can highlight the right
@@ -103,14 +111,14 @@ const groupsWithActive = groups.map((g) => ({
 }));
 ---
 
-<html lang="fr">
+<html lang={getLocale()}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} — Muscu App</title>
     <meta
       name="description"
-      content={description || "Application de musculation"}
+      content={description || L.layout.appTagline}
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
@@ -118,6 +126,14 @@ const groupsWithActive = groups.map((g) => ({
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="muscu.app" />
+
+    {/* ── Locale bootstrap ──
+        Exposes the server-rendered locale so client-side Alpine
+        components (via t()/getLocale()) resolve the same language
+        as the HTML they live in. Runs before the theme block. */}
+    <script is:inline>
+      window.__LOCALE__ = '{getLocale()}';
+    </script>
 
     {/* ── Theme bootstrap (added 2026-08-04) ──
         Runs synchronously in the head, BEFORE first paint, so the

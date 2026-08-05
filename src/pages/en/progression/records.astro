@@ -1,9 +1,9 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
-import AppLayout from '../../layouts/AppLayout.astro';
-import PageHeader from '../../components/layout/PageHeader.astro';
-import EmptyState from '../../components/ui/EmptyState.astro';
+import { t, setLocale, defaultLocale } from '../../../i18n';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PageHeader from '../../../components/layout/PageHeader.astro';
+import EmptyState from '../../../components/ui/EmptyState.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -223,9 +223,9 @@ const L = t();
     calculate1RM,
     type SessionExercise,
     type ProgressRecord,
-  } from '../../lib/storage';
+  } from '../../../lib/storage';
 
-  import { t } from '../../i18n';
+  import { t } from '../../../i18n';
 
   const LABELS = t();
 

@@ -1,14 +1,14 @@
 ---
-import AppLayout from '../../../layouts/AppLayout.astro';
-import PageHeader from '../../../components/layout/PageHeader.astro';
-import Card from '../../../components/ui/Card.astro';
-import CardHeader from '../../../components/ui/CardHeader.astro';
-import CardTitle from '../../../components/ui/CardTitle.astro';
-import CardContent from '../../../components/ui/CardContent.astro';
-import Badge from '../../../components/ui/Badge.astro';
-import Dialog from '../../../components/ui/Dialog.astro';
-import { TRAINING_TEMPLATES } from '../../../lib/templates';
-import { t, setLocale, defaultLocale } from '../../../i18n';
+import AppLayout from '../../../../layouts/AppLayout.astro';
+import PageHeader from '../../../../components/layout/PageHeader.astro';
+import Card from '../../../../components/ui/Card.astro';
+import CardHeader from '../../../../components/ui/CardHeader.astro';
+import CardTitle from '../../../../components/ui/CardTitle.astro';
+import CardContent from '../../../../components/ui/CardContent.astro';
+import Badge from '../../../../components/ui/Badge.astro';
+import Dialog from '../../../../components/ui/Dialog.astro';
+import { TRAINING_TEMPLATES } from '../../../../lib/templates';
+import { t, setLocale, defaultLocale } from '../../../../i18n';
 
 
 setLocale(Astro.currentLocale ?? defaultLocale);
@@ -870,11 +870,11 @@ const setTypes = [
     type SessionSet,
     type SessionMood,
     type SetType,
-  } from '../../../lib/storage';
-  import { TRAINING_TEMPLATES, getTemplateById, type TemplateExercise } from '../../../lib/templates';
-  import { getExerciseTip } from '../../../lib/exercise-tips';
-  import { getRestTime, formatRestTime } from '../../../lib/rest-times';
-  import { t, defaultLocale } from '../../../i18n';
+  } from '../../../../lib/storage';
+  import { TRAINING_TEMPLATES, getTemplateById, type TemplateExercise } from '../../../../lib/templates';
+  import { getExerciseTip } from '../../../../lib/exercise-tips';
+  import { getRestTime, formatRestTime } from '../../../../lib/rest-times';
+  import { t, defaultLocale } from '../../../../i18n';
 
   const LABELS = t();
 

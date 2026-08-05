@@ -1,10 +1,10 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
-import AppLayout from '../../layouts/AppLayout.astro';
-import PageHeader from '../../components/layout/PageHeader.astro';
-import EmptyState from '../../components/ui/EmptyState.astro';
-import Card from '../../components/ui/Card.astro';
+import { t, setLocale, defaultLocale } from '../../../i18n';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PageHeader from '../../../components/layout/PageHeader.astro';
+import EmptyState from '../../../components/ui/EmptyState.astro';
+import Card from '../../../components/ui/Card.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -212,7 +212,7 @@ const L = t();
     calculate1RM,
     type SessionExercise,
     type ProgressRecord,
-  } from '../../lib/storage';
+  } from '../../../lib/storage';
 
   /**
    * Per-exercise progression row.

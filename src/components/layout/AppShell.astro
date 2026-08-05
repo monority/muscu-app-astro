@@ -12,6 +12,7 @@
  */
 import Sidebar from "./Sidebar.astro";
 import Header from "./Header.astro";
+import { t, localizedPath } from "../../i18n";
 
 export type NavLeaf = { label: string; href: string; active?: boolean };
 export type NavItem = {
@@ -30,6 +31,7 @@ interface Props {
 }
 
 const { groups, title, class: className = "" } = Astro.props;
+const L = t();
 
 const classes = ["app-shell", className].filter(Boolean).join(" ");
 
@@ -80,7 +82,7 @@ const renderIcon = (name?: string): string => {
       class="drawer__panel"
       role="dialog"
       aria-modal="true"
-      aria-label="Menu de navigation"
+      aria-label={L.layout.menuAria}
     >
       <div class="drawer__header">
         <div class="drawer__brand">
@@ -111,7 +113,7 @@ const renderIcon = (name?: string): string => {
         <button
           type="button"
           class="drawer__close"
-          aria-label="Fermer le menu"
+          aria-label={L.layout.closeMenu}
           data-mobile-close
         >
           <svg
@@ -131,7 +133,7 @@ const renderIcon = (name?: string): string => {
         </button>
       </div>
 
-      <nav class="drawer__nav" aria-label="Navigation mobile">
+      <nav class="drawer__nav" aria-label={L.layout.mobileNavAria}>
         {
           groups.map((group) => (
             <div class="drawer__group">
@@ -178,7 +180,7 @@ const renderIcon = (name?: string): string => {
       {/* Footer — user session + logout (mirrors sidebar) */}
       <div class="drawer__user" data-user-zone hidden>
         <div class="drawer__user-info">
-          <span class="drawer__user-label">Connecté en tant que</span>
+          <span class="drawer__user-label">{L.layout.signedInAs}</span>
           <span class="drawer__user-name" data-user-name>—</span>
           <span class="drawer__user-email" data-user-email>—</span>
         </div>
@@ -186,7 +188,7 @@ const renderIcon = (name?: string): string => {
           type="button"
           class="drawer__logout"
           data-logout
-          aria-label="Se déconnecter"
+          aria-label={L.layout.logoutAria}
         >
           <svg
             viewBox="0 0 24 24"
@@ -201,13 +203,13 @@ const renderIcon = (name?: string): string => {
           >
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          <span>Déconnexion</span>
-        </button>
-      </div>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>{L.layout.logout}</span>
+      </button>
     </div>
   </div>
+</div>
 </div>
 
 <script>
@@ -264,10 +266,13 @@ const renderIcon = (name?: string): string => {
   // doesn't get this script). Keeps the public/login surface small
   // while protecting the rest of the app behind a localStorage check.
   import { getAuth, clearAuth } from "../../lib/auth";
+  import { t, localizedPath } from "../../i18n";
+
+  const L = t();
 
   const logout = () => {
     clearAuth();
-    window.location.href = "/login";
+    window.location.href = localizedPath("/login");
   };
 
   // ── Wire logout buttons (sidebar + drawer) ──────────────
