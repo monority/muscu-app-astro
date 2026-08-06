@@ -32,4 +32,13 @@ export default {
   seancePlural: 'sessions',
   pluralS: 's',
   deleteConfirm: 'Delete this session?',
+  moreActions: 'More actions',
+  resume: 'Resume',
+  markComplete: 'Mark complete',
+  duplicate: 'Duplicate',
+  moveDate: 'Move',
+  moveTitle: 'Move session',
+  moveDateLabel: 'New date',
+  move: 'Move',
+  copySuffix: '(copy)',
 };

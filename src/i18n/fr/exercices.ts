@@ -61,4 +61,9 @@ export default {
   setCountAria: 'séries enregistrées pour',
   useAria: 'Utiliser',
   setsCount: 'séries',
+  favorites: 'Favoris',
+  favorite: 'Ajouter aux favoris',
+  unfavorite: 'Retirer des favoris',
+  favoriteAria: 'Ajouter aux favoris',
+  unfavoriteAria: 'Retirer des favoris',
 };

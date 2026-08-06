@@ -61,4 +61,9 @@ export default {
   setCountAria: 'logged sets for',
   useAria: 'Use',
   setsCount: 'sets',
+  favorites: 'Favorites',
+  favorite: 'Add to favorites',
+  unfavorite: 'Remove from favorites',
+  favoriteAria: 'Add to favorites',
+  unfavoriteAria: 'Remove from favorites',
 };

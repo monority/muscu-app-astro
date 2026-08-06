@@ -73,6 +73,28 @@ const categories = [
         >
           {L.common.all}
         </button>
+        <button
+          type="button"
+          class="exo__filter"
+          :class="{ 'is-active': favFilter }"
+          @click="favFilter = !favFilter"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          {L.exercices.favorites}
+        </button>
         <template x-for="m in muscleGroups" :key="m">
           <button
             type="button"
@@ -193,6 +215,28 @@ const categories = [
                     <span x-text="getSetCount(ex.id)"></span>
                     <span class="exo__set-label">{L.exercices.setsCount}</span>
                   </span>
+                  <button
+                    type="button"
+                    class="exo__icon-btn exo__fav-btn"
+                    :class="{ 'is-fav': ex.favorite }"
+                    @click.stop="toggleFav(ex)"
+                    :aria-label="(ex.favorite ? labels.unfavoriteAria : labels.favoriteAria) + ' ' + ex.name"
+                    :title="ex.favorite ? labels.unfavorite : labels.favorite"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      class="exo__icon"
+                      :fill="ex.favorite ? 'currentColor' : 'none'"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  </button>
                 </header>
 
                 <p
@@ -339,7 +383,7 @@ const categories = [
           <button
             type="button"
             class="exo__reset-btn"
-            @click="search = ''; muscleFilter = ''"
+            @click="search = ''; muscleFilter = ''; favFilter = false"
             x-show="hasFilters"
           >
             {L.common.reset}
@@ -766,6 +810,7 @@ const categories = [
     saveExercise,
     updateExercise,
     deleteExercise,
+    toggleExerciseFavorite,
     getSessions,
     saveSession,
     updateSession,
@@ -831,6 +876,7 @@ const categories = [
       setCounts: {} as Record<string, number>,
       search: '',
       muscleFilter: '',
+      favFilter: false,
       form: { name: '', muscle: '', customMuscle: '', category: '' } as AlpineFormState,
       formError: '',
       editingId: '' as string,
@@ -912,6 +958,7 @@ const categories = [
         const muscle = this.muscleFilter;
         return this.exercises.filter((ex) => {
           if (muscle && ex.muscle !== muscle) return false;
+          if (this.favFilter && !ex.favorite) return false;
           if (q && !ex.name.toLowerCase().includes(q)) return false;
           return true;
         });
@@ -923,7 +970,7 @@ const categories = [
       },
 
       get hasFilters(): boolean {
-        return Boolean(this.search.trim() || this.muscleFilter);
+        return Boolean(this.search.trim() || this.muscleFilter || this.favFilter);
       },
 
       // ── Actions ──
@@ -945,6 +992,11 @@ const categories = [
         };
         this.formError = '';
         this.openDialogById('exo-form-dialog');
+      },
+
+      toggleFav(ex: Exercise) {
+        toggleExerciseFavorite(ex.id);
+        this.refresh();
       },
 
       save() {
@@ -1576,6 +1628,18 @@ const categories = [
     background-color: hsl(32 95% 50% / 0.12);
     border-color: hsl(32 95% 50% / 0.35);
     color: var(--color-accent);
+  }
+
+  .exo__fav-btn {
+    color: var(--color-muted);
+  }
+
+  .exo__fav-btn.is-fav {
+    color: hsl(45 95% 55%);
+  }
+
+  .exo__fav-btn.is-fav:hover {
+    color: hsl(45 95% 60%);
   }
 
   .exo__icon {

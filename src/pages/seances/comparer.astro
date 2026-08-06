@@ -501,7 +501,7 @@ const L = t();
                       <div class="comp__exo-th comp__exo-th--num">{L.common.reps}</div>
                       <div class="comp__exo-th comp__exo-th--num comp__exo-th--end">{L.sessions.volume}</div>
                     </div>
-                    <template x-for="set in item.session1Ex.sets" :key="set.setNumber">
+                    <template x-for="set in (item.session1Ex ? item.session1Ex.sets : [])" :key="set.setNumber">
                       <div
                         class="comp__exo-row"
                         :class="{ 'is-completed': set.completed }"
@@ -585,7 +585,7 @@ const L = t();
                       <div class="comp__exo-th comp__exo-th--num">{L.common.reps}</div>
                       <div class="comp__exo-th comp__exo-th--num comp__exo-th--end">{L.sessions.volume}</div>
                     </div>
-                    <template x-for="set in item.session2Ex.sets" :key="set.setNumber">
+                    <template x-for="set in (item.session2Ex ? item.session2Ex.sets : [])" :key="set.setNumber">
                       <div
                         class="comp__exo-row"
                         :class="{ 'is-completed': set.completed }"

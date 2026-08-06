@@ -127,28 +127,8 @@ const L = t();
                   role="img"
                   aria-label={L.historique.historyTitle}
                 >
-                  {/* Horizontal grid lines + Y labels */}
-                  <template x-for="i in 5" :key="'g' + i">
-                    <g>
-                      <line
-                        :x1="0"
-                        :y1="(i - 1) * 75"
-                        :x2="800"
-                        :y2="(i - 1) * 75"
-                        stroke="var(--color-border)"
-                        stroke-width="1"
-                        stroke-dasharray="2 4"
-                      />
-                      <text
-                        :x="6"
-                        :y="(i - 1) * 75 - 4"
-                        fill="var(--color-muted)"
-                        font-size="11"
-                        font-family="var(--font-body)"
-                        x-text="formatNumber(chartMax * (1 - (i - 1) / 5)) + ' kg'"
-                      ></text>
-                    </g>
-                  </template>
+                  {/* Horizontal grid lines + Y labels (SVG string: Alpine x-for breaks inside <svg>) */}
+                  <g x-html="chartGridMarkup"></g>
 
                   {/* X axis baseline */}
                   <line
@@ -177,20 +157,8 @@ const L = t();
                     stroke-linejoin="round"
                   />
 
-                  {/* Dots */}
-                  <template x-for="(d, i) in chartData" :key="'d' + i">
-                    <g>
-                      <circle
-                        :cx="chartX(i)"
-                        :cy="chartY(d.rm)"
-                        r="6"
-                        fill="var(--color-bg)"
-                        stroke="var(--color-accent)"
-                        stroke-width="2.5"
-                      />
-                      <title x-text="formatDate(d.date) + ' — ' + formatNumber(d.rm) + ' kg'"></title>
-                    </g>
-                  </template>
+                  {/* Dots (SVG string: Alpine x-for breaks inside <svg>) */}
+                  <g x-html="chartDotsMarkup"></g>
 
                   {/* Gradient defs */}
                   <defs>
@@ -671,6 +639,25 @@ const L = t();
         // Close the polygon along the X axis at y = CHART_H.
         const last = this.chartData.length - 1;
         return `${top} ${this.chartX(last)},${CHART_H} ${this.chartX(0)},${CHART_H}`;
+      },
+
+      get chartGridMarkup(): string {
+        let s = '';
+        for (let i = 1; i <= 5; i++) {
+          const y = (i - 1) * 75;
+          s += `<line x1="0" y1="${y}" x2="800" y2="${y}" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="2 4"></line>`;
+          s += `<text x="6" y="${y - 4}" fill="var(--color-muted)" font-size="11" font-family="var(--font-body)">${this.formatNumber(this.chartMax * (1 - (i - 1) / 5))} kg</text>`;
+        }
+        return s;
+      },
+
+      get chartDotsMarkup(): string {
+        return this.chartData
+          .map(
+            (d, i) =>
+              `<g><circle cx="${this.chartX(i)}" cy="${this.chartY(d.rm)}" r="6" fill="var(--color-bg)" stroke="var(--color-accent)" stroke-width="2.5"></circle><title>${this.formatDate(d.date)} — ${this.formatNumber(d.rm)} kg</title></g>`
+          )
+          .join('');
       },
 
       // ── Display helpers ──

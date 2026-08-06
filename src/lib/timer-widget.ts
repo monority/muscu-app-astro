@@ -1,4 +1,5 @@
 import type { Dictionary } from '../i18n/types';
+import { playBeep } from './sound';
 
 /**
  * Timer pop-out widget.
@@ -113,32 +114,7 @@ function fmtMs(ms: number): string {
 }
 
 function beep(): void {
-  try {
-    const Ctor: typeof AudioContext =
-      window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return;
-    const ctx = new Ctor();
-    const tone = (freq: number, startOffset: number, duration: number) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      const t0 = ctx.currentTime + startOffset;
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(0.35, t0 + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
-      osc.start(t0);
-      osc.stop(t0 + duration + 0.02);
-    };
-    tone(660, 0.0, 0.18);
-    tone(780, 0.22, 0.18);
-    tone(990, 0.44, 0.35);
-    setTimeout(() => ctx.close().catch(() => {}), 1100);
-  } catch {
-    /* audio unavailable — silent */
-  }
+  playBeep();
 }
 
 const WIDGET_CSS = `

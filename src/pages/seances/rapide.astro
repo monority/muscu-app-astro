@@ -89,7 +89,7 @@ const L = t();
               <template x-for="s in availableSessions" :key="s.id">
                 <option
                   :value="s.id"
-                  x-text="`${s.label} (${s.totalSets} ${L.rapide.setsShort} · ${formatWeight(s.totalVolume)})`"
+                  x-text="`${s.label} (${s.totalSets} ${setsShortLabel} · ${formatWeight(s.totalVolume)})`"
                 ></option>
               </template>
             </select>
@@ -163,6 +163,19 @@ const L = t();
             <span>{L.rapide.done}</span>
           </button>
 
+          <button
+            type="button"
+            class="qs__btn qs__btn--ghost qs__undo-working"
+            :disabled="!canUndo"
+            @click="undoLastSet()"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+            <span>{L.rapide.undoLast}</span>
+          </button>
+
           <div class="qs__nav">
             <button
               type="button"
@@ -232,6 +245,14 @@ const L = t();
             >
               +15s
             </button>
+            <button
+              type="button"
+              class="qs__btn qs__btn--ghost qs__undo"
+              :disabled="!canUndo"
+              @click="undoLastSet()"
+            >
+              {L.rapide.undoLast}
+            </button>
           </div>
         </div>
       </section>
@@ -281,6 +302,14 @@ const L = t();
             <button
               type="button"
               class="qs__btn qs__btn--ghost"
+              :disabled="!canUndo"
+              @click="undoLastSet()"
+            >
+              {L.rapide.undoLast}
+            </button>
+            <button
+              type="button"
+              class="qs__btn qs__btn--ghost"
               @click="reset()"
             >
               {L.rapide.chooseAnother}
@@ -301,6 +330,7 @@ const L = t();
     type SetType,
     } from '../../lib/storage';
   import { t, localizedPath } from '../../i18n';
+  import { undoLastCompletedSet } from '../../lib/session-utils';
 
   const LABELS = t();
 
@@ -601,6 +631,39 @@ const L = t();
         }
       },
 
+      // ── Undo ──
+      get canUndo(): boolean {
+        return this.completedSets > 0;
+      },
+
+      undoLastSet() {
+        if (!this.session || !this.canUndo) return;
+        const res = undoLastCompletedSet(this.session);
+        if (!res) return;
+        this.session.exercises = res.session.exercises;
+        this.completedSets = Math.max(0, this.completedSets - 1);
+        if (this.restInterval) {
+          window.clearInterval(this.restInterval);
+          this.restInterval = null;
+        }
+        this.restRemaining = 0;
+        this.state = 'working';
+        // Park the user on the set that was just un-completed.
+        this.currentExerciseIndex = res.exerciseIndex;
+        this.currentSetIndex = res.setIndex;
+        // Re-open the session when the undo lands on a finished one.
+        if (this.session.status === 'completed') {
+          this.session.status = 'in-progress';
+          updateSession(this.session.id, {
+            status: 'in-progress',
+            exercises: this.session.exercises,
+          });
+        } else {
+          updateSession(this.session.id, { exercises: this.session.exercises });
+        }
+        this._requestWakeLock();
+      },
+
       // ── Rest timer ──
       _startRest() {
         this.restRemaining = DEFAULT_REST;
@@ -783,6 +846,7 @@ const L = t();
       },
 
       // ── Formatters (re-export the pure helpers) ──
+      setsShortLabel: LABELS.rapide.setsShort,
       typeLabel(t: SetType): string {
         return typeLabelFn(t);
       },
@@ -1421,6 +1485,22 @@ background-color: var(--color-bg);
   .qs__resting-actions .qs__btn {
     min-height: 6.4rem;
     font-size: 1.6rem;
+  }
+
+  .qs__resting-actions .qs__undo {
+    grid-column: 1 / -1;
+    min-height: 4.8rem;
+    font-size: 1.4rem;
+  }
+
+  .qs__undo-working {
+    min-height: 4.8rem;
+    font-size: 1.4rem;
+    color: var(--color-muted);
+  }
+
+  .qs__undo-working:disabled {
+    opacity: 0.35;
   }
 
   /* ════════════════════════════════════════════════════════

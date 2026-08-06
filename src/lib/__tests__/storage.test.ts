@@ -18,6 +18,7 @@ import {
   getSettings,
   saveExercise,
   saveSession,
+  toggleExerciseFavorite,
   type Session,
   type SessionExercise,
   type SessionSet,
@@ -124,6 +125,31 @@ describe('saveExercise + getExercises', () => {
     const after = getExercises();
     expect(after.length).toBe(initialCount + 1);
     expect(after.some((e) => e.id === created.id)).toBe(true);
+  });
+});
+
+describe('toggleExerciseFavorite', () => {
+  beforeEach(() => {
+    clearLocalStorage();
+  });
+
+  it('defaults to non-favorite and toggles on/off', () => {
+    const created = saveExercise({
+      name: 'Curl haltère',
+      muscle: 'Biceps',
+      category: 'Haltère',
+    });
+    expect(created.favorite).toBeUndefined();
+
+    expect(toggleExerciseFavorite(created.id)).toBe(true);
+    expect(getExercises().find((e) => e.id === created.id)?.favorite).toBe(true);
+
+    expect(toggleExerciseFavorite(created.id)).toBe(false);
+    expect(getExercises().find((e) => e.id === created.id)?.favorite).toBe(false);
+  });
+
+  it('returns false for an unknown id', () => {
+    expect(toggleExerciseFavorite('missing')).toBe(false);
   });
 });
 

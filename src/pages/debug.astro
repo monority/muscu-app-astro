@@ -1,0 +1,175 @@
+---
+import { setLocale, defaultLocale } from '../i18n';
+import '../styles/globals.css';
+
+// Dev-only tool page: generates/clears demo data in localStorage. Kept out
+// of the static shell (SSR) so it never ships as a user-facing route.
+export const prerender = false;
+
+setLocale(Astro.currentLocale ?? defaultLocale);
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Données de test — muscu.app</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #050505;
+        color: #f6f6f6;
+        font-family: 'Barlow', system-ui, sans-serif;
+        display: grid;
+        place-items: center;
+        padding: 2.4rem;
+      }
+      .card {
+        width: 100%;
+        max-width: 46rem;
+        background: #0b0b0b;
+        border: 1px solid hsl(0 0% 100% / 0.08);
+        border-radius: 14px;
+        padding: 2.8rem;
+      }
+      h1 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 2.2rem;
+        margin: 0 0 0.6rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: hsl(32 55% 45%);
+      }
+      p { color: #9ca3af; line-height: 1.5; margin: 0 0 2rem; }
+      .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+      button {
+        flex: 1;
+        min-width: 16rem;
+        border: 1px solid hsl(32 95% 50% / 0.55);
+        background: transparent;
+        color: hsl(32 95% 50%);
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 1.3rem 1.6rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+      button:hover { background: hsl(32 95% 50% / 0.12); }
+      button.is-danger { border-color: hsl(0 70% 55% / 0.55); color: hsl(0 70% 60%); }
+      button.is-danger:hover { background: hsl(0 70% 55% / 0.12); }
+      button:disabled { opacity: 0.5; cursor: progress; }
+      pre {
+        background: #0f0f0f;
+        border: 1px solid hsl(0 0% 100% / 0.08);
+        border-radius: 10px;
+        padding: 1.4rem;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #d1d5db;
+        overflow-x: auto;
+        margin: 1.6rem 0 0;
+      }
+      .counts {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin: 1.6rem 0;
+      }
+      .chip {
+        background: #101010;
+        border: 1px solid hsl(0 0% 100% / 0.08);
+        border-radius: 999px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        color: #9ca3af;
+      }
+      .chip b { color: #f6f6f6; }
+      a { color: hsl(32 95% 50%); text-decoration: none; font-weight: 600; }
+      .status { color: #9ca3af; font-size: 0.9rem; margin-top: 1rem; }
+    </style>
+  </head>
+  <body>
+    <div class="card" x-data="debugApp()" x-init="init()">
+      <h1>Données de test</h1>
+      <p>
+        Génère un historique de démo (12 semaines de séances, progression,
+        mesures corporelles) pour tester tout le site. Attention : les séances,
+        la progression et les mesures <b>actuels sont remplacés</b>.
+      </p>
+
+      <div class="counts">
+        <span class="chip">Séances <b x-text="counts.sessions"></b></span>
+        <span class="chip">Progression <b x-text="counts.progress"></b></span>
+        <span class="chip">Mesures <b x-text="counts.body"></b></span>
+        <span class="chip">Exercices <b x-text="counts.exercises"></b></span>
+      </div>
+
+      <div class="row">
+        <button type="button" @click="generate()" :disabled="busy" x-text="busy ? 'Génération…' : 'Générer les données de test'"></button>
+        <button type="button" class="is-danger" @click="wipe()" x-text="busy ? '…' : 'Tout réinitialiser'"></button>
+      </div>
+
+      <div class="status" x-show="message" x-text="message"></div>
+      <pre x-show="summary" x-text="summary"></pre>
+    </div>
+
+    <script>
+      import { generateDemoData, resetAllData, currentCounts } from '../lib/seed';
+
+      document.addEventListener('alpine:init', () => {
+        window.Alpine.data('debugApp', () => ({
+          counts: { sessions: 0, progress: 0, body: 0, exercises: 0 },
+          summary: '',
+          message: '',
+          busy: false,
+
+          init() {
+            this.refresh();
+          },
+
+          refresh() {
+            this.counts = currentCounts();
+          },
+
+          generate() {
+            if (this.busy) return;
+            this.busy = true;
+            this.message = '';
+            // Defer so the busy label repaints before the (fast) sync work.
+            setTimeout(() => {
+              const s = generateDemoData();
+              this.summary =
+                `Exercices   : ${s.exercises}\n` +
+                `Séances     : ${s.sessions} (${s.completed} complétées, ${s.inProgress} en cours, ${s.planned} planifiées)\n` +
+                `Progression : ${s.progressRecords} records\n` +
+                `Mesures     : ${s.bodyRecords} entrées\n` +
+                `\nLien démo séance : /seances/detail?id=${s.demoSessionId}\n` +
+                `Lien démo comparaison : /seances/comparer?id1=${s.compareId1}&id2=${s.compareId2}`;
+              this.refresh();
+              this.busy = false;
+              this.message = 'OK — données de test générées. Parcours l’app depuis le dashboard.';
+            }, 30);
+          },
+
+          wipe() {
+            if (this.busy) return;
+            if (!window.confirm('Effacer toutes les données (séances, progression, mesures) ?')) return;
+            resetAllData();
+            this.refresh();
+            this.summary = '';
+            this.message = 'Données effacées.';
+          },
+        }));
+      });
+    </script>
+    <!-- Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  </body>
+</html>

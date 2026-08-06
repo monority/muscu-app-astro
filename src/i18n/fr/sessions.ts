@@ -32,4 +32,13 @@ export default {
   seancePlural: 'séances',
   pluralS: 's',
   deleteConfirm: 'Supprimer cette séance ?',
+  moreActions: 'Plus d\'actions',
+  resume: 'Reprendre',
+  markComplete: 'Marquer terminée',
+  duplicate: 'Dupliquer',
+  moveDate: 'Déplacer',
+  moveTitle: 'Déplacer la séance',
+  moveDateLabel: 'Nouvelle date',
+  move: 'Déplacer',
+  copySuffix: '(copie)',
 };

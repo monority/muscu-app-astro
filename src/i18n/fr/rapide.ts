@@ -32,6 +32,7 @@ export default {
   volume: 'Volume',
   viewSession: 'Voir la séance',
   chooseAnother: 'Choisir une autre séance',
+  undoLast: 'Annuler la dernière série',
   typeWarmup: 'Échauffement',
   typeWork: 'Travail',
   typeTop: 'Top set',

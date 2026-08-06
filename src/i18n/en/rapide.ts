@@ -32,6 +32,7 @@ export default {
   volume: 'Volume',
   viewSession: 'View session',
   chooseAnother: 'Choose another session',
+  undoLast: 'Undo last set',
   typeWarmup: 'Warm-up',
   typeWork: 'Work',
   typeTop: 'Top set',

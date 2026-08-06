@@ -3,6 +3,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import Card from '../../components/ui/Card.astro';
+import Dialog from '../../components/ui/Dialog.astro';
 import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 
 
@@ -161,6 +162,30 @@ const L = t();
             <footer class="sess__card-foot">
               <button
                 type="button"
+                class="sess__icon-btn"
+                @click.stop="menuId = menuId === session.id ? '' : session.id"
+                :aria-expanded="(menuId === session.id).toString()"
+                :aria-label="labels.moreActions"
+                :title="labels.moreActions"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="sess__icon"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="5" r="1"></circle>
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+              </button>
+              <button
+                type="button"
                 class="sess__icon-btn sess__icon-btn--danger"
                 @click.stop="deleteSession(session.id)"
                 @keydown.enter.stop
@@ -186,6 +211,37 @@ const L = t();
                   <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
                 </svg>
               </button>
+
+              <template x-if="menuId === session.id">
+                <div class="sess__menu" @click.stop>
+                  <button
+                    type="button"
+                    class="sess__menu-item"
+                    x-show="session.status !== 'in-progress'"
+                    @click="menuId = ''; setStatus(session.id, 'in-progress')"
+                    x-text="labels.resume"
+                  ></button>
+                  <button
+                    type="button"
+                    class="sess__menu-item"
+                    x-show="session.status !== 'completed'"
+                    @click="menuId = ''; setStatus(session.id, 'completed')"
+                    x-text="labels.markComplete"
+                  ></button>
+                  <button
+                    type="button"
+                    class="sess__menu-item"
+                    @click="menuId = ''; duplicateSession(session.id)"
+                    x-text="labels.duplicate"
+                  ></button>
+                  <button
+                    type="button"
+                    class="sess__menu-item"
+                    @click="menuId = ''; openMove(session.id)"
+                    x-text="labels.moveDate"
+                  ></button>
+                </div>
+              </template>
             </footer>
           </article>
         </template>
@@ -223,12 +279,53 @@ const L = t();
         </div>
       </Card>
     </template>
+
+    {/* ── Backdrop for the quick-actions menu ── */}
+    <div
+      class="sess__menu-backdrop"
+      x-show="menuId !== ''"
+      x-cloak
+      @click="menuId = ''"
+    ></div>
+
+    {/* ── Move session dialog ── */}
+    <Dialog id="sess-move-dialog" title={L.sessions.moveTitle}>
+      <label class="sess__move-field">
+        <span class="sess__move-label">{L.sessions.moveDateLabel}</span>
+        <input
+          type="date"
+          class="sess__move-input"
+          x-model="moveDate"
+          :max="todayIso"
+        />
+      </label>
+      <div slot="footer">
+        <button
+          type="button"
+          data-dialog-close
+          class="inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] font-semibold transition-all duration-[160ms] select-none whitespace-nowrap active:scale-[0.97] bg-transparent text-muted border border-border hover:text-white hover:border-white/20 h-12 px-5 text-[1.3rem] min-w-[8rem]"
+        >
+          {L.common.cancel}
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] font-semibold transition-all duration-[160ms] select-none whitespace-nowrap active:scale-[0.97] bg-accent text-accent-foreground border border-accent/45 hover:bg-accent-hover hover:brightness-110 h-12 px-5 text-[1.3rem] min-w-[8rem]"
+          :disabled="!moveDate"
+          @click="confirmMove()"
+        >
+          {L.sessions.move}
+        </button>
+      </div>
+    </Dialog>
   </div>
 </AppLayout>
 
 <script>
   import {
     getSessions,
+    getSessionById,
+    saveSession,
+    updateSession,
     deleteSession,
     type Session,
     type SessionMood,
@@ -303,6 +400,9 @@ const L = t();
       // ── State ──
       sessions: [] as Session[],
       search: '',
+      menuId: '',
+      moveSessionId: '',
+      moveDate: '',
       labels: {
         exoPlural: LABELS.sessions.exoPlural,
         exoSingular: LABELS.sessions.exoSingular,
@@ -317,6 +417,15 @@ const L = t();
         pluralS: LABELS.sessions.pluralS,
         deleteConfirm: LABELS.sessions.deleteConfirm,
         seenAriaPrefix: LABELS.sessions.seenAriaPrefix,
+        moreActions: LABELS.sessions.moreActions,
+        resume: LABELS.sessions.resume,
+        markComplete: LABELS.sessions.markComplete,
+        duplicate: LABELS.sessions.duplicate,
+        moveDate: LABELS.sessions.moveDate,
+      },
+
+      get todayIso(): string {
+        return new Date().toISOString().slice(0, 10);
       },
 
       // ── Init ──
@@ -392,6 +501,49 @@ const L = t();
           deleteSession(id);
           this.sessions = this.sessions.filter((s) => s.id !== id);
         }
+      },
+
+      // ── Quick actions ──
+      setStatus(id: string, status: SessionStatus) {
+        updateSession(id, { status });
+        this.refresh();
+      },
+
+      duplicateSession(id: string) {
+        const src = getSessionById(id);
+        if (!src) return;
+        const copy: Omit<Session, 'id'> = {
+          name: src.name + ' ' + LABELS.sessions.copySuffix,
+          date: new Date().toISOString(),
+          status: 'planned',
+          exercises: src.exercises.map((ex) => ({
+            ...ex,
+            sets: ex.sets.map((set) => ({ ...set, completed: false })),
+          })),
+        };
+        if (src.supersets) copy.supersets = src.supersets.map((g) => ({ ...g }));
+        saveSession(copy);
+        this.refresh();
+      },
+
+      openMove(id: string) {
+        const src = getSessionById(id);
+        if (!src) return;
+        this.moveSessionId = id;
+        this.moveDate = (src.date || '').slice(0, 10);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).openDialog?.('sess-move-dialog');
+      },
+
+      confirmMove() {
+        if (!this.moveSessionId || !this.moveDate) return;
+        const date = new Date(this.moveDate + 'T12:00:00').toISOString();
+        updateSession(this.moveSessionId, { date, status: 'planned' });
+        this.moveSessionId = '';
+        this.moveDate = '';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).closeDialog?.('sess-move-dialog');
+        this.refresh();
       },
     }));
   });
@@ -735,6 +887,7 @@ const L = t();
 
   /* ── Card footer / delete button ── */
   .sess__card-foot {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -778,6 +931,87 @@ const L = t();
   .sess__icon {
     width: 1.6rem;
     height: 1.6rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     QUICK-ACTIONS MENU
+     ════════════════════════════════════════════════════ */
+  .sess__menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.6rem);
+    z-index: 20;
+    min-width: 20rem;
+    padding: 0.6rem;
+    background-color: var(--color-surface-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.35);
+  }
+
+  .sess__menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 4.2rem;
+    padding: 0 1.2rem;
+    background-color: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition-fast);
+  }
+
+  .sess__menu-item:hover {
+    background-color: var(--alpha-bg-soft);
+  }
+
+  .sess__menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background-color: transparent;
+  }
+
+  /* ════════════════════════════════════════════════════
+     MOVE DIALOG
+     ════════════════════════════════════════════════════ */
+  .sess__move-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .sess__move-label {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .sess__move-input {
+    width: 100%;
+    height: 4.8rem;
+    padding: 0 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .sess__move-input:focus-visible {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
   }
 
   /* ════════════════════════════════════════════════════

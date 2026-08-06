@@ -16,6 +16,8 @@ export interface Exercise {
   muscle: string; // e.g. "Pectoraux", "Dos", "Jambes"
   category: string; // e.g. "Barre", "Haltère", "Machine", "Poids du corps"
   createdAt: string; // ISO date
+  // ── User preference (added 2026-08-06) ──
+  favorite?: boolean;
 }
 
 export type SetType = 'warmup' | 'work' | 'top' | 'drop' | 'failure';
@@ -112,7 +114,7 @@ export interface Settings {
 // Constants
 // ============================================================================
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   exercises: 'muscu:exercises',
   sessions: 'muscu:sessions',
   progress: 'muscu:progress',
@@ -388,6 +390,17 @@ export function deleteExercise(id: string): void {
 
 export function getExerciseById(id: string): Exercise | undefined {
   return getExercises().find((ex) => ex.id === id);
+}
+
+/** Toggles the `favorite` flag and returns the new state. */
+export function toggleExerciseFavorite(id: string): boolean {
+  const all = getExercises();
+  const index = all.findIndex((ex) => ex.id === id);
+  if (index === -1) return false;
+  const next = !all[index].favorite;
+  all[index] = { ...all[index], favorite: next };
+  setStore(STORAGE_KEYS.exercises, all);
+  return next;
 }
 
 // ============================================================================
