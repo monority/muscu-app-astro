@@ -26,28 +26,72 @@ const L = t();
     x-cloak
   >
     <div class="login__card" role="form" aria-labelledby="login-title">
-      {/* ── Logo ── */}
-      <div class="login__logo" aria-hidden="true">
-        <svg
-          viewBox="0 0 24 24"
-          width="32"
-          height="32"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M14.4 14.4 9.6 9.6"></path>
-          <path
-            d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
-          ></path>
-          <path d="m21.5 21.5-1.4-1.4"></path>
-          <path d="M3.9 3.9 2.5 2.5"></path>
-          <path
-            d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
-          ></path>
-        </svg>
+      {/* ── Nav: theme · logo · language ── */}
+      <div class="login__nav">
+        <div class="login__nav-side">
+          <button
+            type="button"
+            class="login__theme"
+            @click="toggleTheme()"
+            :aria-label="isDark() ? switchToLight : switchToDark"
+            :title="isDark() ? switchToLight : switchToDark"
+          >
+            <span class="login__theme-icon login__theme-icon--sun" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+              </svg>
+            </span>
+            <span class="login__theme-icon login__theme-icon--moon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        {/* ── Brand icon (dumbbell) ── */}
+        <div class="login__logo" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="32"
+            height="32"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M14.4 14.4 9.6 9.6"></path>
+            <path
+              d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
+            ></path>
+            <path d="m21.5 21.5-1.4-1.4"></path>
+            <path d="M3.9 3.9 2.5 2.5"></path>
+            <path
+              d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
+            ></path>
+          </svg>
+        </div>
+
+        <div class="login__nav-side">
+          <button
+            type="button"
+            class="login__lang"
+            @click="toggleLocale()"
+            :aria-label="switchLocaleAria"
+            :title="switchLocaleAria"
+          >
+            <span class="login__lang-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </span>
+            <span class="login__lang-label" x-text="langTarget">EN</span>
+          </button>
+        </div>
       </div>
 
       <h1 id="login-title" class="login__title">{L.login.title}</h1>
@@ -241,7 +285,7 @@ const L = t();
 
 <script>
   import { setAuth, isAuthenticated } from '../lib/auth';
-  import { t, defaultLocale } from '../i18n';
+  import { t, defaultLocale, localizedPath, getLocale } from '../i18n';
 
   const LABELS = t();
 
@@ -270,6 +314,11 @@ const L = t();
       showPassword: false,
       showSignupMessage: false,
       loading: false,
+      theme: 'dark' as 'dark' | 'light',
+      locale: getLocale(),
+      switchToLight: LABELS.layout.switchToLight,
+      switchToDark: LABELS.layout.switchToDark,
+      switchLocaleAria: LABELS.layout.switchLocale,
       labels: {
         submit: LABELS.login.submit,
         loading: LABELS.login.loading,
@@ -279,9 +328,39 @@ const L = t();
       },
 
       init() {
+        const current =
+          document.documentElement.getAttribute('data-theme') || 'dark';
+        this.theme = current === 'light' ? 'light' : 'dark';
         if (isAuthenticated()) {
-          window.location.href = '/';
+          window.location.href = localizedPath('/');
         }
+      },
+
+      toggleTheme() {
+        this.theme = this.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', this.theme);
+        try {
+          window.localStorage.setItem('muscu-theme', this.theme);
+        } catch {
+          // private mode / quota — silently ignore, the in-memory
+          // theme still applies for the current session
+        }
+      },
+
+      isDark(): boolean {
+        return this.theme === 'dark';
+      },
+
+      get langTarget(): string {
+        return this.locale === 'en' ? 'FR' : 'EN';
+      },
+
+      toggleLocale() {
+        const target = this.locale === 'en' ? 'fr' : 'en';
+        const search = window.location.search;
+        const hash = window.location.hash;
+        const path = target === 'fr' ? '/login' : '/en/login';
+        window.location.href = path + search + hash;
       },
 
       submit() {
@@ -296,14 +375,14 @@ const L = t();
         this.loading = true;
         const name = nameFromEmail(email);
         setAuth(email, name);
-        window.setTimeout(() => { window.location.href = '/'; }, 240);
+        window.setTimeout(() => { window.location.href = localizedPath('/'); }, 240);
       },
 
       devLogin() {
         this.error = '';
         this.loading = true;
         setAuth('dev@muscu.app', 'Dev User');
-        window.location.href = '/';
+        window.location.href = localizedPath('/');
       },
     }));
   });
@@ -343,6 +422,154 @@ const L = t();
       );
   }
 
+  /* ── Nav: theme · logo · language ───────────────────────
+     A header row inside the card where the dumbbell logo
+     sits centered and the two control buttons flank it,
+     giving the card a navigation-bar feel. */
+  .login__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.4rem;
+  }
+
+  /* Equal flexible side columns keep the logo perfectly
+     centered regardless of button widths. */
+  .login__nav-side {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .login__nav-side:first-child {
+    justify-content: flex-start;
+  }
+
+  .login__nav-side:last-child {
+    justify-content: flex-end;
+  }
+
+  /* ── Theme button (icon) ── */
+  .login__theme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.0rem;
+    height: 4.0rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-2);
+    color: var(--color-muted);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .login__theme:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--alpha-border);
+    color: var(--color-text);
+  }
+
+  .login__theme:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .login__theme:active {
+    transform: scale(0.94);
+  }
+
+  .login__theme-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
+  .login__theme-icon svg {
+    display: block;
+  }
+
+  /* Sun visible in dark mode (suggests "switch to light"),
+     moon visible in light mode (suggests "switch to dark"). */
+  .login__theme-icon--sun {
+    display: inline-flex;
+  }
+  .login__theme-icon--moon {
+    display: none;
+  }
+  :global([data-theme="light"]) .login__theme-icon--sun {
+    display: none;
+  }
+  :global([data-theme="light"]) .login__theme-icon--moon {
+    display: inline-flex;
+  }
+
+  /* ── Language button (icon + label) ── */
+  .login__lang {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    height: 4.0rem;
+    padding: 0 1.2rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .login__lang:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--alpha-border);
+  }
+
+  .login__lang:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .login__lang:active {
+    transform: scale(0.97);
+  }
+
+  .login__lang-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .login__lang-icon svg {
+    display: block;
+  }
+
+  .login__lang-label {
+    line-height: 1;
+  }
+
   /* ════════════════════════════════════════════════════
      CARD — 400px wide per spec, premium dark surface
      ════════════════════════════════════════════════════ */
@@ -354,7 +581,7 @@ const L = t();
     border-radius: var(--radius-lg);
     padding: 4.0rem 3.2rem;
     box-shadow: 0 24px 60px hsl(0 0% 0% / 0.55),
-      0 1px 0 hsl(0 0% 100% / 0.04) inset;
+      0 1px 0 var(--alpha-bg-subtle) inset;
   }
 
   /* ── Logo ── */
@@ -364,7 +591,8 @@ const L = t();
     justify-content: center;
     width: 6.4rem;
     height: 6.4rem;
-    margin: 0 auto 2.4rem;
+    margin: 0;
+    flex-shrink: 0;
     border-radius: var(--radius-lg);
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
@@ -437,11 +665,11 @@ const L = t();
   }
 
   .login__input::placeholder {
-    color: hsl(0 0% 100% / 0.25);
+    color: var(--alpha-text-faint);
   }
 
   .login__input:hover {
-    border-color: hsl(0 0% 100% / 0.16);
+    border-color: var(--alpha-border);
   }
 
   .login__input:focus {
@@ -479,7 +707,7 @@ const L = t();
 
   .login__toggle:hover {
     color: var(--color-text);
-    background-color: hsl(0 0% 100% / 0.05);
+    background-color: var(--alpha-bg-soft);
   }
 
   .login__toggle:focus-visible {
@@ -698,8 +926,8 @@ const L = t();
   }
 
   .login__dev-btn:hover {
-    background-color: hsl(0 0% 100% / 0.05);
-    border-color: hsl(0 0% 100% / 0.20);
+    background-color: var(--alpha-bg-soft);
+    border-color: var(--alpha-border);
     color: var(--color-text);
   }
 
@@ -795,6 +1023,30 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
+     LIGHT THEME — soften hardcoded dark shadows/colors
+     ════════════════════════════════════════════════════ */
+  :global([data-theme="light"]) .login__card {
+    box-shadow: 0 24px 60px hsl(0 0% 0% / 0.12),
+      0 1px 0 var(--alpha-bg-subtle) inset;
+  }
+
+  :global([data-theme="light"]) .login__logo {
+    box-shadow: 0 8px 20px hsl(0 0% 0% / 0.08);
+  }
+
+  :global([data-theme="light"]) .login__error {
+    color: hsl(0 70% 40%);
+    background-color: hsl(0 80% 55% / 0.08);
+    border-color: hsl(0 80% 55% / 0.25);
+  }
+
+  :global([data-theme="light"]) .login__signup-msg {
+    color: hsl(217 70% 35%);
+    background-color: hsl(217 80% 55% / 0.06);
+    border-color: hsl(217 80% 55% / 0.20);
+  }
+
+  /* ════════════════════════════════════════════════════
      REDUCED MOTION
      ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
@@ -809,6 +1061,13 @@ const L = t();
     .login__spinner {
       transition: none;
       animation: none;
+    }
+    .login__theme,
+    .login__lang,
+    .login__theme:active,
+    .login__lang:active {
+      transition: none;
+      transform: none;
     }
   }
 </style>

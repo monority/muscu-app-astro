@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
+import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Card from '../../components/ui/Card.astro';
@@ -22,7 +22,7 @@ const L = t();
     x-cloak
   >
     {/* ── Back link ── */}
-    <a href="/exercices" class="hist__back">
+    <a href={localizedPath("/exercices")} class="hist__back">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -62,7 +62,7 @@ const L = t();
           <p class="hist__error-text">
             {L.historique.notFoundDesc}
           </p>
-          <a href="/exercices" class="hist__error-link">
+          <a href={localizedPath("/exercices")} class="hist__error-link">
             {L.historique.viewExercises}
           </a>
         </div>
@@ -95,11 +95,11 @@ const L = t();
                   <path d="M17.5 17.5L22 15"></path>
                 </svg>
               </div>
-              <h1 class="hist__title" x-text="exercise.name"></h1>
+              <h1 class="hist__title" x-text="trExercise(exercise.name)"></h1>
             </div>
             <div class="hist__badges">
-              <span class="hist__badge hist__badge--muscle" x-text="exercise.muscle"></span>
-              <span class="hist__badge hist__badge--category" x-text="exercise.category"></span>
+              <span class="hist__badge hist__badge--muscle" x-text="trMuscle(exercise.muscle)"></span>
+              <span class="hist__badge hist__badge--category" x-text="trCategory(exercise.category)"></span>
             </div>
           </div>
         </header>
@@ -344,7 +344,7 @@ const L = t();
                 title={L.common.noData}
                 description={L.historique.historyEmpty}
                 actionLabel={L.historique.viewExercises}
-                actionHref="/exercices"
+                actionHref={localizedPath("/exercices")}
               />
             </Card>
           </template>
@@ -741,7 +741,7 @@ const L = t();
 
   .hist__back:hover {
     color: var(--color-accent);
-    background-color: hsl(0 0% 100% / 0.04);
+    background-color: var(--alpha-bg-subtle);
   }
 
   .hist__back:focus-visible {
@@ -834,7 +834,7 @@ const L = t();
   }
 
   .hist__badge--category {
-    background-color: hsl(0 0% 100% / 0.05);
+    background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
   }
@@ -1111,7 +1111,7 @@ const L = t();
   }
 
   .hist__type--work {
-    background-color: hsl(0 0% 100% / 0.06);
+    background-color: var(--alpha-bg-soft);
     color: var(--color-text);
   }
 

@@ -1,0 +1,217 @@
+---
+/**
+ * Toast — reusable, self-contained notification primitive.
+ *
+ * Renders a small stack in the bottom-right of the viewport. Driven by
+ * Alpine (loaded via CDN on each page) and registers a global API so any
+ * page/component can trigger it.
+ *
+ * Usage (import anywhere — ideally once, e.g. in AppLayout):
+ *   <Toast />
+ *
+ * Trigger from anywhere on the page:
+ *   showToast('Session enregistrée', 'success');
+ *   showToast('Oops, une erreur est survenue', 'error');
+ *   showToast('Synchronisation en cours...', 'info');
+ *   showToast('Attention : poids faible', 'warning');
+ *
+ * Variants: success (green) | error (red) | info (blue) | warning (yellow).
+ * Default variant is `info`; auto-dismiss defaults to 3000ms (configurable
+ * via the `duration` prop, in milliseconds).
+ *
+ * Accessible: role="status", aria-live="polite", aria-atomic="true".
+ */
+interface Props {
+  /** Auto-dismiss delay in milliseconds (default 3000). */
+  duration?: number;
+}
+
+const { duration = 3000 } = Astro.props;
+---
+
+<div
+  x-data="toastApp()"
+  data-duration={duration}
+  class="toast-root"
+>
+  <!-- ── Toast container ── -->
+  <div
+    x-show="open"
+    x-cloak
+    x-transition.opacity.duration.200ms
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    class="toast"
+    :class="`toast--${variant}`"
+  >
+    <!-- Variant icons -->
+    <span class="toast__icon" x-show="variant === 'success'" x-cloak aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </span>
+    <span class="toast__icon" x-show="variant === 'error'" x-cloak aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </span>
+    <span class="toast__icon" x-show="variant === 'info'" x-cloak aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="12" x2="12" y2="16"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+    </span>
+    <span class="toast__icon" x-show="variant === 'warning'" x-cloak aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </span>
+
+    <p class="toast__message" x-text="message"></p>
+
+    <button type="button" class="toast__close" @click="dismiss()" aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  /* ════════════════════════════════════════════════════
+     TOAST — fixed, bottom-right
+     ════════════════════════════════════════════════════ */
+  .toast-root {
+    position: fixed;
+    bottom: 2.4rem;
+    right: 2.4rem;
+    z-index: 1000;
+    max-width: 42rem;
+    font-family: var(--font-body);
+  }
+
+  .toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+    padding: 1.2rem 1.4rem;
+    background-color: var(--color-surface-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-2);
+  }
+
+  .toast__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .toast__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .toast__message {
+    margin: 0;
+    flex: 1 1 auto;
+    color: var(--color-text);
+    font-size: 1.4rem;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .toast__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.2rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .toast__close svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toast__close:hover {
+    color: var(--color-text);
+    background-color: var(--alpha-bg-hover);
+  }
+
+  /* ── Variant accent colors ── */
+  .toast--success .toast__icon { color: var(--color-success); }
+  .toast--error .toast__icon { color: var(--color-destructive); }
+  .toast--info .toast__icon { color: var(--color-info); }
+  .toast--warning .toast__icon { color: var(--color-warning); }
+
+  /* ── Responsive: < 640px — raise above the bottom nav,
+        reduce the right margin ── */
+  @media (max-width: 640px) {
+    .toast-root {
+      bottom: 5.6rem;
+      right: 1.2rem;
+    }
+  }
+</style>
+
+<script>
+  // Register the Alpine data store. Mirrors the pattern used across the
+  // app (exercices, timer, …): a plain script listens for `alpine:init`
+  // and registers Alpine.data so any page using the CDN build picks it up.
+  document.addEventListener('alpine:init', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data('toastApp', () => ({
+      open: false,
+      message: '',
+      variant: 'info',
+      defaultDuration: 3000,
+      _timer: 0,
+
+      init() {
+        // Resolve the configurable duration from the data attribute the
+        // Astro prop rendered (avoids inlining expressions into inline
+        // scripts, which Astro deliberately leaves unevaluated).
+        const attr = this.$el.getAttribute('data-duration');
+        const parsed = attr ? Number(attr) : NaN;
+        if (Number.isFinite(parsed) && parsed > 0) this.defaultDuration = parsed;
+
+        // Expose the global API: window.showToast(message, variant?)
+        window.showToast = (message: string, variant: string = 'info') => {
+          this.show(message, variant);
+        };
+      },
+
+      show(message: string, variant: string = 'info') {
+        this.message = message;
+        this.variant = variant;
+        this.open = true;
+        if (this._timer) window.clearTimeout(this._timer);
+        this._timer = window.setTimeout(() => {
+          this.open = false;
+        }, this.defaultDuration);
+      },
+
+      dismiss() {
+        if (this._timer) window.clearTimeout(this._timer);
+        this.open = false;
+      },
+    }));
+  });
+</script>

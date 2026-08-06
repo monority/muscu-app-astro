@@ -116,7 +116,7 @@ const L = t();
     type Session,
   } from '../../lib/storage';
 
-  import { t } from '../../i18n';
+  import { t, trExercise, trMuscle } from '../../i18n';
 
   const LABELS = t();
 
@@ -552,7 +552,7 @@ const L = t();
 
           // Full-circle workaround: split into 2 sub-arcs when slice ≈ 100%.
           if (this.muscleSlices.length === 1) {
-            arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${r - innerR}"><title>${svgEscape(sl.muscle)} · ${fmtNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%</title></circle>`;
+            arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${r - innerR}"><title>${svgEscape(trMuscle(sl.muscle))} · ${fmtNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%</title></circle>`;
           } else {
             const d = [
               `M ${x1.toFixed(2)} ${y1.toFixed(2)}`,
@@ -561,7 +561,7 @@ const L = t();
               `A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix1.toFixed(2)} ${iy1.toFixed(2)}`,
               'Z',
             ].join(' ');
-            arcs += `<path d="${d}" fill="${color}"><title>${svgEscape(sl.muscle)} · ${fmtNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%</title></path>`;
+            arcs += `<path d="${d}" fill="${color}"><title>${svgEscape(trMuscle(sl.muscle))} · ${fmtNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%</title></path>`;
           }
         }
 
@@ -577,7 +577,7 @@ const L = t();
           const y = legendY + i * rowH;
           const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
           legend += `<rect x="${legendX}" y="${y - 9}" width="12" height="12" rx="2" fill="${color}"/>`;
-          legend += `<text x="${legendX + 20}" y="${y + 1}" font-size="13" fill="#F6F6F6" font-family="var(--font-body, sans-serif)">${svgEscape(sl.muscle)}</text>`;
+          legend += `<text x="${legendX + 20}" y="${y + 1}" font-size="13" fill="#F6F6F6" font-family="var(--font-body, sans-serif)">${svgEscape(trMuscle(sl.muscle))}</text>`;
           legend += `<text x="${W - 16}" y="${y + 1}" font-size="13" fill="#9CA3AF" text-anchor="end" font-family="var(--font-display, sans-serif)" font-weight="700">${Math.round(sl.pct)}%</text>`;
         });
 
@@ -680,8 +680,8 @@ const L = t();
                 <span class="stats__top-rank">${rank}</span>
                 <div class="stats__top-main">
                   <div class="stats__top-head">
-                    <span class="stats__top-name">${svgEscape(item.name)}</span>
-                    <span class="stats__top-muscle">${svgEscape(item.muscle)}</span>
+                    <span class="stats__top-name">${svgEscape(trExercise(item.name))}</span>
+                    <span class="stats__top-muscle">${svgEscape(trMuscle(item.muscle))}</span>
                     <span class="stats__top-value">${fmtNum(item.volume)} ${LABELS.common.kg}</span>
                   </div>
                   <div class="stats__top-bar" role="presentation">

@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../i18n';
+import { t, setLocale, defaultLocale, localizedPath } from '../i18n';
 import AppLayout from '../layouts/AppLayout.astro';
 import Button from '../components/ui/Button.astro';
 import Card from '../components/ui/Card.astro';
@@ -474,7 +474,7 @@ const workoutCards = [
               title={L.sessions.noSession}
               description={L.ui.emptyStateDesc}
               actionLabel={L.ui.createSession}
-              actionHref="/seances/creer"
+              actionHref={localizedPath("/seances/creer")}
             />
           </CardContent>
         </Card>

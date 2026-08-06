@@ -347,7 +347,7 @@ const renderIcon = (name?: string): string => {
     align-items: stretch;
     /* Same dark surface as <body> so the page never flashes white
        when the sidebar or main area are short. */
-    background-color: #050505;
+    background-color: var(--color-bg);
   }
 
   .main-area {
@@ -355,7 +355,7 @@ const renderIcon = (name?: string): string => {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    background-color: #050505;
+    background-color: var(--color-bg);
     /* Mobile: the body is the scroll container, the topbar is
        `position: sticky` in Header.astro and pins to the top of
        the viewport. Desktop overrides below switch to an in-page
@@ -505,7 +505,7 @@ const renderIcon = (name?: string): string => {
   }
 
   .drawer__close:hover {
-    background-color: hsl(0 0% 100% / 0.05);
+    background-color: var(--alpha-bg-soft);
   }
 
   /* ── Drawer nav ────────────────────────────────────────── */
@@ -551,7 +551,7 @@ const renderIcon = (name?: string): string => {
   }
 
   .drawer__item:hover {
-    background-color: hsl(0 0% 100% / 0.04);
+    background-color: var(--alpha-bg-subtle);
     color: var(--color-text);
   }
 
@@ -605,7 +605,7 @@ const renderIcon = (name?: string): string => {
 
   .drawer__subitem:hover {
     color: var(--color-text);
-    background-color: hsl(0 0% 100% / 0.03);
+    background-color: var(--alpha-bg-subtle);
   }
 
   .drawer__subitem.is-active {

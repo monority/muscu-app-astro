@@ -1,9 +1,9 @@
-﻿---
+---
 import AppLayout from '../layouts/AppLayout.astro';
 import PageHeader from '../components/layout/PageHeader.astro';
 import Card from '../components/ui/Card.astro';
 import EmptyState from '../components/ui/EmptyState.astro';
-import { t, setLocale, defaultLocale } from '../i18n';
+import { t, setLocale, defaultLocale, localizedPath } from '../i18n';
 
 
 
@@ -20,7 +20,7 @@ const L = t();
   <div class="dash" x-data="dashboardApp()" x-init="init()" x-cloak>
     {/* ── Quick actions ── */}
     <div class="dash__actions">
-      <a href="/seances/creer" class="dash__action dash__action--primary">
+      <a href={localizedPath("/seances/creer")} class="dash__action dash__action--primary">
         <svg
           class="dash__action-icon"
           xmlns="http://www.w3.org/2000/svg"
@@ -37,7 +37,7 @@ const L = t();
         </svg>
         <span>{L.dashboard.newSession}</span>
       </a>
-      <a href="/timer" class="dash__action dash__action--secondary">
+      <a href={localizedPath("/timer")} class="dash__action dash__action--secondary">
         <svg
           class="dash__action-icon"
           xmlns="http://www.w3.org/2000/svg"
@@ -217,7 +217,7 @@ const L = t();
       <header class="dash__section-head">
         <h2 x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
         <a
-          href="/seances"
+          href={localizedPath("/seances")}
           class="dash__see-all"
           x-show="hasSessions"
           x-text="labels.viewAll"
@@ -228,7 +228,7 @@ const L = t();
       <div class="dash__sessions" x-show="hasSessions">
         <template x-for="s in recentSessions" :key="s.id">
           <a
-            :href="'/seances/detail?id=' + s.id"
+            :href="localizedPath('/seances/detail?id=' + s.id)"
             class="dash__session"
             :class="'dash__session--' + s.status"
           >
@@ -262,7 +262,7 @@ const L = t();
             title={L.dashboard.noSessions}
             description={L.dashboard.emptyDesc}
             actionLabel={L.dashboard.createFirst}
-            actionHref="/seances/creer"
+            actionHref={localizedPath("/seances/creer")}
           />
         </Card>
       </div>
@@ -281,7 +281,7 @@ const L = t();
     type Session,
     type SessionStatus,
   } from '../lib/storage';
-  import { t, defaultLocale } from '../i18n';
+  import { t, defaultLocale, localizedPath } from '../i18n';
 
   const LABELS = t();
 
@@ -340,6 +340,9 @@ const L = t();
         exoPlural: LABELS.dashboard.exoPlural,
         exoSingular: LABELS.dashboard.exoSingular,
       },
+
+      // Expose localizedPath to Alpine expressions (uses window.__LOCALE__).
+      localizedPath,
 
       // ── Init ──
       init() {
@@ -549,7 +552,7 @@ const L = t();
     color: var(--color-accent-foreground);
     box-shadow:
       0 4px 18px hsl(32 95% 50% / 0.32),
-      inset 0 1px 0 hsl(0 0% 100% / 0.22);
+      inset 0 1px 0 var(--alpha-highlight);
   }
 
   .dash__action--primary:hover {
@@ -557,7 +560,7 @@ const L = t();
     color: var(--color-accent-foreground);
     box-shadow:
       0 6px 22px hsl(32 95% 50% / 0.45),
-      inset 0 1px 0 hsl(0 0% 100% / 0.22);
+      inset 0 1px 0 var(--alpha-highlight);
     transform: translateY(-1px);
   }
 
@@ -574,7 +577,7 @@ const L = t();
   .dash__action--secondary:hover {
     background-color: var(--color-surface-3);
     color: var(--color-text);
-    border-color: hsl(0 0% 100% / 0.20);
+    border-color: var(--alpha-border);
   }
 
   .dash__action--secondary:active {
@@ -889,7 +892,7 @@ const L = t();
 
   .dash__session:hover {
     color: inherit;
-    border-color: hsl(0 0% 100% / 0.18);
+    border-color: var(--alpha-border);
     box-shadow: 0 8px 24px hsl(0 0% 0% / 0.42);
     transform: translateY(-2px);
   }
@@ -942,7 +945,7 @@ const L = t();
   }
 
   .dash__session-sep {
-    color: hsl(0 0% 100% / 0.15);
+    color: var(--alpha-text-faint);
   }
 
   .dash__session-volume {
@@ -982,7 +985,7 @@ const L = t();
   }
 
   .dash__badge--planned {
-    background-color: hsl(0 0% 100% / 0.05);
+    background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
   }

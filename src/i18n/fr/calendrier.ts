@@ -1,0 +1,19 @@
+export default {
+  title: 'Calendrier',
+  description: 'Visualisez vos séances passées et planifiées sur l\'ensemble du mois.',
+  prevMonth: 'Mois précédent',
+  nextMonth: 'Mois suivant',
+  weekdays: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+  monthNames: [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+  ],
+  sessionsOn: 'séances le',
+  noSessions: 'Aucune séance ce jour',
+  today: 'Aujourd\'hui',
+  monthlyStats: 'Statistiques du mois',
+  sessionsThisMonth: 'Séances ce mois',
+  currentStreak: 'Streak actuelle',
+  longestStreak: 'Plus long streak',
+  daysShort: 'j',
+};

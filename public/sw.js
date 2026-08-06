@@ -15,7 +15,7 @@
  * and navigate between cached pages without a connection.
  * ───────────────────────────────────────────────────────────── */
 
-const VERSION = "muscu-app-v2";
+const VERSION = "muscu-app-v4";
 const STATIC_CACHE = `${VERSION}-shell`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 
@@ -44,10 +44,13 @@ const APP_SHELL = [
   "/en/progression",
   "/en/settings",
   "/en/timer",
+  "/timer/pop",
+  "/en/timer/pop",
   "/en/calendrier",
   "/en/login",
   "/manifest.json",
   "/favicon.svg",
+  "/input-stepper.css",
 ];
 
 // Inline offline fallback. Kept tiny and dependency-free so it

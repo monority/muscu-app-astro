@@ -102,9 +102,11 @@ const groupsWithActive = groups.map((g) => ({
       active: isActive,
       children: it.children?.map((c) => ({
         ...c,
-        active:
-          currentPath === c.href ||
-          (c.href !== "/" && currentPath.startsWith(c.href + "/")),
+        // Leaves are terminal links, so they only highlight on an exact
+        // match. Using prefix matching here made the first child (whose
+        // href duplicates the parent, e.g. /progression) stay active on
+        // every deeper page (e.g. /progression/records).
+        active: currentPath === c.href,
       })),
     };
   }),
@@ -122,6 +124,7 @@ const groupsWithActive = groups.map((g) => ({
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="/input-stepper.css" />
     <meta name="theme-color" content="#D97706" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -130,9 +133,23 @@ const groupsWithActive = groups.map((g) => ({
     {/* ── Locale bootstrap ──
         Exposes the server-rendered locale so client-side Alpine
         components (via t()/getLocale()) resolve the same language
-        as the HTML they live in. Runs before the theme block. */}
+        as the HTML they live in. Runs before the theme block.
+        NOTE: expressions are NOT evaluated inside is:inline scripts,
+        so we read the locale from the <html lang="..."> attribute. */}
     <script is:inline>
-      window.__LOCALE__ = '{getLocale()}';
+      window.__LOCALE__ = document.documentElement.getAttribute('lang');
+    </script>
+
+    {/* ── Exercise translation helpers ──
+        Exposed on window so Alpine expressions can translate stored
+        French exercise names/muscles/categories at render time on the
+        EN locale, while stored data stays untouched (it is used as a
+        lookup key by tips / rest-times / templates). */}
+    <script>
+      import { trExercise, trMuscle, trCategory } from "../i18n";
+      (window as any).trExercise = trExercise;
+      (window as any).trMuscle = trMuscle;
+      (window as any).trCategory = trCategory;
     </script>
 
     {/* ── Theme bootstrap (added 2026-08-04) ──
@@ -152,7 +169,15 @@ const groupsWithActive = groups.map((g) => ({
              the default dark theme via the @theme block. */
         }
       })();
+      /* Pin the root background synchronously so an early paint never
+         flashes the dark default (#050505) while the bundled stylesheet
+         is still loading. `var(--color-bg)` (and the themed rules)
+         override this once they apply. */
     </script>
+    <style is:inline>
+      html { background-color: #050505; }
+      html[data-theme="light"] { background-color: #ffffff; }
+    </style>
   </head>
   <body>
     {
@@ -161,7 +186,7 @@ const groupsWithActive = groups.map((g) => ({
           <slot />
         </AppShell>
       ) : (
-        <main style="max-width: 96rem; margin: 0 auto; padding: 2.4rem;">
+        <main>
           <slot />
         </main>
       )
@@ -177,6 +202,100 @@ const groupsWithActive = groups.map((g) => ({
           });
         });
       }
+    </script>
+
+    <script>
+      import { t } from "../i18n";
+
+      // ── Number input steppers ─────────────────────────────
+      // Native number spinners are hidden in /input-stepper.css (they
+      // can't be themed reliably cross-browser). Here we inject designed
+      // chevron buttons inside the right edge of every standalone
+      // number input. Inputs that already ship their own +/- steppers
+      // opt out via the `.no-spinner` class.
+      const L = t();
+
+      const CHEVRON_UP = '<polyline points="6 14 12 8 18 14"/>';
+      const CHEVRON_DOWN = '<polyline points="6 10 12 16 18 10"/>';
+
+      const svg = (body: string): string =>
+        `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+
+      function enhance(input: HTMLInputElement): void {
+        if (input.dataset.stepper === "true") return;
+        input.dataset.stepper = "true";
+
+        const wrap = document.createElement("div");
+        wrap.className = "input-stepper";
+        input.parentNode?.insertBefore(wrap, input);
+        wrap.appendChild(input);
+
+        const makeBtn = (
+          cls: string,
+          label: string,
+          icon: string,
+          fn: () => void,
+        ) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = cls;
+          btn.setAttribute("aria-label", label);
+          btn.innerHTML = svg(icon);
+          // preventDefault keeps focus on the input (no blur, no submit).
+          btn.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            fn();
+          });
+          wrap.appendChild(btn);
+        };
+
+        makeBtn(
+          "input-stepper__btn input-stepper__btn--up",
+          L.common.increase,
+          CHEVRON_UP,
+          () => input.stepUp(),
+        );
+        makeBtn(
+          "input-stepper__btn input-stepper__btn--down",
+          L.common.decrease,
+          CHEVRON_DOWN,
+          () => input.stepDown(),
+        );
+      }
+
+      const isTarget = (el: Element | null): boolean =>
+        !!el &&
+        el instanceof HTMLInputElement &&
+        el.type === "number" &&
+        !el.classList.contains("no-spinner");
+
+      const init = (): void => {
+        document
+          .querySelectorAll<HTMLInputElement>('input[type="number"]:not(.no-spinner)')
+          .forEach(enhance);
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+
+      // Also enhance inputs added later by Alpine (e.g. session set
+      // rows). enhance() is idempotent via the data-stepper marker.
+      const observer = new MutationObserver((records) => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (node.nodeType !== Node.ELEMENT_NODE) continue;
+            const el = node as HTMLElement;
+            if (isTarget(el)) enhance(el as HTMLInputElement);
+            el
+              .querySelectorAll?.('input[type="number"]:not(.no-spinner)')
+              .forEach(enhance);
+          }
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
     </script>
   </body>
 </html>

@@ -1,10 +1,12 @@
 import fr from './fr';
 import en from './en';
+import type { Dictionary } from './types';
+
+export type { Dictionary } from './types';
 
 export const locales = ['fr', 'en'] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = 'fr';
-export type Dictionary = typeof fr;
 
 export const dictionaries: Record<Locale, Dictionary> = { fr, en };
 
@@ -37,5 +39,13 @@ export function localizedPath(path: string): string {
 export function getStaticPaths() {
   return locales.map((lang) => ({ params: { lang } }));
 }
+
+export {
+  trExercise,
+  trMuscle,
+  trCategory,
+  trTemplateName,
+  trTemplateDesc,
+} from './exercise-translations';
 
 export default { t, setLocale, getLocale, localizedPath, getStaticPaths };

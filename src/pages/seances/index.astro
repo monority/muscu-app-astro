@@ -3,7 +3,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import Card from '../../components/ui/Card.astro';
-import { t, setLocale, defaultLocale } from '../../i18n';
+import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 
 
 
@@ -16,7 +16,7 @@ const L = t();
     title={L.sessions.title}
     description={L.sessions.description}
     actionLabel={L.dashboard.newSession}
-    actionHref="/seances/creer"
+    actionHref={localizedPath("/seances/creer")}
   />
 
   <div
@@ -199,7 +199,7 @@ const L = t();
           title={L.sessions.emptyTitle}
           description={L.sessions.emptyDesc}
           actionLabel={L.sessions.createAction}
-          actionHref="/seances/creer"
+          actionHref={localizedPath("/seances/creer")}
         />
       </Card>
     </template>
@@ -234,7 +234,7 @@ const L = t();
     type SessionMood,
     type SessionStatus,
   } from '../../lib/storage';
-  import { t, defaultLocale, getLocale } from '../../i18n';
+  import { t, defaultLocale, getLocale, localizedPath } from '../../i18n';
 
   const LABELS = t();
   const DATE_LOCALE = getLocale() === 'en' ? 'en-GB' : 'fr-FR';
@@ -383,7 +383,7 @@ const L = t();
 
       // ── Actions ──
       navigateTo(id: string) {
-        window.location.href = '/seances/detail?id=' + encodeURIComponent(id);
+        window.location.href = localizedPath('/seances/detail?id=' + encodeURIComponent(id));
       },
 
       deleteSession(id: string) {
@@ -452,7 +452,7 @@ const L = t();
   }
 
   .sess__search-input::placeholder {
-    color: hsl(0 0% 100% / 0.25);
+    color: var(--alpha-text-faint);
   }
 
   .sess__search-input::-webkit-search-cancel-button {
@@ -542,7 +542,7 @@ const L = t();
 
   .sess__card:hover {
     background-color: var(--color-surface-2);
-    border-color: hsl(0 0% 100% / 0.18);
+    border-color: var(--alpha-border);
     box-shadow: 0 8px 24px hsl(0 0% 0% / 0.42);
     transform: translateY(-2px);
   }
@@ -728,7 +728,7 @@ const L = t();
   }
 
   .sess__badge--planned {
-    background-color: hsl(0 0% 100% / 0.05);
+    background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
   }
@@ -760,8 +760,8 @@ const L = t();
   }
 
   .sess__icon-btn:hover {
-    background-color: hsl(0 0% 100% / 0.05);
-    border-color: hsl(0 0% 100% / 0.10);
+    background-color: var(--alpha-bg-soft);
+    border-color: var(--alpha-border-faint);
     color: var(--color-text);
   }
 
@@ -830,7 +830,7 @@ const L = t();
   .sess__reset-btn:hover {
     background-color: var(--color-surface-2);
     color: var(--color-text);
-    border-color: hsl(0 0% 100% / 0.18);
+    border-color: var(--alpha-border);
   }
 
   .sess__reset-btn:active {

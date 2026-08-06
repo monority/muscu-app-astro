@@ -20,6 +20,33 @@ const L = t();
     x-init="init()"
     x-cloak
   >
+    {/* ── Pop-out window ── */}
+    <button
+      type="button"
+      class="timer__popout"
+      :class="{ 'is-open': popupOpen }"
+      @click="openPopup()"
+      :aria-label="labels.popoutAria"
+      :title="labels.popout"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <polyline points="9 21 3 21 3 15"></polyline>
+        <line x1="21" y1="3" x2="14" y2="10"></line>
+        <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>
+      <span class="timer__popout-label" x-text="popupOpen ? labels.popoutOpen : labels.popout"></span>
+    </button>
+
     {/* ── Mode toggle (Countdown / Stopwatch) ── */}
     <div class="timer__mode" role="tablist" aria-label={L.timer.modeAria}>
       <button
@@ -154,7 +181,7 @@ const L = t();
             min="5"
             max="600"
             step="5"
-            class="timer__custom-input"
+            class="timer__custom-input no-spinner"
             x-model.number="customTime"
             @keydown.enter="setCustom()"
             @blur="setCustom()"
@@ -176,22 +203,10 @@ const L = t();
         <button
           type="button"
           class="timer__btn timer__btn--primary"
-          @click="start()"
-          x-show="!running"
-          x-transition.opacity.duration.150ms
-          x-text="remaining === 0 ? labels.restart : labels.start"
+          @click="toggle()"
+          x-text="toggleLabel"
         >
           {L.timer.start}
-        </button>
-        <button
-          type="button"
-          class="timer__btn timer__btn--secondary"
-          @click="pause()"
-          x-show="running"
-          x-transition.opacity.duration.150ms
-          x-text="labels.pause"
-        >
-          Pause
         </button>
         <button
           type="button"
@@ -256,22 +271,10 @@ const L = t();
         <button
           type="button"
           class="timer__btn timer__btn--primary"
-          @click="swStart()"
-          x-show="!sw.running"
-          x-transition.opacity.duration.150ms
-          x-text="sw.elapsed === 0 ? labels.start : labels.resume"
+          @click="toggle()"
+          x-text="toggleLabel"
         >
           {L.timer.start}
-        </button>
-        <button
-          type="button"
-          class="timer__btn timer__btn--secondary"
-          @click="swPause()"
-          x-show="sw.running"
-          x-transition.opacity.duration.150ms
-          x-text="labels.pause"
-        >
-          Pause
         </button>
         <button
           type="button"
@@ -314,14 +317,51 @@ const L = t();
 </AppLayout>
 
 <script>
-  import { t, defaultLocale } from '../../i18n';
+  import { t, defaultLocale, localizedPath } from '../../i18n';
+  import {
+    mountTimerWidget,
+    widgetLabelsFrom,
+    TIMER_CHANNEL,
+    type TimerSnapshot,
+  } from '../../lib/timer-widget';
 
   const LABELS = t();
+
+  // Pop-out bridge kept OUTSIDE the reactive Alpine store: Alpine proxies
+  // its state, which breaks exotic objects like BroadcastChannel. Only the
+  // `popupOpen` flag lives in the component (it drives the button class).
+  const timerBridge: {
+    channel: BroadcastChannel | null;
+    pipWindow: Window | null;
+    popWatcher: number;
+    remoteConnected: boolean;
+    connWatchdog: number;
+    instanceId: string;
+  } = {
+    channel: null,
+    pipWindow: null,
+    popWatcher: 0,
+    remoteConnected: false,
+    connWatchdog: 0,
+    instanceId: 'm' + Math.random().toString(36).slice(2, 10),
+  };
 
   document.addEventListener('alpine:init', () => {
     window.Alpine.data('timerApp', () => ({
       // ── Mode ──
       mode: 'countdown',  // 'countdown' | 'stopwatch'
+
+      // ── Pop-out window ──
+      popupOpen: false,
+
+      // ── Stopwatch state ──
+      sw: {
+        running: false,
+        elapsed: 0,
+        laps: [] as { lapTime: number; totalTime: number }[],
+        startTimestamp: 0,
+        intervalId: null as number | null,
+      },
 
       // ── Countdown state ──
       presets: [60, 90, 120, 180],
@@ -338,6 +378,9 @@ const L = t();
 
       // ── Translations ──
       labels: {
+        title: LABELS.timer.title,
+        countdown: LABELS.timer.countdown,
+        stopwatch: LABELS.timer.stopwatch,
         custom: LABELS.timer.custom,
         start: LABELS.timer.start,
         restart: LABELS.timer.restart,
@@ -352,16 +395,176 @@ const L = t();
         paused: LABELS.timer.paused,
         ready: LABELS.timer.ready,
         done: LABELS.timer.done,
+        popout: LABELS.timer.popout,
+        popoutAria: LABELS.timer.popoutAria,
+        popoutOpen: LABELS.timer.popoutOpen,
       },
 
+      // ── Pop-out bridge plumbing ──
       init() {
         this.display = this.totalTime;
-        // Pause everything when tab is hidden (avoid background drift)
+        // init() can run twice (Alpine auto-calls it AND x-init does). Guard
+        // so a second run doesn't leave two live BroadcastChannels — every
+        // message would then be handled twice (duplicate laps/commands).
+        if (!timerBridge.channel) {
+          timerBridge.channel = new BroadcastChannel(TIMER_CHANNEL);
+          timerBridge.channel.onmessage = (ev: MessageEvent) => this.handleRemote(ev.data);
+        }
+        // Pause everything when tab is hidden (avoid background drift) —
+        // UNLESS a pop-out window is open: then the timer keeps running so
+        // the popup can carry it across screens/tabs.
         document.addEventListener('visibilitychange', () => {
-          if (document.hidden) {
+          if (document.hidden && !this.popupOpen) {
             if (this.running) this.pause();
             if (this.sw.running) this.swPause();
           }
+        });
+      },
+
+      // ════════════════════════════════════════════════
+      // POP-OUT WINDOW (Picture-in-Picture + fallback)
+      // ════════════════════════════════════════════════
+      snapshot(): TimerSnapshot {
+        return {
+          mode: this.mode,
+          totalTime: this.totalTime,
+          remaining: this.remaining,
+          running: this.running,
+          endAt: this.running ? this.endTime : 0,
+          swRunning: this.sw.running,
+          swStartAt: this.sw.running ? this.sw.startTimestamp : 0,
+          swElapsed: this.sw.elapsed,
+          laps: this.sw.laps.map((l) => ({ ...l })),
+          soundEnabled: this.soundEnabled,
+          now: Date.now(),
+        };
+      },
+
+      // Push state to the popup (only when one is open).
+      broadcast() {
+        if (!this.popupOpen && !timerBridge.remoteConnected) return;
+        this.pushState();
+      },
+
+      // Push state unconditionally (used to answer a handshake).
+      pushState() {
+        timerBridge.channel?.postMessage({
+          type: 'state',
+          owner: timerBridge.instanceId,
+          state: this.snapshot(),
+        });
+      },
+
+      handleRemote(msg: any) {
+        if (!msg || typeof msg !== 'object') return;
+        if (msg.type === 'hello') {
+          if (msg.target && msg.target !== '*' && msg.target !== timerBridge.instanceId) return;
+          // Any widget saying hello is a live remote view — broadcast events to
+          // it even when it was opened standalone (popupOpen stays false).
+          // The popup repeats hello every 2.5s; if it stops (window closed) the
+          // watchdog flips the flag back so we don't push into the void.
+          timerBridge.remoteConnected = true;
+          if (timerBridge.connWatchdog) clearTimeout(timerBridge.connWatchdog);
+          timerBridge.connWatchdog = window.setTimeout(() => {
+            timerBridge.remoteConnected = false;
+            timerBridge.connWatchdog = 0;
+          }, 6500);
+          this.pushState();
+          return;
+        }
+        if (msg.type !== 'cmd') return;
+        if (msg.target && msg.target !== timerBridge.instanceId) return;
+        switch (msg.cmd) {
+          case 'start':
+            if (this.mode === 'stopwatch') this.swStart();
+            else this.start();
+            break;
+          case 'pause':
+            if (this.mode === 'stopwatch') this.swPause();
+            else this.pause();
+            break;
+          case 'reset':
+            if (this.mode === 'stopwatch') this.swReset();
+            else this.reset();
+            break;
+          case 'lap':
+            this.swRecordLap();
+            break;
+          case 'setMode':
+            this.setMode(msg.value === 1 ? 'stopwatch' : 'countdown');
+            break;
+          case 'setTime':
+            this.setPreset(Math.max(5, Math.min(600, Number(msg.value) || 90)));
+            break;
+        }
+        // Echo the resulting state straight back so the remote view updates
+        // immediately (it also works when the popup was opened standalone —
+        // no popupOpen needed on this end).
+        this.pushState();
+      },
+
+      async openPopup() {
+        if (this.popupOpen) {
+          timerBridge.pipWindow?.focus();
+          return;
+        }
+        if (!('documentPictureInPicture' in window)) {
+          // No PiP support (Firefox/Safari…) — plain popup, opened synchronously
+          // while the user activation is still intact (await would consume it).
+          this.openFallback();
+          return;
+        }
+        try {
+          const pip = await (window as any).documentPictureInPicture.requestWindow({
+            width: 400,
+            height: 580,
+          });
+          this.attachPip(pip);
+        } catch (e) {
+          // PiP denied/unsupported at runtime — best-effort popup fallback.
+          this.openFallback();
+        }
+      },
+
+      openFallback() {
+        const w = window.open(
+          localizedPath('/timer/pop'),
+          'muscu_timer_pop',
+          'popup,width=400,height=580',
+        );
+        if (!w) return;
+        this.popupOpen = true;
+        if (timerBridge.popWatcher) clearInterval(timerBridge.popWatcher);
+        timerBridge.popWatcher = window.setInterval(() => {
+          if (w.closed) {
+            window.clearInterval(timerBridge.popWatcher);
+            timerBridge.popWatcher = 0;
+            this.popupOpen = false;
+          }
+        }, 500);
+        // Let the popup mount its widget before pushing state.
+        setTimeout(() => this.broadcast(), 350);
+      },
+
+      attachPip(pip: Window) {
+        timerBridge.pipWindow = pip;
+        this.popupOpen = true;
+        const doc = pip.document;
+        doc.title = this.labels.title;
+        doc.documentElement.setAttribute(
+          'data-theme',
+          document.documentElement.getAttribute('data-theme') || 'dark',
+        );
+        doc.body.style.cssText = 'margin:0;background:#0d0d0d;overflow:hidden';
+        const root = doc.createElement('div');
+        root.id = 'tw-mount';
+        doc.body.appendChild(root);
+        const widget = mountTimerWidget(root, widgetLabelsFrom(t()));
+        widget.setSnapshot(this.snapshot(), timerBridge.instanceId);
+        pip.addEventListener('pagehide', () => {
+          timerBridge.pipWindow = null;
+          this.popupOpen = false;
+          widget.destroy();
         });
       },
 
@@ -374,6 +577,30 @@ const L = t();
         this.pause();
         this.swPause();
         this.mode = m;
+        this.broadcast();
+      },
+
+      // Single start/pause/resume toggle (avoids the two-button swap that
+      // reflowed the layout and made the reset button jump while fading).
+      toggle() {
+        if (this.mode === 'stopwatch') {
+          if (this.sw.running) this.swPause();
+          else this.swStart();
+        } else {
+          if (this.running) this.pause();
+          else this.start();
+        }
+      },
+
+      get toggleLabel() {
+        if (this.mode === 'stopwatch') {
+          if (this.sw.running) return this.labels.pause;
+          return this.sw.elapsed > 0 ? this.labels.resume : this.labels.start;
+        }
+        if (this.running) return this.labels.pause;
+        if (this.remaining === 0) return this.labels.restart;
+        if (this.remaining < this.totalTime) return this.labels.resume;
+        return this.labels.start;
       },
 
       // ════════════════════════════════════════════════
@@ -401,6 +628,7 @@ const L = t();
         this.remaining = seconds;
         this.display = seconds;
         this.customTime = seconds;
+        this.broadcast();
       },
 
       setCustom() {
@@ -411,6 +639,7 @@ const L = t();
         this.remaining = v;
         this.display = v;
         this.customTime = v;
+        this.broadcast();
       },
 
       adjustCustom(delta) {
@@ -427,21 +656,28 @@ const L = t();
         this.lastTick = Date.now();
         this.intervalId = setInterval(() => this.tick(), 100);
         this.tick();
+        this.broadcast();
       },
 
       pause() {
         if (!this.running) return;
         this.running = false;
+        if (this.endTime) {
+          this.remaining = Math.max(0, Math.ceil((this.endTime - Date.now()) / 1000));
+          this.display = this.remaining;
+        }
         if (this.intervalId) {
           clearInterval(this.intervalId);
           this.intervalId = null;
         }
+        this.broadcast();
       },
 
       reset() {
         this.pause();
         this.remaining = this.totalTime;
         this.display = this.totalTime;
+        this.broadcast();
       },
 
       tick() {
@@ -456,7 +692,9 @@ const L = t();
           this.pause();
           this.display = 0;
           this.remaining = 0;
-          if (this.soundEnabled) this.beep();
+          // When a pop-out window is open, the popup plays the beep (the main
+          // page may be hidden); otherwise beep here.
+          if (this.soundEnabled && !this.popupOpen) this.beep();
         }
       },
 
@@ -480,6 +718,7 @@ const L = t();
         // Resume: anchor the start to (now - already-elapsed)
         this.sw.startTimestamp = Date.now() - this.sw.elapsed;
         this.sw.intervalId = setInterval(() => this.swTick(), 10);
+        this.broadcast();
       },
 
       swPause() {
@@ -491,12 +730,14 @@ const L = t();
         }
         // Commit the latest elapsed so resume picks up where we left off
         this.sw.elapsed = Date.now() - this.sw.startTimestamp;
+        this.broadcast();
       },
 
       swReset() {
         this.swPause();
         this.sw.elapsed = 0;
         this.sw.laps = [];
+        this.broadcast();
       },
 
       swRecordLap() {
@@ -510,6 +751,7 @@ const L = t();
           lapTime: total - prevTotal,
           totalTime: total,
         });
+        this.broadcast();
       },
 
       swTick() {
@@ -595,6 +837,7 @@ const L = t();
      CONTAINER
      ════════════════════════════════════════════════════ */
   .timer {
+    position: relative;
     max-width: 48rem;
     margin: 0 auto;
     display: flex;
@@ -602,6 +845,48 @@ const L = t();
     align-items: center;
     gap: 3.6rem;
     padding: 3.2rem 0 6rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     POP-OUT BUTTON — top-right corner, icon + label
+     ════════════════════════════════════════════════════ */
+  .timer__popout {
+    position: absolute;
+    top: 0;
+    right: 1.2rem;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 3.6rem;
+    padding: 0 1.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 200ms ease,
+                background-color 200ms ease,
+                border-color 200ms ease;
+  }
+
+  .timer__popout:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface-3);
+    border-color: var(--alpha-border);
+  }
+
+  .timer__popout.is-open {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .timer__popout svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   /* ════════════════════════════════════════════════════
@@ -616,7 +901,7 @@ const L = t();
     border-radius: var(--radius-pill);
     box-shadow:
       inset 0 2px 4px hsl(0 0% 0% / 0.5),
-      inset 0 -1px 0 hsl(0 0% 100% / 0.04);
+      inset 0 -1px 0 var(--alpha-bg-subtle);
   }
 
   .timer__mode-btn {
@@ -663,7 +948,7 @@ const L = t();
     color: var(--color-accent-foreground);
     box-shadow:
       0 2px 10px hsl(32 95% 50% / 0.40),
-      inset 0 1px 0 hsl(0 0% 100% / 0.22);
+      inset 0 1px 0 var(--alpha-highlight);
   }
 
   /* ════════════════════════════════════════════════════
@@ -709,7 +994,7 @@ const L = t();
   .timer__preset:hover {
     color: var(--color-text);
     background-color: var(--color-surface-3);
-    border-color: hsl(0 0% 100% / 0.20);
+    border-color: var(--alpha-border);
     transform: translateY(-2px);
   }
 
@@ -874,7 +1159,7 @@ const L = t();
 
   .timer__step:hover {
     background-color: var(--color-surface-3);
-    border-color: hsl(0 0% 100% / 0.20);
+    border-color: var(--alpha-border);
     color: var(--color-text);
   }
 
@@ -925,62 +1210,50 @@ const L = t();
   }
 
   .timer__btn {
-    height: 5.6rem;
-    min-width: 14rem;
+    height: 5.2rem;
+    min-width: 13rem;
     padding: 0 2.4rem;
     border-radius: var(--radius-pill);
     font-family: var(--font-display);
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
-    border: 1px solid transparent;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
     transition: background-color 200ms ease,
                 border-color 200ms ease,
                 color 200ms ease,
-                box-shadow 200ms ease,
                 transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Primary (Start / Resume) — solid accent, elevated */
+  .timer__btn:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--alpha-border);
+  }
+
+  .timer__btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Primary (Start / Pause / Resume) — accent lives on the border */
   .timer__btn--primary {
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    box-shadow:
-      0 4px 18px hsl(32 95% 50% / 0.32),
-      inset 0 1px 0 hsl(0 0% 100% / 0.22);
+    background-color: transparent;
+    color: var(--color-accent);
+    border-color: hsl(32 95% 50% / 0.55);
+    box-shadow: inset 0 0 0 1px hsl(32 95% 50% / 0.15);
   }
 
   .timer__btn--primary:hover {
-    background-color: var(--color-accent-hover);
-    box-shadow:
-      0 6px 22px hsl(32 95% 50% / 0.45),
-      inset 0 1px 0 hsl(0 0% 100% / 0.22);
-    transform: translateY(-1px);
+    background-color: hsl(32 95% 50% / 0.10);
+    border-color: var(--color-accent);
+    box-shadow: inset 0 0 0 1px hsl(32 95% 50% / 0.30);
   }
 
   .timer__btn--primary:active {
-    transform: translateY(0) scale(0.97);
-    box-shadow:
-      0 2px 10px hsl(32 95% 50% / 0.30),
-      inset 0 1px 0 hsl(0 0% 100% / 0.22);
-  }
-
-  /* Secondary (Pause) — surface fill, neutral */
-  .timer__btn--secondary {
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    border-color: var(--color-border);
-    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.04);
-  }
-
-  .timer__btn--secondary:hover {
-    background-color: var(--color-surface-3);
-    border-color: hsl(0 0% 100% / 0.20);
-  }
-
-  .timer__btn--secondary:active {
+    background-color: hsl(32 95% 50% / 0.16);
     transform: scale(0.97);
   }
 
@@ -993,8 +1266,8 @@ const L = t();
 
   .timer__btn--ghost:hover {
     color: var(--color-text);
-    background-color: hsl(0 0% 100% / 0.04);
-    border-color: hsl(0 0% 100% / 0.06);
+    background-color: var(--alpha-bg-subtle);
+    border-color: var(--alpha-bg-soft);
   }
 
   .timer__btn--ghost:active {
@@ -1003,19 +1276,18 @@ const L = t();
 
   /* Accent ghost (Tour) — accent tint, no solid fill */
   .timer__btn--accent-ghost {
-    background-color: hsl(32 95% 50% / 0.08);
+    background-color: transparent;
     color: var(--color-accent);
     border-color: hsl(32 95% 50% / 0.40);
   }
 
   .timer__btn--accent-ghost:hover:not(:disabled) {
-    background-color: hsl(32 95% 50% / 0.18);
-    border-color: hsl(32 95% 50% / 0.60);
-    transform: translateY(-1px);
+    background-color: hsl(32 95% 50% / 0.10);
+    border-color: var(--color-accent);
   }
 
   .timer__btn--accent-ghost:active:not(:disabled) {
-    transform: translateY(0) scale(0.97);
+    transform: scale(0.97);
   }
 
   .timer__btn:disabled {
@@ -1202,6 +1474,14 @@ const L = t();
     }
     .timer__laps-header {
       font-size: 1.0rem;
+    }
+    .timer__popout-label {
+      display: none;
+    }
+    .timer__popout {
+      width: 3.6rem;
+      justify-content: center;
+      padding: 0;
     }
   }
 </style>

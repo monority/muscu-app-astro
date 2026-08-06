@@ -1,0 +1,65 @@
+---
+import { setLocale, defaultLocale } from '../../i18n';
+import '../../styles/globals.css';
+
+setLocale(Astro.currentLocale ?? defaultLocale);
+const lang = Astro.currentLocale ?? defaultLocale;
+---
+
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <title>Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap"
+    />
+    <script is:inline>
+      /* Match the app's theme (dark default) so the popup never flashes white. */
+      (function () {
+        try {
+          var theme = localStorage.getItem('muscu-theme') || 'dark';
+          if (theme !== 'light' && theme !== 'dark') theme = 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0d0d0d;
+      }
+      #tw-mount {
+        width: 100%;
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tw-mount"></div>
+
+    <script>
+      import { mountTimerWidget, widgetLabelsFrom } from '../../lib/timer-widget';
+      import { t, setLocale } from '../../i18n';
+
+      setLocale(document.documentElement.getAttribute('lang') || 'fr');
+      const LABELS = widgetLabelsFrom(t());
+
+      const root = document.getElementById('tw-mount');
+      if (root) {
+        const widget = mountTimerWidget(root, LABELS);
+        // Ask the main timer page (if open) to send its state. Retry until it
+        // answers — the popup may have been opened before the main window.
+        const hello = () => widget.sendHello();
+        hello();
+        window.setInterval(hello, 2500);
+      }
+    </script>
+  </body>
+</html>

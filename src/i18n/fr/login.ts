@@ -1,0 +1,22 @@
+export default {
+  title: 'Bon retour',
+  subtitle: 'Connectez-vous à votre espace d\'entraînement.',
+  email: 'Email',
+  password: 'Mot de passe',
+  submit: 'Se connecter',
+  loading: 'Connexion…',
+  showPassword: 'Afficher le mot de passe',
+  hidePassword: 'Masquer le mot de passe',
+  createAccount: 'Pas de compte ?',
+  createAccountLink: 'Créer un compte',
+  devMode: 'Mode développement',
+  devWarning: 'Ceci est un compte de développement',
+  devLogin: 'Connexion rapide (dev)',
+  signupMessage: 'L\'inscription arrive bientôt. En attendant, utilisez n\'importe quel email et mot de passe pour vous connecter — c\'est un espace de dev.',
+  defaultPseudo: 'Athlète',
+  errors: {
+    emailRequired: 'Veuillez saisir votre email.',
+    emailInvalid: 'Format d\'email invalide.',
+    passwordRequired: 'Veuillez saisir votre mot de passe.',
+  },
+};

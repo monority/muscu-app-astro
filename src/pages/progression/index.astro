@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
+import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
@@ -117,9 +117,9 @@ const L = t();
                     <path d="M6.5 17.5L2 15"></path>
                     <path d="M17.5 17.5L22 15"></path>
                   </svg>
-                  <h3 class="prog__item-name" x-text="stat.name"></h3>
+                  <h3 class="prog__item-name" x-text="trExercise(stat.name)"></h3>
                 </div>
-                <span class="prog__muscle-badge" x-text="stat.muscle"></span>
+                <span class="prog__muscle-badge" x-text="trMuscle(stat.muscle)"></span>
               </header>
 
               <div class="prog__item-stats">
@@ -199,7 +199,7 @@ const L = t();
           title={L.progression.noData}
           description={L.progression.empty}
           actionLabel={L.common.startSession}
-          actionHref="/seances/creer"
+          actionHref={localizedPath("/seances/creer")}
         />
       </Card>
     </template>

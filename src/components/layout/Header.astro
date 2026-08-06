@@ -52,10 +52,9 @@ const { title, class: className = "" } = Astro.props;
 <style>
   /* ── Shell ─────────────────────────────────────────────── */
   .topbar {
-    position: sticky;
     top: 0;
-    z-index: 40;
-    background-color: hsl(0 0% 0% / 0.85);
+    z-index: 2;
+   background-color: var(--color-surface);
     backdrop-filter: saturate(160%) blur(10px);
     -webkit-backdrop-filter: saturate(160%) blur(10px);
     border-bottom: 1px solid var(--color-border);
@@ -111,7 +110,7 @@ const { title, class: className = "" } = Astro.props;
   }
 
   .topbar__hamburger:hover {
-    background-color: hsl(0 0% 100% / 0.04);
+    background-color: var(--alpha-bg-subtle);
   }
 
   .topbar__hamburger-bar {

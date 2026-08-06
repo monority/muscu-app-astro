@@ -65,6 +65,18 @@
   /* Secondary text — referenced by some components. Falls back to
      --color-muted when no override is provided. */
   --color-text-secondary: var(--color-muted);
+
+  /* Alpha overlays — translucent tints used for nested surfaces,
+     row hover states, inset highlights and faint borders. In the
+     dark theme they are white-on-dark; the light theme overrides
+     them to black-on-light so the same rule works on both. */
+  --alpha-bg-subtle: hsl(0 0% 100% / 0.04);
+  --alpha-bg-soft: hsl(0 0% 100% / 0.06);
+  --alpha-bg-hover: hsl(0 0% 100% / 0.08);
+  --alpha-border-faint: hsl(0 0% 100% / 0.10);
+  --alpha-border: hsl(0 0% 100% / 0.18);
+  --alpha-text-faint: hsl(0 0% 100% / 0.25);
+  --alpha-highlight: hsl(0 0% 100% / 0.22);
 }
 
 /* ── Light theme override ────────────────────────────────────
@@ -84,4 +96,19 @@
   --color-muted: #6B7280;
   /* Accent + state colors stay the same — they have enough contrast
      on either surface to remain readable. */
+
+  /* Alpha overlays flip from white-on-dark to black-on-light so the
+     nested surfaces / hovers / borders keep their contrast. */
+  --alpha-bg-subtle: hsl(0 0% 0% / 0.03);
+  --alpha-bg-soft: hsl(0 0% 0% / 0.05);
+  --alpha-bg-hover: hsl(0 0% 0% / 0.07);
+  --alpha-border-faint: hsl(0 0% 0% / 0.10);
+  --alpha-border: hsl(0 0% 0% / 0.14);
+  --alpha-text-faint: hsl(0 0% 0% / 0.22);
+  --alpha-highlight: hsl(0 0% 100% / 0.0);
+
+  /* Softer shadows in light mode — pure black shadows read heavy
+     on a white surface. */
+  --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.08);
+  --shadow-2: 0 6px 14px hsl(0 0% 0% / 0.08);
 }

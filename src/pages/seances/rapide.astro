@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
+import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
@@ -96,7 +96,7 @@ const L = t();
           </div>
 
           <div class="qs__selecting-actions">
-            <a href="/seances" class="qs__btn qs__btn--ghost">{L.common.back}</a>
+            <a href={localizedPath("/seances")} class="qs__btn qs__btn--ghost">{L.common.back}</a>
             <button
               type="button"
               class="qs__btn qs__btn--primary"
@@ -110,7 +110,7 @@ const L = t();
           <template x-if="availableSessions.length === 0">
             <p class="qs__empty">
               {L.rapide.emptyDesc}
-              <a href="/seances/creer">{L.rapide.restart}</a>.
+              <a href={localizedPath("/seances/creer")}>{L.rapide.restart}</a>.
             </p>
           </template>
         </div>
@@ -127,8 +127,8 @@ const L = t();
         @touchend="onTouchEnd($event)"
       >
         <div class="qs__working-inner">
-          <div class="qs__exercise-name" x-text="currentExercise?.name"></div>
-          <div class="qs__exercise-muscle" x-text="currentExercise?.muscle"></div>
+          <div class="qs__exercise-name" x-text="trExercise(currentExercise?.name)"></div>
+          <div class="qs__exercise-muscle" x-text="trMuscle(currentExercise?.muscle)"></div>
 
           <div class="qs__set-number">
             {L.rapide.setProgress} <span x-text="currentSet.setNumber"></span>
@@ -300,7 +300,7 @@ const L = t();
     type SessionSet,
     type SetType,
     } from '../../lib/storage';
-  import { t } from '../../i18n';
+  import { t, localizedPath } from '../../i18n';
 
   const LABELS = t();
 
@@ -648,7 +648,7 @@ const L = t();
           this.restInterval = null;
         }
         this._releaseWakeLock();
-        window.location.href = '/seances';
+        window.location.href = localizedPath('/seances');
       },
 
       confirmStop() {
@@ -749,7 +749,7 @@ const L = t();
           } else if (this.state === 'selecting' || this.state === 'completed') {
             if (e.key === 'Escape') {
               if (this.state === 'completed') this.reset();
-              else window.location.href = '/seances';
+              else window.location.href = localizedPath('/seances');
             }
           }
         };
@@ -835,7 +835,7 @@ const L = t();
     position: fixed;
     inset: 0;
     z-index: 100;
-    background-color: #050505;
+background-color: var(--color-bg);
     color: #F6F6F6;
     display: flex;
     flex-direction: column;
@@ -855,7 +855,7 @@ const L = t();
     align-items: center;
     gap: 1.2rem;
     padding: 1.2rem 1.6rem;
-    border-bottom: 1px solid hsl(0 0% 100% / 0.06);
+    border-bottom: 1px solid var(--alpha-bg-soft);
   }
 
   .qs__icon-btn {

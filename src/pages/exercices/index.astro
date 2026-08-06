@@ -138,7 +138,7 @@ const categories = [
                       <path d="M6.5 17.5L2 15"></path>
                       <path d="M17.5 17.5L22 15"></path>
                     </svg>
-                    <h3 class="exo__card-name" x-text="ex.name"></h3>
+                    <h3 class="exo__card-name" x-text="trExercise(ex.name)"></h3>
                     <button
                       type="button"
                       class="exo__tip-toggle"
@@ -227,8 +227,8 @@ const categories = [
                 </p>
 
             <div class="exo__card-badges">
-              <span class="exo__badge exo__badge--muscle" x-text="ex.muscle"></span>
-              <span class="exo__badge exo__badge--category" x-text="ex.category"></span>
+              <span class="exo__badge exo__badge--muscle" x-text="trMuscle(ex.muscle)"></span>
+              <span class="exo__badge exo__badge--category" x-text="trCategory(ex.category)"></span>
             </div>
 
             <footer class="exo__card-foot">
@@ -505,8 +505,8 @@ const categories = [
       <div class="exo__add-dialog">
         <header class="exo__add-header">
           <div class="exo__add-header-text">
-            <h2 class="exo__add-title" x-text="addingExercise?.name"></h2>
-            <p class="exo__add-muscle" x-text="addingExercise?.muscle"></p>
+            <h2 class="exo__add-title" x-text="trExercise(addingExercise?.name)"></h2>
+            <p class="exo__add-muscle" x-text="trMuscle(addingExercise?.muscle)"></p>
           </div>
           <button
             type="button"
@@ -1192,7 +1192,7 @@ const categories = [
   }
 
   .exo__search-input::placeholder {
-    color: hsl(0 0% 100% / 0.25);
+    color: var(--alpha-text-faint);
   }
 
   .exo__search-input::-webkit-search-cancel-button {
@@ -1232,7 +1232,7 @@ const categories = [
 
   .exo__filter:hover {
     background-color: var(--color-surface-3);
-    border-color: hsl(0 0% 100% / 0.18);
+    border-color: var(--alpha-border);
     color: var(--color-text);
   }
 
@@ -1343,7 +1343,7 @@ const categories = [
 
   .exo__card:hover {
     background-color: var(--color-surface-2);
-    border-color: hsl(0 0% 100% / 0.18);
+    border-color: var(--alpha-border);
     box-shadow: 0 6px 20px hsl(0 0% 0% / 0.40);
     transform: translateY(-2px);
   }
@@ -1526,7 +1526,7 @@ const categories = [
   }
 
   .exo__badge--category {
-    background-color: hsl(0 0% 100% / 0.05);
+    background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
   }
@@ -1557,8 +1557,8 @@ const categories = [
   }
 
   .exo__icon-btn:hover {
-    background-color: hsl(0 0% 100% / 0.05);
-    border-color: hsl(0 0% 100% / 0.10);
+    background-color: var(--alpha-bg-soft);
+    border-color: var(--alpha-border-faint);
     color: var(--color-text);
   }
 
@@ -1616,7 +1616,7 @@ const categories = [
   .exo__reset-btn:hover {
     background-color: var(--color-surface-2);
     color: var(--color-text);
-    border-color: hsl(0 0% 100% / 0.18);
+    border-color: var(--alpha-border);
   }
 
   /* ════════════════════════════════════════════════════
@@ -1664,7 +1664,7 @@ const categories = [
   }
 
   .exo__input::placeholder {
-    color: hsl(0 0% 100% / 0.25);
+    color: var(--alpha-text-faint);
   }
 
   .exo__input:focus,
@@ -1759,8 +1759,8 @@ const categories = [
   }
 
   .exo__btn--secondary:hover {
-    background-color: hsl(0 0% 100% / 0.05);
-    border-color: hsl(0 0% 100% / 0.18);
+    background-color: var(--alpha-bg-soft);
+    border-color: var(--alpha-border);
     color: var(--color-text);
   }
 
@@ -1876,7 +1876,7 @@ const categories = [
     width: 3.2rem;
     height: 3.2rem;
     flex-shrink: 0;
-    background-color: hsl(0 0% 100% / 0.05);
+    background-color: var(--alpha-bg-soft);
     border: 1px solid transparent;
     border-radius: var(--radius-pill);
     color: var(--color-muted);
@@ -1886,7 +1886,7 @@ const categories = [
   }
 
   .exo__add-close:hover {
-    background-color: hsl(0 0% 100% / 0.10);
+    background-color: var(--alpha-border-faint);
     color: var(--color-text);
   }
 
@@ -2038,8 +2038,8 @@ const categories = [
   }
 
   .exo__add-sets-add:hover {
-    background-color: hsl(0 0% 100% / 0.04);
-    border-color: hsl(0 0% 100% / 0.20);
+    background-color: var(--alpha-bg-subtle);
+    border-color: var(--alpha-border);
     border-style: solid;
     color: var(--color-text);
   }

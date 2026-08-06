@@ -9,6 +9,8 @@ import Input from '../../components/ui/Input.astro';
 import Select from '../../components/ui/Select.astro';
 import Button from '../../components/ui/Button.astro';
 import Dialog from '../../components/ui/Dialog.astro';
+import SettingsBottomBar from '../../components/layout/SettingsBottomBar.astro';
+import Toast from '../../components/ui/Toast.astro';
 import { t, setLocale, defaultLocale } from '../../i18n';
 
 
@@ -31,6 +33,17 @@ const restOptions = REST_PRESETS.map((s) => {
 
 // App version mirrored from package.json
 const APP_VERSION = '0.0.1';
+
+// Section metadata for the fixed bottom navigation bar. Labels come from
+// the same i18n keys used by the section headings so both stay in sync.
+const SETTINGS_SECTIONS = [
+  { id: 'set-profile', label: L.settings.profile },
+  { id: 'set-goals', label: L.settings.goals },
+  { id: 'set-units', label: L.settings.units },
+  { id: 'set-timer', label: L.settings.timerSettings },
+  { id: 'set-data', label: L.settings.data },
+  { id: 'set-about', label: L.settings.about },
+];
 ---
 
 <AppLayout title={L.settings.title}>
@@ -38,6 +51,8 @@ const APP_VERSION = '0.0.1';
     title={L.settings.title}
     description={L.settings.description}
   />
+
+  <Toast />
 
   <div
     class="set"
@@ -48,7 +63,7 @@ const APP_VERSION = '0.0.1';
     {/* ═════════════════════════════════════════════════════
         1. PROFIL
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section">
+    <section class="set__section" id="set-profile">
       <Card>
         <CardHeader>
           <div class="set__heading">
@@ -140,7 +155,7 @@ const APP_VERSION = '0.0.1';
     {/* ═════════════════════════════════════════════════════
         2. OBJECTIFS
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section">
+    <section class="set__section" id="set-goals">
       <Card>
         <CardHeader>
           <div class="set__heading">
@@ -199,7 +214,7 @@ const APP_VERSION = '0.0.1';
                     max="7"
                     step="1"
                     inputmode="numeric"
-                    class="set__goal-input"
+                    class="set__goal-input no-spinner"
                     :value="display.weeklyGoal"
                     @change="setWeeklyGoal(parseInt($event.target.value, 10))"
                     aria-label={L.settings.weeklyGoalCount}
@@ -247,22 +262,6 @@ const APP_VERSION = '0.0.1';
               </div>
             </div>
           </div>
-
-          <p class="set__autosave" x-show="autoSavedAt" x-transition.opacity x-cloak>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            <span x-text="autoSavedAt"></span>
-          </p>
         </CardContent>
       </Card>
     </section>
@@ -270,7 +269,7 @@ const APP_VERSION = '0.0.1';
     {/* ═════════════════════════════════════════════════════
         3. UNITÉS
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section">
+    <section class="set__section" id="set-units">
       <Card>
         <CardHeader>
           <div class="set__heading">
@@ -350,21 +349,6 @@ const APP_VERSION = '0.0.1';
               </div>
             </div>
           </div>
-          <p class="set__autosave" x-show="autoSavedAt" x-transition.opacity x-cloak>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            <span x-text="autoSavedAt"></span>
-          </p>
         </CardContent>
       </Card>
     </section>
@@ -372,7 +356,7 @@ const APP_VERSION = '0.0.1';
     {/* ═════════════════════════════════════════════════════
         4. TIMER
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section">
+    <section class="set__section" id="set-timer">
       <Card>
         <CardHeader>
           <div class="set__heading">
@@ -473,7 +457,7 @@ const APP_VERSION = '0.0.1';
     {/* ═════════════════════════════════════════════════════
         5. DONNÉES
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section">
+    <section class="set__section" id="set-data">
       <Card>
         <CardHeader>
           <div class="set__heading">
@@ -613,27 +597,6 @@ const APP_VERSION = '0.0.1';
             </div>
           </div>
 
-          <p
-            class="set__toast set__toast--success"
-            x-show="dataMessage"
-            x-transition.opacity
-            x-cloak
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            <span x-text="dataMessage"></span>
-          </p>
-
           {/* Danger zone */}
           <div class="set__danger">
             <div class="set__danger-head">
@@ -658,7 +621,7 @@ const APP_VERSION = '0.0.1';
     {/* ═════════════════════════════════════════════════════
         6. À PROPOS
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section">
+    <section class="set__section" id="set-about">
       <Card>
         <CardHeader>
           <div class="set__heading">
@@ -761,6 +724,12 @@ const APP_VERSION = '0.0.1';
         </Button>
       </div>
     </Dialog>
+
+    <SettingsBottomBar
+      sections={SETTINGS_SECTIONS}
+      activeSection="set-profile"
+      saveLabel={L.common.save}
+    />
   </div>
 </AppLayout>
 
@@ -791,16 +760,17 @@ const APP_VERSION = '0.0.1';
     };
     // UI state
     editingProfile: boolean;
-    autoSavedAt: string;
     exporting: boolean;
     exportingCsv: boolean;
     importing: boolean;
-    dataMessage: string;
     resetConfirmText: string;
     weeklyDone: number;
 
     // Lifecycle
     init(): void;
+
+    // Section save dispatch (fired by SettingsBottomBar)
+    saveSection(section: string): void;
 
     // Profile
     startEditProfile(): void;
@@ -853,6 +823,14 @@ const APP_VERSION = '0.0.1';
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  function formatSavedAt(): string {
+    const now = new Date();
+    const hh = now.getHours().toString().padStart(2, '0');
+    const mm = now.getMinutes().toString().padStart(2, '0');
+    const ss = now.getSeconds().toString().padStart(2, '0');
+    return `${LABELS.settings.savedAtPrefix}${hh}:${mm}:${ss}`;
+  }
+
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
@@ -862,11 +840,9 @@ const APP_VERSION = '0.0.1';
       display: getSettings(),
       form: cloneForm(getSettings()),
       editingProfile: false,
-      autoSavedAt: '',
       exporting: false,
       exportingCsv: false,
       importing: false,
-      dataMessage: '',
       resetConfirmText: '',
       weeklyDone: 0,
       labels: {
@@ -895,13 +871,31 @@ const APP_VERSION = '0.0.1';
         this.form = cloneForm(this.display);
         this.weeklyDone = getSessionsThisWeek().length;
 
-        // Auto-clear success toast after 4s.
-        this.$watch('dataMessage', (msg: string) => {
-          if (!msg) return;
-          setTimeout(() => {
-            if (this.dataMessage === msg) this.dataMessage = '';
-          }, 4000);
+        // Autosave on any section save action dispatched by the fixed
+        // bottom bar (SettingsBottomBar.astro).
+        document.addEventListener("settings-save", (e: Event) => {
+          const section = (e as CustomEvent).detail?.section;
+          this.saveSection(section);
         });
+      },
+
+      saveSection(section: string) {
+        // Sections that write settings live directly in `display` and
+        // persist automatically; only Profile and Timer keep unsaved edits
+        // in `this.form`, so those are the ones backed by an explicit save.
+        switch (section) {
+          case 'set-profile':
+            if (this.editingProfile) this.saveProfile();
+            else window.showToast(formatSavedAt(), 'success');
+            break;
+          case 'set-timer':
+            this.saveTimer();
+            break;
+          default:
+            // Units, goals, data and about auto-save (or expose their own
+            // actions); nothing left to flush here.
+            window.showToast(formatSavedAt(), 'success');
+        }
       },
 
       // ── Profile ──
@@ -921,20 +915,20 @@ const APP_VERSION = '0.0.1';
         this.display = updateSettings({ pseudo, email });
         this.form = cloneForm(this.display);
         this.editingProfile = false;
-        this.flashSaved();
+        window.showToast(formatSavedAt(), 'success');
       },
 
       // ── Units (auto-save) ──
       setUnit(unit: 'kg' | 'lbs') {
         if (this.display.unit === unit) return;
         this.display = updateSettings({ unit });
-        this.flashSaved();
+        window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
       },
 
       setRepsFormat(format: 'simple' | 'range') {
         if (this.display.repsFormat === format) return;
         this.display = updateSettings({ repsFormat: format });
-        this.flashSaved();
+        window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
       },
 
       // ── Timer ──
@@ -946,7 +940,7 @@ const APP_VERSION = '0.0.1';
           soundAlerts: this.form.soundAlerts,
         });
         this.form = cloneForm(this.display);
-        this.flashSaved();
+        window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
       },
 
       resetTimerForm() {
@@ -961,7 +955,7 @@ const APP_VERSION = '0.0.1';
         const next = Math.min(7, Math.max(1, Math.round(value)));
         if (this.display.weeklyGoal === next) return;
         this.display = updateSettings({ weeklyGoal: next });
-        this.flashSaved();
+        window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
       },
 
       // ── Data ──
@@ -970,7 +964,7 @@ const APP_VERSION = '0.0.1';
         try {
           const snapshot = exportAllData();
           if (!snapshot) {
-            this.dataMessage = this.labels.storageError;
+            window.showToast(this.labels.storageError, 'error');
             return;
           }
           const date = new Date().toISOString().slice(0, 10);
@@ -979,10 +973,12 @@ const APP_VERSION = '0.0.1';
             JSON.stringify(snapshot, null, 2),
             'application/json',
           );
-          this.dataMessage = this.labels.backupDownloaded;
+          window.showToast(this.labels.backupDownloaded, 'success');
         } catch (err) {
-          this.dataMessage =
-            err instanceof Error ? err.message : this.labels.exportFailed;
+          window.showToast(
+            err instanceof Error ? err.message : this.labels.exportFailed,
+            'error',
+          );
         } finally {
           this.exporting = false;
         }
@@ -998,12 +994,14 @@ const APP_VERSION = '0.0.1';
             csv,
             'text/csv;charset=utf-8',
           );
-          this.dataMessage = this.labels.exportCsvDownloaded;
+          window.showToast(this.labels.exportCsvDownloaded, 'success');
         } catch (err) {
-          this.dataMessage =
+          window.showToast(
             err instanceof Error
               ? err.message
-              : this.labels.exportCsvFailed;
+              : this.labels.exportCsvFailed,
+            'error',
+          );
         } finally {
           this.exportingCsv = false;
         }
@@ -1034,20 +1032,21 @@ const APP_VERSION = '0.0.1';
             importAllData(parsed);
             this.display = getSettings();
             this.form = cloneForm(this.display);
-            this.dataMessage = this.labels.backupRestored;
-            this.flashSaved();
+            window.showToast(this.labels.backupRestored, 'success');
           } catch (err) {
-            this.dataMessage =
+            window.showToast(
               err instanceof Error
                 ? err.message
-                : this.labels.invalidFile;
+                : this.labels.invalidFile,
+              'error',
+            );
           } finally {
             this.importing = false;
             input.value = '';
           }
         };
         reader.onerror = () => {
-          this.dataMessage = this.labels.readError;
+          window.showToast(this.labels.readError, 'error');
           this.importing = false;
           input.value = '';
         };
@@ -1067,23 +1066,7 @@ const APP_VERSION = '0.0.1';
         this.editingProfile = false;
         this.resetConfirmText = '';
         this.closeDialogById('set-reset-dialog');
-        this.dataMessage = this.labels.allDataReset;
-        this.flashSaved();
-      },
-
-      // ── Internals ──
-      flashSaved() {
-        const now = new Date();
-        const hh = now.getHours().toString().padStart(2, '0');
-        const mm = now.getMinutes().toString().padStart(2, '0');
-        const ss = now.getSeconds().toString().padStart(2, '0');
-        this.autoSavedAt = `${this.labels.savedAtPrefix}${hh}:${mm}:${ss}`;
-        // Clear after 3s so it doesn't linger.
-        setTimeout(() => {
-          if (this.autoSavedAt.startsWith(this.labels.savedAtPrefix)) {
-            this.autoSavedAt = '';
-          }
-        }, 3000);
+        window.showToast(this.labels.allDataReset, 'success');
       },
 
       // ── Dialog helpers ──
@@ -1111,10 +1094,16 @@ const APP_VERSION = '0.0.1';
   .set {
     max-width: 88rem;
     margin: 0 auto;
-    padding-bottom: 6rem;
+    padding-bottom: calc(var(--bottom-nav-height, 5.6rem) + 2rem);
     display: flex;
     flex-direction: column;
     gap: 2rem;
+  }
+
+  /* Anchors targeted by the bottom bar: keep the heading clear of the
+     sticky topbar (5.6rem) when scrolled into view. */
+  .set__section {
+    scroll-margin-top: calc(var(--topbar-height, 5.6rem) + 1rem);
   }
 
   /* ═════════════════════════════════════════════════════
@@ -1168,7 +1157,7 @@ const APP_VERSION = '0.0.1';
     justify-content: space-between;
     gap: 2rem;
     padding: 1.6rem 0;
-    border-bottom: 1px solid hsl(0 0% 100% / 0.06);
+    border-bottom: 1px solid var(--alpha-bg-soft);
   }
 
   .set__row:last-child {
@@ -1255,7 +1244,7 @@ const APP_VERSION = '0.0.1';
     gap: 0.8rem;
     margin-top: 1.6rem;
     padding-top: 1.4rem;
-    border-top: 1px solid hsl(0 0% 100% / 0.06);
+    border-top: 1px solid var(--alpha-bg-soft);
   }
 
   /* ═════════════════════════════════════════════════════
@@ -1292,7 +1281,7 @@ const APP_VERSION = '0.0.1';
 
   .set__seg-btn:hover:not(.is-active) {
     color: var(--color-text);
-    background-color: hsl(0 0% 100% / 0.04);
+    background-color: var(--alpha-bg-subtle);
   }
 
   .set__seg-btn:active {
@@ -1360,29 +1349,6 @@ const APP_VERSION = '0.0.1';
   }
 
   /* ═════════════════════════════════════════════════════
-     AUTOSAVE INDICATOR
-     ═════════════════════════════════════════════════════ */
-  .set__autosave {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 1.2rem 0 0;
-    padding: 0.6rem 1rem;
-    background-color: hsl(140 70% 45% / 0.10);
-    border: 1px solid hsl(140 70% 45% / 0.30);
-    border-radius: var(--radius-pill);
-    color: var(--color-success);
-    font-size: 1.1rem;
-    font-weight: 600;
-    align-self: flex-start;
-  }
-
-  .set__autosave svg {
-    width: 1.3rem;
-    height: 1.3rem;
-  }
-
-  /* ═════════════════════════════════════════════════════
      GOAL STEPPER + PROGRESS
      ═════════════════════════════════════════════════════ */
   .set__goal-input-wrap {
@@ -1420,12 +1386,12 @@ const APP_VERSION = '0.0.1';
   }
 
   .set__goal-step:hover {
-    background-color: hsl(0 0% 100% / 0.04);
+    background-color: var(--alpha-bg-subtle);
     color: var(--color-text);
   }
 
   .set__goal-step:active {
-    background-color: hsl(0 0% 100% / 0.08);
+    background-color: var(--alpha-bg-hover);
   }
 
   .set__goal-step svg {
@@ -1533,7 +1499,7 @@ const APP_VERSION = '0.0.1';
   }
 
   .set__data-tile:hover {
-    border-color: hsl(0 0% 100% / 0.18);
+    border-color: var(--alpha-border);
     box-shadow: 0 4px 14px rgb(0 0 0 / 0.30);
   }
 
@@ -1606,8 +1572,8 @@ const APP_VERSION = '0.0.1';
   }
 
   .set__data-btn:hover:not(:disabled) {
-    background-color: hsl(0 0% 100% / 0.05);
-    border-color: hsl(0 0% 100% / 0.20);
+    background-color: var(--alpha-bg-soft);
+    border-color: var(--alpha-border);
   }
 
   .set__data-btn:active:not(:disabled) {
@@ -1629,32 +1595,6 @@ const APP_VERSION = '0.0.1';
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-  }
-
-  /* Toast (success/error) */
-  .set__toast {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin: 1.2rem 0 0;
-    padding: 0.8rem 1.2rem;
-    border-radius: var(--radius-sm);
-    font-size: 1.2rem;
-    font-weight: 600;
-    align-self: flex-start;
-    max-width: 100%;
-  }
-
-  .set__toast svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .set__toast--success {
-    background-color: hsl(140 70% 45% / 0.12);
-    border: 1px solid hsl(140 70% 45% / 0.30);
-    color: var(--color-success);
   }
 
   /* ═════════════════════════════════════════════════════
@@ -1776,7 +1716,7 @@ const APP_VERSION = '0.0.1';
   }
 
   .set__confirm-input::placeholder {
-    color: hsl(0 0% 100% / 0.25);
+    color: var(--alpha-text-faint);
     font-weight: 500;
     letter-spacing: 0.06em;
   }
@@ -1808,7 +1748,7 @@ const APP_VERSION = '0.0.1';
     align-items: center;
     justify-content: space-between;
     padding: 1rem 0;
-    border-bottom: 1px solid hsl(0 0% 100% / 0.06);
+    border-bottom: 1px solid var(--alpha-bg-soft);
     gap: 1rem;
   }
 
@@ -1818,7 +1758,7 @@ const APP_VERSION = '0.0.1';
 
   @media (min-width: 640px) {
     .set__about-row:nth-last-child(-n + 2) {
-      border-bottom: 1px solid hsl(0 0% 100% / 0.06);
+      border-bottom: 1px solid var(--alpha-bg-soft);
     }
     .set__about-row:nth-last-child(2) {
       border-bottom: none;
@@ -1859,7 +1799,7 @@ const APP_VERSION = '0.0.1';
   .set__credits {
     margin: 1.6rem 0 0;
     padding-top: 1.6rem;
-    border-top: 1px solid hsl(0 0% 100% / 0.06);
+    border-top: 1px solid var(--alpha-bg-soft);
     font-size: 1.2rem;
     color: var(--color-muted);
     line-height: 1.6;

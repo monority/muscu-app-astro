@@ -25,7 +25,7 @@ html {
   /* Ensure the dark surface fills the whole viewport, even when
      the page content is shorter than the screen. */
   min-height: 100vh;
-  background-color: #050505;
+  background-color: var(--color-bg, #050505);
   /* Prevent any rogue child from creating a horizontal scrollbar on
      mobile. The drawer / sidebar are position:fixed|sticky and have
      their own overflow control. */
@@ -33,7 +33,7 @@ html {
 }
 
 body {
-  background-color: #050505;
+  background-color: var(--color-bg, #050505);
   color: var(--color-text);
   font-family: var(--font-body);
   font-size: 1.6rem;
@@ -133,13 +133,20 @@ svg {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 100% / 0.15);
+  background: var(--alpha-border);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 100% 0.25);
+  background: var(--alpha-border-faint);
 }
+
+/* ---------- Number input steppers ----------
+ * Native spinner hiding + the .input-stepper chevron styles live in
+ * /public/input-stepper.css (NOT here): Astro ships public/ verbatim,
+ * so the build's LightningsCSS can't strip the -webkit- prefixes that
+ * Chromium requires on ::-webkit-inner-spin-button.
+ */
 
 /* ---------- Page fade-in ---------- */
 @keyframes fadeIn {

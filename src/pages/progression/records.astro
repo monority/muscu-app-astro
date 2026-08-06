@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
+import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
@@ -148,8 +148,8 @@ const L = t();
 
             <div class="rec__card-main">
               <div class="rec__card-head">
-                <h3 class="rec__card-name" x-text="rec.name"></h3>
-                <span class="rec__muscle-badge" x-text="rec.muscle"></span>
+                <h3 class="rec__card-name" x-text="trExercise(rec.name)"></h3>
+                <span class="rec__muscle-badge" x-text="trMuscle(rec.muscle)"></span>
               </div>
 
               <div class="rec__card-stats">
@@ -200,7 +200,7 @@ const L = t();
           title={L.records.noRecords}
           description={L.records.noRecordsDesc}
           actionLabel={L.common.startSession}
-          actionHref="/seances/creer"
+          actionHref={localizedPath("/seances/creer")}
         />
       </div>
     </template>
@@ -619,7 +619,7 @@ const L = t();
 
   .rec__sort-btn:hover {
     color: var(--color-text);
-    background-color: hsl(0 0% 100% / 0.04);
+    background-color: var(--alpha-bg-subtle);
   }
 
   .rec__sort-btn--active {
