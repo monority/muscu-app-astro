@@ -19,7 +19,9 @@ import timer from './timer';
 import settings from './settings';
 import login from './login';
 import ui from './ui';
-import offline from './offline';
+import offline from './offline';
+
+import command from './command';
 
 export default {
   nav,
@@ -43,5 +45,8 @@ export default {
   settings,
   login,
   ui,
-  offline,
-};
+offline,
+
+  command,
+
+};

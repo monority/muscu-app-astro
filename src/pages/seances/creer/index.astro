@@ -677,7 +677,6 @@ const setTypes = [
                 type="button"
                 class="ses__template"
                 @click={`loadTemplate('${tpl.id}')`}
-                :disabled="!canLoadTemplate('${tpl.id}')"
               >
                 <span class="ses__template-name">{trTemplateName(tpl.name)}</span>
                 <span class="ses__template-desc">{trTemplateDesc(tpl.id)}</span>
@@ -864,6 +863,7 @@ const setTypes = [
 <script>
   import {
     getExercises,
+    saveExercise,
     saveSession,
     type Exercise,
     type SessionExercise,
@@ -881,6 +881,10 @@ const setTypes = [
 
   // Default set type for newly created sets (mirrors spec).
   const DEFAULT_SET_TYPE: SetType = 'work';
+
+  // Fallback category when a template exercise carries no category.
+  // Kept in sync with the "Autre" option on the exercices page.
+  const TEMPLATE_FALLBACK_CATEGORY = 'Autre';
 
   // RPE colour tone buckets — drive both the big number and the slider thumb.
   function rpeToneFn(rpe: number): 'easy' | 'moderate' | 'hard' | 'max' {
@@ -1132,28 +1136,27 @@ const setTypes = [
 
       // ── Templates (added 2026-08-04) ──
       /**
-       * Returns true when every exercise referenced by the template
-       * exists in the user's library. Templates referencing unknown
-       * exercises are skipped silently so the rest of the template
-       * still loads.
-       */
-      canLoadTemplate(templateId: string): boolean {
-        const tpl = getTemplateById(templateId);
-        if (!tpl) return false;
-        return tpl.exercises.some((te) => this.findExerciseByName(te.name) != null);
-      },
-
-      /**
        * Inserts every exercise from the template at the bottom of the
-       * current session. Existing exercises are left untouched.
+       * current session. Any referenced exercise missing from the user's
+       * library is auto-created (from the template data) first, so a
+       * template always loads — even when defaults were renamed/deleted.
        */
       loadTemplate(templateId: string) {
         const tpl = getTemplateById(templateId);
         if (!tpl) return;
         const added: number[] = [];
         for (const te of tpl.exercises) {
-          const ex = this.findExerciseByName(te.name);
-          if (!ex) continue;
+          let ex = this.findExerciseByName(te.name);
+          if (!ex) {
+            // Auto-create the missing exercise in the library, then use it.
+            ex = saveExercise({
+              name: te.name,
+              muscle: te.muscle,
+              category: TEMPLATE_FALLBACK_CATEGORY,
+            });
+            // Keep the picker in sync so the new exercise is available later.
+            this.availableExercises = [...this.availableExercises, ex];
+          }
           const newEx = this.buildBuilderExercise(ex, te);
           this.exercises.push(newEx);
           added.push(this.exercises.length - 1);
@@ -2291,13 +2294,18 @@ const setTypes = [
   }
 
   .ses__picker-tip {
-    grid-column: 1 / -1;
+    grid-column: 1;
     grid-row: 2;
-    margin: 0.6rem 0 0;
+    margin: 0;
+
+    min-width: 0;
     padding: 0.9rem 1.0rem;
     background-color: var(--color-surface-2);
     border-left: 3px solid var(--color-accent);
     border-radius: var(--radius-sm);
+    border-bottom: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
     color: var(--color-muted);
     font-size: 1.2rem;
     line-height: 1.5;
@@ -2463,10 +2471,9 @@ const setTypes = [
     transform: scale(0.98);
   }
 
-  .ses__template:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    background-color: var(--color-surface-2);
+  .ses__template:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
   .ses__template-name {

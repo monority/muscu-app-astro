@@ -24,7 +24,7 @@ export default {
   needExo: 'Ajoutez au moins un exercice pour enregistrer la séance.',
   emptyLibrary: 'Votre bibliothèque d\'exercices est vide.',
   createExoLink: 'Créer des exercices →',
-  templateHint: 'Cliquez pour ajouter toute la séance en un clic',
+  templateHint: 'Cliquez pour ajouter toute la séance en un clic. Les exercices manquants seront créés automatiquement.',
   exercisesWord: 'exercices',
   allAdded: 'Tous vos exercices sont déjà dans cette séance.',
   noSearchMatch: 'Aucun exercice ne correspond à votre recherche.',

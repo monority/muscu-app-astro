@@ -1265,8 +1265,14 @@ const categories = [
   }
 
   .exo__filter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    white-space: nowrap;
     height: 4.0rem;
     padding: 0 1.4rem;
+    min-width: 6rem;
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-pill);
@@ -1280,6 +1286,10 @@ const categories = [
                 border-color var(--transition-fast),
                 color var(--transition-fast),
                 transform var(--transition-fast);
+  }
+
+  .exo__filter svg {
+    flex-shrink: 0;
   }
 
   .exo__filter:hover {
@@ -1594,8 +1604,11 @@ const categories = [
 
   .exo__icon-btn {
     display: inline-flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
     width: 4.4rem;
     height: 4.4rem;
     background-color: transparent;
@@ -1645,6 +1658,7 @@ const categories = [
   .exo__icon {
     width: 1.6rem;
     height: 1.6rem;
+    flex-shrink: 0;
   }
 
   /* ════════════════════════════════════════════════════

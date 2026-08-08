@@ -24,7 +24,7 @@ export default {
   needExo: 'Add at least one exercise to save the session.',
   emptyLibrary: 'Your exercise library is empty.',
   createExoLink: 'Create exercises →',
-  templateHint: 'Click to add the whole session in one click',
+  templateHint: 'Click to add the whole session in one click. Missing exercises will be created automatically.',
   exercisesWord: 'exercises',
   allAdded: 'All your exercises are already in this session.',
   noSearchMatch: 'No exercise matches your search.',

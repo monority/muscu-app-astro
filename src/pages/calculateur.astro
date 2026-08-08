@@ -354,10 +354,10 @@ const L = t();
   }
 
   /** Available plate weights, biggest first so we can use a greedy algo. */
-  const PLATE_INVENTORY: ReadonlyArray<number> = [25, 20, 15, 10, 5, 2.5, 1.25];
+  const PLATE_INVENTORY: ReadonlyArray<number> = [25, 20, 15, 10, 5, 2.5, 2, 1.5, 1.25, 1];
 
   /** Available dumbbell plate weights (kg), biggest first so we can use a greedy algo. */
-  const DUMBBELL_PLATE_INVENTORY: ReadonlyArray<number> = [10, 7.5, 5, 4, 3, 2.5, 2, 1.5, 1, 0.5];
+  const DUMBBELL_PLATE_INVENTORY: ReadonlyArray<number> = [10, 7.5, 5, 4, 3, 2.5, 2, 1.5, 1.25, 1, 0.5];
 
   interface PlateCount {
     weight: number;
@@ -599,7 +599,10 @@ const L = t();
           10: 108,
           5: 84,
           2.5: 60,
+          2: 55,
+          1.5: 49,
           1.25: 44,
+          1: 40,
         };
         return map[weight] ?? 60;
       },
@@ -930,7 +933,10 @@ const L = t();
   .calc__plate--10    { background: linear-gradient(180deg, #15803d, #14532d); }
   .calc__plate--5     { background: linear-gradient(180deg, #d4d4d8, #71717a); color: #111; }
   .calc__plate--2_5   { background: linear-gradient(180deg, #1f2937, #111827); }
+  .calc__plate--2     { background: linear-gradient(180deg, #9ca3af, #4b5563); }
+  .calc__plate--1_5   { background: linear-gradient(180deg, #6b7280, #374151); }
   .calc__plate--1_25  { background: linear-gradient(180deg, #525252, #262626); }
+  .calc__plate--1     { background: linear-gradient(180deg, #4b5563, #1f2937); }
 
   /* ── Breakdown list ── */
   .calc__breakdown {

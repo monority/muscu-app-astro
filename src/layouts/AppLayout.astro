@@ -1,6 +1,7 @@
 ---
 import "../styles/globals.css";
 import AppShell from "../components/layout/AppShell.astro";
+import QuickSearch from "../components/layout/QuickSearch.astro";
 import { t, setLocale, getLocale, localizedPath } from "../i18n";
 
 /**
@@ -191,6 +192,10 @@ const groupsWithActive = groups.map((g) => ({
         </main>
       )
     }
+
+    {/* Global command palette — searches pages/exercises/sessions.
+        Opened by the sidebar search field, "/", or Ctrl/Cmd+K. */}
+    <QuickSearch />
 
     <script is:inline>
       // Register the service worker for offline use (gym wifi is spotty).

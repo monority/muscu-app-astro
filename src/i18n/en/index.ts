@@ -20,7 +20,9 @@ import timer from './timer';
 import settings from './settings';
 import login from './login';
 import ui from './ui';
-import offline from './offline';
+import offline from './offline';
+
+import command from './command';
 
 const en: Dictionary = {
   nav,
@@ -44,7 +46,9 @@ const en: Dictionary = {
   settings,
   login,
   ui,
-  offline,
-};
-
+offline,
+
+  command,
+
+};
 export default en;

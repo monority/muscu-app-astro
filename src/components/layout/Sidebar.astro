@@ -8,7 +8,7 @@
  *
  * Structure:
  *   [logo + brand]
- *   [search input (decorative, disabled)]
+ *   [search field → exercises search (/exercices)]
  *   [nav groups → items (with optional sub-items)]
  *   [footer]
  */
@@ -92,9 +92,16 @@ const renderIcon = (name?: string): string => {
     </div>
   </div>
 
-  {/* Search */}
+  {/* Search — opens the global quick-search modal (command palette) */}
   <div class="sidebar__search">
-    <div class="sidebar__search-field">
+    <button
+      type="button"
+      class="sidebar__search-link"
+      data-quick-search-trigger
+      aria-label={L.layout.searchAria}
+      aria-haspopup="dialog"
+      title={L.layout.searchAria}
+    >
       <svg
         class="sidebar__search-icon"
         viewBox="0 0 24 24"
@@ -110,14 +117,9 @@ const renderIcon = (name?: string): string => {
         <circle cx="11" cy="11" r="8"></circle>
         <path d="m21 21-4.3-4.3"></path>
       </svg>
-      <input
-        type="search"
-        placeholder={L.layout.searchPlaceholder}
-        disabled
-        aria-label={L.layout.searchAria}
-      />
+      <span class="sidebar__search-hint">{L.layout.searchPlaceholder}</span>
       <kbd aria-hidden="true">/</kbd>
-    </div>
+    </button>
   </div>
 
   {/* Nav */}
@@ -245,7 +247,7 @@ const renderIcon = (name?: string): string => {
 </aside>
 
 <script>
-  import { t, getLocale } from "../../i18n";
+import { t, getLocale } from "../../i18n";
 
   const L = t();
 
@@ -353,33 +355,38 @@ const renderIcon = (name?: string): string => {
     padding: 0 1.2rem 1.6rem;
   }
 
-  .sidebar__search-field {
+  .sidebar__search-link {
     position: relative;
-  }
-
-  .sidebar__search input {
+    display: flex;
+    align-items: center;
     width: 100%;
     height: 3.6rem;
-    padding: 0 4rem 0 3.6rem;
+    padding: 0 3.4rem 0 3.6rem;
     border: 1px solid var(--color-border);
     border-radius: 0.8rem;
     background-color: var(--color-surface-2);
-    color: var(--color-text);
+    color: var(--color-muted);
     font-family: var(--font-body);
     font-size: 1.3rem;
     line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+    -webkit-appearance: none;
+    appearance: none;
     transition:
       border-color var(--transition-fast),
       background-color var(--transition-fast);
   }
 
-  .sidebar__search input::placeholder {
-    color: var(--color-muted);
+  .sidebar__search-link:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--alpha-border);
   }
 
-  .sidebar__search input:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
+  .sidebar__search-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
   .sidebar__search-icon {
@@ -717,7 +724,7 @@ const renderIcon = (name?: string): string => {
   @media (prefers-reduced-motion: reduce) {
     .nav-item,
     .nav-subitem,
-    .sidebar__search input,
+    .sidebar__search-link,
     .sidebar__logout,
     .sidebar__logout:active {
       transition: none;

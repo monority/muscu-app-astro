@@ -672,8 +672,7 @@ const L = t();
     border-radius: var(--radius-lg);
     cursor: pointer;
     transition: border-color var(--transition-base),
-                box-shadow var(--transition-base),
-                transform var(--transition-base);
+                box-shadow var(--transition-base);
   }
 
   /* Hover arrow indicator */
@@ -692,7 +691,7 @@ const L = t();
     pointer-events: none;
   }
 
-  .sess__card:hover {
+  .sess__card:hover:not(:has(.sess__menu)) {
     background-color: var(--color-surface-2);
     border-color: var(--alpha-border);
     box-shadow: 0 8px 24px hsl(0 0% 0% / 0.42);

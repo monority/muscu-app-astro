@@ -1,0 +1,656 @@
+---
+/**
+ * QuickSearch — shadcn-style command palette / quick-search modal.
+ *
+ * Global search overlay (native <dialog>) that searches across:
+ *   - Pages (static list, localized nav labels)
+ *   - Exercises (from localStorage via getExercises(); display names +
+ *     muscles translated on the EN locale via trExercise/trMuscle)
+ *   - Sessions (from getSessions(), by name → /seances/detail?id=…)
+ *
+ * Pages always win, then exercises, then sessions, each under a small
+ * group header. Clicking a row (or pressing ↵ on the highlighted one)
+ * navigates via window.location.
+ *
+ * Triggers:
+ *   - Any element with `data-quick-search-trigger` (e.g. the Sidebar
+ *     search field) — clicked via event delegation
+ *   - "/" key (ignored while typing in an input/textarea/contenteditable)
+ *   - Ctrl/Cmd+K (always)
+ *   - window.quickSearch.open() / close() from any script
+ *
+ * Escape closes via the native <dialog> behaviour; clicking the
+ * backdrop closes too (see the click handler in the script below).
+ */
+import { t } from "../../i18n";
+
+const L = t();
+---
+
+<dialog
+  id="quick-search-dialog"
+  class="quick-search"
+  aria-label={L.command.ariaLabel}
+  x-data="commandMenu()"
+>
+  <div class="quick-search__panel">
+    {/* ── Input ─────────────────────────────────────────── */}
+    <div class="quick-search__input">
+      <svg
+        class="quick-search__input-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input
+        type="search"
+        class="quick-search__field"
+        x-model="keyword"
+        @input="highlight = 0"
+        @keydown.down.prevent="move(1)"
+        @keydown.up.prevent="move(-1)"
+        @keydown.enter.prevent="selectCurrent()"
+        placeholder={L.command.placeholder}
+        aria-label={L.command.ariaLabel}
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+      <kbd class="quick-search__esc" aria-hidden="true">esc</kbd>
+    </div>
+
+    {/* ── Results ───────────────────────────────────────── */}
+    <div
+      class="quick-search__list"
+      @keydown.down.prevent="move(1)"
+      @keydown.up.prevent="move(-1)"
+      @keydown.enter.prevent="selectCurrent()"
+    >
+      <template x-for="group in groups" :key="group.id">
+        <section
+          class="quick-search__group"
+          :id="'qs-grp-' + group.id"
+          :aria-labelledby="'qs-grp-' + group.id + '-title'"
+        >
+          <header
+            class="quick-search__group-title"
+            :id="'qs-grp-' + group.id + '-title'"
+            x-text="group.title"
+          ></header>
+          <template x-for="item in group.items" :key="item.key">
+            <button
+              type="button"
+              class="quick-search__item"
+              :class="{ 'is-active': highlight === item.index }"
+              :data-qsi="item.index"
+              @mouseenter="highlight = item.index"
+              @mousemove="highlight = item.index"
+              @click="selectItem(item)"
+            >
+              <span class="quick-search__item-label" x-text="item.label"></span>
+              <span
+                class="quick-search__item-sub"
+                x-show="item.sub"
+                x-text="item.sub"
+              ></span>
+            </button>
+          </template>
+        </section>
+      </template>
+
+      <div class="quick-search__empty" x-show="noResults">
+        <div class="quick-search__empty-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+            <path d="m8.5 8.5 5 5"></path>
+            <path d="m13.5 8.5-5 5"></path>
+          </svg>
+        </div>
+        <p class="quick-search__empty-title" x-text="emptyTitle"></p>
+        <p class="quick-search__empty-hint" x-text="emptyHint"></p>
+      </div>
+    </div>
+
+    {/* ── Footer hints ──────────────────────────────────── */}
+    <footer class="quick-search__footer">
+      <div class="quick-search__hint">
+        <kbd aria-hidden="true">↑↓</kbd>
+        <span x-text="hintNav"></span>
+      </div>
+      <div class="quick-search__hint">
+        <kbd aria-hidden="true">↵</kbd>
+        <span x-text="hintSelect"></span>
+      </div>
+      <div class="quick-search__hint">
+        <kbd aria-hidden="true">esc</kbd>
+        <span x-text="hintClose"></span>
+      </div>
+    </footer>
+  </div>
+</dialog>
+
+<style>
+  /* The universal reset (margin: 0 on *) breaks native <dialog>
+     centering, so re-assert fixed centering like Dialog.astro does. */
+  .quick-search {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    width: min(58rem, calc(100vw - 1.6rem));
+    max-height: calc(100vh - 6rem);
+    overflow: hidden;
+    box-shadow: 0 24px 48px hsl(0 0% 0% / 0.45);
+  }
+
+  /* Short viewports (e.g. mobile + virtual keyboard): clamp to the
+     dynamic viewport height instead of 100vh. */
+  @supports (height: 100dvh) {
+    .quick-search {
+      max-height: calc(100dvh - 6rem);
+    }
+  }
+
+  .quick-search::backdrop {
+    background-color: rgb(0 0 0 / 0.6);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+
+  @keyframes quick-search-in {
+    from { opacity: 0; transform: scale(0.97) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .quick-search[open] {
+    animation: quick-search-in 180ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quick-search[open] {
+      animation: none;
+    }
+  }
+
+  .quick-search__panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Input ────────────────────────────────────────────── */
+  .quick-search__input {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 4.8rem;
+    padding: 0 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .quick-search__input-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--color-muted);
+    flex-shrink: 0;
+  }
+
+  .quick-search__field {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+  }
+
+  .quick-search__field::placeholder {
+    color: var(--color-muted);
+  }
+
+  .quick-search__field::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+
+  .quick-search__esc {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.6rem;
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
+
+  /* ── Results list ─────────────────────────────────────── */
+  .quick-search__list {
+    max-height: min(44rem, 55vh);
+    overflow-y: auto;
+    padding: 0.8rem;
+  }
+
+  .quick-search__group-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.8rem 0.8rem 0.4rem;
+  }
+
+  .quick-search__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    width: 100%;
+    padding: 1rem 1.2rem;
+    border: none;
+    border-radius: 0.8rem;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition-fast);
+  }
+
+  .quick-search__item:hover {
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .quick-search__item.is-active {
+    background-color: var(--alpha-bg-hover);
+  }
+
+  .quick-search__item-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .quick-search__item-sub {
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Empty state ──────────────────────────────────────── */
+  .quick-search__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 3.2rem 1.6rem;
+    text-align: center;
+  }
+
+  .quick-search__empty-icon {
+    width: 3.2rem;
+    height: 3.2rem;
+    color: var(--color-muted);
+    margin-bottom: 0.8rem;
+  }
+
+  .quick-search__empty-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .quick-search__empty-hint {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  /* ── Footer hints ─────────────────────────────────────── */
+  .quick-search__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.4rem;
+    padding: 0.8rem 1.4rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .quick-search__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--color-muted);
+  }
+
+  .quick-search__hint kbd {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 0.4rem;
+    padding: 0.15rem 0.5rem;
+    line-height: 1.2;
+  }
+</style>
+
+<script>
+  import { t, getLocale, localizedPath, trExercise, trMuscle } from "../../i18n";
+  import { getExercises, getSessions } from "../../lib/storage";
+  import type { Exercise, Session } from "../../lib/storage";
+
+  declare global {
+    interface Window {
+      quickSearch?: { open: () => void; close: () => void };
+    }
+  }
+
+  type QKind = "page" | "exercise" | "session";
+  interface QItem {
+    index: number;
+    key: string;
+    kind: QKind;
+    label: string;
+    sub?: string;
+    href: string;
+  }
+  interface QGroup {
+    id: string;
+    title: string;
+    items: QItem[];
+  }
+
+  /** Lowercase + strip diacritics so "echec" matches "échec". */
+  const normalize = (s: string): string =>
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  const matches = (label: string, q: string): boolean =>
+    normalize(label).includes(q);
+
+  /** Prefix hits rank above substring hits (0 < 1). */
+  const rankScore = (name: string, q: string): number =>
+    normalize(name).startsWith(q) ? 0 : 1;
+
+  // ─── Alpine component ─────────────────────────────────────
+  document.addEventListener("alpine:init", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data("commandMenu", () => {
+      const L = t();
+      const locale = getLocale();
+      const base = (p: string) => localizedPath(p);
+
+      // Static page catalogue (labels localized at init).
+      const pages: QItem[] = [
+        { index: 0, key: "page:/", kind: "page", label: L.nav.dashboard, href: base("/") },
+        { index: 0, key: "page:/exercices", kind: "page", label: L.nav.exercices, href: base("/exercices") },
+        { index: 0, key: "page:/exercices/historique", kind: "page", label: L.nav.historique, href: base("/exercices/historique") },
+        { index: 0, key: "page:/progression", kind: "page", label: L.nav.progression, href: base("/progression") },
+        { index: 0, key: "page:/calculateur", kind: "page", label: L.nav.calculateur, href: base("/calculateur") },
+        { index: 0, key: "page:/calendrier", kind: "page", label: L.nav.calendrier, href: base("/calendrier") },
+        { index: 0, key: "page:/seances", kind: "page", label: L.nav.seances, href: base("/seances") },
+        { index: 0, key: "page:/timer", kind: "page", label: L.nav.timer, href: base("/timer") },
+        { index: 0, key: "page:/settings", kind: "page", label: L.nav.settings, href: base("/settings") },
+      ];
+
+      const formatDate = (iso: string): string => {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return iso;
+        return d.toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR");
+      };
+
+      return {
+        keyword: "",
+        highlight: 0,
+        placeholder: L.command.placeholder,
+        emptyTitle: L.command.noResults,
+        emptyHint: L.command.noResultsHint,
+        hintNav: L.command.hintNav,
+        hintSelect: L.command.hintSelect,
+        hintClose: L.command.hintClose,
+        exercises: [] as Exercise[],
+        sessions: [] as Session[],
+
+        init() {
+          // Loaded once when the component boots, then filtered reactively.
+          this.exercises = getExercises();
+          this.sessions = getSessions();
+        },
+
+        get query(): string {
+          return normalize(this.keyword);
+        },
+
+        get flatItems(): QItem[] {
+          return this.groups.reduce((acc: QItem[], g) => acc.concat(g.items), []);
+        },
+
+        get noResults(): boolean {
+          return this.query.length > 0 && this.flatItems.length === 0;
+        },
+
+        get groups(): QGroup[] {
+          const q = this.query;
+          const result: QGroup[] = [];
+
+          // 1. Pages (shown unfiltered when the query is empty)
+          const pageHits = q ? pages.filter((p) => matches(p.label, q)) : pages;
+          if (pageHits.length) {
+            result.push({ id: "pages", title: L.command.pages, items: pageHits });
+          }
+
+          // 2. Exercises — match the raw (FR) name and the translated
+          //    name, so the EN locale can find "bench press" too.
+          if (q) {
+            const exo = this.exercises
+              .map((e) => ({ e, tr: trExercise(e.name) }))
+              .filter(({ e, tr }) => matches(e.name, q) || matches(tr, q))
+              .sort((a, b) => {
+                const ra = Math.min(rankScore(a.e.name, q), rankScore(a.tr, q));
+                const rb = Math.min(rankScore(b.e.name, q), rankScore(b.tr, q));
+                return ra - rb;
+              })
+              .slice(0, 8)
+              .map(({ e, tr }) => ({
+                index: 0,
+                key: `exo:${e.id}`,
+                kind: "exercise" as const,
+                label: tr,
+                sub: trMuscle(e.muscle),
+                href: base("/exercices"),
+              }));
+            if (exo.length) {
+              result.push({ id: "exercises", title: L.command.exercises, items: exo });
+            }
+          }
+
+          // 3. Sessions — match by name.
+          if (q) {
+            const sess = this.sessions
+              .filter((s) => matches(s.name, q))
+              .sort((a, b) => rankScore(a.name, q) - rankScore(b.name, q))
+              .slice(0, 8)
+              .map((s) => ({
+                index: 0,
+                key: `ses:${s.id}`,
+                kind: "session" as const,
+                label: s.name,
+                sub: formatDate(s.date),
+                href: base(`/seances/detail?id=${encodeURIComponent(s.id)}`),
+              }));
+            if (sess.length) {
+              result.push({ id: "sessions", title: L.command.sessions, items: sess });
+            }
+          }
+
+          // Assign a flat index so keyboard navigation spans all groups.
+          let i = 0;
+          for (const g of result) {
+            for (const it of g.items) it.index = i++;
+          }
+          return result;
+        },
+
+        move(dir: number) {
+          const n = this.flatItems.length;
+          if (!n) return;
+          this.highlight = (this.highlight + dir + n) % n;
+          this.$nextTick(() => {
+            const el = this.$el.querySelector(`[data-qsi="${this.highlight}"]`);
+            if (el) el.scrollIntoView({ block: "nearest" });
+          });
+        },
+
+        selectCurrent() {
+          const items = this.flatItems;
+          if (!items.length) return;
+          this.selectItem(items[this.highlight] ?? items[0]);
+        },
+
+        selectItem(item: QItem) {
+          window.location.href = item.href;
+        },
+
+        reset() {
+          this.keyword = "";
+          this.highlight = 0;
+        },
+      };
+    });
+  });
+
+  // ─── Window bridge + global wiring ────────────────────────
+  let qsBound = false;
+
+  function resetCmdState(dlg: HTMLDialogElement): void {
+    const a = (window as any).Alpine;
+    if (!a || typeof a.$data !== "function") return;
+    try {
+      const data = a.$data(dlg) as { reset?: () => void } | undefined;
+      data?.reset?.();
+    } catch {
+      // Alpine not ready yet — the next open() call will reset again.
+    }
+  }
+
+  function openCmd(): void {
+    const dlg = document.getElementById(
+      "quick-search-dialog",
+    ) as HTMLDialogElement | null;
+    if (!dlg || dlg.tagName !== "DIALOG") return;
+    resetCmdState(dlg);
+    if (!dlg.open) dlg.showModal();
+    const input = dlg.querySelector<HTMLInputElement>('input[type="search"]');
+    if (input) requestAnimationFrame(() => input.focus());
+  }
+
+  function bindQuickSearch(): void {
+    if (qsBound) return;
+    const dlg = document.getElementById(
+      "quick-search-dialog",
+    ) as HTMLDialogElement | null;
+    if (!dlg) return;
+    qsBound = true;
+
+    // Backdrop click → close (click lands on the dialog element itself
+    // when it hits the backdrop, same technique as Dialog.astro).
+    dlg.addEventListener("click", (e) => {
+      if (e.target !== dlg) return;
+      const rect = dlg.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      if (!inside) dlg.close();
+    });
+
+    // Sidebar (and any future) trigger buttons.
+    document
+      .querySelectorAll<HTMLElement>("[data-quick-search-trigger]")
+      .forEach((el) => {
+        if (el.dataset.qsBound === "true") return;
+        el.dataset.qsBound = "true";
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          openCmd();
+        });
+      });
+
+    // "/" opens (unless typing), Ctrl/Cmd+K always opens.
+    document.addEventListener("keydown", (e) => {
+      const target = e.target as HTMLElement | null;
+      const typing =
+        !!target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        openCmd();
+        return;
+      }
+      if (
+        e.key === "/" &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !typing
+      ) {
+        e.preventDefault();
+        openCmd();
+      }
+    });
+  }
+
+  window.quickSearch = {
+    open: openCmd,
+    close: () => {
+      const dlg = document.getElementById(
+        "quick-search-dialog",
+      ) as HTMLDialogElement | null;
+      if (dlg?.open) dlg.close();
+    },
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindQuickSearch);
+  } else {
+    bindQuickSearch();
+  }
+  document.addEventListener("astro:page-load", bindQuickSearch);
+</script>

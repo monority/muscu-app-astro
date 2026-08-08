@@ -38,11 +38,11 @@ const {
 } = Astro.props;
 
 const classes = [
-  'bg-[var(--color-surface-3)]',
+  'bg-[var(--color-surface)]',
   'border border-[var(--color-border)]',
   'rounded-[var(--radius-xl)]',
   'p-6',
-  'max-w-lg w-full',
+  'w-full max-w-6xl',
   'text-[var(--color-text)]',
   className,
 ]
@@ -108,7 +108,7 @@ const classes = [
     inset: 0;
     margin: auto;
     border: none;
-    background: transparent;
+    background-color: var(--color-surface);
     max-height: calc(100vh - 4rem);
     overflow-y: auto;
     color: inherit;
