@@ -25,6 +25,7 @@ const {
   id,
   value,
   class: className = "",
+  ...rest
 } = Astro.props;
 
 const hintId = id ? `${id}-hint` : undefined;
@@ -77,6 +78,7 @@ const inputClasses = [
   }
 
   <input
+    {...rest}
     type={type}
     id={id}
     name={name}

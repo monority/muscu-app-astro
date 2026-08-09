@@ -26,6 +26,7 @@ const {
   href,
   type = "button",
   class: className = "",
+  ...rest
 } = Astro.props;
 
 const baseClasses = [
@@ -71,6 +72,7 @@ const classes = [
 {
   href ? (
     <a
+      {...rest}
       href={isInactive ? undefined : href}
       class={classes}
       role="button"
@@ -108,6 +110,7 @@ const classes = [
     </a>
   ) : (
     <button
+      {...rest}
       type={type}
       class={classes}
       disabled={isInactive}
