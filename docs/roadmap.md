@@ -1,10 +1,10 @@
 # Roadmap — muscu-app
 
-> **Roadmap vivante** — mise à jour le **2026-08-08**
+> **Roadmap vivante** — mise à jour le **2026-08-09**
 > Projet : **muscu-app** — tracker de gym (Astro SSR + Alpine.js), persistance localStorage (`muscu:*`), i18n FR/EN.
 > Ce fichier est la **source de vérité** pour orienter les prochaines itérations : chaque item livré bascule dans « Récemment livré », puis est retiré des prochaines priorités.
 
-> **Note de vérification (2026-08-08)** : contrôle du code effectué avant rédaction. L'**export/import JSON (sauvegarde/restauration + export CSV)** et les **toasts** sont **déjà en place** (Réglages → section Données ; composant `Toast.astro`/API `window.showToast`). Ils sont donc listés dans « Récemment livré » et **retirés de la table P0**. Le seul correctif P0 réellement restant est le **raccourci clavier du timer**.
+> **Note de vérification (2026-08-09)** : contrôle du code effectué avant rédaction. En place en amont : **export/import JSON (sauvegarde/restauration + export CSV)** (Réglages → section Données) et **toasts** (`Toast.astro`/API `window.showToast`). Depuis : **raccourcis clavier du timer**, puis l'ensemble du **P1** (tendance par exercice, rappels de séance, RPE/uRPE par série, supersets, fiche de séance imprimable + CSV). La table **P0 est supprimée** (aucun item restant) et le **P1 est vide** — tout figure dans « ✅ Récemment livré ».
 
 ---
 
@@ -28,28 +28,12 @@
 | Modèles de séance (auto-création) | Template généré automatiquement à la création d'une séance. | `src/lib/templates.ts`, `src/pages/seances/creer/index.astro` |
 | Tailles de plaques du calculateur | Inventaire barre : 25, 20, 15, 10, 5, 2,5, 2, 1,5, 1,25, 1 kg · haltères : 10, 7,5, 5, 4, 3, 2,5, 2, 1,5, 1,25, 1, 0,5 kg. Les petites plaques 1 / 1,25 / 1,5 / 2 kg ont été ajoutées à l'inventaire barre (déjà présentes côté haltères). | `src/pages/calculateur.astro` |
 | Fix z-index des menus | Menus déroulants toujours au-dessus du contenu : `z-50` sur le menu `Dropdown.astro`, suppression du hover `.sess__card:hover:not(:has(.sess__menu))` qui recouvrait le menu. | `src/components/ui/Dropdown.astro`, `src/pages/seances/index.astro` |
-
----
-
-## P0 — Correctifs & fondations (petits, sûrs, à forte valeur)
-
-| Élément | Effort | Valeur | Fichiers principaux | Description |
-|---|---|---|---|---|
-| **Raccourcis clavier timer** | S | haute | `src/pages/timer/index.astro`, `src/pages/timer/pop.astro` | `Espace` = pause/reprise, `R` = reset. Écoute `keydown` avec garde : ignorer si le focus est dans un `input`/`textarea`/`select`. Le timer n'a aujourd'hui que `@keydown.enter` sur l'input personnalisé ; les méthodes `toggle()`/`reset()` existent déjà. À appliquer aussi à la fenêtre PiP (`pop.astro`).<br><br>**Critères d'acceptation** : `Espace` bascule `pause/reprise`, `R` reset — sans conflit quand un champ est focus (`input`/`textarea`/`select`). |
-
-> La table P0 ci-dessus ne contient plus que le travail restant : **raccourcis clavier du timer** (petit, quotidien, confort fort). Export/import JSON et toasts sont livrés (voir « ✅ Récemment livré ») et donc retirés de P0.
-
----
-
-## P1 — Fonctionnalités (effort moyen, valeur claire)
-
-| Élément | Effort | Valeur | Fichiers principaux | Description |
-|---|---|---|---|---|
-| **Graphique de tendance par exercice** | M | haute | `src/pages/exercices/index.astro`, `src/pages/exercices/historique.astro`, `src/pages/progression/index.astro`, `src/lib/storage.ts` (`getSessionsByExercise`), nouveau `src/lib/stats.ts` | Courbe **volume** (Σ charge×reps) et **1 RM estimé** (Epley, déjà via `calculate1RM` — `src/lib/storage.ts`) par séance, filtré par exercice. Données disponibles via `getSessionsByExercise` + `getProgressRecords` (`src/lib/storage.ts`). Rendu SVG inline (aucune dépendance, même pattern que le calendrier). Sélecteur d'exercice + zoom sur une période.<br><br>**Critères d'acceptation** : SVG inline, aucune nouvelle dépendance, responsive mobile, sélecteur d'exercice fonctionnel, au moins 2 points nécessaires pour tracer la courbe. |
-| **Rappels de séance** | M | haute | nouveau `src/lib/reminders.ts`, `src/pages/calendrier.astro`, `src/pages/settings/index.astro`, `public/sw.js` | Notifications via Notification API (« C'est le moment de la séance ») programmées depuis le calendrier ou les réglages. Permission demandée au moment opportun ; rappels quotidiens/hebdomadaires (complète `weeklyGoal`). Le service worker existant (`public/sw.js`) couvre le cas hors-onglet.<br><br>**Critères d'acceptation** : Notification API + service worker enregistré ; fallback toast quand permission refusée.<br>**Dépend de** : Notification API + service worker + UX de permission. |
-| **RPE / uRPE par série** | M | moyenne | `src/pages/seances/creer/index.astro`, `src/pages/seances/rapide.astro`, `src/lib/session-utils.ts`, `src/pages/progression/stats.astro` | Les champs existent déjà : `SessionSet.rpe`, `Session.rpe`/`Session.fatigue` dans `src/lib/storage.ts`. Manquent : une **saisie** simple par série (curseur ou `+/-`) et une **tendance fatigue**, facilement visible en progression.<br><br>**Critères d'acceptation** : champ RPE sur chaque série, ajustable après coup, tendance visible. |
-| **Supersets programmés (alternance auto)** | M | moyenne | `src/pages/seances/creer/index.astro`, `src/lib/session-utils.ts`, `src/lib/storage.ts` (`Superset` déjà typé) | Le type `Superset` (`src/lib/storage.ts`) est déjà défini (groupes de 2+ `exerciseId`). Faire : détection auto d'une alternance A→B→A→B dans le builder (2 exercices « verrouillés »), regroupement visuel avec repos partagé, persistance dans `session.supersets`. Utile pour les circuits.<br><br>**Critères d'acceptation** : détection alterne 2 exercices, groupement visuel, dégroupement possible. |
-| **Export PDF/CSV : fiche de séance** | S→M | moyenne | `src/pages/seances/detail.astro`, `src/lib/storage.ts` (réutiliser `csvEscape` (`src/lib/storage.ts`) / `exportSessionsAsCSV`), miroir `/en/` | Récap d'une séance précise : CSV en un clic (une série par ligne) et PDF via vue imprimable `window.print()` (header/footer distincts). Bouton dans la fiche détail d'une séance terminée.<br><br>**Critères d'acceptation** : génération hors-ligne, CSV déjà présent réutilisé (une série par ligne), PDF via `window.print()` sans dépendance. |
+| Raccourcis clavier du timer | `Espace` = pause/reprise, `R` = reset, avec garde `keydown` (ignoré si focus dans un `input`/`textarea`/`select`). Appliqué à la fenêtre principale et à la PiP. | `src/pages/timer/index.astro`, `src/pages/timer/pop.astro` |
+| Graphique de tendance par exercice | Courbe **volume** (Σ charge×reps) et **1 RM estimé** (Epley) par séance, filtré par exercice. Rendu SVG inline (aucune dépendance), sélecteur d'exercice + zoom sur une période, responsive mobile. | `src/pages/exercices/tendance.astro` (+ miroir `/en/`), `src/i18n/{fr,en}/tendance.ts` |
+| Rappels de séance | Notifications via Notification API (« C'est le moment de la séance ») configurées depuis les réglages (quotidien/hebdomadaire). Fallback toast quand la permission est refusée. | `src/components/params/ReminderSettings.astro`, `src/lib/storage.ts` (`ReminderSettings`) |
+| RPE / uRPE par série | Saisie compacte RPE/uRPE par série (pas de 0,5, 10→4) dans le builder, ajustable après coup ; badge et tendance fatigue dans la fiche séance. | `src/pages/seances/creer/index.astro`, `src/lib/storage.ts` (`RPE_OPTIONS`), `src/pages/seances/detail.astro` |
+| Supersets (détection auto) | Détection auto d'une alternance A→B→A→B dans le builder (2 exercices consécutifs), groupement visuel avec repos partagé, dégroupement possible, persistance `Session.supersets` + colonne `Superset` du CSV. | `src/pages/seances/creer/index.astro`, `src/pages/seances/detail.astro`, `src/lib/storage.ts` (`Session.supersets`, colonne CSV `Superset`) |
+| Fiche de séance imprimable + CSV par séance | Récap d'une séance précise : vue imprimable `window.print()` (header/footer distincts) et CSV en un clic (une série par ligne). Bouton dans la fiche détail. | `src/pages/seances/print.astro` (+ miroir `/en/`), `src/lib/storage.ts` (`sessionsToCsv` / `exportSessionAsCsv`) |
 
 ---
 
@@ -66,11 +50,14 @@
 
 ## Priorité conseillée
 
-1. **Raccourcis clavier timer** (P0, S) — le dernier correctif restant : vite rentabilisé et visible à chaque visite.
-2. **Rappels de séance** (P1, M) — la première fonction « au-delà du tracking » : notifications. Touchée chaque semaine.
-3. **Graphique de tendance par exercice** (P1, M) — la vue la plus demandée en salle (volume/1RM en évolution).
+P0 et P1 sont **entièrement livrés** — plus aucun correctif ni fonctionnalité courte en attente. Les prochaines itérations ouvrent le **P2** ci-dessus :
 
-> **Note** : l'Export/Import JSON constituait initialement la première priorité — **déjà livré** (2026-08-08). Le point de départ des itérations est donc d'abord le timer shortcuts, puis la séquence ci-dessus. Ordre P1 conseillé : rappels → graphique → RPE → supersets → export fiche séance ; l'ordre des trois premiers reste flexible selon les retours d'usage.
+1. **Sync compte (WebDAV / Google Drive)** (P2, L) — la seule brique P2 à valeur « haute » : sauvegarde/restauration automatique, débloque la portabilité entre devices. Indépendante des autres items P2.
+2. **Répartition volume par groupe musculaire** (P2, M) — le plus petit P2, exploite directement les données déjà collectées (volume par muscle, période semaine/mois).
+3. **MRV automatique (charge prescrite)** (P2, L) — capitalise sur la tendance 1RM/RPE déjà en place (trend chart + RPE/uRPE par série).
+4. **Communauté / benchmarks** (P2, L) — le plus gros morceau (SQL + auth + confidentialité) ; à lancer en dernier et seulement une fois la sync stable.
+
+> **Note** : l'ordre des trois premiers reste flexible selon les retours d'usage ; rien ne bloque la sync, car elle ne dépend d'aucun des items 2–4.
 
 ---
 
