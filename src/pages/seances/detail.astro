@@ -436,7 +436,7 @@ const L = t();
 
           <template x-for="(ex, exIdx) in session.exercises" :key="exIdx">
             <Card>
-              <article class="exo-row">
+              <article class="exo-row" :class="supersetTint(ex)">
                 <header class="exo-row__head">
                   <h3 class="exo-row__name" x-text="trExercise(ex.name)"></h3>
                   <div class="exo-row__head-actions">
@@ -463,6 +463,33 @@ const L = t();
                       <span x-text="labels.startRest">{L.detail.startRest}</span>
                       <span class="exo-row__rest-time" x-text="formatRestTime(getRestTime(ex.name))"></span>
                     </button>
+                    {/* ── Superset badge (added 2026-08-09) ──
+                        Rendered from the persisted Session.supersets array.
+                        Exercises sharing a group get the same colour and the
+                        article row gets a matching background tint. */}
+                    <span
+                      class="exo-row__superset"
+                      :class="'exo-row__superset--g' + (supersetGroup(ex)?.color ?? 0)"
+                      :aria-label="supersetLabelFor(ex)"
+                      :title="supersetMembers(ex)"
+                      x-show="supersetGroup(ex) != null"
+                      x-cloak
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                      </svg>
+                      <span x-text="supersetLabelFor(ex)"></span>
+                    </span>
                     <span class="exo-row__muscle" x-text="trMuscle(ex.muscle)"></span>
                   </div>
                 </header>
@@ -1014,6 +1041,55 @@ const L = t();
           if (e > best) best = e;
         }
         return best;
+      },
+
+      // ── Supersets (rendered 2026-08-09) ──
+      // Pure presentation over the persisted `Session.supersets` array.
+      // Older sessions lack the field → the helpers return null/'' and
+      // the badge stays hidden, so nothing crashes.
+      trName(ex: SessionExercise): string {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).trExercise as ((n: string) => string) | undefined;
+        return fn ? fn(ex.name) : ex.name;
+      },
+
+      /**
+       * 1-based group ordinal + colour index for an exercise belonging
+       * to a persisted superset, or null. Colour cycled g1..g5 so it
+       * matches the builder badge palette.
+       */
+      supersetGroup(ex: SessionExercise): { n: number; color: number } | null {
+        if (!this.session?.supersets) return null;
+        const idx = this.session.supersets.findIndex((g) =>
+          g.exercises.includes(ex.exerciseId),
+        );
+        if (idx === -1) return null;
+        return { n: idx + 1, color: (idx % 5) + 1 };
+      },
+
+      /** Row tint class for grouped exercises, '' when not grouped. */
+      supersetTint(ex: SessionExercise): string {
+        const g = this.supersetGroup(ex);
+        return g ? 'exo-row--g' + g.color : '';
+      },
+
+      /** "Superset 1" badge copy, '' when not grouped. */
+      supersetLabelFor(ex: SessionExercise): string {
+        const g = this.supersetGroup(ex);
+        return g ? `${LABELS.detail.supersetLabel} ${g.n}` : '';
+      },
+
+      /** Member names of the group, joined for the tooltip. */
+      supersetMembers(ex: SessionExercise): string {
+        if (!this.session?.supersets) return '';
+        const group = this.session.supersets.find((g) =>
+          g.exercises.includes(ex.exerciseId),
+        );
+        if (!group) return '';
+        return this.session.exercises
+          .filter((e) => group.exercises.includes(e.exerciseId))
+          .map((e) => this.trName(e))
+          .join(' · ');
       },
 
       statusLabel(s: SessionStatus): string {
@@ -1982,6 +2058,42 @@ const L = t();
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
+
+  /* ── Superset group badge + row tint (added 2026-08-09) ──
+     Exercises grouped via Session.supersets share a colour; the whole
+     row is tinted so grouped set rows read as a visual chain. Colours
+     match the builder group palette (g1..g5). */
+  .exo-row__superset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.8rem;
+    padding: 0 1.1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .exo-row__superset svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .exo-row__superset--g1 { background-color: hsl(32 95% 50% / 0.12); color: #E0A34E; border-color: hsl(32 95% 50% / 0.30); }
+  .exo-row__superset--g2 { background-color: hsl(197 85% 53% / 0.12); color: #7DD3FC; border-color: hsl(197 85% 53% / 0.30); }
+  .exo-row__superset--g3 { background-color: hsl(271 80% 66% / 0.12); color: #D8B4FE; border-color: hsl(271 80% 66% / 0.30); }
+  .exo-row__superset--g4 { background-color: hsl(142 70% 45% / 0.12); color: #86EFAC; border-color: hsl(142 70% 45% / 0.30); }
+  .exo-row__superset--g5 { background-color: hsl(330 81% 60% / 0.12); color: #F9A8D4; border-color: hsl(330 81% 60% / 0.30); }
+
+  .exo-row--g1 { background-color: color-mix(in srgb, #D97706 6%, transparent); }
+  .exo-row--g2 { background-color: color-mix(in srgb, #38BDF8 6%, transparent); }
+  .exo-row--g3 { background-color: color-mix(in srgb, #A855F7 6%, transparent); }
+  .exo-row--g4 { background-color: color-mix(in srgb, #22C55E 6%, transparent); }
+  .exo-row--g5 { background-color: color-mix(in srgb, #F472B6 6%, transparent); }
 
   /* ── Per-exercise header actions (added 2026-08-04) ──
      Hosts the "Démarrer le repos" button next to the muscle

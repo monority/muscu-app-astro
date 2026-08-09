@@ -85,4 +85,5 @@ export default {
   suggestionContinueDetail: 'Tu travailles dans la bonne zone d\'effort (RPE moyen entre 6 et 8 / 10). Conserve la même charge encore une ou deux séances avant d\'augmenter.',
   shareFooter: 'muscu.app — Training Log',
   shareSetsLabel: 'SÉRIES',
+  supersetLabel: 'Superset',
 };

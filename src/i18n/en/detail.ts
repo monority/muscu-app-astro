@@ -85,4 +85,5 @@ export default {
   suggestionContinueDetail: 'You are working in the right effort zone (average RPE between 6 and 8 / 10). Keep the same load for one or two more sessions before increasing.',
   shareFooter: 'muscu.app — Training Log',
   shareSetsLabel: 'SETS',
+  supersetLabel: 'Superset',
 };

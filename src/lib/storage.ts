@@ -673,16 +673,30 @@ function formatSetRpeCsv(set: SessionSet): string {
 }
 
 /**
+ * 1-based ordinal of the superset group the given exercise belongs to
+ * (per the persisted `session.supersets` array), or 0 when the exercise
+ * is not part of any superset. Sessions saved before the superset feature
+ * simply have no `supersets` field → 0 → empty CSV cell.
+ */
+function supersetGroupOrdinal(session: Session, exerciseId: string): number {
+  if (!session.supersets) return 0;
+  const idx = session.supersets.findIndex((g) => g.exercises.includes(exerciseId));
+  return idx >= 0 ? idx + 1 : 0;
+}
+
+/**
  * Builds a CSV string of all sessions with one row per set, suitable for
  * import into a spreadsheet. Columns:
- *   Date, Nom, Exercice, Série, Type, Charge (kg), Répétitions, 1RM estimé, RPE.
+ *   Date, Nom, Exercice, Série, Type, Charge (kg), Répétitions, 1RM estimé, RPE, Superset.
  * The estimated 1RM uses the Epley formula via `calculate1RM`. The RPE column
  * carries a prefixed label ("RPE 7.5" / "uRPE 7") and is empty when a set has
- * no RPE logged (e.g. sessions saved before the feature existed).
+ * no RPE logged (e.g. sessions saved before the feature existed). The Superset
+ * column holds the 1-based group number of the exercise and is empty when the
+ * exercise is not grouped (added 2026-08-09).
  */
 export function exportSessionsAsCSV(): string {
   const sessions = getSessions();
-  const header = 'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé,RPE';
+  const header = 'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé,RPE,Superset';
   const rows = sessions.flatMap((session) =>
     session.exercises.flatMap((exercise) =>
       exercise.sets.map((set, i) =>
@@ -696,6 +710,7 @@ export function exportSessionsAsCSV(): string {
           set.reps,
           Math.round(calculate1RM(set.weight, set.reps)),
           csvEscape(formatSetRpeCsv(set)),
+          supersetGroupOrdinal(session, exercise.exerciseId) || '',
         ].join(','),
       ),
     ),
