@@ -7,6 +7,7 @@ import CardTitle from '../../../components/ui/CardTitle.astro';
 import CardContent from '../../../components/ui/CardContent.astro';
 import Badge from '../../../components/ui/Badge.astro';
 import Dialog from '../../../components/ui/Dialog.astro';
+import Toast from '../../../components/ui/Toast.astro';
 import { TRAINING_TEMPLATES } from '../../../lib/templates';
 import { t, setLocale, defaultLocale, localizedPath, trTemplateName, trTemplateDesc } from '../../../i18n';
 
@@ -28,6 +29,7 @@ const setTypes = [
 ---
 
 <AppLayout title={L.builder.title}>
+  <Toast />
   <div
     class="ses"
     x-data="sessionBuilder()"
@@ -406,15 +408,46 @@ const setTypes = [
                     </select>
                   </div>
                   <div class="ses__cell ses__cell--num" role="cell">
-                    <input
-                      type="number"
-                      class="ses__input ses__input--inline no-spinner"
-                      min="0"
-                      step="0.5"
-                      x-model.number="set.weight"
-                      inputmode="decimal"
-                      :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
-                    />
+                    <div class="ses__weight-cell">
+                      <input
+                        type="number"
+                        class="ses__input ses__input--inline no-spinner"
+                        min="0"
+                        step="0.5"
+                        x-model.number="set.weight"
+                        inputmode="decimal"
+                        :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
+                      />
+                      {/* ── MRV — suggested load (added 2026-08-10) ──
+                          Subtle second tap target inside the weight cell.
+                          Disabled when the exercise has no useful history
+                          (title explains why). Click = confirmation: fills
+                          the weight with the suggestion + toast. Never
+                          overwrites a typed weight without this click. */}
+                      <button
+                        type="button"
+                        class="ses__mrv-btn"
+                        :class="{ 'is-disabled': !mrvEnabled(exIdx, setIdx) }"
+                        :disabled="!mrvEnabled(exIdx, setIdx)"
+                        :title="mrvTitle(exIdx, setIdx)"
+                        :aria-label="labels.mrvSuggestFor + ' ' + (setIdx + 1)"
+                        @click="applyMrv(exIdx, setIdx)"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="ses__icon"
+                          aria-hidden="true"
+                        >
+                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   <div class="ses__cell ses__cell--num" role="cell">
                     <input
@@ -989,10 +1022,12 @@ const setTypes = [
 <script>
   import {
     getExercises,
+    getSessions,
     saveExercise,
     saveSession,
     RPE_OPTIONS,
     type Exercise,
+    type Session,
     type SessionExercise,
     type SessionSet,
     type SessionMood,
@@ -1002,7 +1037,8 @@ const setTypes = [
   import { getExerciseTip } from '../../../lib/exercise-tips';
   import { getRestTime, formatRestTime } from '../../../lib/rest-times';
   import { playBeep } from '../../../lib/sound';
-  import { t, defaultLocale, localizedPath } from '../../../i18n';
+  import { suggestLoadSuggestion } from '../../../lib/mrv';
+  import { t, defaultLocale, getLocale, localizedPath } from '../../../i18n';
 
   const LABELS = t();
 
@@ -1047,6 +1083,9 @@ const setTypes = [
       sessionDate: new Date().toISOString().split('T')[0],
       exercises: [] as BuilderExercise[],
       availableExercises: [] as Exercise[],
+      // Completed sessions snapshot read once at init — the MRV engine reads
+      // from it (never from localStorage) so row bindings stay cheap.
+      allSessions: [] as Session[],
       exerciseSearch: '',
       // Per-set RPE values (10 → 4 by 0.5) used by each set's select.
       rpeValues: RPE_OPTIONS,
@@ -1152,11 +1191,18 @@ const setTypes = [
         units: LABELS.builder.units,
         rest: LABELS.builder.rest,
         discardTitle: LABELS.builder.discardTitle,
+        // ── MRV — suggested load (added 2026-08-10) ──
+        mrvSuggestFor: LABELS.builder.mrvSuggestFor,
+        mrvNoHistory: LABELS.builder.mrvNoHistory,
+        mrvFromHistory: LABELS.builder.mrvFromHistory,
+        mrvCapped: LABELS.builder.mrvCapped,
+        mrvToast: LABELS.builder.mrvToast,
       },
 
       // ── Init ──
       init() {
         this.availableExercises = getExercises();
+        this.allSessions = getSessions();
       },
 
       // ── Derived ──
@@ -1558,6 +1604,72 @@ const setTypes = [
 
       hasWorkingWeight(exercise: SessionExercise): boolean {
         return exercise.sets.some((s) => s.type === 'work' && s.weight > 0);
+      },
+
+      // ── MRV — suggested load (added 2026-08-10) ──
+      // V1 prog. linéaire (src/lib/mrv.ts) : la charge proposée pour une
+      // série est calculée depuis l'historique des séances terminées
+      // (top set récent, ajustement reps/RPE, plafond 1RM Epley, arrondi
+      // 2,5 kg). Jamais appliquée sans clic explicite — clic = confirmation.
+      mrvSuggestion(
+        exerciseIndex: number,
+        setIndex: number,
+      ): ReturnType<typeof suggestLoadSuggestion> | null {
+        const ex = this.exercises[exerciseIndex];
+        const set = ex?.sets[setIndex];
+        if (!ex || !set) return null;
+        return suggestLoadSuggestion(ex.exerciseId, this.allSessions, {
+          targetReps: set.reps > 0 ? set.reps : undefined,
+          lastLoad: set.weight > 0 ? set.weight : undefined,
+        });
+      },
+
+      /** True quand le bouton ⚡ est cliquable (une suggestion existe). */
+      mrvEnabled(exerciseIndex: number, setIndex: number): boolean {
+        const s = this.mrvSuggestion(exerciseIndex, setIndex);
+        return Boolean(s && s.weight != null);
+      },
+
+      /** Raison localisée de la suggestion (tooltip du bouton ⚡). */
+      mrvTitle(exerciseIndex: number, setIndex: number): string {
+        const s = this.mrvSuggestion(exerciseIndex, setIndex);
+        if (!s || s.reason === 'none') return this.labels.mrvNoHistory;
+        if (s.reason === 'epley-cap') return this.labels.mrvCapped;
+        return this.labels.mrvFromHistory;
+      },
+
+      /**
+       * Click = confirmation : remplit le poids de la série avec la charge
+       * suggérée + toast. Ne fait rien quand aucune suggestion n'existe (le
+       * bouton est désactivé) — et n'écrit JAMAIS de poids sans ce clic.
+       */
+      applyMrv(exerciseIndex: number, setIndex: number) {
+        const ex = this.exercises[exerciseIndex];
+        const set = ex?.sets[setIndex];
+        const s = this.mrvSuggestion(exerciseIndex, setIndex);
+        if (!set || !s) return;
+        if (s.weight == null) {
+          this.showToast(this.labels.mrvNoHistory, 'warning');
+          return;
+        }
+        set.weight = s.weight;
+        const weightLabel = s.weight.toLocaleString(
+          getLocale() === 'fr' ? 'fr-FR' : 'en-US',
+          { maximumFractionDigits: 1 },
+        );
+        this.showToast(
+          this.labels.mrvToast.replace('{weight}', weightLabel),
+          'success',
+        );
+      },
+
+      /** Wraps the global Toast.astro API (window.showToast, if mounted). */
+      showToast(message: string, variant = 'info') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fn = (window as any).showToast as
+          | ((m: string, v?: string) => void)
+          | undefined;
+        if (fn) fn(message, variant);
       },
 
       generateWarmup(exerciseIndex: number) {
@@ -2372,6 +2484,62 @@ const setTypes = [
   .ses__set-complete svg {
     width: 1.6rem;
     height: 1.6rem;
+  }
+
+  /* ── MRV — suggested-load button in the weight cell (added 2026-08-10) ──
+     Small bolt next to the weight input. Disabled (dimmed) when the
+     exercise has no exploitable history; the title localises the reason. */
+  .ses__weight-cell {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.3rem;
+  }
+
+  .ses__weight-cell .ses__input--inline {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ses__mrv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 3.4rem;
+    height: 3.4rem;
+    padding: 0;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                opacity var(--transition-fast),
+                transform var(--transition-fast);
+  }
+
+  .ses__mrv-btn:hover:not(.is-disabled):not(:disabled) {
+    background-color: hsl(32 95% 50% / 0.12);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .ses__mrv-btn:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+
+  .ses__mrv-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--color-accent);
+  }
+
+  .ses__mrv-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
   }
 
   /* ════════════════════════════════════════════════════
@@ -3603,6 +3771,7 @@ const setTypes = [
     .ses__btn--warmup,
     .ses__ex-toggle,
     .ses__ex-chevron,
+    .ses__mrv-btn,
     .ses__actions {
       transition: none;
     }

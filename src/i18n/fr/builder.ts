@@ -79,6 +79,12 @@ export default {
   rpeAria: 'Effort perçu (RPE) de 1 à 10',
   rpeForSet: 'Effort perçu de la série (RPE)',
   rpeTypeLabel: 'Type d\'effort de la série (RPE/uRPE)',
+  // ── MRV — charge suggérée (added 2026-08-10) ──
+  mrvSuggestFor: 'Suggérer une charge pour la série',
+  mrvNoHistory: 'Aucun historique pour cet exercice',
+  mrvFromHistory: 'Basé sur votre meilleure série récente (progression linéaire)',
+  mrvCapped: 'Plafonné à 95 % de votre 1RM estimé (Epley)',
+  mrvToast: 'Charge suggérée : {weight} kg',
   notesPlaceholder: "Comment s'est passée la séance…",
   discardConfirm: 'Annuler la séance en cours ? Les modifications non enregistrées seront perdues.',
   discardTitle: 'Annuler la séance ?',

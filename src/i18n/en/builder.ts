@@ -79,6 +79,12 @@ export default {
   rpeAria: 'Perceived effort (RPE) from 1 to 10',
   rpeForSet: 'Set perceived effort (RPE)',
   rpeTypeLabel: 'Set effort type (RPE/uRPE)',
+  // ── MRV — suggested load (added 2026-08-10) ──
+  mrvSuggestFor: 'Suggest a load for set',
+  mrvNoHistory: 'No history for this exercise',
+  mrvFromHistory: 'Based on your best recent set (linear progression)',
+  mrvCapped: 'Capped at 95% of your estimated 1RM (Epley)',
+  mrvToast: 'Suggested load: {weight} kg',
   notesPlaceholder: 'How did the session go...',
   discardConfirm: 'Discard the current session? Unsaved changes will be lost.',
   discardTitle: 'Discard session?',

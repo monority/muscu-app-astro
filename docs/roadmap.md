@@ -35,6 +35,8 @@
 | Supersets (détection auto) | Détection auto d'une alternance A→B→A→B dans le builder (2 exercices consécutifs), groupement visuel avec repos partagé, dégroupement possible, persistance `Session.supersets` + colonne `Superset` du CSV. | `src/pages/seances/creer/index.astro`, `src/pages/seances/detail.astro`, `src/lib/storage.ts` (`Session.supersets`, colonne CSV `Superset`) |
 | Fiche de séance imprimable + CSV par séance | Récap d'une séance précise : vue imprimable `window.print()` (header/footer distincts) et CSV en un clic (une série par ligne). Bouton dans la fiche détail. | `src/pages/seances/print.astro` (+ miroir `/en/`), `src/lib/storage.ts` (`sessionsToCsv` / `exportSessionAsCsv`) |
 | Sync WebDAV (backup / restore) | Sauvegarde/restauration du `localStorage` vers un serveur WebDAV : credentials dans les réglages, push / pull / test de connexion, restauration avec confirmation, dernier-écrit-gagne (last-write-wins). Wire-format : snapshot `AppDataSnapshot`. **Google Drive reste expérimental (OAuth) — non implémenté**. | `src/lib/sync.ts`, `src/pages/settings/index.astro`, `src/i18n/{fr,en}/settings.ts` (bloc sync), tests `src/lib/__tests__/sync.test.ts` |
+| Répartition volume par groupe musculaire | Camembert des volumes Σ (charge×reps) par groupe musculaire sur la période (semaine/mois/tout), SVG inline (aucune dépendance), tooltip volume + %. Convention : séries terminées des séances `completed` uniquement, muscle snapshot du `SessionExercise`. | `src/pages/progression/stats.astro`, `src/lib/volume-stats.ts`, tests `src/lib/__tests__/volume-stats.test.ts` |
+| MRV automatique (charge prescrite) — **V1** (progression linéaire) | Bouton ⚡ dans la cellule poids d'une série du builder : charge suggérée depuis l'historique, appliquée **uniquement sur clic** (jamais d'écrasement silencieux), toast + tooltip localisés (fr/en). **Formule V1 documentée + testée** (`MRV_FORMULA`) : base = top set (max poids) de la **dernière séance terminée** (repli `lastLoad`) ; facteur répétitions ±4 % / pas de 2 reps (clamp ±10 %) ; RPE ≥ 8,5 → +2,5 %, ≤ 6,5 → −2,5 % ; plafond **95 % du 1RM Epley** ; arrondi à 2,5 kg (1,25 configurable). V2 (algorithme intelligent) reste en P2. | `src/lib/mrv.ts` (`MRV_FORMULA`, `suggestLoad`, `suggestLoadSuggestion`), `src/pages/seances/creer/index.astro`, `src/i18n/{fr,en}/builder.ts`, tests `src/lib/__tests__/mrv.test.ts` |
 
 ---
 
@@ -42,21 +44,19 @@
 
 | Élément | Effort | Valeur | Fichiers principaux | Description |
 |---|---|---|---|---|
-| **MRV automatique (charge prescrite)** | L | moyenne | nouveau `src/lib/mrv.ts` (placeholder « Joker »), `src/pages/seances/creer/index.astro`, `src/lib/session-utils.ts` | « Joker » = placeholder d'algorithme : à terme, proposer la charge d'une série à partir de l'historique (1RM estimé, RPE). V1 simple d'abord (progression linéaire depuis les `ProgressRecord` — `src/lib/storage.ts`), algorithme intelligent en v2.<br><br>**Critères d'acceptation** : formule documentée et testée.<br>**Dépend de** : modèle de calcul à définir (V1 : progression linéaire, V2 : algorithme). |
-| **Répartition volume par groupe musculaire** | M | moyenne | `src/pages/progression/stats.astro`, nouveau `src/lib/volume-stats.ts` | Camembert des volumes Σ par groupe musculaire sur la période (semaine/mois). Données : `getSessions` + mapping muscles du catalogue. SVG inline, même pattern que les autres chart.<br><br>**Critères d'acceptation** : répartition par muscle, tooltip (volume + %), période semaine/mois. |
+| **MRV — V2 (algorithme intelligent)** | M | moyenne | `src/lib/mrv.ts` (V1 livrée), `src/pages/seances/creer/index.astro`, `src/lib/session-utils.ts` | **V1 = progression linéaire livrée** (voir « ✅ Récemment livré »). Reste : modèle de calcul avancé (progression non-linéaire, néo-RPE / vélocité, fatigue sessionnelle…) pour affiner la charge prescrite.<br><br>**Critères d'acceptation (V2)** : algorithme documenté et testé.<br>**Dépend de** : modèle de calcul v2 à définir. |
 | **Communauté / benchmarks** | L | haute | back-end Astro SSR + base de données (base : `docs/supabase-schema.sql`), `src/lib/auth.ts` | Comparer son volume/1RM à un recueil anonyme. Nécessite SQL + auth + politique de confidentialité — gros morceau, à ne pas lancer avant P1.<br><br>**Critères d'acceptation** : opt-in anonyme (aucune donnée personnelle), comparaison volume/1RM.<br>**Dépend de** : SQL (`docs/supabase-schema.sql`) + auth + politique de confidentialité. |
 
 ---
 
 ## Priorité conseillée
 
-P0 et P1 sont **entièrement livrés** — plus aucun correctif ni fonctionnalité courte en attente. Les prochaines itérations ouvrent le **P2** ci-dessus :
+P0 et P1 sont **entièrement livrés**. En P2 : « Répartition volume par groupe musculaire » **livrée** et « MRV automatique » **livrée en V1** (progression linéaire, formule documentée + testée). Il reste :
 
-1. **Répartition volume par groupe musculaire** (P2, M) — le plus petit P2, exploite directement les données déjà collectées (volume par muscle, période semaine/mois).
-2. **MRV automatique (charge prescrite)** (P2, L) — capitalise sur la tendance 1RM/RPE déjà en place (trend chart + RPE/uRPE par série).
-3. **Communauté / benchmarks** (P2, L) — le plus gros morceau (SQL + auth + confidentialité) ; à lancer en dernier.
+1. **Communauté / benchmarks** (P2, L) — le plus gros morceau (SQL + auth + confidentialité) ; à lancer en dernier.
+2. *(optionnel)* **MRV V2 (algorithme intelligent)** (P2, M) — suite naturelle de la V1 livrée, à porter selon les retours d'usage.
 
-> **Note** : l'ordre des deux premiers reste flexible selon les retours d'usage ; aucun de ces items ne dépend d'un autre (la sync WebDAV déjà livrée couvrait la portabilité entre devices).
+> **Note** : aucun de ces items ne dépend d'un autre (la sync WebDAV déjà livrée couvrait la portabilité entre devices).
 
 ---
 
