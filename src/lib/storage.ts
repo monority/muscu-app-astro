@@ -685,8 +685,8 @@ function supersetGroupOrdinal(session: Session, exerciseId: string): number {
 }
 
 /**
- * Builds a CSV string of all sessions with one row per set, suitable for
- * import into a spreadsheet. Columns:
+ * Builds a CSV string from the given sessions with one row per set, suitable
+ * for import into a spreadsheet. Columns:
  *   Date, Nom, Exercice, Série, Type, Charge (kg), Répétitions, 1RM estimé, RPE, Superset.
  * The estimated 1RM uses the Epley formula via `calculate1RM`. The RPE column
  * carries a prefixed label ("RPE 7.5" / "uRPE 7") and is empty when a set has
@@ -694,8 +694,7 @@ function supersetGroupOrdinal(session: Session, exerciseId: string): number {
  * column holds the 1-based group number of the exercise and is empty when the
  * exercise is not grouped (added 2026-08-09).
  */
-export function exportSessionsAsCSV(): string {
-  const sessions = getSessions();
+export function sessionsToCsv(sessions: Session[]): string {
   const header = 'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé,RPE,Superset';
   const rows = sessions.flatMap((session) =>
     session.exercises.flatMap((exercise) =>
@@ -716,6 +715,23 @@ export function exportSessionsAsCSV(): string {
     ),
   );
   return [header, ...rows].join('\n');
+}
+
+/**
+ * Bulk export: CSV of every session in localStorage. Delegates to the pure
+ * `sessionsToCsv` so per-session sheets can reuse the exact same pipeline.
+ */
+export function exportSessionsAsCSV(): string {
+  return sessionsToCsv(getSessions());
+}
+
+/**
+ * Per-session export: CSV of a single session, using the same columns and
+ * formulas as the bulk export (used by the « Fiche » action on the detail
+ * page). One row per set.
+ */
+export function exportSessionAsCsv(session: Session): string {
+  return sessionsToCsv([session]);
 }
 
 /**

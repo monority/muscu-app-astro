@@ -86,4 +86,17 @@ export default {
   shareFooter: 'muscu.app — Training Log',
   shareSetsLabel: 'SETS',
   supersetLabel: 'Superset',
+  // ── Session sheet (PDF/CSV) ──
+  sheet: 'Sheet',
+  sheetAria: 'Session sheet',
+  downloadCsv: 'Download CSV',
+  downloadCsvAria: 'Download this session as CSV',
+  printPdf: 'Print / PDF',
+  printPdfAria: 'Print the sheet or save it as PDF',
+  csvDownloaded: 'Session CSV downloaded.',
+  csvDownloadFailed: 'Failed to export the session CSV.',
+  printFooter: 'Generated with Muscu App',
+  printNotFoundTitle: 'Sheet unavailable',
+  printNotFoundDesc: 'This session could not be found. Go back and try again.',
+  printNotFoundBack: 'Back to the session',
 };

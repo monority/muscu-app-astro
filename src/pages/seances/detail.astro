@@ -2,6 +2,7 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
+import Toast from '../../components/ui/Toast.astro';
 import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 
 
@@ -11,6 +12,8 @@ const L = t();
 ---
 
 <AppLayout title={L.detail.title}>
+  <Toast />
+
   <div
     class="detail"
     x-data="sessionDetailApp()"
@@ -252,6 +255,65 @@ const L = t();
             </svg>
             <span x-text="labels.compare">{L.detail.compare}</span>
           </a>
+
+          {/* ── Fiche (CSV + impression) ──
+              Exports THIS session as a CSV spreadsheet, or opens a
+              print-friendly sheet route (target=_blank) so the user's
+              browser print dialog produces the PDF. */}
+          <div class="detail__sheet" role="group" aria-label={L.detail.sheetAria}>
+            <span class="detail__sheet-label" aria-hidden="true">{L.detail.sheet}</span>
+
+            <button
+              type="button"
+              class="detail__btn detail__btn--secondary"
+              @click="downloadSessionCsv()"
+              :aria-label="labels.downloadCsvAria"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="detail__btn-icon"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="3" y1="15" x2="21" y2="15"></line>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+              </svg>
+              <span x-text="labels.downloadCsv">{L.detail.downloadCsv}</span>
+            </button>
+
+            <a
+              class="detail__btn detail__btn--secondary"
+              :href="printHref()"
+              target="_blank"
+              rel="noopener"
+              :aria-label="labels.printPdfAria"
+              :aria-disabled="!session"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="detail__btn-icon"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              <span x-text="labels.printPdf">{L.detail.printPdf}</span>
+            </a>
+          </div>
 
           <button
             type="button"
@@ -744,6 +806,7 @@ const L = t();
     updateSession,
     deleteSession,
     calculate1RM,
+    exportSessionAsCsv,
     type Session,
     type SessionExercise,
     type SessionMood,
@@ -756,6 +819,31 @@ const L = t();
   import { t, localizedPath } from '../../i18n';
 
   const LABELS = t();
+
+  // ── Sheet helpers (CSV download) ─────────────────────────
+  function downloadBlob(filename: string, content: string, mime: string): void {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Defer revoke so the download has time to start in Safari/Firefox.
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  /** Lowercase slug for file names: accents stripped, non-alnum → '-'. */
+  function slugify(s: string): string {
+    const slug = s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return slug || 'seance';
+  }
 
   // ── Pure helpers (module scope) ────────────────────────────
   function statusLabelFn(s: SessionStatus): string {
@@ -907,7 +995,10 @@ const L = t();
 
     Alpine.data('sessionDetailApp', () => ({
       // ── State ──
-      labels: LABELS.detail,
+      labels: {
+        ...LABELS.detail,
+        printHref: localizedPath('/seances/print'),
+      },
       session: null as Session | null,
       sessionId: '',
       notFound: false,
@@ -1281,6 +1372,33 @@ const L = t();
           | undefined;
         if (fn) fn('delete-session-dialog');
         window.location.href = localizedPath('/seances');
+      },
+
+      // ── Fiche de séance (PDF/CSV, added 2026-08-09) ──
+      /** URL of the print-friendly sheet route for the loaded session. */
+      printHref(): string {
+        const base = this.labels.printHref as string;
+        return base + (this.session ? `?id=${encodeURIComponent(this.session.id)}` : '');
+      },
+
+      /** Downloads THIS session only as CSV (`<slug>_<date>.csv`). */
+      downloadSessionCsv() {
+        if (!this.session) return;
+        try {
+          const csv = exportSessionAsCsv(this.session);
+          const datePart = (this.session.date || '').split('T')[0] || 'seance';
+          downloadBlob(
+            `${slugify(this.session.name)}_${datePart}.csv`,
+            csv,
+            'text/csv;charset=utf-8',
+          );
+          window.showToast(this.labels.csvDownloaded, 'success');
+        } catch (err) {
+          window.showToast(
+            err instanceof Error ? err.message : this.labels.csvDownloadFailed,
+            'error',
+          );
+        }
       },
 
       // ── Share image generation ──────────────────────
@@ -1916,6 +2034,27 @@ const L = t();
   .detail__btn--destructive:hover {
     background-color: hsl(0 80% 50%);
     box-shadow: 0 4px 14px hsl(0 80% 55% / 0.35);
+  }
+
+  /* ── Fiche (CSV + print) group ── */
+  .detail__sheet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    padding: 1.2rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin: 0.2rem 0;
+  }
+
+  .detail__sheet-label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    margin-right: 0.4rem;
   }
 
   /* ════════════════════════════════════════════════════

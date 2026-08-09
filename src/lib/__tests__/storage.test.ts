@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   calculate1RM,
   exportSessionsAsCSV,
+  exportSessionAsCsv,
   generateId,
   getExercises,
   getSessions,
@@ -329,6 +330,151 @@ describe('exportSessionsAsCSV', () => {
     expect(lines[0]).toContain('Superset');
     expect(lines[1].split(',')[9]).toBe('1');
     expect(lines[2].split(',')[9]).toBe('1');
+  });
+});
+
+describe('exportSessionAsCsv', () => {
+  beforeEach(() => {
+    clearLocalStorage();
+  });
+
+  it('exports only the requested session, one row per set', () => {
+    saveSession({
+      name: 'Legs',
+      date: '2026-08-04',
+      exercises: [
+        {
+          exerciseId: 'ex-1',
+          name: 'Squat',
+          muscle: 'Quadriceps',
+          sets: [
+            { exerciseId: 'ex-1', setNumber: 1, weight: 100, reps: 5, type: 'work', completed: true },
+            { exerciseId: 'ex-1', setNumber: 2, weight: 100, reps: 5, type: 'work', completed: true },
+          ],
+        },
+      ],
+      status: 'completed',
+    });
+    saveSession({
+      name: 'Push',
+      date: '2026-08-05',
+      exercises: [
+        {
+          exerciseId: 'ex-2',
+          name: 'Développé',
+          muscle: 'Pectoraux',
+          sets: [
+            { exerciseId: 'ex-2', setNumber: 1, weight: 60, reps: 10, type: 'work', completed: true },
+          ],
+        },
+      ],
+      status: 'completed',
+    });
+
+    const [target] = getSessions().filter((s) => s.name === 'Legs');
+    const csv = exportSessionAsCsv(target);
+    const lines = csv.split('\n');
+
+    expect(lines.length).toBe(3); // header + 2 rows
+    expect(lines[1]).toContain('Legs');
+    expect(lines[2]).toContain('Legs');
+    expect(csv).not.toContain('Push');
+    expect(csv).not.toContain('Développé');
+    expect(lines[0]).toContain('Superset');
+  });
+
+  it('keeps the same columns and superset handling as the bulk export', () => {
+    saveSession({
+      name: 'Superset push',
+      date: '2026-08-06',
+      exercises: [
+        {
+          exerciseId: 'ex-1',
+          name: 'Développé',
+          muscle: 'Pectoraux',
+          sets: [
+            { exerciseId: 'ex-1', setNumber: 1, weight: 60, reps: 8, rpe: 7.5, rpeType: 'urpe', type: 'work', completed: true },
+          ],
+        },
+      ],
+      status: 'completed',
+      supersets: [{ exercises: ['ex-1', 'ex-2'] }],
+    });
+
+    const [session] = getSessions();
+    const csv = exportSessionAsCsv(session);
+    const rows = csv.split('\n');
+
+    expect(rows[0]).toBe(
+      'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé,RPE,Superset',
+    );
+    const row = rows[1].split(',');
+    expect(row.length).toBe(10);
+    expect(row[8]).toContain('uRPE 7.5');
+    expect(row[9]).toBe('1');
+  });
+
+  it('quotes a comma + double-quote exercise name as an RFC 4180 field', () => {
+    saveSession({
+      name: 'CSV day',
+      date: '2026-08-04',
+      exercises: [
+        {
+          exerciseId: 'ex-1',
+          name: 'Row, "Curl" test',
+          muscle: 'Biceps',
+          sets: [
+            { exerciseId: 'ex-1', setNumber: 1, weight: 80, reps: 8, type: 'work', completed: true },
+          ],
+        },
+      ],
+      status: 'completed',
+    });
+
+    const [session] = getSessions();
+    const csv = exportSessionAsCsv(session);
+    const lines = csv.split('\n');
+
+    // The Exercice column embeds a comma and a double-quote: RFC 4180 wraps
+    // the field in quotes (first cell char `"`) and doubles the inner quote.
+    // Row: Date,Nom,Exercice,Série,Type,Charge,Répétitions,1RM,RPE,Superset
+    expect(lines.length).toBe(2);
+    expect(lines[1]).toBe(
+      '2026-08-04,CSV day,"Row, ""Curl"" test",1,work,80,8,101,,',
+    );
+    // The key assertions per the finding: opens with `"`, inner `"` doubled.
+    const field = '"Row, ""Curl"" test"';
+    expect(lines[1]).toContain(field);
+    expect(field).toMatch(/^".*"$/);
+    expect(field).toContain('""');
+  });
+
+  it('doubles an embedded quote even when the value contains no comma', () => {
+    saveSession({
+      name: 'Quotes',
+      date: '2026-08-07',
+      exercises: [
+        {
+          exerciseId: 'ex-1',
+          name: 'Incline "Press"',
+          muscle: 'Pectoraux',
+          sets: [
+            { exerciseId: 'ex-1', setNumber: 1, weight: 60, reps: 10, type: 'work', completed: true },
+          ],
+        },
+      ],
+      status: 'completed',
+    });
+
+    const [session] = getSessions();
+    const csv = exportSessionAsCsv(session);
+    const lines = csv.split('\n');
+
+    // 1RM for 60 × 10 via Epley = 60 × (1 + 10/30) = 80.
+    expect(lines[1]).toBe(
+      '2026-08-07,Quotes,"Incline ""Press""",1,work,60,10,80,,',
+    );
+    expect(lines[1].includes('"Incline ""Press"""')).toBe(true);
   });
 });
 

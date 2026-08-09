@@ -86,4 +86,17 @@ export default {
   shareFooter: 'muscu.app — Training Log',
   shareSetsLabel: 'SÉRIES',
   supersetLabel: 'Superset',
+  // ── Fiche de séance (PDF/CSV) ──
+  sheet: 'Fiche',
+  sheetAria: 'Fiche de séance',
+  downloadCsv: 'Télécharger CSV',
+  downloadCsvAria: 'Télécharger la fiche CSV de cette séance',
+  printPdf: 'Imprimer / PDF',
+  printPdfAria: 'Imprimer la fiche ou l\'enregistrer en PDF',
+  csvDownloaded: 'Fiche CSV téléchargée.',
+  csvDownloadFailed: 'Échec de l\u2019export de la fiche CSV.',
+  printFooter: 'Généré avec Muscu App',
+  printNotFoundTitle: 'Fiche indisponible',
+  printNotFoundDesc: 'Cette séance est introuvable. Revenez en arrière et réessayez.',
+  printNotFoundBack: 'Retour à la séance',
 };
