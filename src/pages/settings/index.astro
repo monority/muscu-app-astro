@@ -44,6 +44,7 @@ const SETTINGS_SECTIONS = [
   { id: 'set-timer', label: L.settings.timerSettings },
   { id: 'set-reminder', label: L.settings.reminders },
   { id: 'set-data', label: L.settings.data },
+  { id: 'set-sync', label: L.settings.sync.title },
   { id: 'set-about', label: L.settings.about },
 ];
 ---
@@ -626,7 +627,148 @@ const SETTINGS_SECTIONS = [
     </section>
 
     {/* ═════════════════════════════════════════════════════
-        7. À PROPOS
+        7. SYNCHRONISATION WEBDAV
+        ═════════════════════════════════════════════════════ */}
+    <section class="set__section" id="set-sync">
+      <Card>
+        <CardHeader>
+          <div class="set__heading">
+            <span class="set__heading-icon" aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"></path>
+                <polyline points="8 16 12 20 16 16"></polyline>
+              </svg>
+            </span>
+            <CardTitle>{L.settings.sync.title}</CardTitle>
+          </div>
+          <p class="set__heading-sub">{L.settings.sync.desc}</p>
+          <p class="set__sync-note">{L.settings.sync.corsNote}</p>
+        </CardHeader>
+
+        <CardContent>
+          <form class="set__form" @submit.prevent="saveSync()">
+            <div class="set__rows">
+              <div class="set__row set__row--form">
+                <div class="set__row-label">
+                  <span class="set__row-title" x-text="labels.syncUrl">{L.settings.sync.url}</span>
+                  <span class="set__row-hint" x-text="labels.syncConflict">{L.settings.sync.conflict}</span>
+                </div>
+                <div class="set__row-value set__row-value--control">
+                  <input
+                    type="text"
+                    class="set__sync-input"
+                    x-model="syncForm.url"
+                    :placeholder="labels.syncUrlPlaceholder"
+                    autocomplete="url"
+                    spellcheck="false"
+                    aria-label={L.settings.sync.url}
+                  />
+                </div>
+              </div>
+
+              <div class="set__row set__row--form">
+                <div class="set__row-label">
+                  <span class="set__row-title">{L.settings.sync.username}</span>
+                </div>
+                <div class="set__row-value set__row-value--control">
+                  <input
+                    type="text"
+                    class="set__sync-input"
+                    x-model="syncForm.username"
+                    :placeholder="labels.syncUsernamePlaceholder"
+                    autocomplete="username"
+                    spellcheck="false"
+                    aria-label={L.settings.sync.username}
+                  />
+                </div>
+              </div>
+
+              <div class="set__row set__row--form">
+                <div class="set__row-label">
+                  <span class="set__row-title">{L.settings.sync.password}</span>
+                  <span class="set__row-hint">{L.settings.sync.passwordNote}</span>
+                </div>
+                <div class="set__row-value set__row-value--control">
+                  <input
+                    type="password"
+                    class="set__sync-input"
+                    x-model="syncForm.password"
+                    :placeholder="labels.syncPasswordPlaceholder"
+                    autocomplete="current-password"
+                    aria-label={L.settings.sync.password}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="set__actions">
+              <button
+                type="button"
+                class="set__data-btn"
+                @click="cancelSync()"
+              >
+                {L.common.cancel}
+              </button>
+              <button
+                type="submit"
+                class="set__data-btn set__sync-btn--primary"
+              >
+                {L.common.save}
+              </button>
+            </div>
+          </form>
+
+          {/* Last sync status + Google Drive note */}
+          <div class="set__sync-status" x-show="syncConfigured" x-cloak>
+            <span class="set__sync-status-key">{L.settings.sync.lastSync}</span>
+            <span class="set__sync-status-value" x-text="syncLastLabel"></span>
+          </div>
+          <p class="set__sync-note">{L.settings.sync.googleDrive}</p>
+
+          {/* Manual-only actions */}
+          <div class="set__sync-actions">
+            <button
+              type="button"
+              class="set__data-btn set__sync-btn"
+              :disabled="syncBusy !== null || !syncForm.url.trim()"
+              @click="testSync()"
+            >
+              <span x-show="syncBusy !== 'test'" x-cloak x-text="labels.syncTest">{L.settings.sync.test}</span>
+              <span x-show="syncBusy === 'test'" x-cloak x-text="labels.syncTesting">{L.settings.sync.testing}</span>
+            </button>
+            <button
+              type="button"
+              class="set__data-btn set__sync-btn set__sync-btn--primary"
+              :disabled="syncBusy !== null || !syncForm.url.trim()"
+              @click="pushSync()"
+            >
+              <span x-show="syncBusy !== 'push'" x-cloak x-text="labels.syncPush">{L.settings.sync.push}</span>
+              <span x-show="syncBusy === 'push'" x-cloak x-text="labels.syncPushing">{L.settings.sync.pushing}</span>
+            </button>
+            <button
+              type="button"
+              class="set__data-btn set__sync-btn"
+              :disabled="syncBusy !== null || !syncForm.url.trim()"
+              @click="askRestore()"
+            >
+              <span x-show="syncBusy !== 'pull'" x-cloak x-text="labels.syncPull">{L.settings.sync.pull}</span>
+              <span x-show="syncBusy === 'pull'" x-cloak x-text="labels.syncPulling">{L.settings.sync.pulling}</span>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+
+    {/* ═════════════════════════════════════════════════════
+        8. À PROPOS
         ═════════════════════════════════════════════════════ */}
     <section class="set__section" id="set-about">
       <Card>
@@ -732,6 +874,36 @@ const SETTINGS_SECTIONS = [
       </div>
     </Dialog>
 
+    {/* ═════════════════════════════════════════════════════
+        WEBDAV RESTORE CONFIRMATION DIALOG
+        ═════════════════════════════════════════════════════ */}
+    <Dialog id="set-restore-dialog" title={L.settings.sync.restoreTitle}>
+      <p class="set__confirm-text">{L.settings.sync.restoreBody}</p>
+      <p class="set__confirm-text set__confirm-text--muted">
+        {L.settings.sync.restoreIrreversible}
+      </p>
+
+      <div slot="footer">
+        <button
+          type="button"
+          class="set__data-btn"
+          data-dialog-close
+          x-bind:disabled="syncBusy !== null"
+        >
+          {L.common.cancel}
+        </button>
+        <button
+          type="button"
+          class="set__danger-btn"
+          x-bind:disabled="syncBusy !== null"
+          @click="confirmRestore()"
+        >
+          <span x-show="syncBusy !== 'pull'" x-cloak>{L.settings.sync.restoreConfirm}</span>
+          <span x-show="syncBusy === 'pull'" x-cloak>{L.settings.sync.pulling}</span>
+        </button>
+      </div>
+    </Dialog>
+
     <SettingsBottomBar
       sections={SETTINGS_SECTIONS}
       activeSection="set-profile"
@@ -751,6 +923,13 @@ const SETTINGS_SECTIONS = [
     getSessionsThisWeek,
     type Settings,
   } from '../../lib/storage';
+  import {
+    syncPush,
+    syncPull,
+    syncTest,
+    SyncError,
+    type SyncErrorCode,
+  } from '../../lib/sync';
   import { t, defaultLocale } from '../../i18n';
 
   const LABELS = t();
@@ -772,6 +951,11 @@ const SETTINGS_SECTIONS = [
     importing: boolean;
     resetConfirmText: string;
     weeklyDone: number;
+    // WebDAV sync
+    syncForm: { url: string; username: string; password: string };
+    syncConfigured: boolean;
+    syncBusy: 'test' | 'push' | 'pull' | null;
+    syncLastLabel: string;
 
     // Lifecycle
     init(): void;
@@ -802,6 +986,18 @@ const SETTINGS_SECTIONS = [
     handleImportFile(event: Event): void;
     askReset(): void;
     confirmReset(): void;
+
+    // WebDAV sync
+    saveSync(): void;
+    cancelSync(): void;
+    persistSyncConfig(): void;
+    persistSyncConfigWithNow(): void;
+    lastSyncLabel(lastSyncAt?: string): string;
+    testSync(): Promise<void>;
+    pushSync(): Promise<void>;
+    askRestore(): void;
+    confirmRestore(): Promise<void>;
+    syncErrorLabel(err: unknown): string;
 
     // Dialog helpers
     openDialogById(id: string): void;
@@ -852,6 +1048,10 @@ const SETTINGS_SECTIONS = [
       importing: false,
       resetConfirmText: '',
       weeklyDone: 0,
+      syncForm: { url: '', username: '', password: '' },
+      syncConfigured: false,
+      syncBusy: null,
+      syncLastLabel: '',
       labels: {
         notSet: LABELS.settings.notSet,
         download: LABELS.settings.download,
@@ -869,6 +1069,27 @@ const SETTINGS_SECTIONS = [
         readError: LABELS.settings.readError,
         allDataReset: LABELS.settings.allDataReset,
         savedAtPrefix: LABELS.settings.savedAtPrefix,
+        syncUrl: LABELS.settings.sync.url,
+        syncUrlPlaceholder: LABELS.settings.sync.urlPlaceholder,
+        syncConflict: LABELS.settings.sync.conflict,
+        syncUsernamePlaceholder: LABELS.settings.sync.usernamePlaceholder,
+        syncPasswordPlaceholder: LABELS.settings.sync.passwordPlaceholder,
+        syncTest: LABELS.settings.sync.test,
+        syncTesting: LABELS.settings.sync.testing,
+        syncPush: LABELS.settings.sync.push,
+        syncPushing: LABELS.settings.sync.pushing,
+        syncPull: LABELS.settings.sync.pull,
+        syncPulling: LABELS.settings.sync.pulling,
+        syncTestOk: LABELS.settings.sync.testOk,
+        syncTestOkNoBackup: LABELS.settings.sync.testOkNoBackup,
+        syncPushed: LABELS.settings.sync.pushed,
+        syncRestored: LABELS.settings.sync.restored,
+        syncNotConfigured: LABELS.settings.sync.notConfigured,
+        syncUnavailable: LABELS.settings.sync.unavailable,
+        syncFallback: LABELS.settings.sync.fallback,
+        syncLastSync: LABELS.settings.sync.lastSync,
+        syncNever: LABELS.settings.sync.never,
+        syncError: LABELS.settings.sync.error,
       },
 
       // ── Init ──
@@ -877,6 +1098,13 @@ const SETTINGS_SECTIONS = [
         this.display = getSettings();
         this.form = cloneForm(this.display);
         this.weeklyDone = getSessionsThisWeek().length;
+        this.syncForm = {
+          url: this.display.webdav?.url || '',
+          username: this.display.webdav?.username || '',
+          password: this.display.webdav?.password || '',
+        };
+        this.syncConfigured = Boolean(this.display.webdav?.url);
+        this.syncLastLabel = this.lastSyncLabel(this.display.webdav?.lastSyncAt);
 
         // Autosave on any section save action dispatched by the fixed
         // bottom bar (SettingsBottomBar.astro).
@@ -897,6 +1125,9 @@ const SETTINGS_SECTIONS = [
             break;
           case 'set-timer':
             this.saveTimer();
+            break;
+          case 'set-sync':
+            this.saveSync();
             break;
           default:
             // Units, goals, data and about auto-save (or expose their own
@@ -1074,6 +1305,163 @@ const SETTINGS_SECTIONS = [
         this.resetConfirmText = '';
         this.closeDialogById('set-reset-dialog');
         window.showToast(this.labels.allDataReset, 'success');
+      },
+
+      // ── WebDAV sync ──
+      saveSync() {
+        // Saving an empty field clears the stored connection; saving a
+        // complete URL stores it and marks the connection as configured.
+        this.persistSyncConfig();
+        window.showToast(formatSavedAt(), 'success');
+      },
+
+      /** Persists the current sync form into Settings and refreshes the
+       *  configured flag + last-sync label. Keeps the timestamp when the
+       *  connection is kept, clears it when the URL is emptied. */
+      persistSyncConfig() {
+        const url = this.syncForm.url.trim();
+        this.display = updateSettings({
+          webdav: {
+            url,
+            username: this.syncForm.username.trim(),
+            password: this.syncForm.password,
+            lastSyncAt: url ? this.display.webdav?.lastSyncAt : undefined,
+          },
+        });
+        this.syncConfigured = Boolean(url);
+        this.syncLastLabel = this.lastSyncLabel(
+          this.syncConfigured ? this.display.webdav?.lastSyncAt : undefined,
+        );
+      },
+
+      /** Persists the sync form and stamps a fresh success timestamp. */
+      persistSyncConfigWithNow() {
+        this.display = updateSettings({
+          webdav: {
+            url: this.syncForm.url.trim(),
+            username: this.syncForm.username.trim(),
+            password: this.syncForm.password,
+            lastSyncAt: new Date().toISOString(),
+          },
+        });
+        this.syncConfigured = true;
+        this.syncLastLabel = this.lastSyncLabel(
+          this.display.webdav?.lastSyncAt,
+        );
+      },
+
+      cancelSync() {
+        // Discard unsaved edits and restore the persisted connection.
+        const webdav = this.display.webdav;
+        this.syncForm = {
+          url: webdav?.url || '',
+          username: webdav?.username || '',
+          password: webdav?.password || '',
+        };
+      },
+
+      lastSyncLabel(lastSyncAt?: string): string {
+        if (!lastSyncAt) return this.labels.syncNever;
+        const d = new Date(lastSyncAt);
+        if (Number.isNaN(d.getTime())) return this.labels.syncNever;
+        return `${this.labels.syncLastSync} — ${d.toLocaleString()}`;
+      },
+
+      syncErrorLabel(err: unknown): string {
+        if (err instanceof SyncError) {
+          const code = err.code as SyncErrorCode;
+          const label = this.labels.syncError[code] ?? this.labels.syncFallback;
+          if (code === 'sync-http' && typeof err.status === 'number') {
+            return `${label} (HTTP ${err.status})`;
+          }
+          return label;
+        }
+        // Plain errors (e.g. importAllData validation) carry their message.
+        return err instanceof Error && err.message
+          ? err.message
+          : this.labels.syncFallback;
+      },
+
+      async testSync() {
+        if (!this.syncForm.url.trim()) {
+          window.showToast(this.labels.syncNotConfigured, 'error');
+          return;
+        }
+        this.syncBusy = 'test';
+        try {
+          const result = await syncTest(
+            this.syncForm.url,
+            this.syncForm.username,
+            this.syncForm.password,
+          );
+          window.showToast(
+            result.hasBackup ? this.labels.syncTestOk : this.labels.syncTestOkNoBackup,
+            'success',
+          );
+        } catch (err) {
+          window.showToast(this.syncErrorLabel(err), 'error');
+        } finally {
+          this.syncBusy = null;
+        }
+      },
+
+      async pushSync() {
+        if (!this.syncForm.url.trim()) {
+          window.showToast(this.labels.syncNotConfigured, 'error');
+          return;
+        }
+        this.syncBusy = 'push';
+        try {
+          const snapshot = exportAllData();
+          if (!snapshot) {
+            window.showToast(this.labels.storageError, 'error');
+            return;
+          }
+          await syncPush(
+            this.syncForm.url,
+            this.syncForm.username,
+            this.syncForm.password,
+            snapshot,
+          );
+          // Last-write-wins: record the successful push so the status line
+          // reflects the most recent sync.
+          this.persistSyncConfigWithNow();
+          window.showToast(this.labels.syncPushed, 'success');
+        } catch (err) {
+          window.showToast(this.syncErrorLabel(err), 'error');
+        } finally {
+          this.syncBusy = null;
+        }
+      },
+
+      askRestore() {
+        if (!this.syncForm.url.trim()) {
+          window.showToast(this.labels.syncNotConfigured, 'error');
+          return;
+        }
+        this.openDialogById('set-restore-dialog');
+      },
+
+      async confirmRestore() {
+        this.syncBusy = 'pull';
+        try {
+          const snapshot = await syncPull(
+            this.syncForm.url,
+            this.syncForm.username,
+            this.syncForm.password,
+          );
+          // Destructive: replaces all local data with the remote backup.
+          importAllData(snapshot);
+          this.display = getSettings();
+          this.form = cloneForm(this.display);
+          this.persistSyncConfigWithNow();
+          this.closeDialogById('set-restore-dialog');
+          window.showToast(this.labels.syncRestored, 'success');
+        } catch (err) {
+          window.showToast(this.syncErrorLabel(err), 'error');
+        } finally {
+          this.syncBusy = null;
+        }
       },
 
       // ── Dialog helpers ──
@@ -1590,6 +1978,83 @@ const SETTINGS_SECTIONS = [
   .set__data-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  /* ═════════════════════════════════════════════════════
+     WEBDAV SYNC
+     ═════════════════════════════════════════════════════ */
+  .set__sync-input {
+    width: 100%;
+    height: 4.2rem;
+    padding: 0 1.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.25rem;
+    outline: none;
+    transition: border-color var(--transition-fast),
+                box-shadow var(--transition-fast);
+  }
+
+  .set__sync-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .set__sync-input::placeholder {
+    color: var(--color-muted);
+  }
+
+  .set__sync-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 1.2rem;
+  }
+
+  .set__sync-status-key {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .set__sync-status-value {
+    font-size: 1.25rem;
+    color: var(--color-text);
+  }
+
+  .set__sync-note {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+
+  .set__sync-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 1.4rem;
+  }
+
+  .set__sync-btn {
+    flex: 1 1 auto;
+    min-width: 12rem;
+  }
+
+  .set__sync-btn--primary {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+
+  .set__sync-btn--primary:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
   }
 
   .set__file-input {

@@ -21,6 +21,7 @@ import {
   saveSession,
   toggleExerciseFavorite,
   DEFAULT_REMINDERS,
+  DEFAULT_WEBDAV,
   type Session,
   type SessionExercise,
   type SessionSet,
@@ -212,6 +213,7 @@ describe('getSettings', () => {
       soundAlerts: true,
       weeklyGoal: 3,
       reminders: DEFAULT_REMINDERS,
+      webdav: DEFAULT_WEBDAV,
     });
   });
 });

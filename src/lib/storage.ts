@@ -135,6 +135,24 @@ export interface Settings {
   // Nested object so older localStorage payloads merge safely
   // through the DEFAULT_SETTINGS fallback in `getSettings()`.
   reminders: ReminderSettings;
+  // ── WebDAV sync (added 2026-08-10) ──
+  // Credentials live in localStorage only (never sent anywhere but the
+  // user-configured WebDAV host). `lastSyncAt` drives the "last sync"
+  // status line on the settings page.
+  webdav: WebdavSettings;
+}
+
+/**
+ * WebDAV account for the manual sync section on the settings page.
+ * The password is stored in plain localStorage — a deliberate tradeoff
+ * documented in the UI (this app is 100% offline/local-first).
+ */
+export interface WebdavSettings {
+  url: string;
+  username: string;
+  password: string;
+  /** ISO timestamp of the last successful push/pull ('' when never). */
+  lastSyncAt?: string;
 }
 
 // ============================================================================
@@ -159,6 +177,12 @@ export const DEFAULT_REMINDERS: ReminderSettings = {
   time: '18:00',
 };
 
+export const DEFAULT_WEBDAV: WebdavSettings = {
+  url: '',
+  username: '',
+  password: '',
+};
+
 export const DEFAULT_SETTINGS: Settings = {
   pseudo: '',
   email: '',
@@ -168,6 +192,7 @@ export const DEFAULT_SETTINGS: Settings = {
   soundAlerts: true,
   weeklyGoal: 3,
   reminders: DEFAULT_REMINDERS,
+  webdav: DEFAULT_WEBDAV,
 };
 
 const DEFAULT_EXERCISES: ReadonlyArray<{

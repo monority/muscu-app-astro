@@ -94,6 +94,9 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
         data: svgWrap(
           '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
         ),
+        sync: svgWrap(
+          '<path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><polyline points="8 16 12 20 16 16"/>',
+        ),
         about: svgWrap(
           '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
         ),
@@ -139,6 +142,8 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
           Unités: "Unités",
           Timer: "Timer",
           Données: "Données",
+          "Synchronisation WebDAV": "Synchro",
+          "WebDAV sync": "Synchro",
           "À propos": "À propos",
         };
         return short[label] || label;
