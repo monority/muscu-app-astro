@@ -1,0 +1,836 @@
+---
+import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import AppLayout from '../../layouts/AppLayout.astro';
+import PageHeader from '../../components/layout/PageHeader.astro';
+import Card from '../../components/ui/Card.astro';
+setLocale(Astro.currentLocale ?? defaultLocale);
+const L = t();
+---
+
+<AppLayout title={L.tendance.title}>
+  <PageHeader
+    title={L.tendance.title}
+    description={L.tendance.description}
+  />
+
+  <div
+    class="trend"
+    x-data="exerciseTrendApp()"
+    x-init="init()"
+    x-cloak
+  >
+    {/* ── Back link ── */}
+    <a href={localizedPath("/exercices")} class="trend__back">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      <span>{L.tendance.back}</span>
+    </a>
+
+    {/* ── Not found state ── */}
+    <template x-if="notFound">
+      <Card>
+        <div class="trend__error">
+          <div class="trend__error-icon" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h2 class="trend__error-title">{L.tendance.notFound}</h2>
+          <p class="trend__error-text">{L.tendance.notFoundDesc}</p>
+          <a href={localizedPath("/exercices")} class="trend__error-link">
+            {L.tendance.viewExercises}
+          </a>
+        </div>
+      </Card>
+    </template>
+
+    {/* ── Loaded exercise ── */}
+    <template x-if="!notFound && exercise">
+      <div class="trend__content">
+        {/* ── Controls ── */}
+        <Card padding="md">
+          <div class="trend__controls">
+            {/* Exercise selector */}
+            <div class="trend__field trend__field--grow">
+              <label class="trend__label" for="trend-exercise">
+                {L.tendance.exercise}
+              </label>
+              <div class="trend__select-wrap">
+                <select
+                  id="trend-exercise"
+                  class="trend__select"
+                  :value="selectedId"
+                  @change="onExerciseChange($event.target.value)"
+                >
+                  <template x-for="ex in exercises" :key="ex.id">
+                    <option :value="ex.id" x-text="trExercise(ex.name)"></option>
+                  </template>
+                </select>
+                <svg
+                  class="trend__select-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            {/* Metric toggle */}
+            <div class="trend__field">
+              <span class="trend__label" id="trend-metric-label">
+                {L.tendance.metric}
+              </span>
+              <div class="trend__segmented" role="group" aria-labelledby="trend-metric-label">
+                <button
+                  type="button"
+                  class="trend__seg"
+                  :class="{ 'is-active': metric === 'volume' }"
+                  @click="metric = 'volume'"
+                >
+                  {L.tendance.metricVolume}
+                </button>
+                <button
+                  type="button"
+                  class="trend__seg"
+                  :class="{ 'is-active': metric === 'rm' }"
+                  @click="metric = 'rm'"
+                >
+                  {L.tendance.metric1RM}
+                </button>
+              </div>
+            </div>
+
+            {/* Period toggle */}
+            <div class="trend__field">
+              <span class="trend__label" id="trend-period-label">
+                {L.tendance.period}
+              </span>
+              <div class="trend__segmented" role="group" aria-labelledby="trend-period-label">
+                <button
+                  type="button"
+                  class="trend__seg"
+                  :class="{ 'is-active': period === 'all' }"
+                  @click="period = 'all'"
+                >
+                  {L.tendance.periodAll}
+                </button>
+                <button
+                  type="button"
+                  class="trend__seg"
+                  :class="{ 'is-active': period === '3m' }"
+                  @click="period = '3m'"
+                >
+                  {L.tendance.period3m}
+                </button>
+                <button
+                  type="button"
+                  class="trend__seg"
+                  :class="{ 'is-active': period === '1y' }"
+                  @click="period = '1y'"
+                >
+                  {L.tendance.period1y}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* ── Chart ── */}
+        <Card padding="lg">
+          <div class="trend__chart-section">
+            <header class="trend__section-head">
+              <h2 class="trend__section-title" x-text="chartTitle"></h2>
+              <span class="trend__section-meta" x-text="chartMeta"></span>
+            </header>
+
+            {/* Empty state: 0 points, or <2 points (not enough to draw a curve) */}
+            <template x-if="points.length < 2">
+              <p class="trend__chart-empty" x-text="emptyMessage"></p>
+            </template>
+
+            <template x-if="points.length >= 2">
+              <div class="trend__chart-wrap">
+                <svg
+                  class="trend__chart"
+                  viewBox="0 0 800 300"
+                  preserveAspectRatio="xMidYMid meet"
+                  role="img"
+                  :aria-label="chartTitle"
+                >
+                  {/* Horizontal grid lines + Y labels (SVG string: Alpine x-for breaks inside <svg>) */}
+                  <g x-html="chartGridMarkup"></g>
+
+                  {/* X axis baseline */}
+                  <line
+                    x1="0"
+                    y1="300"
+                    x2="800"
+                    y2="300"
+                    stroke="var(--color-border)"
+                    stroke-width="1"
+                  />
+
+                  {/* Soft area under the line */}
+                  <polygon
+                    :points="chartAreaPoints"
+                    fill="url(#trend-gradient)"
+                    opacity="0.18"
+                  />
+
+                  {/* Line */}
+                  <polyline
+                    :points="chartLinePoints"
+                    fill="none"
+                    stroke="var(--color-accent)"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  {/* Dots (SVG string: Alpine x-for breaks inside <svg>) */}
+                  <g x-html="chartDotsMarkup"></g>
+
+                  {/* Gradient defs */}
+                  <defs>
+                    <linearGradient id="trend-gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="var(--color-accent)" stop-opacity="0.55" />
+                      <stop offset="100%" stop-color="var(--color-accent)" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+
+                {/* X axis date labels (subset to avoid overlap) */}
+                <div class="trend__chart-x" x-show="points.length > 0">
+                  <template x-for="(d, i) in points" :key="'l' + i">
+                    <span
+                      class="trend__chart-tick"
+                      :class="{ 'trend__chart-tick--start': i === 0, 'trend__chart-tick--end': i === points.length - 1 }"
+                      x-show="i === 0 || i === points.length - 1 || i === Math.floor(points.length / 2)"
+                      x-text="formatDateShort(d.date)"
+                    ></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </Card>
+      </div>
+    </template>
+  </div>
+</AppLayout>
+
+<script>
+  import { t, getLocale, trExercise } from '../../i18n';
+  import {
+    getExercises,
+    getExerciseById,
+    getSessions,
+    calculate1RM,
+    type Exercise,
+    type Session,
+  } from '../../lib/storage';
+
+  const LABELS = t();
+
+  /** One data point on the trend chart (per-session date aggregation). */
+  interface TrendPoint {
+    date: string;
+    value: number;
+  }
+
+  type Metric = 'volume' | 'rm';
+  type Period = 'all' | '3m' | '1y';
+
+  // Chart geometry — same convention as /exercices/historique.
+  const CHART_W = 800;
+  const CHART_H = 300;
+
+  function monthAgo(months: number): number {
+    const d = new Date();
+    d.setMonth(d.getMonth() - months);
+    return d.getTime();
+  }
+
+  function fmtNum(n: number): string {
+    if (!Number.isFinite(n) || n <= 0) return '0';
+    return Math.round(n).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US');
+  }
+
+  function fmtDate(iso: string): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
+  function fmtDateShort(iso: string): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+    });
+  }
+
+  document.addEventListener('alpine:init', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data('exerciseTrendApp', () => ({
+      // ── State ──
+      exercises: [] as Exercise[],
+      selectedId: '',
+      exercise: null as Exercise | null,
+      notFound: false,
+      metric: 'volume' as Metric,
+      period: 'all' as Period,
+
+      // ── Init ──
+      init() {
+        this.exercises = getExercises();
+
+        const params = new URLSearchParams(window.location.search);
+        const exParam = params.get('ex');
+        let found: Exercise | undefined;
+        if (exParam) {
+          found = getExerciseById(exParam);
+          if (!found) found = this.exercises.find((e) => e.name === exParam);
+          if (!found) {
+            this.notFound = true;
+            return;
+          }
+        } else {
+          found = this.exercises[0];
+          if (!found) {
+            this.notFound = true;
+            return;
+          }
+        }
+
+        this.selectedId = found.id;
+        this.exercise = found;
+      },
+
+      onExerciseChange(value: string) {
+        this.selectedId = value;
+        this.exercise = this.exercises.find((e) => e.id === value) ?? null;
+      },
+
+      // ── Data aggregation ──
+      // Per date: Volume = Σ (weight × reps) / 1RM = max Epley estimate,
+      // over completed sets only (same convention as /exercices/historique).
+      get points(): TrendPoint[] {
+        if (!this.exercise) return [];
+        const sessions: Session[] = getSessions();
+
+        const byDate = new Map<string, { vol: number; rm: number }>();
+        for (const session of sessions) {
+          for (const ex of session.exercises) {
+            if (ex.exerciseId !== this.exercise.id) continue;
+            let vol = 0;
+            let rm = 0;
+            for (const set of ex.sets) {
+              if (!set.completed) continue;
+              vol += set.weight * set.reps;
+              const estimate = calculate1RM(set.weight, set.reps);
+              if (estimate > rm) rm = estimate;
+            }
+            const cur = byDate.get(session.date) ?? { vol: 0, rm: 0 };
+            cur.vol += vol;
+            cur.rm = Math.max(cur.rm, rm);
+            byDate.set(session.date, cur);
+          }
+        }
+
+        // Period filter.
+        const minTime =
+          this.period === '3m'
+            ? monthAgo(3)
+            : this.period === '1y'
+              ? monthAgo(12)
+              : null;
+
+        let pts = Array.from(byDate.entries()).map(([date, v]) => ({
+          date,
+          value: this.metric === 'volume' ? v.vol : v.rm,
+        }));
+        if (minTime !== null) {
+          pts = pts.filter((p) => new Date(p.date).getTime() >= minTime);
+        }
+
+        return pts.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        );
+      },
+
+      // ── Derived (display) ──
+      get chartTitle(): string {
+        if (!this.exercise) return '';
+        const t = trExercise(this.exercise.name);
+        return this.metric === 'volume'
+          ? `${t} — ${LABELS.tendance.chartVolumeTitle}`
+          : `${t} — ${LABELS.tendance.chart1RMTitle}`;
+      },
+
+      get chartMeta(): string {
+        const n = this.points.length;
+        return `${n} ${n > 1 ? LABELS.historique.sessions : LABELS.historique.sessionSingular}`;
+      },
+
+      get emptyMessage(): string {
+        return this.points.length === 0
+          ? LABELS.tendance.noSessions
+          : LABELS.tendance.minPoints;
+      },
+
+      get chartMax(): number {
+        // Scale headroom: 10% above the peak so the top dot doesn't kiss the border.
+        const peak = this.points.reduce((m, d) => (d.value > m ? d.value : m), 0);
+        return Math.max(peak * 1.1, 10);
+      },
+
+      // ── Chart geometry helpers ──
+      chartX(i: number): number {
+        const n = this.points.length;
+        if (n <= 1) return CHART_W / 2;
+        return (i / (n - 1)) * CHART_W;
+      },
+
+      chartY(v: number): number {
+        const max = this.chartMax;
+        if (max <= 0) return CHART_H;
+        return CHART_H - (v / max) * CHART_H;
+      },
+
+      get chartLinePoints(): string {
+        return this.points
+          .map((d, i) => `${this.chartX(i)},${this.chartY(d.value)}`)
+          .join(' ');
+      },
+
+      get chartAreaPoints(): string {
+        if (this.points.length === 0) return '';
+        const top = this.points
+          .map((d, i) => `${this.chartX(i)},${this.chartY(d.value)}`)
+          .join(' ');
+        const last = this.points.length - 1;
+        return `${top} ${this.chartX(last)},${CHART_H} ${this.chartX(0)},${CHART_H}`;
+      },
+
+      get chartGridMarkup(): string {
+        let s = '';
+        for (let i = 1; i <= 5; i++) {
+          const y = (i - 1) * 75;
+          s += `<line x1="0" y1="${y}" x2="800" y2="${y}" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="2 4"></line>`;
+          s += `<text x="6" y="${y - 4}" fill="var(--color-muted)" font-size="11" font-family="var(--font-body)">${this.formatNumber(this.chartMax * (1 - (i - 1) / 5))} ${LABELS.common.kg}</text>`;
+        }
+        return s;
+      },
+
+      get chartDotsMarkup(): string {
+        return this.points
+          .map(
+            (d, i) =>
+              `<g><circle cx="${this.chartX(i)}" cy="${this.chartY(d.value)}" r="6" fill="var(--color-bg)" stroke="var(--color-accent)" stroke-width="2.5"></circle><title>${this.formatDate(d.date)} — ${this.formatNumber(d.value)} ${LABELS.common.kg}</title></g>`
+          )
+          .join('');
+      },
+
+      // ── Display helpers ──
+      formatNumber(n: number): string {
+        return fmtNum(n);
+      },
+      formatDate(iso: string): string {
+        return fmtDate(iso);
+      },
+      formatDateShort(iso: string): string {
+        return fmtDateShort(iso);
+      },
+    }));
+  });
+</script>
+
+{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+<style>
+  /* Hide Alpine elements until initialized (prevents flash) */
+  [x-cloak] {
+    display: none !important;
+  }
+
+  /* ════════════════════════════════════════════════════
+     CONTAINER
+     ════════════════════════════════════════════════════ */
+  .trend {
+    max-width: 96rem;
+    margin: 0 auto;
+    padding-bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .trend__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     BACK LINK
+     ════════════════════════════════════════════════════ */
+  .trend__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-decoration: none;
+    align-self: flex-start;
+    padding: 0.4rem 0.6rem 0.4rem 0.4rem;
+    margin-left: -0.4rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast),
+                background-color var(--transition-fast);
+  }
+
+  .trend__back:hover {
+    color: var(--color-accent);
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .trend__back:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .trend__back svg {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
+  /* ════════════════════════════════════════════════════
+     CONTROLS
+     ════════════════════════════════════════════════════ */
+  .trend__controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  @media (min-width: 640px) {
+    .trend__controls {
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 1.6rem;
+      flex-wrap: wrap;
+    }
+  }
+
+  .trend__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .trend__field--grow {
+    flex: 1 1 24rem;
+  }
+
+  .trend__label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+  }
+
+  /* ── Select ── */
+  .trend__select-wrap {
+    position: relative;
+    min-width: 22rem;
+  }
+
+  .trend__select {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 4.4rem;
+    padding: 0 4rem 0 1.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    line-height: 1.2;
+    outline: none;
+    cursor: pointer;
+    transition: border-color var(--transition-fast),
+                box-shadow var(--transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .trend__select:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .trend__select-icon {
+    position: absolute;
+    top: 50%;
+    right: 1.3rem;
+    transform: translateY(-50%);
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--color-muted);
+    pointer-events: none;
+  }
+
+  /* ── Segmented toggle ── */
+  .trend__segmented {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem;
+    gap: 0.3rem;
+    min-height: 4.4rem;
+    flex-wrap: wrap;
+  }
+
+  .trend__seg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.6rem;
+    padding: 0 1.5rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .trend__seg:hover {
+    color: var(--color-text);
+  }
+
+  .trend__seg.is-active {
+    background-color: hsl(32 95% 50% / 0.14);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* ════════════════════════════════════════════════════
+     CHART
+     ════════════════════════════════════════════════════ */
+  .trend__chart-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .trend__section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+  }
+
+  .trend__section-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text);
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .trend__section-meta {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
+  .trend__chart-empty {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    line-height: 1.5;
+    text-align: center;
+    padding: 2.4rem 1.2rem;
+  }
+
+  .trend__chart-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .trend__chart {
+    width: 100%;
+    height: auto;
+    max-height: 32rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+  }
+
+  .trend__chart-x {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1.2rem;
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .trend__chart-tick {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .trend__chart-tick--start,
+  .trend__chart-tick--end {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  /* ════════════════════════════════════════════════════
+     NOT FOUND STATE
+     ════════════════════════════════════════════════════ */
+  .trend__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.2rem;
+    padding: 2rem 0;
+    max-width: 32rem;
+    margin: 0 auto;
+  }
+
+  .trend__error-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    background-color: hsl(0 80% 55% / 0.10);
+    color: var(--color-destructive);
+  }
+
+  .trend__error-icon svg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .trend__error-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--color-text);
+  }
+
+  .trend__error-text {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+
+  .trend__error-link {
+    display: inline-flex;
+    align-items: center;
+    height: 4.2rem;
+    padding: 0 1.8rem;
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-decoration: none;
+    margin-top: 0.4rem;
+    transition: background-color var(--transition-fast);
+  }
+
+  .trend__error-link:hover {
+    background-color: var(--color-accent-hover);
+    color: var(--color-accent-foreground);
+  }
+
+  @media (max-width: 640px) {
+    .trend__select-wrap {
+      min-width: 0;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .trend__field {
+      min-width: 0;
+    }
+
+    .trend__seg {
+      padding: 0 1.2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trend__back,
+    .trend__error-link,
+    .trend__select,
+    .trend__seg {
+      transition: none;
+    }
+  }
+</style>

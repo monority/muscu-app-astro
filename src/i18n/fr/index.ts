@@ -8,7 +8,9 @@ import detail from './detail';
 import comparer from './comparer';
 import rapide from './rapide';
 import exercices from './exercices';
-import historique from './historique';
+import historique from './historique';
+
+import tendance from './tendance';
 import progression from './progression';
 import records from './records';
 import stats from './stats';
@@ -34,7 +36,9 @@ export default {
   comparer,
   rapide,
   exercices,
-  historique,
+  historique,
+
+  tendance,
   progression,
   records,
   stats,
