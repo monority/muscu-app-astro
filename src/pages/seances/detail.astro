@@ -522,7 +522,7 @@ const L = t();
                           </td>
                           <td class="exo-row__num" x-text="formatWeight(set.weight)"></td>
                           <td class="exo-row__num" x-text="set.reps"></td>
-                          <td x-text="set.rpe != null ? formatRpe(set.rpe) : '—'"></td>
+                          <td x-text="formatSetRpe(set)"></td>
                           <td class="exo-row__td-end">
                             <svg
                               x-show="set.completed"
@@ -721,6 +721,7 @@ const L = t();
     type SessionExercise,
     type SessionMood,
     type SessionStatus,
+    type RpeType,
     type SetType,
   } from '../../lib/storage';
   import { getRestTime, formatRestTime } from '../../lib/rest-times';
@@ -792,6 +793,20 @@ const L = t();
   function formatRpeFn(rpe: number): string {
     if (!Number.isFinite(rpe)) return '—';
     return rpe.toString();
+  }
+
+  /**
+   * Per-set RPE display label: "RPE 7.5" or "uRPE 7".
+   * Sets without a value render '—'. An absent rpeType falls back to
+   * plain RPE so sessions saved before uRPE existed render safely.
+   */
+  function formatSetRpeFn(
+    rpe: number | string | null | undefined,
+    rpeType?: RpeType,
+  ): string {
+    const v = typeof rpe === 'string' ? Number(rpe) : rpe;
+    if (v == null || !Number.isFinite(v)) return '—';
+    return (rpeType === 'urpe' ? 'uRPE ' : 'RPE ') + v.toString();
   }
 
   // ── Notes helpers (added 2026-08-04) ───────────────────────
@@ -1027,6 +1042,10 @@ const L = t();
 
       formatRpe(rpe: number): string {
         return formatRpeFn(rpe);
+      },
+
+      formatSetRpe(set: { rpe?: number | null; rpeType?: RpeType }): string {
+        return formatSetRpeFn(set.rpe, set.rpeType);
       },
 
       /**

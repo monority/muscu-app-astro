@@ -342,7 +342,7 @@ const L = t();
                       <td class="hist__num" data-label={L.historique.colWeight} x-text="formatNumber(row.weight) + ' kg'"></td>
                       <td class="hist__num" data-label={L.historique.colReps} x-text="row.reps"></td>
                       <td class="hist__num hist__num--accent" data-label={L.historique.col1RM} x-text="formatNumber(row.estimated1RM) + ' kg'"></td>
-                      <td class="hist__num" data-label={L.historique.colRpe} x-text="row.rpe != null ? formatRpe(row.rpe) : '—'"></td>
+                      <td class="hist__num" data-label={L.historique.colRpe} x-text="formatRpe(row)"></td>
                       <td data-label={L.historique.colType}>
                         <span
                           class="hist__type"
@@ -369,6 +369,7 @@ const L = t();
     getSessions,
     calculate1RM,
     type Exercise,
+    type RpeType,
     type SetType,
   } from '../../lib/storage';
 
@@ -385,6 +386,7 @@ const L = t();
     weight: number;
     reps: number;
     rpe: number | null;
+    rpeType?: RpeType;
     type: SetType;
     estimated1RM: number;
     sessionName: string;
@@ -436,9 +438,14 @@ const L = t();
     }
   }
 
-  function fmtRpe(rpe: number): string {
-    if (!Number.isFinite(rpe)) return '—';
-    return rpe.toString();
+  /**
+   * Per-set RPE display label: "RPE 7.5" or "uRPE 7".
+   * Absent rpeType falls back to plain RPE; missing value renders '—'.
+   */
+  function fmtRpe(rpe: number | string | null | undefined, rpeType?: RpeType): string {
+    const v = typeof rpe === 'string' ? Number(rpe) : rpe;
+    if (v == null || !Number.isFinite(v)) return '—';
+    return (rpeType === 'urpe' ? 'uRPE ' : 'RPE ') + v.toString();
   }
 
   document.addEventListener('alpine:init', () => {
@@ -496,6 +503,7 @@ const L = t();
                 weight: set.weight,
                 reps: set.reps,
                 rpe: set.rpe ?? null,
+                rpeType: set.rpeType,
                 type: set.type,
                 estimated1RM: calculate1RM(set.weight, set.reps),
                 sessionName: session.name,
@@ -673,8 +681,8 @@ const L = t();
       typeLabel(t: SetType): string {
         return typeLabelFn(t);
       },
-      formatRpe(rpe: number): string {
-        return fmtRpe(rpe);
+      formatRpe(row: HistoryRow): string {
+        return fmtRpe(row.rpe, row.rpeType);
       },
     }));
   });

@@ -71,6 +71,8 @@ export default {
   notesTitle: 'Notes de séance',
   rpe: 'Effort perçu (RPE)',
   rpeAria: 'Effort perçu (RPE) de 1 à 10',
+  rpeForSet: 'Effort perçu de la série (RPE)',
+  rpeTypeLabel: 'Type d\'effort de la série (RPE/uRPE)',
   notesPlaceholder: "Comment s'est passée la séance…",
   discardConfirm: 'Annuler la séance en cours ? Les modifications non enregistrées seront perdues.',
   discardTitle: 'Annuler la séance ?',

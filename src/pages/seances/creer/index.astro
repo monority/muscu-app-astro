@@ -306,6 +306,7 @@ const setTypes = [
                 <div class="ses__cell ses__cell--type" role="columnheader">Type</div>
                 <div class="ses__cell ses__cell--num" role="columnheader">Poids (kg)</div>
                 <div class="ses__cell ses__cell--num" role="columnheader">Reps</div>
+                <div class="ses__cell ses__cell--rpe" role="columnheader">RPE</div>
                 <div class="ses__cell ses__cell--action" role="columnheader" aria-label="Actions"></div>
               </div>
               <template x-for="(set, setIdx) in ex.sets" :key="setIdx">
@@ -343,6 +344,49 @@ const setTypes = [
                       inputmode="numeric"
                       :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
                     />
+                  </div>
+                  {/* ── Per-set RPE / uRPE (added 2026-08-09) ──
+                      Compact segmented RPE/uRPE toggle + 0.5-step select.
+                      Shown once the set is marked complete; the value
+                      persists on the set even if the set is later unmarked. */}
+                  <div
+                    class="ses__cell ses__cell--rpe"
+                    role="cell"
+                    x-show="set.completed"
+                    x-cloak
+                  >
+                    <div class="ses__rpe-set">
+                      <div
+                        class="ses__rpe-toggle"
+                        role="group"
+                        :aria-label="labels.rpeTypeLabel + ' ' + (setIdx + 1)"
+                      >
+                        <button
+                          type="button"
+                          class="ses__rpe-toggle-btn"
+                          :class="{ 'is-active': set.rpeType !== 'urpe' }"
+                          @click="set.rpeType = 'rpe'"
+                          :aria-pressed="set.rpeType !== 'urpe'"
+                        >RPE</button>
+                        <button
+                          type="button"
+                          class="ses__rpe-toggle-btn"
+                          :class="{ 'is-active': set.rpeType === 'urpe' }"
+                          @click="set.rpeType = 'urpe'"
+                          :aria-pressed="set.rpeType === 'urpe'"
+                        >uRPE</button>
+                      </div>
+                      <select
+                        class="ses__select ses__select--inline ses__rpe-select"
+                        x-model="set.rpe"
+                        :aria-label="labels.rpeForSet + ' ' + (setIdx + 1)"
+                      >
+                        <option :value="null">—</option>
+                        <template x-for="v in rpeValues" :key="v">
+                          <option :value="v" x-text="v"></option>
+                        </template>
+                      </select>
+                    </div>
                   </div>
                   <div class="ses__cell ses__cell--action" role="cell">
                     <button
@@ -865,6 +909,7 @@ const setTypes = [
     getExercises,
     saveExercise,
     saveSession,
+    RPE_OPTIONS,
     type Exercise,
     type SessionExercise,
     type SessionSet,
@@ -921,6 +966,8 @@ const setTypes = [
       exercises: [] as BuilderExercise[],
       availableExercises: [] as Exercise[],
       exerciseSearch: '',
+      // Per-set RPE values (10 → 4 by 0.5) used by each set's select.
+      rpeValues: RPE_OPTIONS,
 
       // ── Notes state (added 2026-08-04) ──
       sessionRpe: 5,
@@ -978,6 +1025,8 @@ const setTypes = [
         setTypeLabel: LABELS.builder.setTypeLabel,
         weightForSet: LABELS.builder.weightForSet,
         repsForSet: LABELS.builder.repsForSet,
+        rpeForSet: LABELS.builder.rpeForSet,
+        rpeTypeLabel: LABELS.builder.rpeTypeLabel,
         deleteSet: LABELS.builder.deleteSet,
         noSets: LABELS.builder.noSets,
         setsPlural: LABELS.builder.setsPlural,
@@ -1118,6 +1167,7 @@ const setTypes = [
           weight: 0,
           reps: 0,
           type: DEFAULT_SET_TYPE,
+          rpeType: 'rpe',
           completed: false,
         };
         const newEx: BuilderExercise = {
@@ -1178,6 +1228,7 @@ const setTypes = [
             weight: 0,
             reps: te.defaultReps,
             type: DEFAULT_SET_TYPE,
+            rpeType: 'rpe',
             completed: false,
           });
         }
@@ -1274,6 +1325,7 @@ const setTypes = [
           weight: last ? last.weight : 0,
           reps: last ? last.reps : 0,
           type: DEFAULT_SET_TYPE,
+          rpeType: 'rpe',
           completed: false,
         };
         ex.sets.push(next);
@@ -1312,6 +1364,7 @@ const setTypes = [
           type: 'warmup',
           weight: Math.round(maxWeight * p),
           reps: warmupReps[i],
+          rpeType: 'rpe',
           completed: false,
         }));
 
@@ -1853,7 +1906,7 @@ const setTypes = [
   .ses__table-head,
   .ses__table-row {
     display: grid;
-    grid-template-columns: 3.2rem minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) 3.2rem;
+    grid-template-columns: 3.2rem minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.1fr) 3.2rem;
     align-items: center;
     gap: 0.4rem;
     padding: 0 1.0rem;
@@ -1901,6 +1954,68 @@ const setTypes = [
 
   .ses__cell--type {
     justify-content: stretch;
+  }
+
+  /* ── Per-set RPE control (added 2026-08-09) ──
+     Compact segmented RPE/uRPE toggle + 0.5-step value select,
+     shown once the set is marked complete. Stays inline so rows
+     keep their 6-column grid on desktop. */
+  .ses__rpe-set {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+  }
+
+  .ses__rpe-toggle {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.2rem;
+    padding: 0.2rem;
+    background-color: var(--color-surface-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+  }
+
+  .ses__rpe-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.4rem;
+    padding: 0 0.8rem;
+    background-color: transparent;
+    border: none;
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                box-shadow var(--transition-fast);
+  }
+
+  .ses__rpe-toggle-btn.is-active {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.30);
+  }
+
+  .ses__rpe-toggle-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .ses__rpe-select {
+    flex-shrink: 0;
+    width: 6.4rem;
+    padding: 0 2.0rem 0 0.6rem;
   }
 
   .ses__cell--action {
@@ -2902,6 +3017,7 @@ const setTypes = [
       grid-template-areas:
         'num type'
         'weight reps'
+        'rpe rpe'
         'action action';
       gap: 0.6rem;
       padding: 1.0rem;
@@ -2924,6 +3040,18 @@ const setTypes = [
       justify-content: flex-end;
       padding-top: 0.4rem;
       border-top: 1px dashed var(--color-border);
+    }
+    .ses__table-row .ses__cell--rpe {
+      grid-area: rpe;
+      justify-content: stretch;
+      padding-top: 0.4rem;
+    }
+    .ses__rpe-set {
+      justify-content: stretch;
+    }
+    .ses__rpe-select {
+      flex: 1 1 auto;
+      width: auto;
     }
     .ses__picker-name {
       white-space: normal;

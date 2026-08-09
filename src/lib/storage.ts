@@ -22,12 +22,24 @@ export interface Exercise {
 
 export type SetType = 'warmup' | 'work' | 'top' | 'drop' | 'failure';
 
+export type RpeType = 'rpe' | 'urpe';
+
+/** Selectable per-set RPE values (10 → 4 by 0.5 steps). */
+export const RPE_OPTIONS: number[] = [10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5, 4];
+
 export interface SessionSet {
   exerciseId: string;
   setNumber: number;
   weight: number;
   reps: number;
-  rpe?: number;
+  /**
+   * Perceived effort for this set, 0-10 in 0.5 steps (e.g. 7.5).
+   * Optional + nullable so sessions saved before the per-set RPE feature
+   * stay parseable — callers must treat null/undefined as "not logged".
+   */
+  rpe?: number | null;
+  /** Whether `rpe` is an RPE or uRPE value. Absent ⇒ treat as 'rpe'. */
+  rpeType?: RpeType;
   type: SetType;
   completed: boolean;
 }
@@ -651,14 +663,26 @@ function csvEscape(value: string | number): string {
 }
 
 /**
+ * CSV cell for a set's RPE: "RPE 7.5" or "uRPE 7", or '' when absent.
+ * uRPE sets are prefixed so the exported spreadsheet stays self-explanatory.
+ */
+function formatSetRpeCsv(set: SessionSet): string {
+  const v = typeof set.rpe === 'string' ? Number(set.rpe) : set.rpe;
+  if (v == null || !Number.isFinite(v)) return '';
+  return (set.rpeType === 'urpe' ? 'uRPE ' : 'RPE ') + v;
+}
+
+/**
  * Builds a CSV string of all sessions with one row per set, suitable for
  * import into a spreadsheet. Columns:
- *   Date, Nom, Exercice, Série, Type, Charge (kg), Répétitions, 1RM estimé.
- * The estimated 1RM uses the Epley formula via `calculate1RM`.
+ *   Date, Nom, Exercice, Série, Type, Charge (kg), Répétitions, 1RM estimé, RPE.
+ * The estimated 1RM uses the Epley formula via `calculate1RM`. The RPE column
+ * carries a prefixed label ("RPE 7.5" / "uRPE 7") and is empty when a set has
+ * no RPE logged (e.g. sessions saved before the feature existed).
  */
 export function exportSessionsAsCSV(): string {
   const sessions = getSessions();
-  const header = 'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé';
+  const header = 'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé,RPE';
   const rows = sessions.flatMap((session) =>
     session.exercises.flatMap((exercise) =>
       exercise.sets.map((set, i) =>
@@ -671,6 +695,7 @@ export function exportSessionsAsCSV(): string {
           set.weight,
           set.reps,
           Math.round(calculate1RM(set.weight, set.reps)),
+          csvEscape(formatSetRpeCsv(set)),
         ].join(','),
       ),
     ),

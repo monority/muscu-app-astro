@@ -225,7 +225,7 @@ describe('exportSessionsAsCSV', () => {
     const lines = csv.split('\n');
     expect(lines.length).toBe(1);
     expect(lines[0]).toBe(
-      'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé',
+      'Date,Nom,Exercice,Série,Type,Charge (kg),Répétitions,1RM estimé,RPE',
     );
   });
 
@@ -235,6 +235,8 @@ describe('exportSessionsAsCSV', () => {
       setNumber: 1,
       weight: 100,
       reps: 5,
+      rpe: 7.5,
+      rpeType: 'urpe',
       type: 'work',
       completed: true,
     };
@@ -260,6 +262,34 @@ describe('exportSessionsAsCSV', () => {
     expect(lines[1]).toContain('work');
     // 1RM for 100 × 5 via Epley ≈ 117
     expect(lines[1]).toContain('117');
+    // uRPE set exports a prefixed label in the RPE column
+    expect(lines[1]).toContain('uRPE 7.5');
+  });
+
+  it('exports an empty RPE cell for sets without an RPE value', () => {
+    const set: SessionSet = {
+      exerciseId: 'ex-1',
+      setNumber: 1,
+      weight: 60,
+      reps: 10,
+      type: 'work',
+      completed: true,
+    };
+    saveSession({
+      name: 'Push',
+      date: '2026-08-05',
+      exercises: [
+        { exerciseId: 'ex-1', name: 'Développé', muscle: 'Pectoraux', sets: [set] },
+      ],
+      status: 'completed',
+    });
+
+    const csv = exportSessionsAsCSV();
+    const lines = csv.split('\n');
+    // 8 data columns → the row ends with an empty RPE column.
+    const row = lines[1].split(',');
+    expect(row.length).toBe(9);
+    expect(row[8]).toBe('');
   });
 });
 

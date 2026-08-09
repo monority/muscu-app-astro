@@ -71,6 +71,8 @@ export default {
   notesTitle: 'Session notes',
   rpe: 'Perceived effort (RPE)',
   rpeAria: 'Perceived effort (RPE) from 1 to 10',
+  rpeForSet: 'Set perceived effort (RPE)',
+  rpeTypeLabel: 'Set effort type (RPE/uRPE)',
   notesPlaceholder: 'How did the session go...',
   discardConfirm: 'Discard the current session? Unsaved changes will be lost.',
   discardTitle: 'Discard session?',
