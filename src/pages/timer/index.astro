@@ -100,6 +100,18 @@ const L = t();
       </button>
     </div>
 
+    {/* ── Keyboard shortcut hints ── */}
+    <div class="timer__shortcuts" aria-hidden="true">
+      <span class="timer__shortcut">
+        <kbd class="timer__kbd">Espace</kbd>
+        <span x-text="labels.shortcutsToggle"></span>
+      </span>
+      <span class="timer__shortcut">
+        <kbd class="timer__kbd">R</kbd>
+        <span x-text="labels.shortcutsReset"></span>
+      </span>
+    </div>
+
     {/* ════════════════════════════════════════════════════
         COUNTDOWN MODE
         ════════════════════════════════════════════════════ */}
@@ -399,11 +411,17 @@ const L = t();
         popout: LABELS.timer.popout,
         popoutAria: LABELS.timer.popoutAria,
         popoutOpen: LABELS.timer.popoutOpen,
+        shortcutsToggle: LABELS.timer.shortcutsToggle,
+        shortcutsReset: LABELS.timer.shortcutsReset,
       },
+
+      // ── Keyboard ──
+      _keyHandler: null as ((e: KeyboardEvent) => void) | null,
 
       // ── Pop-out bridge plumbing ──
       init() {
         this.display = this.totalTime;
+        this._installKeyboard();
         // init() can run twice (Alpine auto-calls it AND x-init does). Guard
         // so a second run doesn't leave two live BroadcastChannels — every
         // message would then be handled twice (duplicate laps/commands).
@@ -796,7 +814,39 @@ const L = t();
         playBeep();
       },
 
+      // ── Keyboard shortcuts ──
+      _installKeyboard() {
+        if (this._keyHandler) return;
+        this._keyHandler = (e: KeyboardEvent) => {
+          // Don't hijack typing in form fields (e.g. the custom time input).
+          const target = e.target as HTMLElement | null;
+          if (
+            target &&
+            (target.tagName === 'INPUT' ||
+              target.tagName === 'TEXTAREA' ||
+              target.tagName === 'SELECT' ||
+              target.isContentEditable)
+          ) {
+            return;
+          }
+          // Leave browser/app shortcuts alone.
+          if (e.ctrlKey || e.metaKey || e.altKey) return;
+          if (e.key === ' ') {
+            e.preventDefault();
+            this.toggle();
+          } else if (e.key.toLowerCase() === 'r') {
+            if (this.mode === 'stopwatch') this.swReset();
+            else this.reset();
+          }
+        };
+        window.addEventListener('keydown', this._keyHandler);
+      },
+
       destroy() {
+        if (this._keyHandler) {
+          window.removeEventListener('keydown', this._keyHandler);
+          this._keyHandler = null;
+        }
         if (this.intervalId) clearInterval(this.intervalId);
         if (this.sw.intervalId) clearInterval(this.sw.intervalId);
       },
@@ -1171,6 +1221,36 @@ const L = t();
   .timer__custom-input:focus {
     border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
+  }
+
+  /* ════════════════════════════════════════════════════
+     KEYBOARD SHORTCUT HINTS
+     ════════════════════════════════════════════════════ */
+  .timer__shortcuts {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .timer__shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.1rem;
+    color: var(--color-muted);
+  }
+
+  .timer__kbd {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 0.4rem;
+    padding: 0.15rem 0.5rem;
+    line-height: 1.2;
   }
 
   /* ════════════════════════════════════════════════════

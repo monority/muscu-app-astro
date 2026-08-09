@@ -33,4 +33,6 @@ export default {
   popoutOpen: 'Pop-out open',
   connected: 'Connected to timer',
   disconnected: 'Looking for the timer…',
+  shortcutsToggle: 'Pause / resume',
+  shortcutsReset: 'Reset',
 };

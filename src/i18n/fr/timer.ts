@@ -33,4 +33,6 @@ export default {
   popoutOpen: 'Fenêtre externe ouverte',
   connected: 'Connecté au timer',
   disconnected: 'Recherche du timer…',
+  shortcutsToggle: 'Pause / reprise',
+  shortcutsReset: 'Réinitialiser',
 };
