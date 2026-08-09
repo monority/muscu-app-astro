@@ -10,6 +10,7 @@ import Select from '../../components/ui/Select.astro';
 import Button from '../../components/ui/Button.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import SettingsBottomBar from '../../components/layout/SettingsBottomBar.astro';
+import ReminderSettings from '../../components/params/ReminderSettings.astro';
 import Toast from '../../components/ui/Toast.astro';
 import { t, setLocale, defaultLocale } from '../../i18n';
 
@@ -41,6 +42,7 @@ const SETTINGS_SECTIONS = [
   { id: 'set-goals', label: L.settings.goals },
   { id: 'set-units', label: L.settings.units },
   { id: 'set-timer', label: L.settings.timerSettings },
+  { id: 'set-reminder', label: L.settings.reminders },
   { id: 'set-data', label: L.settings.data },
   { id: 'set-about', label: L.settings.about },
 ];
@@ -455,7 +457,12 @@ const SETTINGS_SECTIONS = [
     </section>
 
     {/* ═════════════════════════════════════════════════════
-        5. DONNÉES
+        5. RAPPEL D'ENTRAÎNEMENT
+        ═════════════════════════════════════════════════════ */}
+    <ReminderSettings />
+
+    {/* ═════════════════════════════════════════════════════
+        6. DONNÉES
         ═════════════════════════════════════════════════════ */}
     <section class="set__section" id="set-data">
       <Card>
@@ -619,7 +626,7 @@ const SETTINGS_SECTIONS = [
     </section>
 
     {/* ═════════════════════════════════════════════════════
-        6. À PROPOS
+        7. À PROPOS
         ═════════════════════════════════════════════════════ */}
     <section class="set__section" id="set-about">
       <Card>

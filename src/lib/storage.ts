@@ -95,6 +95,17 @@ export interface BodyRecord {
 export type WeightUnit = 'kg' | 'lbs';
 export type RepsFormat = 'simple' | 'range';
 
+/**
+ * Session reminder configuration (added 2026-08-09).
+ * `days` uses JavaScript `Date#getDay()` indexing: 0 = Sunday …
+ * 6 = Saturday. `time` is a "HH:MM" string in 24h local time.
+ */
+export interface ReminderSettings {
+  enabled: boolean;
+  days: number[];
+  time: string; // "HH:MM"
+}
+
 export interface Settings {
   pseudo: string;
   email: string;
@@ -108,6 +119,10 @@ export interface Settings {
   // page can show a quick "current weight" without reading
   // the body store separately.
   bodyWeight?: number;
+  // ── Session reminders (added 2026-08-09) ──
+  // Nested object so older localStorage payloads merge safely
+  // through the DEFAULT_SETTINGS fallback in `getSettings()`.
+  reminders: ReminderSettings;
 }
 
 // ============================================================================
@@ -120,7 +135,17 @@ export const STORAGE_KEYS = {
   progress: 'muscu:progress',
   settings: 'muscu-settings',
   body: 'muscu:body',
+  // Cooldown marker for the session reminder watcher: stores the
+  // last notified "YYYY-MM-DD HH:MM" slot so a minutely reminder is
+  // never fired repeatedly for the same minute/session.
+  reminderNotified: 'muscu:reminder-notified',
 } as const;
+
+export const DEFAULT_REMINDERS: ReminderSettings = {
+  enabled: false,
+  days: [1, 3, 5], // Mon, Wed, Fri
+  time: '18:00',
+};
 
 export const DEFAULT_SETTINGS: Settings = {
   pseudo: '',
@@ -130,6 +155,7 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultRestTime: 90,
   soundAlerts: true,
   weeklyGoal: 3,
+  reminders: DEFAULT_REMINDERS,
 };
 
 const DEFAULT_EXERCISES: ReadonlyArray<{
@@ -591,6 +617,7 @@ const APP_DATA_KEYS: ReadonlyArray<{ key: string; match: RegExp }> = [
   { key: STORAGE_KEYS.progress, match: /^muscu:progress$/ },
   { key: STORAGE_KEYS.settings, match: /^muscu-settings$/ },
   { key: STORAGE_KEYS.body, match: /^muscu:body$/ },
+  { key: STORAGE_KEYS.reminderNotified, match: /^muscu:reminder-notified$/ },
 ];
 
 /**

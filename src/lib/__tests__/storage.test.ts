@@ -19,6 +19,7 @@ import {
   saveExercise,
   saveSession,
   toggleExerciseFavorite,
+  DEFAULT_REMINDERS,
   type Session,
   type SessionExercise,
   type SessionSet,
@@ -209,6 +210,7 @@ describe('getSettings', () => {
       defaultRestTime: 90,
       soundAlerts: true,
       weeklyGoal: 3,
+      reminders: DEFAULT_REMINDERS,
     });
   });
 });
