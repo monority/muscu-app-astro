@@ -140,6 +140,11 @@ export interface Settings {
   // user-configured WebDAV host). `lastSyncAt` drives the "last sync"
   // status line on the settings page.
   webdav: WebdavSettings;
+  // ── Community benchmarks opt-in (added 2026-08-10) ──
+  // Records INTENT only: no server exists yet, so enabling this never
+  // triggers a network request. It is the flag a future anonymized
+  // cohort upload will read once Supabase sync ships.
+  benchmarksOptIn: boolean;
 }
 
 /**
@@ -193,6 +198,7 @@ export const DEFAULT_SETTINGS: Settings = {
   weeklyGoal: 3,
   reminders: DEFAULT_REMINDERS,
   webdav: DEFAULT_WEBDAV,
+  benchmarksOptIn: false,
 };
 
 const DEFAULT_EXERCISES: ReadonlyArray<{

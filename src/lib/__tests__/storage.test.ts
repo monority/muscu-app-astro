@@ -214,6 +214,7 @@ describe('getSettings', () => {
       weeklyGoal: 3,
       reminders: DEFAULT_REMINDERS,
       webdav: DEFAULT_WEBDAV,
+      benchmarksOptIn: false,
     });
   });
 });

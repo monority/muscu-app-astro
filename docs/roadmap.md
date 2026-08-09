@@ -4,7 +4,7 @@
 > Projet : **muscu-app** — tracker de gym (Astro SSR + Alpine.js), persistance localStorage (`muscu:*`), i18n FR/EN.
 > Ce fichier est la **source de vérité** pour orienter les prochaines itérations : chaque item livré bascule dans « Récemment livré », puis est retiré des prochaines priorités.
 
-> **Note de vérification (2026-08-10)** : contrôle du code effectué avant rédaction. En place en amont : **export/import JSON (sauvegarde/restauration + export CSV)** (Réglages → section Données) et **toasts** (`Toast.astro`/API `window.showToast`). Depuis : **raccourcis clavier du timer**, puis l'ensemble du **P1** (tendance par exercice, rappels de séance, RPE/uRPE par série, supersets, fiche de séance imprimable + CSV), puis la **sync WebDAV** (sauvegarde/restauration). La table **P0 est supprimée** (aucun item restant) et le **P1 est vide** — tout figure dans « ✅ Récemment livré ».
+> **Note de vérification (2026-08-10)** : contrôle du code effectué avant rédaction. En place en amont : **export/import JSON (sauvegarde/restauration + export CSV)** (Réglages → section Données) et **toasts** (`Toast.astro`/API `window.showToast`). Depuis : **raccourcis clavier du timer**, puis l'ensemble du **P1** (tendance par exercice, rappels de séance, RPE/uRPE par série, supersets, fiche de séance imprimable + CSV), puis la **sync WebDAV** (sauvegarde/restauration), puis les **benchmarks V1** (opt-in + données de référence locales étiquetées, aucune collecte serveur). La table **P0 est supprimée** (aucun item restant) et le **P1 est vide** — tout figure dans « ✅ Récemment livré ».
 
 ---
 
@@ -37,6 +37,7 @@
 | Sync WebDAV (backup / restore) | Sauvegarde/restauration du `localStorage` vers un serveur WebDAV : credentials dans les réglages, push / pull / test de connexion, restauration avec confirmation, dernier-écrit-gagne (last-write-wins). Wire-format : snapshot `AppDataSnapshot`. **Google Drive reste expérimental (OAuth) — non implémenté**. | `src/lib/sync.ts`, `src/pages/settings/index.astro`, `src/i18n/{fr,en}/settings.ts` (bloc sync), tests `src/lib/__tests__/sync.test.ts` |
 | Répartition volume par groupe musculaire | Camembert des volumes Σ (charge×reps) par groupe musculaire sur la période (semaine/mois/tout), SVG inline (aucune dépendance), tooltip volume + %. Convention : séries terminées des séances `completed` uniquement, muscle snapshot du `SessionExercise`. | `src/pages/progression/stats.astro`, `src/lib/volume-stats.ts`, tests `src/lib/__tests__/volume-stats.test.ts` |
 | MRV automatique (charge prescrite) — **V1** (progression linéaire) | Bouton ⚡ dans la cellule poids d'une série du builder : charge suggérée depuis l'historique, appliquée **uniquement sur clic** (jamais d'écrasement silencieux), toast + tooltip localisés (fr/en). **Formule V1 documentée + testée** (`MRV_FORMULA`) : base = top set (max poids) de la **dernière séance terminée** (repli `lastLoad`) ; facteur répétitions ±4 % / pas de 2 reps (clamp ±10 %) ; RPE ≥ 8,5 → +2,5 %, ≤ 6,5 → −2,5 % ; plafond **95 % du 1RM Epley** ; arrondi à 2,5 kg (1,25 configurable). V2 (algorithme intelligent) reste en P2. | `src/lib/mrv.ts` (`MRV_FORMULA`, `suggestLoad`, `suggestLoadSuggestion`), `src/pages/seances/creer/index.astro`, `src/i18n/{fr,en}/builder.ts`, tests `src/lib/__tests__/mrv.test.ts` |
+| Benchmarks V1 (commu) — **données de référence locales** | Table **1RM estimé (Epley) vs percentiles p50/p75/p90** par exercice (séances terminées uniquement), badge de bande « ≥ 75ᵉ » + surlignage, opt-in anonyme `settings.benchmarksOptIn` (**intention seulement — AUCUN envoi réseau**, note « données locales »). Source **étiquetée non-communautaire** (`benchmarks-data.ts` : standards d'entraînement, `DATA_STATUS='reference'`), upload anonyme futur dépend de déploiement Supabase + politique de confidentialité. | `src/lib/benchmarks.ts`, `src/lib/benchmarks-data.ts`, `src/pages/progression/stats.astro` (+ miroir `/en/`), `src/i18n/{fr,en}/stats.ts` (clés benchmarks), `src/lib/storage.ts` (`Settings.benchmarksOptIn`), tests `src/lib/__tests__/benchmarks.test.ts` |
 
 ---
 
@@ -45,15 +46,15 @@
 | Élément | Effort | Valeur | Fichiers principaux | Description |
 |---|---|---|---|---|
 | **MRV — V2 (algorithme intelligent)** | M | moyenne | `src/lib/mrv.ts` (V1 livrée), `src/pages/seances/creer/index.astro`, `src/lib/session-utils.ts` | **V1 = progression linéaire livrée** (voir « ✅ Récemment livré »). Reste : modèle de calcul avancé (progression non-linéaire, néo-RPE / vélocité, fatigue sessionnelle…) pour affiner la charge prescrite.<br><br>**Critères d'acceptation (V2)** : algorithme documenté et testé.<br>**Dépend de** : modèle de calcul v2 à définir. |
-| **Communauté / benchmarks** | L | haute | back-end Astro SSR + base de données (base : `docs/supabase-schema.sql`), `src/lib/auth.ts` | Comparer son volume/1RM à un recueil anonyme. Nécessite SQL + auth + politique de confidentialité — gros morceau, à ne pas lancer avant P1.<br><br>**Critères d'acceptation** : opt-in anonyme (aucune donnée personnelle), comparaison volume/1RM.<br>**Dépend de** : SQL (`docs/supabase-schema.sql`) + auth + politique de confidentialité. |
+| **Communauté / benchmarks** | L | haute | back-end Astro SSR + base de données (base : `docs/supabase-schema.sql`), `src/lib/auth.ts` | Comparer son volume/1RM à un recueil anonyme. Nécessite SQL + auth + politique de confidentialité — gros morceau, à ne pas lancer avant P1.<br><br>**Critères d'acceptation** : opt-in anonyme (aucune donnée personnelle), comparaison volume/1RM.<br>**Dépend de** : SQL (`docs/supabase-schema.sql`) + auth + politique de confidentialité.<br><br>**Progression — V1 benchmarks locaux livrée** : opt-in `settings.benchmarksOptIn` (intention seulement, aucun envoi réseau), table 1RM (Epley) vs **données de référence étiquetées** (`src/lib/benchmarks-data.ts` — standards d'entraînement, PAS une cohorte réelle, remplaçables dès la sync serveur). **Upload anonyme serveur dépend de** déploiement Supabase + base de données + politique de confidentialité. |
 
 ---
 
 ## Priorité conseillée
 
-P0 et P1 sont **entièrement livrés**. En P2 : « Répartition volume par groupe musculaire » **livrée** et « MRV automatique » **livrée en V1** (progression linéaire, formule documentée + testée). Il reste :
+P0 et P1 sont **entièrement livrés**. En P2 : « Répartition volume par groupe musculaire » **livrée**, « MRV automatique » **livrée en V1**, et **« Communauté / benchmarks » livrée en V1 locale** (opt-in + source de référence étiquetée). Il reste :
 
-1. **Communauté / benchmarks** (P2, L) — le plus gros morceau (SQL + auth + confidentialité) ; à lancer en dernier.
+1. **Communauté / benchmarks — upload anonyme serveur** (P2, L) — la partie collection/upload serveur (SQL + auth + confidentialité) ; à lancer en dernier.
 2. *(optionnel)* **MRV V2 (algorithme intelligent)** (P2, M) — suite naturelle de la V1 livrée, à porter selon les retours d'usage.
 
 > **Note** : aucun de ces items ne dépend d'un autre (la sync WebDAV déjà livrée couvrait la portabilité entre devices).

@@ -25,4 +25,18 @@ export default {
   regularity: 'Régularité',
   last12wKg: '12 dernières semaines · kg soulevés',
   last8w: '8 dernières semaines',
+  // ── Benchmarks (roadmap P2 « Communauté / benchmarks », V1 locale) ──
+  benchmarksTitle: 'Benchmarks',
+  benchmarksDesc: 'Comparez votre meilleur 1RM (Epley) à des repères de force, par exercice.',
+  benchmarksColExercise: 'Exercice',
+  benchmarksColYour1RM: 'Ton 1RM',
+  benchmarksPctl50: '50ᵉ',
+  benchmarksPctl75: '75ᵉ',
+  benchmarksPctl90: '90ᵉ',
+  benchmarksThresholdHeader: 'Seuil percentile (kg)',
+  benchmarksOptInLabel: 'Participer anonymement aux benchmarks',
+  benchmarksOptInDesc: 'Aucune donnée partagée maintenant — upload à venir. Vos données restent 100 % locales (localStorage).',
+  benchmarksSourceNote: 'Données de référence (standards d\u2019entraînement). Les benchmarks communautaires arriveront avec la synchronisation serveur.',
+  benchmarksNoBands: 'Aucun repère pour cet exercice',
+  benchmarksEmpty: 'Terminez des séances pour comparer votre 1RM aux repères.',
 };
