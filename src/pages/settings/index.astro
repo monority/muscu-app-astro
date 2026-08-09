@@ -658,12 +658,13 @@ const SETTINGS_SECTIONS = [
             <div class="set__rows">
               <div class="set__row set__row--form">
                 <div class="set__row-label">
-                  <span class="set__row-title" x-text="labels.syncUrl">{L.settings.sync.url}</span>
+                  <label class="set__row-title" for="set-sync-url" x-text="labels.syncUrl">{L.settings.sync.url}</label>
                   <span class="set__row-hint" x-text="labels.syncConflict">{L.settings.sync.conflict}</span>
                 </div>
                 <div class="set__row-value set__row-value--control">
                   <input
                     type="text"
+                    id="set-sync-url"
                     class="set__sync-input"
                     x-model="syncForm.url"
                     :placeholder="labels.syncUrlPlaceholder"
@@ -676,11 +677,12 @@ const SETTINGS_SECTIONS = [
 
               <div class="set__row set__row--form">
                 <div class="set__row-label">
-                  <span class="set__row-title">{L.settings.sync.username}</span>
+                  <label class="set__row-title" for="set-sync-username">{L.settings.sync.username}</label>
                 </div>
                 <div class="set__row-value set__row-value--control">
                   <input
                     type="text"
+                    id="set-sync-username"
                     class="set__sync-input"
                     x-model="syncForm.username"
                     :placeholder="labels.syncUsernamePlaceholder"
@@ -693,16 +695,17 @@ const SETTINGS_SECTIONS = [
 
               <div class="set__row set__row--form">
                 <div class="set__row-label">
-                  <span class="set__row-title">{L.settings.sync.password}</span>
+                  <label class="set__row-title" for="set-sync-password">{L.settings.sync.password}</label>
                   <span class="set__row-hint">{L.settings.sync.passwordNote}</span>
                 </div>
                 <div class="set__row-value set__row-value--control">
                   <input
                     type="password"
+                    id="set-sync-password"
                     class="set__sync-input"
                     x-model="syncForm.password"
                     :placeholder="labels.syncPasswordPlaceholder"
-                    autocomplete="current-password"
+                    autocomplete="off"
                     aria-label={L.settings.sync.password}
                   />
                 </div>
@@ -735,33 +738,39 @@ const SETTINGS_SECTIONS = [
 
           {/* Manual-only actions */}
           <div class="set__sync-actions">
-            <button
+            <Button
+              variant="secondary"
               type="button"
-              class="set__data-btn set__sync-btn"
+              class="set__sync-btn"
               :disabled="syncBusy !== null || !syncForm.url.trim()"
+              :loading="syncBusy === 'test'"
               @click="testSync()"
             >
               <span x-show="syncBusy !== 'test'" x-cloak x-text="labels.syncTest">{L.settings.sync.test}</span>
               <span x-show="syncBusy === 'test'" x-cloak x-text="labels.syncTesting">{L.settings.sync.testing}</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
               type="button"
-              class="set__data-btn set__sync-btn set__sync-btn--primary"
+              class="set__sync-btn"
               :disabled="syncBusy !== null || !syncForm.url.trim()"
+              :loading="syncBusy === 'push'"
               @click="pushSync()"
             >
               <span x-show="syncBusy !== 'push'" x-cloak x-text="labels.syncPush">{L.settings.sync.push}</span>
               <span x-show="syncBusy === 'push'" x-cloak x-text="labels.syncPushing">{L.settings.sync.pushing}</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               type="button"
-              class="set__data-btn set__sync-btn"
+              class="set__sync-btn"
               :disabled="syncBusy !== null || !syncForm.url.trim()"
+              :loading="syncBusy === 'pull'"
               @click="askRestore()"
             >
               <span x-show="syncBusy !== 'pull'" x-cloak x-text="labels.syncPull">{L.settings.sync.pull}</span>
               <span x-show="syncBusy === 'pull'" x-cloak x-text="labels.syncPulling">{L.settings.sync.pulling}</span>
-            </button>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -884,23 +893,22 @@ const SETTINGS_SECTIONS = [
       </p>
 
       <div slot="footer">
-        <button
-          type="button"
-          class="set__data-btn"
+        <Button
+          variant="secondary"
           data-dialog-close
-          x-bind:disabled="syncBusy !== null"
+          type="button"
         >
           {L.common.cancel}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="destructive"
           type="button"
-          class="set__danger-btn"
           x-bind:disabled="syncBusy !== null"
           @click="confirmRestore()"
         >
           <span x-show="syncBusy !== 'pull'" x-cloak>{L.settings.sync.restoreConfirm}</span>
           <span x-show="syncBusy === 'pull'" x-cloak>{L.settings.sync.pulling}</span>
-        </button>
+        </Button>
       </div>
     </Dialog>
 
