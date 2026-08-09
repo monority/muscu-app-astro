@@ -72,8 +72,28 @@ const L = t();
       <Card>
         <CardHeader>
           <div class="stats__chart-head">
-            <CardTitle>{L.stats.muscleChart}</CardTitle>
-            <span class="stats__chart-meta">par volume (12 sem.)</span>
+            <CardTitle>{L.stats.volumeByMuscle}</CardTitle>
+            <div class="stats__chart-actions">
+              <span class="stats__chart-meta" x-text="periodMeta"></span>
+              <div class="stats__segmented" role="group" aria-label={L.stats.volumePeriod}>
+                <button
+                  type="button"
+                  class="stats__seg"
+                  :class="{ 'is-active': period === 'week' }"
+                  @click="period = 'week'"
+                >
+                  {L.stats.volumePeriodWeek}
+                </button>
+                <button
+                  type="button"
+                  class="stats__seg"
+                  :class="{ 'is-active': period === 'month' }"
+                  @click="period = 'month'"
+                >
+                  {L.stats.volumePeriodMonth}
+                </button>
+              </div>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -116,7 +136,13 @@ const L = t();
     type Session,
   } from '../../lib/storage';
 
-  import { t, trExercise, trMuscle } from '../../i18n';
+  import { t, getLocale, trExercise, trMuscle } from '../../i18n';
+
+  import {
+    volumeByMuscle,
+    type MuscleVolumeSlice,
+    type VolumePeriod,
+  } from '../../lib/volume-stats';
 
   const LABELS = t();
 
@@ -138,12 +164,6 @@ const L = t();
     durationCount: number;
   }
 
-  interface MuscleSlice {
-    muscle: string;
-    volume: number;
-    pct: number; // 0..100
-  }
-
   interface TopExercise {
     exerciseId: string;
     name: string;
@@ -158,6 +178,12 @@ const L = t();
   function fmtNum(n: number): string {
     if (!Number.isFinite(n) || n <= 0) return '0';
     return Math.round(n).toLocaleString('fr-FR');
+  }
+
+  /** Locale-aware number formatting for the volume-by-muscle card. */
+  function fmtLocalNum(n: number): string {
+    if (!Number.isFinite(n) || n <= 0) return '0';
+    return Math.round(n).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US');
   }
 
   function fmtDate(iso: string): string {
@@ -179,20 +205,20 @@ const L = t();
     return m === 0 ? `${h} h` : `${h} h ${m}`;
   }
 
-  /** Palette for the muscle donut (high-contrast hues on dark navy). */
+  /** Palette for the muscle donut (high-hue-distance, theme-agnostic). */
   const MUSCLE_PALETTE: ReadonlyArray<string> = [
-    '#D97706', // accent
     '#3B82F6', // blue
-    '#10B981', // green
-    '#A855F7', // purple
-    '#EF4444', // red
-    '#EAB308', // yellow
-    '#06B6D4', // cyan
-    '#EC4899', // pink
-    '#84CC16', // lime
     '#F97316', // orange
+    '#10B981', // emerald
+    '#EC4899', // pink
+    '#EAB308', // yellow
     '#6366F1', // indigo
+    '#D97706', // amber
     '#14B8A6', // teal
+    '#EF4444', // red
+    '#84CC16', // lime
+    '#A855F7', // purple
+    '#06B6D4', // cyan
   ];
 
   // ============================================================================
@@ -281,42 +307,6 @@ const L = t();
     }
   }
 
-  /**
-   * Compute muscle distribution (volume share) over the last `n` weeks.
-   * Warmup sets are included for total volume parity with the other
-   * stats; this gives a "what did you actually push" reading.
-   */
-  function muscleDistribution(sessions: Session[], n: number): MuscleSlice[] {
-    const totals = new Map<string, number>();
-    const buckets = buildWeeks(n);
-    const minKey = buckets[0].key;
-    const maxKey = buckets[buckets.length - 1].key;
-
-    for (const session of sessions) {
-      if (session.status !== 'completed') continue;
-      if (!session.date) continue;
-      if (session.date < minKey || session.date > maxKey) continue;
-
-      for (const ex of session.exercises) {
-        if (!ex.muscle) continue;
-        for (const set of ex.sets) {
-          if (!set.completed) continue;
-          totals.set(ex.muscle, (totals.get(ex.muscle) ?? 0) + set.weight * set.reps);
-        }
-      }
-    }
-
-    const total = Array.from(totals.values()).reduce((s, v) => s + v, 0);
-    if (total <= 0) return [];
-    return Array.from(totals.entries())
-      .map(([muscle, volume]) => ({
-        muscle,
-        volume,
-        pct: (volume / total) * 100,
-      }))
-      .sort((a, b) => b.volume - a.volume);
-  }
-
   /** Top N exercises by volume, descending. */
   function topExercisesByVolume(
     sessions: Session[],
@@ -359,11 +349,6 @@ const L = t();
   // SVG renderers
   // ============================================================================
 
-  /** Polar → cartesian on a circle of radius r centred at (cx, cy). */
-  function polar(cx: number, cy: number, r: number, angleRad: number): [number, number] {
-    return [cx + r * Math.cos(angleRad), cy + r * Math.sin(angleRad)];
-  }
-
   function svgEscape(s: string): string {
     return s
       .replace(/&/g, '&amp;')
@@ -395,7 +380,9 @@ const L = t();
       consistencyPct: 0,
       avgDuration: 0,
       durationSessionCount: 0,
-      muscleSlices: [] as MuscleSlice[],
+      period: 'week' as VolumePeriod,
+      muscleWeek: [] as MuscleVolumeSlice[],
+      muscleMonth: [] as MuscleVolumeSlice[],
       top5: [] as TopExercise[],
 
       // ── Init ──
@@ -417,8 +404,20 @@ const L = t();
         this.weeks8 = buildWeeks(8);
         aggregateByWeek(sessions, this.weeks8);
 
-        this.muscleSlices = muscleDistribution(sessions, 12);
+        this.muscleWeek = volumeByMuscle(sessions, { period: 'week' });
+        this.muscleMonth = volumeByMuscle(sessions, { period: 'month' });
         this.top5 = topExercisesByVolume(sessions, 5, 12);
+      },
+
+      // ── Derived (volume-by-muscle donut) ──
+      get slices(): MuscleVolumeSlice[] {
+        return this.period === 'week' ? this.muscleWeek : this.muscleMonth;
+      },
+
+      get periodMeta(): string {
+        return this.period === 'week'
+          ? LABELS.stats.volumeLast7d
+          : LABELS.stats.volumeLast30d;
       },
 
       // ── Display helpers ──
@@ -518,78 +517,71 @@ const L = t();
       },
 
       // ════════════════════════════════════════════════════════
-      // SVG: Muscle distribution donut
+      // SVG: Volume-by-muscle donut (period-selectable)
+      // Segments = circles with stroke-dasharray/dashoffset so each
+      // group is a ring arc starting at 12 o'clock. A full-circle
+      // single slice is handled naturally: gapLen clamps to 0.
       // ════════════════════════════════════════════════════════
       renderMuscleChart(): string {
-        if (this.muscleSlices.length === 0) {
-          return `<p class="stats__empty">${LABELS.stats.noData}</p>`;
+        const slices = this.slices;
+        if (slices.length === 0) {
+          return `<p class="stats__empty">${LABELS.stats.volumeEmpty}</p>`;
         }
 
-        const W = 480;
-        const H = 360;
-        const cx = 140;
+        const W = 300;
+        const H = 300;
+        const cx = W / 2;
         const cy = H / 2;
-        const r = 110;
-        const innerR = 68;
+        const r = 100;
+        const thickness = 14;
+        const C = 2 * Math.PI * r;
 
-        // Build arcs.
-        const total = this.muscleSlices.reduce((s, sl) => s + sl.volume, 0);
-        let cursor = -Math.PI / 2; // start at 12 o'clock
+        // Ring arcs, biggest share first (stabilises the palette order).
         let arcs = '';
-        for (let i = 0; i < this.muscleSlices.length; i++) {
-          const sl = this.muscleSlices[i];
-          const angle = (sl.volume / total) * Math.PI * 2;
-          const startAngle = cursor;
-          const endAngle = cursor + angle;
-          cursor = endAngle;
+        let cursor = 0; // cumulative share already drawn (0..1)
+        for (let i = 0; i < slices.length; i++) {
+          const sl = slices[i];
+          const frac = sl.pct / 100;
+          const segLen = C * frac;
+          const gapLen = Math.max(0, C - segLen);
+          const offset = -(C * cursor);
+          cursor += frac;
 
-          const [x1, y1] = polar(cx, cy, r, startAngle);
-          const [x2, y2] = polar(cx, cy, r, endAngle);
-          const [ix1, iy1] = polar(cx, cy, innerR, startAngle);
-          const [ix2, iy2] = polar(cx, cy, innerR, endAngle);
-          const largeArc = angle > Math.PI ? 1 : 0;
           const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
-
-          // Full-circle workaround: split into 2 sub-arcs when slice ≈ 100%.
-          if (this.muscleSlices.length === 1) {
-            arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${r - innerR}"><title>${svgEscape(trMuscle(sl.muscle))} · ${fmtNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%</title></circle>`;
-          } else {
-            const d = [
-              `M ${x1.toFixed(2)} ${y1.toFixed(2)}`,
-              `A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`,
-              `L ${ix2.toFixed(2)} ${iy2.toFixed(2)}`,
-              `A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix1.toFixed(2)} ${iy1.toFixed(2)}`,
-              'Z',
-            ].join(' ');
-            arcs += `<path d="${d}" fill="${color}"><title>${svgEscape(trMuscle(sl.muscle))} · ${fmtNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%</title></path>`;
-          }
+          const tip = `${svgEscape(trMuscle(sl.muscle))} · ${fmtLocalNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%`;
+          arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${thickness}" stroke-dasharray="${segLen.toFixed(2)} ${gapLen.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}" tabindex="0"><title>${tip}</title></circle>`;
         }
 
-        // Center label: total volume.
-        const totalRounded = fmtNum(total);
+        const total = slices.reduce((s, sl) => s + sl.volume, 0);
 
-        // Legend on the right.
-        const legendX = 290;
-        const legendY = 40;
-        const rowH = 22;
-        let legend = '';
-        this.muscleSlices.forEach((sl, i) => {
-          const y = legendY + i * rowH;
-          const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
-          legend += `<rect x="${legendX}" y="${y - 9}" width="12" height="12" rx="2" fill="${color}"/>`;
-          legend += `<text x="${legendX + 20}" y="${y + 1}" font-size="13" fill="#F6F6F6" font-family="var(--font-body, sans-serif)">${svgEscape(trMuscle(sl.muscle))}</text>`;
-          legend += `<text x="${W - 16}" y="${y + 1}" font-size="13" fill="#9CA3AF" text-anchor="end" font-family="var(--font-display, sans-serif)" font-weight="700">${Math.round(sl.pct)}%</text>`;
-        });
+        const legend = slices
+          .map((sl, i) => {
+            const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
+            const name = svgEscape(trMuscle(sl.muscle));
+            const tip = `${name} · ${fmtLocalNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%`;
+            return `
+              <li class="stats__legend-row" title="${tip}">
+                <span class="stats__legend-swatch" style="background: ${color}" aria-hidden="true"></span>
+                <span class="stats__legend-name">${name}</span>
+                <span class="stats__legend-pct">${Math.round(sl.pct)}%</span>
+                <span class="stats__legend-value">${fmtLocalNum(sl.volume)} ${LABELS.common.kg}</span>
+              </li>`;
+          })
+          .join('');
 
-        const svg = `
-<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="stats__chart stats__chart--donut" role="img" aria-label="${LABELS.stats.muscleChart}">
-  ${arcs}
-  <text x="${cx}" y="${cy - 4}" font-size="13" fill="#9CA3AF" text-anchor="middle" font-family="var(--font-body, sans-serif)" text-transform="uppercase">Total</text>
-  <text x="${cx}" y="${cy + 18}" font-size="22" fill="#D97706" text-anchor="middle" font-family="var(--font-display, sans-serif)" font-weight="700">${totalRounded} ${LABELS.common.kg}</text>
-  ${legend}
-</svg>`.trim();
-
-        return svg;
+        return `
+<div class="stats__donut">
+  <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="stats__donut-svg" role="img" aria-label="${LABELS.stats.volumeByMuscle}">
+    <g transform="rotate(-90 ${cx} ${cy})">
+      ${arcs}
+    </g>
+    <text x="${cx}" y="${cy - 4}" font-size="13" fill="var(--color-muted)" text-anchor="middle" font-family="var(--font-body, sans-serif)" letter-spacing="0.1em">${LABELS.stats.total.toUpperCase()}</text>
+    <text x="${cx}" y="${cy + 20}" font-size="22" fill="var(--color-accent)" text-anchor="middle" font-family="var(--font-display, sans-serif)" font-weight="700">${fmtLocalNum(total)} ${LABELS.common.kg}</text>
+  </svg>
+  <ul class="stats__donut-legend" aria-label="${LABELS.stats.volumeByMuscle}">
+    ${legend}
+  </ul>
+</div>`.trim();
       },
 
       // ════════════════════════════════════════════════════════
@@ -806,6 +798,146 @@ const L = t();
     letter-spacing: 0.10em;
     color: var(--color-muted);
     font-weight: 700;
+  }
+
+  .stats__chart-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* ── Period segmented toggle (same pattern as /exercices/tendance) ── */
+  .stats__segmented {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem;
+    gap: 0.3rem;
+    min-height: 4.4rem;
+  }
+
+  .stats__seg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.6rem;
+    padding: 0 1.4rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .stats__seg:hover {
+    color: var(--color-text);
+  }
+
+  .stats__seg.is-active {
+    background-color: hsl(32 95% 50% / 0.14);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .stats__seg:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* ── Volume-by-muscle donut ── */
+  .stats__donut {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+    align-items: center;
+  }
+
+  @media (min-width: 680px) {
+    .stats__donut {
+      grid-template-columns: minmax(22rem, 32rem) 1fr;
+    }
+  }
+
+  .stats__donut-svg {
+    width: 100%;
+    max-width: 32rem;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 680px) {
+    .stats__donut-svg {
+      margin: 0;
+    }
+  }
+
+  .stats__donut-svg circle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .stats__donut-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .stats__legend-row {
+    display: grid;
+    grid-template-columns: 1.2rem 1fr 3.6rem 6.8rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+  }
+
+  .stats__legend-swatch {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .stats__legend-name {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    word-break: break-word;
+  }
+
+  .stats__legend-pct {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .stats__legend-value {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-align: right;
   }
 
   .stats__chart-wrap {
