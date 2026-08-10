@@ -59,6 +59,7 @@ const L = t();
         @keydown.enter.prevent="selectCurrent()"
         placeholder={L.command.placeholder}
         aria-label={L.command.ariaLabel}
+        aria-describedby="quick-search-hints"
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
@@ -128,7 +129,15 @@ const L = t();
     </div>
 
     {/* ── Footer hints ──────────────────────────────────── */}
-    <footer class="quick-search__footer">
+    <footer class="quick-search__footer" id="quick-search-hints">
+      <div class="quick-search__hint">
+        <span class="quick-search__keys">
+          <kbd aria-hidden="true">Ctrl</kbd>
+          <kbd aria-hidden="true">K</kbd>
+          <kbd aria-hidden="true">/</kbd>
+        </span>
+        <span x-text="hintOpen"></span>
+      </div>
       <div class="quick-search__hint">
         <kbd aria-hidden="true">↑↓</kbd>
         <span x-text="hintNav"></span>
@@ -160,7 +169,7 @@ const L = t();
     width: min(58rem, calc(100vw - 1.6rem));
     max-height: calc(100vh - 6rem);
     overflow: hidden;
-    box-shadow: 0 24px 48px hsl(0 0% 0% / 0.45);
+    box-shadow: 0 24px 48px color-mix(in srgb, #000 45%, transparent);
   }
 
   /* Short viewports (e.g. mobile + virtual keyboard): clamp to the
@@ -172,7 +181,7 @@ const L = t();
   }
 
   .quick-search::backdrop {
-    background-color: rgb(0 0 0 / 0.6);
+    background-color: color-mix(in srgb, #000 60%, transparent);
     -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
   }
@@ -364,6 +373,13 @@ const L = t();
     padding: 0.15rem 0.5rem;
     line-height: 1.2;
   }
+
+  /* Key-combo chips (Ctrl + K + /) sit tighter than the hint→label gap. */
+  .quick-search__keys {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
 </style>
 
 <script>
@@ -442,6 +458,7 @@ const L = t();
         placeholder: L.command.placeholder,
         emptyTitle: L.command.noResults,
         emptyHint: L.command.noResultsHint,
+        hintOpen: L.command.hintOpen,
         hintNav: L.command.hintNav,
         hintSelect: L.command.hintSelect,
         hintClose: L.command.hintClose,
@@ -476,16 +493,40 @@ const L = t();
             result.push({ id: "pages", title: L.command.pages, items: pageHits });
           }
 
-          // 2. Exercises — match the raw (FR) name and the translated
-          //    name, so the EN locale can find "bench press" too.
+          // 2. Exercises — match the raw (FR) name, the translated name
+          //    (so the EN locale can find "bench press"), and the muscle
+          //    group. When the query matches a muscle (fr key or en
+          //    translation via trMuscle), the exercises of that muscle are
+          //    prefix-rank-boosted; an exact muscle query ("Pectoraux" /
+          //    "chest") turns the group header into that muscle's name.
           if (q) {
+            const muscleKeys = this.exercises
+              .map((e) => e.muscle)
+              .filter((m, i, arr) => arr.indexOf(m) === i);
+            const muscleHits = new Set(
+              muscleKeys.filter(
+                (m) => matches(m, q) || matches(trMuscle(m), q),
+              ),
+            );
+            const exactMuscle =
+              muscleHits.size === 1 ? [...muscleHits][0] : null;
+
             const exo = this.exercises
               .map((e) => ({ e, tr: trExercise(e.name) }))
-              .filter(({ e, tr }) => matches(e.name, q) || matches(tr, q))
+              .filter(
+                ({ e, tr }) =>
+                  matches(e.name, q) ||
+                  matches(tr, q) ||
+                  muscleHits.has(e.muscle),
+              )
               .sort((a, b) => {
-                const ra = Math.min(rankScore(a.e.name, q), rankScore(a.tr, q));
-                const rb = Math.min(rankScore(b.e.name, q), rankScore(b.tr, q));
-                return ra - rb;
+                const score = (item: { e: Exercise; tr: string }): number =>
+                  (muscleHits.has(item.e.muscle) ? 0 : 1) * 2 +
+                  Math.min(
+                    rankScore(item.e.name, q),
+                    rankScore(item.tr, q),
+                  );
+                return score(a) - score(b);
               })
               .slice(0, 8)
               .map(({ e, tr }) => ({
@@ -497,7 +538,18 @@ const L = t();
                 href: base("/exercices"),
               }));
             if (exo.length) {
-              result.push({ id: "exercises", title: L.command.exercises, items: exo });
+              result.push({
+                id: "exercises",
+                // Exact muscle query ("Pectoraux" / "chest") becomes the
+                // group header; substring hits only get the rank boost.
+                title:
+                  exactMuscle !== null &&
+                  (normalize(exactMuscle) === q ||
+                    normalize(trMuscle(exactMuscle)) === q)
+                    ? trMuscle(exactMuscle)
+                    : L.command.exercises,
+                items: exo,
+              });
             }
           }
 

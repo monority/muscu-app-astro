@@ -7,6 +7,7 @@ import Card from '../../components/ui/Card.astro';
 import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -214,9 +215,11 @@ const L = t();
       </CardHeader>
       <CardContent>
         <template x-if="records.length === 0">
-          <p class="poids__empty">
-            {L.poids.empty} {L.poids.addFirst}
-          </p>
+          <EmptyState
+            icon="package"
+            title={L.poids.empty}
+            description={L.poids.addFirst}
+          />
         </template>
         <template x-if="records.length > 0">
           <div class="poids__chart-wrap" x-html="renderChart()"></div>
@@ -880,15 +883,6 @@ const L = t();
     height: auto;
     min-height: 24rem;
     display: block;
-  }
-
-  .poids__empty {
-    text-align: center;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    padding: 2rem 1rem;
-    margin: 0;
-    line-height: 1.5;
   }
 
   /* ═══ History table ═══ */

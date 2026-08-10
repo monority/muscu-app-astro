@@ -137,4 +137,12 @@ export default {
     standingCalf: 'Standing calf raise',
     legPress: 'Leg press',
   },
+
+  microPatternsDesc: 'Small recurring patterns: status dots, set type pills and a segmented control.',
+  dots: 'Status dots',
+  dotsDesc: 'Discrete status indicators (session state, metadata) — same language as /calendrier.',
+  setTypePills: 'Set type pills',
+  setTypePillsDesc: 'Warm-up / work / top / drop / failure labels — copied from /seances/comparer, to be centralized.',
+  segmented: 'Segmented control',
+  segmentedDesc: 'Week / month toggle — copied from /progression/stats, to be centralized.',
 };

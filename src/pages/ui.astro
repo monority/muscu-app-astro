@@ -35,6 +35,10 @@ import WorkoutCard from '../components/workout/WorkoutCard.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 
+// Design-token showcase — the `value` strings below deliberately mirror
+// the raw token literals from styles/tokens.css. They are the specimen
+// data this page exists to display, NOT style drifts; keep them in sync
+// with tokens.css and out of any color-purge pass.
 const swatches = [
   { name: 'bg', token: '--color-bg', value: '#050505' },
   { name: 'surface', token: '--color-surface', value: '#0B0B0B' },
@@ -715,4 +719,142 @@ const workoutCards = [
       </div>
     </div>
   </section>
+
+  <!-- ─── 11. Micro patterns ─────────────────────────────── -->
+  <!-- Samples copied from production pages until these are centralized
+       as design-system primitives (see REFONTE). Dots ← /calendrier,
+       set-type pills ← /seances/comparer, segmented ← /progression/stats. -->
+  <section style="margin-bottom: 4.8rem;">
+    <header style="margin-bottom: 2.4rem;">
+      <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem;">11</div>
+      <h2 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 0.8rem;">Micro patterns</h2>
+      <p style="color: var(--color-muted); font-size: 1.4rem; max-width: 60rem;">{L.ui.microPatternsDesc}</p>
+    </header>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr)); gap: 1.6rem;">
+      <Card>
+        <CardHeader>
+          <CardTitle>{L.ui.dots}</CardTitle>
+          <p style="color: var(--color-muted); font-size: 1.3rem; margin: 0; line-height: 1.5;">{L.ui.dotsDesc}</p>
+        </CardHeader>
+        <CardContent>
+          <div style="display: flex; gap: 2.4rem; align-items: center; flex-wrap: wrap;">
+            <span class="demo-dot demo-dot--success" aria-hidden="true"></span>
+            <span class="demo-dot demo-dot--info" aria-hidden="true"></span>
+            <span class="demo-dot demo-dot--muted" aria-hidden="true"></span>
+          </div>
+          <p style="color: var(--color-muted); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 1.2rem 0 0;">success · info · muted</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{L.ui.setTypePills}</CardTitle>
+          <p style="color: var(--color-muted); font-size: 1.3rem; margin: 0; line-height: 1.5;">{L.ui.setTypePillsDesc}</p>
+        </CardHeader>
+        <CardContent>
+          <div style="display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap;">
+            <span class="demo-pill demo-pill--warmup">{L.builder.types.warmup}</span>
+            <span class="demo-pill demo-pill--work">{L.builder.types.work}</span>
+            <span class="demo-pill demo-pill--top">{L.builder.types.top}</span>
+            <span class="demo-pill demo-pill--drop">{L.builder.types.drop}</span>
+            <span class="demo-pill demo-pill--failure">{L.builder.types.failure}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{L.ui.segmented}</CardTitle>
+          <p style="color: var(--color-muted); font-size: 1.3rem; margin: 0; line-height: 1.5;">{L.ui.segmentedDesc}</p>
+        </CardHeader>
+        <CardContent>
+          {/* Copy-paste of /progression/stats .stats__segmented — duplicated until centralized. */}
+          <div class="demo-segmented" role="group" aria-label={L.stats.volumePeriod}>
+            <button type="button" class="demo-seg is-active">{L.stats.volumePeriodWeek}</button>
+            <button type="button" class="demo-seg">{L.stats.volumePeriodMonth}</button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </section>
 </AppLayout>
+
+<style>
+  /* Micro-pattern samples — copy-paste from production pages until
+     centralized as primitives (REFONTE residual). Tokens only. */
+  .demo-dot {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+  }
+  .demo-dot--success { background-color: var(--color-success); }
+  .demo-dot--info { background-color: var(--color-info); }
+  .demo-dot--muted { background-color: var(--color-muted); }
+
+  .demo-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 2.2rem;
+    padding: 0 0.8rem;
+    border-radius: var(--radius-pill);
+    font-size: 1.0rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .demo-pill--warmup {
+    background-color: color-mix(in srgb, var(--color-info) 14%, transparent);
+    color: var(--color-info);
+  }
+  .demo-pill--work {
+    background-color: var(--alpha-bg-soft);
+    color: var(--color-text);
+  }
+  .demo-pill--top {
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-accent);
+  }
+  .demo-pill--drop {
+    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    color: var(--color-warning);
+  }
+  .demo-pill--failure {
+    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
+    color: var(--color-destructive);
+  }
+
+  .demo-segmented {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+  .demo-seg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.4rem;
+    padding: 0 1.4rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .demo-seg.is-active {
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>

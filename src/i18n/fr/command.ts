@@ -6,6 +6,7 @@ export default {
   sessions: 'Séances',
   noResults: 'Aucun résultat',
   noResultsHint: 'Essayez un autre terme de recherche.',
+  hintOpen: 'Ctrl+K ou /',
   hintNav: 'Naviguer',
   hintSelect: 'Ouvrir',
   hintClose: 'Fermer',

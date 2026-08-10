@@ -132,6 +132,9 @@ const groupsWithActive = groups.map((g) => ({
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/input-stepper.css" />
+    {/* theme-color cannot read CSS vars at rest — the attribute below is a
+        static fallback; the theme bootstrap script overwrites it with the
+        real --color-accent value (pop.astro precedent). */}
     <meta name="theme-color" content="#D97706" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -173,19 +176,25 @@ const groupsWithActive = groups.map((g) => ({
           var theme = localStorage.getItem('muscu-theme') || 'dark';
           if (theme !== 'light' && theme !== 'dark') theme = 'dark';
           document.documentElement.setAttribute('data-theme', theme);
+          /* Sync the browser chrome color with the real --color-accent
+             token (bundled stylesheet carries it on :root). Falls back
+             to the static meta content while the bundle is loading. */
+          var accent = getComputedStyle(document.documentElement)
+            .getPropertyValue('--color-accent').trim();
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta && accent) meta.setAttribute('content', accent);
         } catch (e) {
           /* localStorage unavailable (SSR / private mode) — keep
              the default dark theme via the @theme block. */
         }
       })();
       /* Pin the root background synchronously so an early paint never
-         flashes the dark default (#050505) while the bundled stylesheet
-         is still loading. `var(--color-bg)` (and the themed rules)
-         override this once they apply. */
+         flashes white while the bundled stylesheet is still loading.
+         `var(--color-bg)` resolves once the bundle applies; globals.css
+         re-asserts the pre-bundle fallback for the dark default. */
     </script>
     <style is:inline>
-      html { background-color: #050505; }
-      html[data-theme="light"] { background-color: #ffffff; }
+      html { background-color: var(--color-bg); }
     </style>
   </head>
   <body>

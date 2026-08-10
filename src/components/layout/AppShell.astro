@@ -500,7 +500,7 @@ const navId = (href: string): string =>
   .drawer__backdrop {
     position: absolute;
     inset: 0;
-    background-color: hsl(0 0% 0% / 0.55);
+    background-color: color-mix(in srgb, #000 55%, transparent);
     opacity: 0;
     transition: opacity 220ms ease;
   }
@@ -517,7 +517,7 @@ const navId = (href: string): string =>
     width: min(30rem, 88vw);
     background-color: var(--color-surface);
     border-right: 1px solid var(--color-border);
-    box-shadow: 8px 0 24px hsl(0 0% 0% / 0.5);
+    box-shadow: 8px 0 24px color-mix(in srgb, #000 50%, transparent);
     display: flex;
     flex-direction: column;
     transform: translateX(-100%);
@@ -850,8 +850,8 @@ const navId = (href: string): string =>
   }
 
   .drawer__logout:hover {
-    background-color: hsl(0 80% 55% / 0.10);
-    border-color: hsl(0 80% 55% / 0.35);
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-destructive) 35%, transparent);
     color: var(--color-destructive);
   }
 

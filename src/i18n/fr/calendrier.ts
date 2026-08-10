@@ -10,6 +10,7 @@ export default {
   ],
   sessionsOn: 'séances le',
   noSessions: 'Aucune séance ce jour',
+  noSessionsHint: 'Sélectionnez un autre jour ou créez une séance.',
   today: 'Aujourd\'hui',
   monthlyStats: 'Statistiques du mois',
   sessionsThisMonth: 'Séances ce mois',

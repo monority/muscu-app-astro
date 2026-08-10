@@ -788,7 +788,7 @@ const L = t();
     height: 4.4rem;
     flex-shrink: 0;
     border-radius: var(--radius-md);
-    background-color: hsl(32 95% 50% / 0.12);
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
     color: var(--color-accent);
   }
 
@@ -927,8 +927,8 @@ const L = t();
   }
 
   .hist__stat--hero {
-    background-color: hsl(32 95% 50% / 0.08);
-    border-color: hsl(32 95% 50% / 0.30);
+    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
   .hist__stat-head {
@@ -1081,8 +1081,8 @@ const L = t();
   }
 
   .hist__type--warmup {
-    background-color: hsl(217 80% 55% / 0.12);
-    color: hsl(217 80% 70%);
+    background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
+    color: var(--color-info);
   }
 
   .hist__type--work {
@@ -1091,17 +1091,17 @@ const L = t();
   }
 
   .hist__type--top {
-    background-color: hsl(32 95% 50% / 0.14);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
     color: var(--color-accent);
   }
 
   .hist__type--drop {
-    background-color: hsl(48 95% 55% / 0.14);
+    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
     color: var(--color-warning);
   }
 
   .hist__type--failure {
-    background-color: hsl(0 80% 55% / 0.14);
+    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
     color: var(--color-destructive);
   }
 
@@ -1126,7 +1126,7 @@ const L = t();
     width: 6rem;
     height: 6rem;
     border-radius: 50%;
-    background-color: hsl(0 80% 55% / 0.10);
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
     color: var(--color-destructive);
   }
 

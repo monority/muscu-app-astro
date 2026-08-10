@@ -7,6 +7,7 @@ import Card from '../components/ui/Card.astro';
 import CardHeader from '../components/ui/CardHeader.astro';
 import CardTitle from '../components/ui/CardTitle.astro';
 import CardContent from '../components/ui/CardContent.astro';
+import EmptyState from '../components/ui/EmptyState.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -77,8 +78,10 @@ const L = t();
           </template>
         </div>
 
-        {/* Day grid */}
-        <div class="cal__grid" role="grid">
+        {/* Day grid — real <button>s with aria-selected (single-select
+            picker). No role="grid"/"gridcell" here: adding ARIA grid
+            roles to native buttons would mask their button semantics. */}
+        <div class="cal__grid">
           <template x-for="day in calendarDays" :key="day.date">
             <button
               type="button"
@@ -89,8 +92,8 @@ const L = t();
                 'cal__day--selected': selectedDate === day.date
               }"
               :disabled="!day.isCurrentMonth"
+              :aria-current="selectedDate === day.date ? 'date' : false"
               @click="selectDate(day)"
-              role="gridcell"
             >
               <span class="cal__day-num" x-text="day.dayNum"></span>
               <template x-if="day.sessions.length > 0">
@@ -99,6 +102,7 @@ const L = t();
                     <span
                       class="cal__dot"
                       :class="'cal__dot--' + s.status"
+                      role="img"
                       :aria-label="statusLabel(s.status)"
                     ></span>
                   </template>
@@ -142,9 +146,11 @@ const L = t();
         </CardHeader>
         <CardContent>
           <template x-if="selectedSessions.length === 0">
-            <p class="cal__empty">
-              {L.calendrier.noSessions}
-            </p>
+            <EmptyState
+              icon="package"
+              title={L.calendrier.noSessions}
+              description={L.calendrier.noSessionsHint}
+            />
           </template>
           <template x-if="selectedSessions.length > 0">
             <div class="cal__day-sessions">
@@ -706,13 +712,6 @@ const L = t();
   }
 
   /* ═══ Selected day ═══ */
-  .cal__empty {
-    color: var(--color-muted);
-    text-align: center;
-    padding: 1.5rem 1rem;
-    margin: 0;
-    font-size: 1.3rem;
-  }
 
   .cal__day-sessions {
     display: flex;

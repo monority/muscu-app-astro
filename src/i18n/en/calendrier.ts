@@ -10,6 +10,7 @@ export default {
   ],
   sessionsOn: 'sessions on',
   noSessions: 'No sessions on this day',
+  noSessionsHint: 'Select another day or create a session.',
   today: 'Today',
   monthlyStats: 'Monthly statistics',
   sessionsThisMonth: 'Sessions this month',

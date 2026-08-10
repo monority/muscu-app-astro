@@ -185,6 +185,8 @@ const L = t();
                 type="button"
                 class="sess__icon-btn"
                 @click.stop="menuId = menuId === session.id ? '' : session.id"
+                @keydown.enter.stop
+                @keydown.space.stop
                 :aria-expanded="(menuId === session.id).toString()"
                 :aria-label="labels.moreActions"
                 :title="labels.moreActions"
@@ -234,7 +236,9 @@ const L = t();
               </button>
 
               <template x-if="menuId === session.id">
-                <div class="sess__menu" @click.stop>
+                {/* Enter/Space inside the popover must NOT bubble to the
+                    card article's navigate() keydown handlers. */}
+                <div class="sess__menu" @click.stop @keydown.enter.stop @keydown.space.stop>
                   <Button
                     variant="ghost"
                     size="sm"

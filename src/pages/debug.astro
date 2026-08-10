@@ -14,6 +14,13 @@ setLocale(Astro.currentLocale ?? defaultLocale);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Données de test — muscu.app</title>
+
+    {/* ── Styling decision (E2) ─────────────────────────────
+        Kept fully self-contained on purpose: this dev-only page
+        must keep rendering even when the design tokens / globals
+        are mid-refactor (it is the tool you open to fix those).
+        The color literals below are pinned copies of the token
+        values, not drift — ignore color-purge audits on this file. */}
     <style>
       :root { color-scheme: dark; }
       * { box-sizing: border-box; }

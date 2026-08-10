@@ -609,7 +609,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
         const grid = cssVar('--color-border');
 
         if (this.weeks12.length === 0) {
-          return `<p class="stats__empty">${LABELS.common.noData}</p>`;
+          return `<p class="stats__empty" role="status">${LABELS.common.noData}</p>`;
         }
 
         const maxVol = this.weeks12.reduce(
@@ -693,7 +693,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
       renderMuscleChart(): string {
         const groups = groupByFamily(this.slices);
         if (groups.length === 0) {
-          return `<p class="stats__empty">${LABELS.stats.volumeEmpty}</p>`;
+          return `<p class="stats__empty" role="status">${LABELS.stats.volumeEmpty}</p>`;
         }
 
         const W = 300;
@@ -721,7 +721,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
 
           const color = muscleToneColor(g.dominant.muscle);
           const tip = `${svgEscape(familyLabel(g))} · ${fmtLocalNum(g.volume)} ${LABELS.common.kg} · ${Math.round(g.pct)}%`;
-          arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${thickness}" stroke-dasharray="${segLen.toFixed(2)} ${gapLen.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}" tabindex="0"><title>${tip}</title></circle>`;
+          arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${thickness}" stroke-dasharray="${segLen.toFixed(2)} ${gapLen.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"><title>${tip}</title></circle>`;
         }
 
         const total = groups.reduce((s, g) => s + g.volume, 0);
@@ -775,7 +775,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
         const grid = cssVar('--color-border');
 
         if (this.weeks8.length === 0) {
-          return `<p class="stats__empty">${LABELS.common.noData}</p>`;
+          return `<p class="stats__empty" role="status">${LABELS.common.noData}</p>`;
         }
 
         const maxCount = this.weeks8.reduce(
@@ -835,7 +835,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
       // ════════════════════════════════════════════════════════
       renderTopExercises(): string {
         if (this.top5.length === 0) {
-          return `<p class="stats__empty">${LABELS.stats.noData}</p>`;
+          return `<p class="stats__empty" role="status">${LABELS.stats.noData}</p>`;
         }
 
         const peak = this.top5[0].volume;
@@ -875,7 +875,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
 
       renderBenchmarksTable(): string {
         if (!this.hasCompletedSessions) {
-          return `<p class="stats__empty">${svgEscape(LABELS.stats.benchmarksEmpty)}</p>`;
+          return `<p class="stats__empty" role="status">${svgEscape(LABELS.stats.benchmarksEmpty)}</p>`;
         }
 
         const head = `

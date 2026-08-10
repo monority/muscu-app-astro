@@ -137,4 +137,12 @@ export default {
     standingCalf: 'Mollets debout',
     legPress: 'Leg press',
   },
+
+  microPatternsDesc: 'Petits motifs récurrents : points d\'état, pills de type de série et contrôle segmenté.',
+  dots: 'Points d\'état',
+  dotsDesc: 'Indicateurs d\'état discrets (statut de séance, métadonnées) — même langage que /calendrier.',
+  setTypePills: 'Pills de type de série',
+  setTypePillsDesc: 'Étiquettes warm-up / work / top / drop / failure — copiées de /seances/comparer, à centraliser.',
+  segmented: 'Contrôle segmenté',
+  segmentedDesc: 'Bascule semaine / mois — copiée de /progression/stats, à centraliser.',
 };
