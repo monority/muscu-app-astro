@@ -193,6 +193,9 @@ const L = t();
     type VolumePeriod,
   } from '../../lib/volume-stats';
 
+  import { cssVar, cssVarAlpha } from '../../lib/css-var';
+  import { muscleHue, type MuscleTone } from '../../lib/colors';
+
   const LABELS = t();
 
   // ============================================================================
@@ -254,21 +257,94 @@ const L = t();
     return m === 0 ? `${h} h` : `${h} h ${m}`;
   }
 
-  /** Palette for the muscle donut (high-hue-distance, theme-agnostic). */
-  const MUSCLE_PALETTE: ReadonlyArray<string> = [
-    '#3B82F6', // blue
-    '#F97316', // orange
-    '#10B981', // emerald
-    '#EC4899', // pink
-    '#EAB308', // yellow
-    '#6366F1', // indigo
-    '#D97706', // amber
-    '#14B8A6', // teal
-    '#EF4444', // red
-    '#84CC16', // lime
-    '#A855F7', // purple
-    '#06B6D4', // cyan
-  ];
+  /**
+   * Donut palette — the 6 muscle-category hues from src/styles/tokens.css
+   * (`--color-cat-*`), the SAME families the muscle badges render via
+   * `muscleHue()` (src/lib/colors.ts) + `badge--cat-<tone>`.
+   *
+   * This is the "abandon des 12 couleurs, 6 familles thématiques" decision
+   * (REFONTE §4 residual) : the previous 12-color MUSCLE_PALETTE is gone.
+   * Each slice's color is read live from the theme tokens at render time,
+   * so dark/light is honored and donut arcs + legend swatches match the
+   * category badges exactly. Unknown muscles (`other`/« Autre ») fall back
+   * to the neutral muted tone.
+   */
+  const CAT_TONE_VAR: Record<string, string> = {
+    chest: '--color-cat-chest',
+    back: '--color-cat-back',
+    shoulders: '--color-cat-shoulders',
+    arms: '--color-cat-arms',
+    legs: '--color-cat-legs',
+    core: '--color-cat-core',
+  };
+
+  /** Donut/légende color for a stored muscle key — family token value. */
+  function muscleToneColor(muscle: string): string {
+    const token = CAT_TONE_VAR[muscleHue(muscle)];
+    return cssVar(token || '--color-muted');
+  }
+
+  /** One donut slice after aggregation: a whole muscle FAMILY. */
+  interface FamilySlice {
+    /** Hue family (`muscleHue()` tones chest/back/shoulders/arms/legs/core/other). */
+    tone: MuscleTone;
+    /** Σ volume of every stored muscle in the family, kg. */
+    volume: number;
+    /** Family share of the period's total, 0..100 (recomputed from grouped totals). */
+    pct: number;
+    /** Largest-volume muscle of the family — its translated name labels the arc. */
+    dominant: MuscleVolumeSlice;
+    /** How many distinct stored muscles share this family (label suffix ×N). */
+    count: number;
+  }
+
+  /**
+   * Donut aggregation (REFONTE §4): group per-muscle slices from
+   * `volumeByMuscle()` into the 6 muscle FAMILIES via `muscleHue()`
+   * (+ `other`), so the ring shows one arc per hue family — not one
+   * per stored muscle (e.g. 5 green leg arcs collapse into one « legs »
+   * family arc). pct is recomputed from the grouped totals so the ring
+   * still sums to 100%. Families sort by aggregate volume desc; the
+   * dominant muscle (largest volume within the family) labels it.
+   */
+  function groupByFamily(slices: MuscleVolumeSlice[]): FamilySlice[] {
+    const byTone = new Map<
+      MuscleTone,
+      { volume: number; count: number; dominant: MuscleVolumeSlice }
+    >();
+    for (const sl of slices) {
+      const tone = muscleHue(sl.muscle);
+      const entry = byTone.get(tone) ?? { volume: 0, count: 0, dominant: sl };
+      entry.volume += sl.volume;
+      entry.count += 1;
+      if (sl.volume > entry.dominant.volume) entry.dominant = sl;
+      byTone.set(tone, entry);
+    }
+
+    const grouped = Array.from(byTone.entries()).map(([tone, e]) => ({
+      tone,
+      volume: e.volume,
+      pct: 0,
+      dominant: e.dominant,
+      count: e.count,
+    }));
+    const total = grouped.reduce((s, g) => s + g.volume, 0);
+    for (const g of grouped) {
+      g.pct = total > 0 ? (g.volume / total) * 100 : 0;
+    }
+    return grouped.sort((a, b) => b.volume - a.volume);
+  }
+
+  /**
+   * Donut/légende label for a family slice: the dominant muscle's
+   * translated name (matches the exercise-badge language via `trMuscle`),
+   * suffixed ` ×N` when several stored muscles share the family — honest
+   * about the aggregation without inventing a family-level name.
+   */
+  function familyLabel(g: FamilySlice): string {
+    const name = trMuscle(g.dominant.muscle);
+    return g.count > 1 ? `${name} ×${g.count}` : name;
+  }
 
   // ============================================================================
   // Pure helpers (testable, kept small)
@@ -527,6 +603,11 @@ function benchmarkBadge(band: PercentileBand | null): string {
         const plotW = W - PAD_L - PAD_R;
         const plotH = H - PAD_T - PAD_B;
 
+        // Chart colors — read from the design tokens (theme-aware).
+        const accent = cssVar('--color-accent');
+        const muted = cssVar('--color-muted');
+        const grid = cssVar('--color-border');
+
         if (this.weeks12.length === 0) {
           return `<p class="stats__empty">${LABELS.common.noData}</p>`;
         }
@@ -568,31 +649,30 @@ function benchmarkBadge(band: PercentileBand | null): string {
 
         // Grid + Y labels
         for (const t of tickPositions) {
-          svg += `<line x1="${PAD_L}" y1="${t.y.toFixed(1)}" x2="${W - PAD_R}" y2="${t.y.toFixed(1)}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
-          svg += `<text x="${PAD_L - 8}" y="${(t.y + 4).toFixed(1)}" font-size="13" fill="#9CA3AF" text-anchor="end" font-family="var(--font-body, sans-serif)">${fmtNum(t.value)}</text>`;
+          svg += `<line x1="${PAD_L}" y1="${t.y.toFixed(1)}" x2="${W - PAD_R}" y2="${t.y.toFixed(1)}" stroke="${grid}" stroke-width="1"/>`;
+          svg += `<text x="${PAD_L - 8}" y="${(t.y + 4).toFixed(1)}" font-size="13" fill="${muted}" text-anchor="end" font-family="var(--font-body, sans-serif)">${fmtNum(t.value)}</text>`;
         }
 
         // Bars
-        const accentCurrent = '#D97706';
-        const accentMuted = 'rgba(217, 119, 6, 0.55)';
+        const accentMuted = cssVarAlpha('--color-accent', 0.55);
         this.weeks12.forEach((b, i) => {
           const x = PAD_L + i * slotW + barGap;
           const h = peak > 0 ? (b.volume / peak) * plotH : 0;
           const y = PAD_T + plotH - h;
           const isCurrent = i === this.weeks12.length - 1;
-          const fill = isCurrent ? accentCurrent : accentMuted;
+          const fill = isCurrent ? accent : accentMuted;
           const heightPx = Math.max(0, h);
           svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${heightPx.toFixed(1)}" rx="2" fill="${fill}"><title>${fmtDate(b.key)} · ${fmtNum(b.volume)} ${LABELS.common.kg}</title></rect>`;
         });
 
         // X axis baseline
-        svg += `<line x1="${PAD_L}" y1="${(PAD_T + plotH).toFixed(1)}" x2="${W - PAD_R}" y2="${(PAD_T + plotH).toFixed(1)}" stroke="var(--color-border, #2a2a2a)" stroke-width="1"/>`;
+        svg += `<line x1="${PAD_L}" y1="${(PAD_T + plotH).toFixed(1)}" x2="${W - PAD_R}" y2="${(PAD_T + plotH).toFixed(1)}" stroke="${grid}" stroke-width="1"/>`;
 
         // X labels
         for (const i of labelIdxs) {
           const b = this.weeks12[i];
           const cx = PAD_L + i * slotW + slotW / 2;
-          svg += `<text x="${cx.toFixed(1)}" y="${(PAD_T + plotH + 24).toFixed(1)}" font-size="12" fill="#9CA3AF" text-anchor="middle" font-family="var(--font-body, sans-serif)">${fmtDate(b.key)}</text>`;
+          svg += `<text x="${cx.toFixed(1)}" y="${(PAD_T + plotH + 24).toFixed(1)}" font-size="12" fill="${muted}" text-anchor="middle" font-family="var(--font-body, sans-serif)">${fmtDate(b.key)}</text>`;
         }
 
         svg += `</svg>`;
@@ -601,13 +681,18 @@ function benchmarkBadge(band: PercentileBand | null): string {
 
       // ════════════════════════════════════════════════════════
       // SVG: Volume-by-muscle donut (period-selectable)
-      // Segments = circles with stroke-dasharray/dashoffset so each
-      // group is a ring arc starting at 12 o'clock. A full-circle
-      // single slice is handled naturally: gapLen clamps to 0.
+      // Slices are FIRST grouped by muscle FAMILY (`muscleHue` → the 6
+      // `--color-cat-*` tones + `other`), so the ring shows one arc and
+      // legend row per family instead of per stored muscle. Ring arcs
+      // keep the same geometry as before: circles with
+      // stroke-dasharray/dashoffset, each group a ring arc starting at
+      // 12 o'clock (full-circle single family handled naturally: gapLen
+      // clamps to 0). Arc and legend come from the same aggregated
+      // array, so their order/count always match 1:1.
       // ════════════════════════════════════════════════════════
       renderMuscleChart(): string {
-        const slices = this.slices;
-        if (slices.length === 0) {
+        const groups = groupByFamily(this.slices);
+        if (groups.length === 0) {
           return `<p class="stats__empty">${LABELS.stats.volumeEmpty}</p>`;
         }
 
@@ -619,35 +704,39 @@ function benchmarkBadge(band: PercentileBand | null): string {
         const thickness = 14;
         const C = 2 * Math.PI * r;
 
+        // Donut colors — token values (same hues as the category badges).
+        const accent = cssVar('--color-accent');
+        const muted = cssVar('--color-muted');
+
         // Ring arcs, biggest share first (stabilises the palette order).
         let arcs = '';
         let cursor = 0; // cumulative share already drawn (0..1)
-        for (let i = 0; i < slices.length; i++) {
-          const sl = slices[i];
-          const frac = sl.pct / 100;
+        for (let i = 0; i < groups.length; i++) {
+          const g = groups[i];
+          const frac = g.pct / 100;
           const segLen = C * frac;
           const gapLen = Math.max(0, C - segLen);
           const offset = -(C * cursor);
           cursor += frac;
 
-          const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
-          const tip = `${svgEscape(trMuscle(sl.muscle))} · ${fmtLocalNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%`;
+          const color = muscleToneColor(g.dominant.muscle);
+          const tip = `${svgEscape(familyLabel(g))} · ${fmtLocalNum(g.volume)} ${LABELS.common.kg} · ${Math.round(g.pct)}%`;
           arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${thickness}" stroke-dasharray="${segLen.toFixed(2)} ${gapLen.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}" tabindex="0"><title>${tip}</title></circle>`;
         }
 
-        const total = slices.reduce((s, sl) => s + sl.volume, 0);
+        const total = groups.reduce((s, g) => s + g.volume, 0);
 
-        const legend = slices
-          .map((sl, i) => {
-            const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
-            const name = svgEscape(trMuscle(sl.muscle));
-            const tip = `${name} · ${fmtLocalNum(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%`;
+        const legend = groups
+          .map((g) => {
+            const color = muscleToneColor(g.dominant.muscle);
+            const name = svgEscape(familyLabel(g));
+            const tip = `${name} · ${fmtLocalNum(g.volume)} ${LABELS.common.kg} · ${Math.round(g.pct)}%`;
             return `
               <li class="stats__legend-row" title="${tip}">
                 <span class="stats__legend-swatch" style="background: ${color}" aria-hidden="true"></span>
                 <span class="stats__legend-name">${name}</span>
-                <span class="stats__legend-pct">${Math.round(sl.pct)}%</span>
-                <span class="stats__legend-value">${fmtLocalNum(sl.volume)} ${LABELS.common.kg}</span>
+                <span class="stats__legend-pct">${Math.round(g.pct)}%</span>
+                <span class="stats__legend-value">${fmtLocalNum(g.volume)} ${LABELS.common.kg}</span>
               </li>`;
           })
           .join('');
@@ -658,8 +747,8 @@ function benchmarkBadge(band: PercentileBand | null): string {
     <g transform="rotate(-90 ${cx} ${cy})">
       ${arcs}
     </g>
-    <text x="${cx}" y="${cy - 4}" font-size="13" fill="var(--color-muted)" text-anchor="middle" font-family="var(--font-body, sans-serif)" letter-spacing="0.1em">${LABELS.stats.total.toUpperCase()}</text>
-    <text x="${cx}" y="${cy + 20}" font-size="22" fill="var(--color-accent)" text-anchor="middle" font-family="var(--font-display, sans-serif)" font-weight="700">${fmtLocalNum(total)} ${LABELS.common.kg}</text>
+    <text x="${cx}" y="${cy - 4}" font-size="13" fill="${muted}" text-anchor="middle" font-family="var(--font-body, sans-serif)" letter-spacing="0.1em">${LABELS.stats.total.toUpperCase()}</text>
+    <text x="${cx}" y="${cy + 20}" font-size="22" fill="${accent}" text-anchor="middle" font-family="var(--font-display, sans-serif)" font-weight="700">${fmtLocalNum(total)} ${LABELS.common.kg}</text>
   </svg>
   <ul class="stats__donut-legend" aria-label="${LABELS.stats.volumeByMuscle}">
     ${legend}
@@ -679,6 +768,11 @@ function benchmarkBadge(band: PercentileBand | null): string {
         const PAD_B = 48;
         const plotW = W - PAD_L - PAD_R;
         const plotH = H - PAD_T - PAD_B;
+
+        // Chart colors — read from the design tokens (theme-aware).
+        const accent = cssVar('--color-accent');
+        const muted = cssVar('--color-muted');
+        const grid = cssVar('--color-border');
 
         if (this.weeks8.length === 0) {
           return `<p class="stats__empty">${LABELS.common.noData}</p>`;
@@ -710,12 +804,11 @@ function benchmarkBadge(band: PercentileBand | null): string {
         let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="stats__chart" role="img" aria-label="${LABELS.stats.freqChart}">`;
 
         for (const t of tickPositions) {
-          svg += `<line x1="${PAD_L}" y1="${t.y.toFixed(1)}" x2="${W - PAD_R}" y2="${t.y.toFixed(1)}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
-          svg += `<text x="${PAD_L - 8}" y="${(t.y + 4).toFixed(1)}" font-size="12" fill="#9CA3AF" text-anchor="end" font-family="var(--font-body, sans-serif)">${Math.round(t.value)}</text>`;
+          svg += `<line x1="${PAD_L}" y1="${t.y.toFixed(1)}" x2="${W - PAD_R}" y2="${t.y.toFixed(1)}" stroke="${grid}" stroke-width="1"/>`;
+          svg += `<text x="${PAD_L - 8}" y="${(t.y + 4).toFixed(1)}" font-size="12" fill="${muted}" text-anchor="end" font-family="var(--font-body, sans-serif)">${Math.round(t.value)}</text>`;
         }
 
-        const accent = '#D97706';
-        const accentSoft = 'rgba(217, 119, 6, 0.55)';
+        const accentSoft = cssVarAlpha('--color-accent', 0.55);
         this.weeks8.forEach((b, i) => {
           const x = PAD_L + i * slotW + barGap;
           const h = peak > 0 ? (b.sessionCount / peak) * plotH : 0;
@@ -725,12 +818,12 @@ function benchmarkBadge(band: PercentileBand | null): string {
           svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" rx="2" fill="${fill}"><title>${fmtDate(b.key)} · ${b.sessionCount} ${LABELS.stats.sessionSingular}${b.sessionCount > 1 ? 's' : ''}</title></rect>`;
         });
 
-        svg += `<line x1="${PAD_L}" y1="${(PAD_T + plotH).toFixed(1)}" x2="${W - PAD_R}" y2="${(PAD_T + plotH).toFixed(1)}" stroke="var(--color-border, #2a2a2a)" stroke-width="1"/>`;
+        svg += `<line x1="${PAD_L}" y1="${(PAD_T + plotH).toFixed(1)}" x2="${W - PAD_R}" y2="${(PAD_T + plotH).toFixed(1)}" stroke="${grid}" stroke-width="1"/>`;
 
         for (const i of labelIdxs) {
           const b = this.weeks8[i];
           const cx = PAD_L + i * slotW + slotW / 2;
-          svg += `<text x="${cx.toFixed(1)}" y="${(PAD_T + plotH + 24).toFixed(1)}" font-size="11" fill="#9CA3AF" text-anchor="middle" font-family="var(--font-body, sans-serif)">${fmtDate(b.key)}</text>`;
+          svg += `<text x="${cx.toFixed(1)}" y="${(PAD_T + plotH + 24).toFixed(1)}" font-size="11" fill="${muted}" text-anchor="middle" font-family="var(--font-body, sans-serif)">${fmtDate(b.key)}</text>`;
         }
 
         svg += `</svg>`;
@@ -756,7 +849,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
                 <div class="stats__top-main">
                   <div class="stats__top-head">
                     <span class="stats__top-name">${svgEscape(trExercise(item.name))}</span>
-                    <span class="stats__top-muscle">${svgEscape(trMuscle(item.muscle))}</span>
+                    <span class="badge--category badge--cat-${muscleHue(item.muscle)} inline-flex items-center font-semibold whitespace-nowrap rounded-[var(--radius-pill)] px-2 py-0.5 text-[1.0rem] uppercase tracking-wider self-start">${svgEscape(trMuscle(item.muscle))}</span>
                     <span class="stats__top-value">${fmtNum(item.volume)} ${LABELS.common.kg}</span>
                   </div>
                   <div class="stats__top-bar" role="presentation">
@@ -878,8 +971,8 @@ function benchmarkBadge(band: PercentileBand | null): string {
   }
 
   .stats__sum--hero {
-    background-color: hsl(32 95% 50% / 0.08);
-    border-color: hsl(32 95% 50% / 0.30);
+    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
   .stats__sum-label {
@@ -964,7 +1057,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.6rem;
+    min-height: 4.4rem;
     padding: 0 1.4rem;
     background-color: transparent;
     border: 1px solid transparent;
@@ -985,7 +1078,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
   }
 
   .stats__seg.is-active {
-    background-color: hsl(32 95% 50% / 0.14);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
     border-color: var(--color-accent);
     color: var(--color-accent);
   }
@@ -1181,14 +1274,6 @@ function benchmarkBadge(band: PercentileBand | null): string {
     word-break: break-word;
   }
 
-  .stats__top-muscle {
-    font-size: 1.0rem;
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    color: var(--color-accent);
-    font-weight: 700;
-  }
-
   .stats__top-value {
     font-family: var(--font-display);
     font-size: 1.4rem;
@@ -1209,7 +1294,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
   .stats__top-fill {
     position: absolute;
     inset: 0 auto 0 0;
-    background: linear-gradient(90deg, hsl(32 95% 50%), hsl(32 95% 60%));
+    background: linear-gradient(90deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 80%, white));
     border-radius: var(--radius-pill);
   }
 
@@ -1288,9 +1373,9 @@ function benchmarkBadge(band: PercentileBand | null): string {
     width: 1.8rem;
     height: 1.8rem;
     border-radius: 50%;
-    background: white;
+    background: var(--color-accent-foreground);
     transition: transform 200ms ease;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+    box-shadow: var(--shadow-1);
     display: inline-block;
   }
 
@@ -1356,11 +1441,11 @@ function benchmarkBadge(band: PercentileBand | null): string {
   }
 
   .stats__bench-row--top {
-    background-color: hsl(32 95% 50% / 0.08);
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
   }
 
   .stats__bench-row--top:hover {
-    background-color: hsl(32 95% 50% / 0.14);
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
   }
 
   .stats__bench-value {
@@ -1382,8 +1467,8 @@ function benchmarkBadge(band: PercentileBand | null): string {
     align-items: center;
     height: 2.2rem;
     padding: 0 0.8rem;
-    background-color: hsl(32 95% 50% / 0.14);
-    border: 1px solid hsl(32 95% 50% / 0.40);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
     border-radius: var(--radius-pill);
     color: var(--color-accent);
     font-size: 1.0rem;
@@ -1438,5 +1523,44 @@ function benchmarkBadge(band: PercentileBand | null): string {
     .stats__bench-toggle-thumb {
       transition: none;
     }
+  }
+</style>
+
+<style is:global>
+  /* Top-5 muscle badges (renderTopExercises) are injected via Alpine
+     `x-html`, so Astro-scoped styles — including Badge.astro's own
+     scoped rules — never match them. Unscoped mirror of the category
+     badge look, same design tokens as Badge.astro (no new colors). */
+  .badge--category {
+    background-color: var(--alpha-bg-soft);
+    color: var(--color-muted);
+  }
+  .badge--cat-chest {
+    background-color: var(--color-cat-chest-bg);
+    color: var(--color-cat-chest);
+  }
+  .badge--cat-back {
+    background-color: var(--color-cat-back-bg);
+    color: var(--color-cat-back);
+  }
+  .badge--cat-shoulders {
+    background-color: var(--color-cat-shoulders-bg);
+    color: var(--color-cat-shoulders);
+  }
+  .badge--cat-arms {
+    background-color: var(--color-cat-arms-bg);
+    color: var(--color-cat-arms);
+  }
+  .badge--cat-legs {
+    background-color: var(--color-cat-legs-bg);
+    color: var(--color-cat-legs);
+  }
+  .badge--cat-core {
+    background-color: var(--color-cat-core-bg);
+    color: var(--color-cat-core);
+  }
+  .badge--cat-other {
+    background-color: var(--alpha-bg-soft);
+    color: var(--color-muted);
   }
 </style>

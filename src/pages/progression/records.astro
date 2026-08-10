@@ -470,8 +470,8 @@ const L = t();
   }
 
   .rec__stat--hero {
-    background-color: hsl(32 95% 50% / 0.08);
-    border-color: hsl(32 95% 50% / 0.30);
+    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
   .rec__stat-label {
@@ -609,7 +609,7 @@ const L = t();
   }
 
   .rec__sort-btn {
-    height: 3.4rem;
+    height: 4.4rem;
     padding: 0 1.2rem;
     background: transparent;
     border: 0;
@@ -626,6 +626,11 @@ const L = t();
   .rec__sort-btn:hover {
     color: var(--color-text);
     background-color: var(--alpha-bg-subtle);
+  }
+
+  .rec__sort-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
   .rec__sort-btn--active {
@@ -668,7 +673,7 @@ const L = t();
 
   .rec__card:hover {
     background-color: var(--color-surface-2);
-    border-color: hsl(32 95% 50% / 0.30);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
   .rec__card:focus-visible {
@@ -686,7 +691,7 @@ const L = t();
     justify-content: center;
     width: 4.2rem;
     height: 4.2rem;
-    background-color: hsl(32 95% 50% / 0.12);
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
     color: var(--color-accent);
     border-radius: var(--radius-md);
     flex-shrink: 0;

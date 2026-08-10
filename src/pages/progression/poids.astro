@@ -295,6 +295,8 @@ const L = t();
     type BodyRecord,
   } from '../../lib/storage';
 
+  import { cssVar } from '../../lib/css-var';
+
   import { t } from '../../i18n';
 
   const LABELS = t();
@@ -496,6 +498,14 @@ const L = t();
         const plotW = W - PAD_L - PAD_R;
         const plotH = H - PAD_T - PAD_B;
 
+        // Chart colors — read from the design tokens so the SVG stays in
+        // sync with the current theme (dark/light) without hardcoded hexes.
+        const accent = cssVar('--color-accent');
+        const bg = cssVar('--color-bg');
+        const muted = cssVar('--color-muted');
+        const text = cssVar('--color-text');
+        const grid = cssVar('--color-border');
+
         const weights = this.records.map((r) => r.weight);
         let minW = Math.min(...weights);
         let maxW = Math.max(...weights);
@@ -553,8 +563,8 @@ const L = t();
         // Grid lines + Y labels
         for (const t of ticks) {
           const y = yAt(t);
-          svg += `<line x1="${PAD_L}" y1="${y.toFixed(1)}" x2="${W - PAD_R}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
-          svg += `<text x="${PAD_L - 8}" y="${(y + 4).toFixed(1)}" font-size="14" fill="#9CA3AF" text-anchor="end" font-family="var(--font-display, sans-serif)">${Math.round(t * 10) / 10}</text>`;
+          svg += `<line x1="${PAD_L}" y1="${y.toFixed(1)}" x2="${W - PAD_R}" y2="${y.toFixed(1)}" stroke="${grid}" stroke-width="1"/>`;
+          svg += `<text x="${PAD_L - 8}" y="${(y + 4).toFixed(1)}" font-size="14" fill="${muted}" text-anchor="end" font-family="var(--font-display, sans-serif)">${Math.round(t * 10) / 10}</text>`;
         }
 
         // Area under the line
@@ -564,25 +574,25 @@ const L = t();
             .map((r, i) => `L ${xAt(i).toFixed(1)} ${yAt(r.weight).toFixed(1)}`)
             .join(' ') +
           ` L ${xAt(this.records.length - 1).toFixed(1)} ${(H - PAD_B).toFixed(1)} Z`;
-        svg += `<defs><linearGradient id="poids-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D97706" stop-opacity="0.35"/><stop offset="100%" stop-color="#D97706" stop-opacity="0"/></linearGradient></defs>`;
+        svg += `<defs><linearGradient id="poids-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${accent}" stop-opacity="0.35"/><stop offset="100%" stop-color="${accent}" stop-opacity="0"/></linearGradient></defs>`;
         svg += `<path d="${areaPath}" fill="url(#poids-grad)"/>`;
 
         // Line
-        svg += `<path d="${path}" fill="none" stroke="#D97706" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+        svg += `<path d="${path}" fill="none" stroke="${accent}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
 
         // First / last accent dots
-        svg += `<circle cx="${xAt(0).toFixed(1)}" cy="${yAt(first.weight).toFixed(1)}" r="5" fill="#D97706" stroke="#050505" stroke-width="2"/>`;
-        svg += `<circle cx="${xAt(this.records.length - 1).toFixed(1)}" cy="${yAt(last.weight).toFixed(1)}" r="6" fill="#D97706" stroke="#050505" stroke-width="2"/>`;
+        svg += `<circle cx="${xAt(0).toFixed(1)}" cy="${yAt(first.weight).toFixed(1)}" r="5" fill="${accent}" stroke="${bg}" stroke-width="2"/>`;
+        svg += `<circle cx="${xAt(this.records.length - 1).toFixed(1)}" cy="${yAt(last.weight).toFixed(1)}" r="6" fill="${accent}" stroke="${bg}" stroke-width="2"/>`;
 
         // X labels
         for (const i of labelIdxs) {
           const r = this.records[i];
-          svg += `<text x="${xAt(i).toFixed(1)}" y="${(H - PAD_B + 24).toFixed(1)}" font-size="14" fill="#9CA3AF" text-anchor="middle" font-family="var(--font-body, sans-serif)">${fmtDate(r.date)}</text>`;
+          svg += `<text x="${xAt(i).toFixed(1)}" y="${(H - PAD_B + 24).toFixed(1)}" font-size="14" fill="${muted}" text-anchor="middle" font-family="var(--font-body, sans-serif)">${fmtDate(r.date)}</text>`;
         }
 
         // Min / max labels on the right of first/last dots
-        svg += `<text x="${(xAt(0) - 12).toFixed(1)}" y="${(yAt(first.weight) + 4).toFixed(1)}" font-size="14" font-weight="700" fill="#F6F6F6" text-anchor="end" font-family="var(--font-display, sans-serif)">${Math.round(first.weight * 10) / 10} kg</text>`;
-        svg += `<text x="${(xAt(this.records.length - 1) + 12).toFixed(1)}" y="${(yAt(last.weight) + 4).toFixed(1)}" font-size="14" font-weight="700" fill="#F6F6F6" text-anchor="start" font-family="var(--font-display, sans-serif)">${Math.round(last.weight * 10) / 10} kg</text>`;
+        svg += `<text x="${(xAt(0) - 12).toFixed(1)}" y="${(yAt(first.weight) + 4).toFixed(1)}" font-size="14" font-weight="700" fill="${text}" text-anchor="end" font-family="var(--font-display, sans-serif)">${Math.round(first.weight * 10) / 10} kg</text>`;
+        svg += `<text x="${(xAt(this.records.length - 1) + 12).toFixed(1)}" y="${(yAt(last.weight) + 4).toFixed(1)}" font-size="14" font-weight="700" fill="${text}" text-anchor="start" font-family="var(--font-display, sans-serif)">${Math.round(last.weight * 10) / 10} kg</text>`;
 
         svg += `</svg>`;
         return svg;
@@ -677,8 +687,8 @@ const L = t();
   }
 
   .poids__error {
-    background-color: hsl(0 80% 55% / 0.10);
-    border: 1px solid hsl(0 80% 55% / 0.30);
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-destructive) 30%, transparent);
     border-radius: var(--radius-sm);
     color: var(--color-destructive);
     font-size: 1.2rem;
@@ -688,8 +698,8 @@ const L = t();
   }
 
   .poids__success {
-    background-color: hsl(142 70% 45% / 0.10);
-    border: 1px solid hsl(142 70% 45% / 0.30);
+    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
     border-radius: var(--radius-sm);
     color: var(--color-success);
     font-size: 1.2rem;
@@ -784,8 +794,8 @@ const L = t();
 
   .poids__stat--hero {
     grid-column: 1 / -1;
-    background-color: hsl(32 95% 50% / 0.08);
-    border-color: hsl(32 95% 50% / 0.30);
+    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
   @media (min-width: 640px) {
@@ -941,8 +951,8 @@ const L = t();
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
@@ -954,8 +964,8 @@ const L = t();
   }
 
   .poids__icon-btn:hover {
-    background-color: hsl(0 80% 55% / 0.10);
-    border-color: hsl(0 80% 55% / 0.30);
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-destructive) 30%, transparent);
     color: var(--color-destructive);
   }
 
