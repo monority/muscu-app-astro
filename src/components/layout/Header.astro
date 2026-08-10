@@ -41,6 +41,32 @@ const { title, class: className = "" } = Astro.props;
       <span class="topbar__hamburger-bar"></span>
     </button>
 
+    {/* Search (mobile/tablet only — opens the quick-search palette) */}
+    <button
+      type="button"
+      class="topbar__search"
+      data-quick-search-trigger
+      aria-label={L.layout.searchAria}
+      aria-haspopup="dialog"
+      title={L.layout.searchAria}
+    >
+      <svg
+        class="topbar__search-icon"
+        viewBox="0 0 24 24"
+        width="18"
+        height="18"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+    </button>
+
     {title && <span class="topbar__title">{title}</span>}
 
     <div class="topbar__right">
@@ -133,7 +159,42 @@ const { title, class: className = "" } = Astro.props;
     transform: translateY(-6px) rotate(-45deg);
   }
 
+  /* ── Mobile search trigger ────────────────────────────── */
+  /* Same visual language as the hamburger; opens the global
+     quick-search palette on handheld/tablet screens. Hidden on
+     desktop because the sidebar already has a search field. */
+  .topbar__search {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 4.4rem;
+    height: 4.4rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    padding: 0;
+    color: var(--color-text);
+    flex: 0 0 auto;
+    transition: background-color var(--transition-fast);
+  }
+
+  .topbar__search:hover {
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .topbar__search-icon {
+    display: block;
+    color: currentColor;
+  }
+
   /* ── Responsive ────────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .topbar__search {
+      display: inline-flex;
+    }
+  }
+
   @media (min-width: 1024px) {
     .topbar__hamburger {
       display: none;

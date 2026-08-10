@@ -12,8 +12,9 @@
  * carrying the active section id; the settings page listens for it and
  * triggers the relevant save action.
  *
- * The bar sits at `z-index: 55`, below the mobile drawer (`z-index: 60`),
- * and uses the shared design tokens so it adapts to dark/light themes.
+ * The bar sits at z-index `2` (sticky in the settings page flow, below the
+ * mobile drawer at `z-index: 60`) and uses the shared design tokens so it
+ * adapts to dark/light themes.
  */
 interface Props {
   sections: { id: string; label: string }[];
@@ -21,12 +22,16 @@ interface Props {
   saveLabel?: string;
 }
 
+import { t } from "../../i18n";
+
+const L = t();
+
 const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro.props;
 ---
 
 <nav
   class="set-bar"
-  aria-label="Sections des paramètres"
+  aria-label={L.settings.sectionsAria}
   x-data={`settingsBarApp(${JSON.stringify(activeSection)}, ${JSON.stringify(saveLabel)})`}
   data-sections={JSON.stringify(sections)}
 >

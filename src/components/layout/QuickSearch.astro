@@ -416,9 +416,13 @@ const L = t();
       // Static page catalogue (labels localized at init).
       const pages: QItem[] = [
         { index: 0, key: "page:/", kind: "page", label: L.nav.dashboard, href: base("/") },
+        { index: 0, key: "page:/seances/rapide", kind: "page", label: L.nav.rapide, href: base("/seances/rapide") },
+        { index: 0, key: "page:/seances/creer", kind: "page", label: L.nav.creer, href: base("/seances/creer") },
         { index: 0, key: "page:/exercices", kind: "page", label: L.nav.exercices, href: base("/exercices") },
-        { index: 0, key: "page:/exercices/historique", kind: "page", label: L.nav.historique, href: base("/exercices/historique") },
         { index: 0, key: "page:/progression", kind: "page", label: L.nav.progression, href: base("/progression") },
+        { index: 0, key: "page:/progression/poids", kind: "page", label: L.nav.poidsMesures, href: base("/progression/poids") },
+        { index: 0, key: "page:/progression/records", kind: "page", label: L.nav.records, href: base("/progression/records") },
+        { index: 0, key: "page:/progression/stats", kind: "page", label: L.nav.statistiques, href: base("/progression/stats") },
         { index: 0, key: "page:/calculateur", kind: "page", label: L.nav.calculateur, href: base("/calculateur") },
         { index: 0, key: "page:/calendrier", kind: "page", label: L.nav.calendrier, href: base("/calendrier") },
         { index: 0, key: "page:/seances", kind: "page", label: L.nav.seances, href: base("/seances") },

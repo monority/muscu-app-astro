@@ -1,6 +1,7 @@
 export default {
   title: 'Settings',
   description: 'Customize your app and manage your preferences.',
+  sectionsAria: 'Settings sections',
   profile: 'Profile',
   pseudo: 'Username',
   email: 'Email',
