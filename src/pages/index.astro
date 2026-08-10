@@ -2,10 +2,12 @@
 import AppLayout from '../layouts/AppLayout.astro';
 import PageHeader from '../components/layout/PageHeader.astro';
 import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardContent from '../components/ui/CardContent.astro';
 import EmptyState from '../components/ui/EmptyState.astro';
+import Badge from '../components/ui/Badge.astro';
 import { t, setLocale, defaultLocale, localizedPath } from '../i18n';
-
-
 
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
@@ -14,259 +16,318 @@ const L = t();
 <AppLayout title={L.dashboard.title}>
   <PageHeader
     title={L.dashboard.title}
-    description="Vue d'ensemble de votre progression."
+    description={L.dashboard.description}
+    actionLabel={L.dashboard.newSession}
+    actionHref={localizedPath("/seances/creer")}
   />
 
   <div class="dash" x-data="dashboardApp()" x-init="init()" x-cloak>
-    {/* ── Quick actions ── */}
-    <div class="dash__actions">
-      <a href={localizedPath("/seances/creer")} class="dash__action dash__action--primary">
-        <svg
-          class="dash__action-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        <span>{L.dashboard.newSession}</span>
-      </a>
-      <a href={localizedPath("/timer")} class="dash__action dash__action--secondary">
-        <svg
-          class="dash__action-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="13" r="8"></circle>
-          <path d="M12 9v4l2 2"></path>
-          <path d="M5 3 2 6"></path>
-          <path d="m22 6-3-3"></path>
-          <path d="M6.38 18.7 4 21"></path>
-          <path d="M17.64 18.67 20 21"></path>
-        </svg>
-        <span>{L.dashboard.stopwatch}</span>
-      </a>
+    {/* ── Onboarding (first run: no sessions yet) ── */}
+    <div class="dash__onboarding" x-show="!hasSessions">
+      <Card padding="lg">
+        <EmptyState
+          icon="dumbbell"
+          title={L.dashboard.welcomeTitle}
+          description={L.dashboard.welcomeDesc}
+          actionLabel={L.dashboard.createFirst}
+          actionHref={localizedPath("/seances/creer")}
+        />
+        <div class="dash__onboarding-alt">
+          <a href={localizedPath("/exercices")} class="dash__onboarding-link">
+            {L.dashboard.browseExercises}
+          </a>
+        </div>
+      </Card>
     </div>
 
-    {/* ── Weekly goal ── */}
-    <section class="dash__goal-card" aria-label="Objectif hebdomadaire">
-      <div class="dash__goal-head">
-        <div class="dash__goal-head-text">
-          <span class="dash__goal-eyebrow" x-text="labels.weeklyGoalEyebrow">Objectif hebdomadaire</span>
-          <h2 class="dash__goal-title">
+    {/* ── Main dashboard (once training has started) ── */}
+    <div x-show="hasSessions">
+      {/* ── Hero strip ── */}
+      <section class="dash__hero" aria-label={L.dashboard.goalCardAria}>
+        <div class="dash__hero-main">
+          <div class="dash__goal-ring" aria-hidden="true">
+            <svg viewBox="0 0 44 44" class="dash__goal-ring-svg">
+              <circle
+                cx="22"
+                cy="22"
+                r="18"
+                class="dash__goal-ring-track"
+              ></circle>
+              <circle
+                cx="22"
+                cy="22"
+                r="18"
+                class="dash__goal-ring-fill"
+                :stroke-dasharray="`${weeklyProgress * 113.1} 113.1`"
+              ></circle>
+            </svg>
             <span
-              class="dash__goal-done"
-              x-text="weeklyDone"
-            >0</span><span class="dash__goal-sep" aria-hidden="true">/</span><span
-              class="dash__goal-target"
-              x-text="settings.weeklyGoal"
-            >3</span>
+              class="dash__goal-ring-pct"
+              x-text="`${Math.round(weeklyProgress * 100)}%`"
+            >0%</span>
+          </div>
+
+          <div class="dash__hero-text">
             <span
-              class="dash__goal-unit"
-              x-text="settings.weeklyGoal > 1 ? labels.weeklyThisWeek : labels.weeklyThisWeekOne"
-            >{L.dashboard.weeklyThisWeek}</span>
-          </h2>
-        </div>
-        <div class="dash__goal-ring" aria-hidden="true">
-          <svg viewBox="0 0 44 44" class="dash__goal-ring-svg">
-            <circle
-              cx="22"
-              cy="22"
-              r="18"
-              class="dash__goal-ring-track"
-            ></circle>
-            <circle
-              cx="22"
-              cy="22"
-              r="18"
-              class="dash__goal-ring-fill"
-              :stroke-dasharray="`${weeklyProgress * 113.1} 113.1`"
-            ></circle>
-          </svg>
-          <span
-            class="dash__goal-ring-pct"
-            x-text="`${Math.round(weeklyProgress * 100)}%`"
-          >0%</span>
-        </div>
-      </div>
-      <div class="dash__goal-bar">
-        <div
-          class="dash__goal-bar-fill"
-          :class="{ 'dash__goal-bar-fill--complete': weeklyDone >= settings.weeklyGoal }"
-          :style="`width: ${Math.min(100, weeklyProgress * 100)}%`"
-        ></div>
-      </div>
-      <p
-        class="dash__goal-hint"
-        x-show="weeklyDone >= settings.weeklyGoal"
-        x-transition.opacity
-        x-cloak
-        x-text="labels.weeklyGoalDone"
-      ></p>
-      <p
-        class="dash__goal-hint dash__goal-hint--muted"
-        x-show="weeklyDone < settings.weeklyGoal && settings.weeklyGoal > 0"
-      >
-        Encore
-        <strong x-text="settings.weeklyGoal - weeklyDone"></strong>
-        <span x-text="(settings.weeklyGoal - weeklyDone) > 1 ? labels.weeklyMorePlural : labels.weeklyMoreSingular"></span>
-        <span x-text="labels.forGoal"></span>
-      </p>
-    </section>
-
-    {/* ── KPI grid ── */}
-    <section class="dash__kpis" aria-label={L.dashboard.kpisAria}>
-      {/* Volume total */}
-      <Card class="dash__kpi">
-        <div class="flex flex-col gap-1">
-          <div class="dash__kpi-head">
-            <span class="dash__kpi-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-            </span>
-            <span class="dash__kpi-label">{L.dashboard.totalVolume}</span>
-          </div>
-          <div class="flex items-baseline">
-            <span class="dash__kpi-value" x-text="formatVolume(kpis.totalVolume)">0</span>
-            <span class="dash__kpi-unit">kg</span>
-          </div>
-        </div>
-      </Card>
-
-      {/* Séances */}
-      <Card class="dash__kpi">
-        <div class="flex flex-col gap-1">
-          <div class="dash__kpi-head">
-            <span class="dash__kpi-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
-            </span>
-            <span class="dash__kpi-label">{L.dashboard.totalSessions}</span>
-          </div>
-          <div class="flex items-baseline">
-            <span class="dash__kpi-value" x-text="kpis.totalSessions">0</span>
-            <span
-              class="dash__kpi-unit"
-              x-text="kpis.totalSessions > 1 ? labels.weeklyMorePlural : labels.weeklyMoreSingular"
-            >{L.dashboard.totalSessions}</span>
-          </div>
-        </div>
-      </Card>
-
-      {/* PRs */}
-      <Card class="dash__kpi">
-        <div class="flex flex-col gap-1">
-          <div class="dash__kpi-head">
-            <span class="dash__kpi-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-            </span>
-            <span class="dash__kpi-label">PRs</span>
-          </div>
-          <div class="flex items-baseline">
-            <span class="dash__kpi-value" x-text="kpis.bestPRs">0</span>
-            <span
-              class="dash__kpi-unit"
-              x-text="kpis.bestPRs > 1 ? 'exercices' : 'exercice'"
-            >exercices</span>
-          </div>
-          <div
-            class="dash__kpi-sub"
-            x-show="kpis.top1RM > 0"
-            x-text="labels.top1RM + ' ' + formatVolume(kpis.top1RM) + ' kg'"
-          ></div>
-        </div>
-      </Card>
-
-      {/* Streak */}
-      <Card class="dash__kpi">
-        <div class="flex flex-col gap-1">
-          <div class="dash__kpi-head">
-            <span class="dash__kpi-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-            </span>
-            <span class="dash__kpi-label">{L.dashboard.streak}</span>
-          </div>
-          <div class="flex items-baseline">
-            <span class="dash__kpi-value" x-text="kpis.streak">0</span>
-            <span
-              class="dash__kpi-unit"
-              x-text="kpis.streak > 1 ? 'jours' : 'jour'"
-            >jours</span>
-          </div>
-          <div
-            class="dash__kpi-sub"
-            x-show="kpis.streak === 0 && kpis.totalSessions > 0"
-            x-text="labels.noRecent"
-          ></div>
-        </div>
-      </Card>
-    </section>
-
-    {/* ── Recent sessions ── */}
-    <section class="dash__recent" aria-label={L.dashboard.recentAria}>
-      <header class="dash__section-head">
-        <h2 x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
-        <a
-          href={localizedPath("/seances")}
-          class="dash__see-all"
-          x-show="hasSessions"
-          x-text="labels.viewAll"
-        >{L.dashboard.viewAll} →</a>
-      </header>
-
-      {/* List of recent sessions (when there are any) */}
-      <div class="dash__sessions" x-show="hasSessions">
-        <template x-for="s in recentSessions" :key="s.id">
-          <a
-            :href="localizedPath('/seances/detail?id=' + s.id)"
-            class="dash__session"
-            :class="'dash__session--' + s.status"
-          >
-            <div class="dash__session-head">
-              <h3 class="dash__session-name" x-text="s.name"></h3>
+              class="dash__goal-eyebrow"
+              x-text="labels.weeklyGoalEyebrow"
+            >{L.dashboard.weeklyGoalEyebrow}</span>
+            <h2 class="dash__goal-title">
+              <span class="dash__goal-done" x-text="weeklyDone">0</span>
+              <span class="dash__goal-sep" aria-hidden="true">/</span>
+              <span class="dash__goal-target" x-text="settings.weeklyGoal">3</span>
               <span
-                class="dash__badge"
-                :class="'dash__badge--' + s.status"
-                x-text="statusLabel(s.status)"
-              ></span>
+                class="dash__goal-unit"
+                x-text="weeklyDone === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
+              >{L.dashboard.sessionsUnit}</span>
+            </h2>
+
+            <div
+              class="dash__goal-bar"
+              role="progressbar"
+              aria-label={L.dashboard.goalCardAria}
+              aria-valuemin="0"
+              :aria-valuenow="weeklyDone"
+              :aria-valuemax="settings.weeklyGoal"
+            >
+              <div
+                class="dash__goal-bar-fill"
+                :class="{ 'dash__goal-bar-fill--complete': weeklyDone >= settings.weeklyGoal }"
+                :style="`width: ${Math.min(100, weeklyProgress * 100)}%`"
+              ></div>
             </div>
 
-            <div class="dash__session-meta">
-              <span class="dash__session-date" x-text="formatDate(s.date)"></span>
-              <span class="dash__session-sep" aria-hidden="true">·</span>
-              <span>
-                <span x-text="sessionExercisesCount(s)"></span>
-                <span x-text="sessionExercisesCount(s) > 1 ? labels.exoPlural : labels.exoSingular"></span>
-              </span>
-              <span class="dash__session-sep" aria-hidden="true">·</span>
-              <span class="dash__session-volume" x-text="formatVolume(sessionVolume(s)) + ' kg'">0 kg</span>
-            </div>
+            <p
+              class="dash__goal-hint"
+              x-show="weeklyDone >= settings.weeklyGoal"
+              x-transition.opacity
+              x-cloak
+              x-text="labels.weeklyGoalDone"
+            ></p>
+            <p
+              class="dash__goal-hint dash__goal-hint--muted"
+              x-show="weeklyDone < settings.weeklyGoal && settings.weeklyGoal > 0"
+              x-text="remainingHintText()"
+            ></p>
+          </div>
+        </div>
+
+        <div class="dash__hero-cta">
+          <a href={localizedPath("/seances/creer")} class="dash__cta dash__cta--primary">
+            <svg
+              class="dash__cta-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>{L.dashboard.newSession}</span>
           </a>
-        </template>
-      </div>
+          <a href={localizedPath("/timer")} class="dash__cta dash__cta--secondary">
+            <svg
+              class="dash__cta-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="13" r="8"></circle>
+              <path d="M12 9v4l2 2"></path>
+              <path d="M5 3 2 6"></path>
+              <path d="m22 6-3-3"></path>
+              <path d="M6.38 18.7 4 21"></path>
+              <path d="M17.64 18.67 20 21"></path>
+            </svg>
+            <span>{L.dashboard.stopwatch}</span>
+          </a>
+        </div>
+      </section>
 
-      {/* Empty state (when no sessions yet) */}
-      <div x-show="!hasSessions">
-        <Card>
-          <EmptyState
-            title={L.dashboard.noSessions}
-            description={L.dashboard.emptyDesc}
-            actionLabel={L.dashboard.createFirst}
-            actionHref={localizedPath("/seances/creer")}
-          />
+      {/* ── KPI band ── */}
+      <section class="dash__kpis" aria-label={L.dashboard.kpisAria}>
+        {/* Volume */}
+        <Card class="dash__kpi" padding="md">
+          <div class="flex flex-col gap-1">
+            <div class="dash__kpi-head">
+              <span class="dash__kpi-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+              </span>
+              <span class="dash__kpi-label">{L.dashboard.totalVolume}</span>
+            </div>
+            <div class="flex items-baseline">
+              <span class="dash__kpi-value" x-text="formatVolume(kpis.totalVolume)">0</span>
+              <span class="dash__kpi-unit">{L.common.kg}</span>
+            </div>
+          </div>
         </Card>
-      </div>
-    </section>
+
+        {/* Séances */}
+        <Card class="dash__kpi" padding="md">
+          <div class="flex flex-col gap-1">
+            <div class="dash__kpi-head">
+              <span class="dash__kpi-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
+              </span>
+              <span class="dash__kpi-label">{L.dashboard.totalSessions}</span>
+            </div>
+            <div class="flex items-baseline">
+              <span class="dash__kpi-value" x-text="kpis.totalSessions">0</span>
+              <span
+                class="dash__kpi-unit"
+                x-text="kpis.totalSessions === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
+              >{L.dashboard.sessionsUnit}</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* PRs */}
+        <Card class="dash__kpi" padding="md">
+          <div class="flex flex-col gap-1">
+            <div class="dash__kpi-head">
+              <span class="dash__kpi-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              </span>
+              <span class="dash__kpi-label">{L.dashboard.bestPRs}</span>
+            </div>
+            <div class="flex items-baseline">
+              <span class="dash__kpi-value" x-text="kpis.bestPRs">0</span>
+              <span
+                class="dash__kpi-unit"
+                x-text="kpis.bestPRs === 1 ? labels.exoSingular.trim() : labels.exercisesUnit"
+              >{L.dashboard.exercisesUnit}</span>
+            </div>
+            <div
+              class="dash__kpi-sub"
+              x-show="kpis.top1RM > 0"
+              x-text="labels.top1RM + ' ' + formatVolume(kpis.top1RM) + ' ' + labels.kg"
+            ></div>
+          </div>
+        </Card>
+
+        {/* Streak */}
+        <Card class="dash__kpi" padding="md">
+          <div class="flex flex-col gap-1">
+            <div class="dash__kpi-head">
+              <span class="dash__kpi-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              </span>
+              <span class="dash__kpi-label">{L.dashboard.streak}</span>
+            </div>
+            <div class="flex items-baseline">
+              <span class="dash__kpi-value" x-text="kpis.streak">0</span>
+              <span
+                class="dash__kpi-unit"
+                x-text="kpis.streak === 1 ? labels.daysSingular : labels.daysUnit"
+              >{L.dashboard.daysPlural}</span>
+            </div>
+            <div
+              class="dash__kpi-sub"
+              x-show="kpis.streak === 0 && kpis.totalSessions > 0"
+              x-text="labels.noRecent"
+            ></div>
+          </div>
+        </Card>
+      </section>
+
+      {/* ── Insights row (7-day volume + muscle split) ── */}
+      <section class="dash__insights" x-show="hasCompletedSessions">
+        <Card>
+          <CardHeader>
+            <div class="dash__chart-head">
+              <CardTitle>{L.dashboard.volumeLast7d}</CardTitle>
+              <span class="dash__chart-meta">{L.common.kg}</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div class="dash__chart-wrap" x-html="renderSparkline()"></div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div class="dash__chart-head">
+              <CardTitle>{L.dashboard.muscleSplit}</CardTitle>
+              <span class="dash__chart-meta">{L.dashboard.thisWeek}</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div class="dash__chart-wrap" x-html="renderDonut()"></div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ── Recent sessions ── */}
+      <section class="dash__recent" aria-label={L.dashboard.recentAria}>
+        <header class="dash__section-head">
+          <h2 x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
+          <a
+            href={localizedPath("/seances")}
+            class="dash__see-all"
+            x-show="hasSessions"
+            x-text="labels.viewAll"
+          >{L.dashboard.viewAll} →</a>
+        </header>
+
+        <div class="dash__sessions" x-show="hasSessions">
+          <template x-for="s in recentSessions" :key="s.id">
+            <a
+              :href="localizedPath('/seances/detail?id=' + s.id)"
+              class="dash__session"
+              :class="'dash__session--' + s.status"
+            >
+              <div class="dash__session-head">
+                <h3 class="dash__session-name" x-text="s.name"></h3>
+                <div class="dash__session-badge">
+                  <div x-show="s.status === 'completed'">
+                    <Badge variant="success" size="sm"><span x-text="statusLabel(s.status)"></span></Badge>
+                  </div>
+                  <div x-show="s.status === 'in-progress'">
+                    <Badge variant="info" size="sm"><span x-text="statusLabel(s.status)"></span></Badge>
+                  </div>
+                  <div x-show="s.status !== 'completed' && s.status !== 'in-progress'">
+                    <Badge variant="default" size="sm"><span x-text="statusLabel(s.status)"></span></Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dash__session-meta">
+                <span class="dash__session-date" x-text="formatDate(s.date)"></span>
+                <span class="dash__session-sep" aria-hidden="true">·</span>
+                <span>
+                  <span x-text="sessionExercisesCount(s)"></span>
+                  <span x-text="sessionExercisesCount(s) > 1 ? labels.exoPlural : labels.exoSingular"></span>
+                </span>
+                <span class="dash__session-sep" aria-hidden="true">·</span>
+                <span class="dash__session-volume" x-text="formatVolume(sessionVolume(s)) + ' ' + labels.kg">0 kg</span>
+              </div>
+            </a>
+          </template>
+        </div>
+
+        {/* Empty fallback inside a Card (unreachable while onboarding shows). */}
+        <div x-show="!hasSessions">
+          <Card>
+            <EmptyState
+              title={L.dashboard.noSessions}
+              description={L.dashboard.emptyDesc}
+              actionLabel={L.dashboard.createFirst}
+              actionHref={localizedPath("/seances/creer")}
+            />
+          </Card>
+        </div>
+      </section>
+    </div>
   </div>
 </AppLayout>
 
@@ -274,14 +335,17 @@ const L = t();
   import {
     getSessions,
     getExercises,
-    getProgressRecords,
     getSessionsThisWeek,
     getSettings,
     calculate1RM,
     type Session,
     type SessionStatus,
   } from '../lib/storage';
-  import { t, defaultLocale, localizedPath } from '../i18n';
+  import { t, getLocale, localizedPath, trMuscle } from '../i18n';
+  import {
+    volumeByMuscle,
+    type MuscleVolumeSlice,
+  } from '../lib/volume-stats';
 
   const LABELS = t();
 
@@ -292,10 +356,12 @@ const L = t();
     return LABELS.sessions.planned;
   }
 
+  const DATE_LOCALE = getLocale() === 'fr' ? 'fr-FR' : 'en-US';
+
   function formatDate(iso: string): string {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString('fr-FR', {
+    return d.toLocaleDateString(DATE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -304,7 +370,7 @@ const L = t();
 
   function formatVolume(volume: number): string {
     if (!Number.isFinite(volume) || volume <= 0) return '0';
-    return Math.round(volume).toLocaleString('fr-FR');
+    return Math.round(volume).toLocaleString(DATE_LOCALE);
   }
 
   /** ISO date key YYYY-MM-DD (local-tz) — used for day-level comparisons. */
@@ -315,6 +381,34 @@ const L = t();
     return `${y}-${m}-${day}`;
   }
 
+  /** Escape a string for safe embedding inside generated SVG/HTML. */
+  function svgEscape(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /** Palette for the muscle donut (same high-hue-distance set as stats.astro). */
+  const MUSCLE_PALETTE: ReadonlyArray<string> = [
+    '#3B82F6', // blue
+    '#F97316', // orange
+    '#10B981', // emerald
+    '#EC4899', // pink
+    '#EAB308', // yellow
+    '#6366F1', // indigo
+    '#D97706', // amber
+    '#14B8A6', // teal
+    '#EF4444', // red
+    '#84CC16', // lime
+    '#A855F7', // purple
+    '#06B6D4', // cyan
+  ];
+
+  // Fallback bucket id used by volumeByMuscle for unknown muscle groups.
+  const OTHER_MUSCLE = 'Autre';
+
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
@@ -324,21 +418,25 @@ const L = t();
       sessions: [] as Session[],
       settings: getSettings(),
       weeklyDone: 0,
+      spark: [] as Array<{ key: string; label: string; volume: number }>,
+      muscleWeek: [] as MuscleVolumeSlice[],
+      donutSlices: [] as MuscleVolumeSlice[],
       labels: {
         top1RM: LABELS.dashboard.top1RM,
-        weeklyThisWeek: LABELS.dashboard.weeklyThisWeek,
-        weeklyThisWeekOne: LABELS.dashboard.weeklyThisWeekOne,
-        weeklyMorePlural: LABELS.dashboard.weeklyMorePlural,
+        weeklyGoalEyebrow: LABELS.dashboard.weeklyGoalEyebrow,
+        weeklyGoalDone: LABELS.dashboard.weeklyGoalDone,
         weeklyMoreSingular: LABELS.dashboard.weeklyMoreSingular,
-        forGoal: LABELS.dashboard.forGoal,
+        sessionsUnit: LABELS.dashboard.sessionsUnit,
+        exercisesUnit: LABELS.dashboard.exercisesUnit,
+        daysUnit: LABELS.dashboard.daysUnit,
+        remainingHint: LABELS.dashboard.remainingHint,
+        exoPlural: LABELS.dashboard.exoPlural,
+        exoSingular: LABELS.dashboard.exoSingular,
+        daysSingular: LABELS.dashboard.daysSingular,
         noRecent: LABELS.dashboard.noRecent,
         viewAll: LABELS.dashboard.viewAllArrow,
         recentSessions: LABELS.dashboard.recentSessions,
-        weeklyGoalEyebrow: LABELS.dashboard.weeklyGoalEyebrow,
-        weeklyGoalDone: LABELS.dashboard.weeklyGoalDone,
-        indicLabel: LABELS.dashboard.indicLabel,
-        exoPlural: LABELS.dashboard.exoPlural,
-        exoSingular: LABELS.dashboard.exoSingular,
+        kg: LABELS.common.kg,
       },
 
       // Expose localizedPath to Alpine expressions (uses window.__LOCALE__).
@@ -346,19 +444,25 @@ const L = t();
 
       // ── Init ──
       init() {
-        // Touch the storage so the exercise seed is created on first load
-        // (also lets us count library size for the "X dans la bibliothèque" hint).
+        // Touch the storage so the exercise seed is created on first load.
         getExercises();
         this.sessions = getSessions().sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
         );
         this.settings = getSettings();
         this.weeklyDone = getSessionsThisWeek().length;
+        this.spark = this.buildSpark();
+        this.muscleWeek = volumeByMuscle(this.sessions, { period: 'week' });
+        this.donutSlices = this.buildDonutSlices(this.muscleWeek);
       },
 
       // ── Derived ──
       get hasSessions(): boolean {
         return this.sessions.length > 0;
+      },
+
+      get hasCompletedSessions(): boolean {
+        return this.sessions.some((s) => s.status === 'completed');
       },
 
       get recentSessions(): Session[] {
@@ -381,6 +485,21 @@ const L = t();
           top1RM: this.top1RM(),
           streak: this.streak(),
         };
+      },
+
+      // ── Hero hint ──
+      remainingHintText(): string {
+        const remaining = Math.max(
+          0,
+          this.settings.weeklyGoal - this.weeklyDone,
+        );
+        const unit =
+          remaining === 1
+            ? this.labels.weeklyMoreSingular
+            : this.labels.sessionsUnit;
+        return this.labels.remainingHint
+          .replace('{count}', String(remaining))
+          .replace('{unit}', unit);
       },
 
       totalVolume(): number {
@@ -474,7 +593,7 @@ const L = t();
         return s.exercises.length;
       },
 
-      // ── Formatters exposed to the template ──
+      // ── Formatters / helpers exposed to the template ──
       statusLabel(status: SessionStatus): string {
         return statusLabel(status);
       },
@@ -487,13 +606,166 @@ const L = t();
         return formatVolume(volume);
       },
 
-      // ── Storage-backed helpers (kept on the component for future
-      //    expansion, e.g. quick-launch from the dashboard). ──
-      _getProgressCount(): number {
-        return getExercises().reduce(
-          (sum, ex) => sum + getProgressRecords(ex.id).length,
-          0,
-        );
+      // ════════════════════════════════════════════════════════
+      // 7-day volume sparkline (pattern adapted from stats.astro
+      // renderVolumeChart — bars only, no axis labels).
+      // ════════════════════════════════════════════════════════
+      buildSpark(): Array<{ key: string; label: string; volume: number }> {
+        const days: Array<{ key: string; label: string; volume: number }> = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          d.setHours(0, 0, 0, 0);
+          days.push({
+            key: dateKey(d),
+            label: d.toLocaleDateString(DATE_LOCALE, {
+              day: 'numeric',
+              month: 'short',
+            }),
+            volume: 0,
+          });
+        }
+
+        const byKey = new Map(days.map((d) => [d.key, d] as const));
+        for (const s of this.sessions) {
+          if (s.status !== 'completed') continue;
+          if (!s.date) continue;
+          const bucket = byKey.get(dateKey(new Date(s.date)));
+          if (!bucket) continue;
+          for (const ex of s.exercises) {
+            for (const set of ex.sets) {
+              if (!set.completed) continue;
+              bucket.volume += set.weight * set.reps;
+            }
+          }
+        }
+        return days;
+      },
+
+      renderSparkline(): string {
+        const days = this.spark;
+        if (days.length === 0) {
+          return `<p class="dash__empty">${svgEscape(LABELS.common.noData)}</p>`;
+        }
+
+        const total = days.reduce((s, d) => s + d.volume, 0);
+        const peak = Math.max(1, ...days.map((d) => d.volume)) * 1.1;
+
+        const W = 480;
+        const H = 160;
+        const PAD = 8;
+        const slotW = (W - PAD * 2) / days.length;
+        const barW = Math.max(10, slotW * 0.52);
+        const barGap = (slotW - barW) / 2;
+
+        const accentCurrent = '#D97706';
+        const accentMuted = 'rgba(217, 119, 6, 0.50)';
+
+        let bars = '';
+        days.forEach((d, i) => {
+          const h = (d.volume / peak) * (H - PAD * 2);
+          const x = PAD + i * slotW + barGap;
+          const y = H - PAD - h;
+          const isCurrent = i === days.length - 1;
+          const fill = isCurrent ? accentCurrent : accentMuted;
+          bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" rx="2" fill="${fill}" tabindex="0"><title>${svgEscape(d.label)} · ${formatVolume(d.volume)} ${LABELS.common.kg}</title></rect>`;
+        });
+
+        const ariaLabel = `${LABELS.dashboard.volumeLast7d} · ${formatVolume(total)} ${LABELS.common.kg}`;
+
+        return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="dash__sparkline" role="img" aria-label="${svgEscape(ariaLabel)}">${bars}</svg>`;
+      },
+
+      // ════════════════════════════════════════════════════════
+      // Muscle donut (pattern copied from stats.astro
+      // renderMuscleChart — stroke-dasharray arcs, MUSCLE_PALETTE).
+      // Legend keeps the top 5 muscles and buckets the rest.
+      // ════════════════════════════════════════════════════════
+      buildDonutSlices(week: MuscleVolumeSlice[]): MuscleVolumeSlice[] {
+        if (week.length === 0) return [];
+        const top = week.slice(0, 5);
+        if (week.length <= 5) return top;
+
+        const rest = week.slice(5);
+        const restVolume = rest.reduce((s, sl) => s + sl.volume, 0);
+        const total = week.reduce((s, sl) => s + sl.volume, 0);
+        return [
+          ...top,
+          {
+            id: OTHER_MUSCLE,
+            muscle: OTHER_MUSCLE,
+            volume: restVolume,
+            pct: total > 0 ? (restVolume / total) * 100 : 0,
+          },
+        ];
+      },
+
+      renderDonut(): string {
+        const slices = this.donutSlices;
+        if (slices.length === 0) {
+          return `<p class="dash__empty">${svgEscape(LABELS.common.noData)}</p>`;
+        }
+
+        const otherLabel = LABELS.common.otherSingular;
+        const nameOf = (slice: MuscleVolumeSlice): string =>
+          slice.muscle === OTHER_MUSCLE ? otherLabel : trMuscle(slice.muscle);
+
+        const W = 300;
+        const H = 300;
+        const cx = W / 2;
+        const cy = H / 2;
+        const r = 100;
+        const thickness = 14;
+        const C = 2 * Math.PI * r;
+
+        // Ring arcs, biggest share first (stabilises the palette order).
+        let arcs = '';
+        let cursor = 0; // cumulative share already drawn (0..1)
+        for (let i = 0; i < slices.length; i++) {
+          const sl = slices[i];
+          const frac = sl.pct / 100;
+          const segLen = C * frac;
+          const gapLen = Math.max(0, C - segLen);
+          const offset = -(C * cursor);
+          cursor += frac;
+
+          const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
+          const tip = `${svgEscape(nameOf(sl))} · ${formatVolume(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%`;
+          arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${thickness}" stroke-dasharray="${segLen.toFixed(2)} ${gapLen.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}" tabindex="0"><title>${tip}</title></circle>`;
+        }
+
+        const total = slices.reduce((s, sl) => s + sl.volume, 0);
+
+        const legend = slices
+          .map((sl, i) => {
+            const color = MUSCLE_PALETTE[i % MUSCLE_PALETTE.length];
+            const name = svgEscape(nameOf(sl));
+            const tip = `${name} · ${formatVolume(sl.volume)} ${LABELS.common.kg} · ${Math.round(sl.pct)}%`;
+            return `
+              <li class="dash__legend-row" title="${tip}">
+                <span class="dash__legend-swatch" style="background: ${color}" aria-hidden="true"></span>
+                <span class="dash__legend-name">${name}</span>
+                <span class="dash__legend-pct">${Math.round(sl.pct)}%</span>
+                <span class="dash__legend-value">${formatVolume(sl.volume)} ${LABELS.common.kg}</span>
+              </li>`;
+          })
+          .join('');
+
+        const ariaLabel = `${LABELS.dashboard.muscleSplit} · ${LABELS.dashboard.thisWeek}`;
+
+        return `
+<div class="dash__donut">
+  <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="dash__donut-svg" role="img" aria-label="${svgEscape(ariaLabel)}">
+    <g transform="rotate(-90 ${cx} ${cy})">
+      ${arcs}
+    </g>
+    <text x="${cx}" y="${cy - 4}" font-size="13" fill="var(--color-muted)" text-anchor="middle" font-family="var(--font-body, sans-serif)" letter-spacing="0.1em">${svgEscape(LABELS.dashboard.thisWeek.toUpperCase())}</text>
+    <text x="${cx}" y="${cy + 20}" font-size="22" fill="var(--color-accent)" text-anchor="middle" font-family="var(--font-display, sans-serif)" font-weight="700">${formatVolume(total)} ${LABELS.common.kg}</text>
+  </svg>
+  <ul class="dash__donut-legend" aria-label="${svgEscape(LABELS.dashboard.muscleSplit)}">
+    ${legend}
+  </ul>
+</div>`.trim();
       },
     }));
   });
@@ -518,20 +790,213 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     QUICK ACTIONS
+     ONBOARDING (first run)
      ════════════════════════════════════════════════════ */
-  .dash__actions {
+  .dash__onboarding {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1.2rem;
-    margin-bottom: 2.4rem;
+    justify-content: center;
   }
 
-  .dash__action {
+  .dash__onboarding-alt {
+    display: flex;
+    justify-content: center;
+  }
+
+  .dash__onboarding-link {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast);
+  }
+
+  .dash__onboarding-link:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .dash__onboarding-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* ════════════════════════════════════════════════════
+     HERO STRIP
+     ════════════════════════════════════════════════════ */
+  .dash__hero {
+    position: relative;
+    margin-bottom: 3.2rem;
+    padding: 2.4rem 2.6rem;
+    background-color: var(--color-surface);
+    background-image: radial-gradient(
+      ellipse at top right,
+      hsl(32 95% 50% / 0.10),
+      transparent 60%
+    );
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .dash__hero-main {
+    display: flex;
+    align-items: center;
+    gap: 2.2rem;
+  }
+
+  .dash__hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .dash__goal-eyebrow {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  .dash__goal-title {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.5vw, 3rem);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash__goal-done {
+    color: var(--color-accent);
+  }
+
+  .dash__goal-sep {
+    color: var(--color-muted);
+    margin: 0 0.2rem;
+  }
+
+  .dash__goal-target {
+    color: var(--color-text);
+  }
+
+  .dash__goal-unit {
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    margin-left: 0.8rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .dash__goal-ring {
+    position: relative;
+    flex-shrink: 0;
+    width: 6.0rem;
+    height: 6.0rem;
+  }
+
+  .dash__goal-ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    overflow: visible;
+  }
+
+  .dash__goal-ring-track {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 3;
+  }
+
+  .dash__goal-ring-fill {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                stroke 200ms ease;
+  }
+
+  .dash__goal-ring-pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .dash__goal-bar {
+    height: 1rem;
+    max-width: 42rem;
+    background-color: var(--color-surface-3);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.30);
+  }
+
+  .dash__goal-bar-fill {
+    height: 100%;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-accent),
+      hsl(32 95% 60%)
+    );
+    border-radius: 999px;
+    box-shadow: 0 0 12px hsl(32 95% 50% / 0.45);
+    transition: width 360ms cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 200ms ease,
+                box-shadow 200ms ease;
+  }
+
+  .dash__goal-bar-fill--complete {
+    background-image: linear-gradient(90deg, var(--color-success), var(--color-success));
+    box-shadow: 0 0 12px hsl(142 70% 45% / 0.45);
+  }
+
+  .dash__goal-hint {
+    margin: 0.8rem 0 0;
+    font-size: 1.2rem;
+    color: var(--color-success);
+    font-weight: 600;
+  }
+
+  .dash__goal-hint--muted {
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
+  /* ── Hero CTAs ── */
+  .dash__hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 1.2rem;
+  }
+
+  .dash__cta {
     display: inline-flex;
     align-items: center;
     gap: 0.8rem;
-    height: 4.8rem;
+    min-height: 4.4rem;
     padding: 0 2rem;
     border-radius: var(--radius-md);
     font-family: var(--font-display);
@@ -547,7 +1012,12 @@ const L = t();
                 transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .dash__action--primary {
+  .dash__cta:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .dash__cta--primary {
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
     box-shadow:
@@ -555,7 +1025,7 @@ const L = t();
       inset 0 1px 0 var(--alpha-highlight);
   }
 
-  .dash__action--primary:hover {
+  .dash__cta--primary:hover {
     background-color: var(--color-accent-hover);
     color: var(--color-accent-foreground);
     box-shadow:
@@ -564,27 +1034,25 @@ const L = t();
     transform: translateY(-1px);
   }
 
-  .dash__action--primary:active {
+  .dash__cta--primary:active {
     transform: translateY(0) scale(0.97);
   }
 
-  .dash__action--secondary {
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
+  .dash__cta--secondary {
+    background-color: transparent;
+    color: var(--color-muted);
+    font-weight: 600;
   }
 
-  .dash__action--secondary:hover {
-    background-color: var(--color-surface-3);
+  .dash__cta--secondary:hover {
     color: var(--color-text);
-    border-color: var(--alpha-border);
   }
 
-  .dash__action--secondary:active {
+  .dash__cta--secondary:active {
     transform: scale(0.97);
   }
 
-  .dash__action-icon {
+  .dash__cta-icon {
     width: 1.6rem;
     height: 1.6rem;
     flex-shrink: 0;
@@ -633,7 +1101,7 @@ const L = t();
   }
 
   .dash__kpi-label {
-    font-size: 1.1rem;
+    font-size: 1.0rem;
     color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -666,171 +1134,136 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     WEEKLY GOAL CARD
+     INSIGHTS ROW — 1 / 2 columns
      ════════════════════════════════════════════════════ */
-  .dash__goal-card {
-    position: relative;
+  .dash__insights {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
     margin-bottom: 3.2rem;
-    padding: 2.4rem 2.6rem;
-    background-color: var(--color-surface);
-    background-image: radial-gradient(
-      ellipse at top right,
-      hsl(32 95% 50% / 0.10),
-      transparent 60%
-    );
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
   }
 
-  .dash__goal-head {
+  @media (min-width: 960px) {
+    .dash__insights {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .dash__chart-head {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    gap: 2rem;
-    margin-bottom: 1.6rem;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
-  .dash__goal-head-text {
+  .dash__chart-meta {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+
+  .dash__chart-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .dash__sparkline {
+    width: 100%;
+    height: auto;
+    min-height: 14rem;
+    display: block;
+  }
+
+  .dash__sparkline rect:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* ── Donut (pattern adapted from stats__donut) ── */
+  .dash__donut {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+    align-items: center;
+  }
+
+  .dash__donut-svg {
+    width: 100%;
+    max-width: 26rem;
+    height: auto;
+    min-height: 14rem;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .dash__donut-svg circle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .dash__donut-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.6rem;
     min-width: 0;
   }
 
-  .dash__goal-eyebrow {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-  }
-
-  .dash__goal-title {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 4vw, 2.4rem);
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0;
-    line-height: 1.1;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__goal-done {
-    color: var(--color-accent);
-  }
-
-  .dash__goal-sep {
-    color: var(--color-muted);
-    margin: 0 0.2rem;
-  }
-
-  .dash__goal-target {
-    color: var(--color-text);
-  }
-
-  .dash__goal-unit {
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: var(--color-muted);
-    margin-left: 0.8rem;
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  .dash__goal-ring {
-    position: relative;
-    flex-shrink: 0;
-    width: 5.0rem;
-    height: 5.0rem;
-  }
-
-  .dash__goal-ring-svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-    overflow: visible;
-  }
-
-  .dash__goal-ring-track {
-    fill: none;
-    stroke: var(--color-border);
-    stroke-width: 3;
-  }
-
-  .dash__goal-ring-fill {
-    fill: none;
-    stroke: var(--color-accent);
-    stroke-width: 3;
-    stroke-linecap: round;
-    transition: stroke-dasharray 320ms cubic-bezier(0.4, 0, 0.2, 1),
-                stroke 200ms ease;
-  }
-
-  .dash__goal-ring-pct {
-    position: absolute;
-    inset: 0;
-    display: flex;
+  .dash__legend-row {
+    display: grid;
+    grid-template-columns: 1.2rem 1fr 3.6rem 6.8rem;
     align-items: center;
-    justify-content: center;
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .dash__goal-bar {
-    height: 1rem;
-    background-color: var(--color-surface-3);
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    overflow: hidden;
-    box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.30);
-  }
-
-  .dash__goal-bar-fill {
-    height: 100%;
-    background-image: linear-gradient(
-      90deg,
-      var(--color-accent),
-      hsl(32 95% 60%)
-    );
-    border-radius: 999px;
-    box-shadow: 0 0 12px hsl(32 95% 50% / 0.45);
-    transition: width 360ms cubic-bezier(0.4, 0, 0.2, 1),
-                background-color 200ms ease,
-                box-shadow 200ms ease;
-  }
-
-  .dash__goal-bar-fill--complete {
-    background-image: linear-gradient(90deg, #16A34A, #22C55E);
-    box-shadow: 0 0 12px hsl(142 70% 45% / 0.45);
-  }
-
-  .dash__goal-hint {
-    margin: 1.2rem 0 0;
-    font-size: 1.2rem;
-    color: var(--color-success);
-    display: flex;
-    gap : var(--spacing-1);
-    font-weight: 600;
-  }
-
-  .dash__goal-hint--muted {
-    color: var(--color-muted);
-    font-weight: 500;
-  }
-
-  .dash__goal-hint strong {
+    border-radius: var(--radius-md);
     color: var(--color-text);
+  }
+
+  .dash__legend-swatch {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .dash__legend-name {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
     font-weight: 700;
+    word-break: break-word;
+  }
+
+  .dash__legend-pct {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .dash__legend-value {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .dash__empty {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    padding: 2rem 1rem;
+    margin: 0;
+    line-height: 1.5;
   }
 
   /* ════════════════════════════════════════════════════
@@ -860,11 +1293,17 @@ const L = t();
     font-weight: 600;
     color: var(--color-accent);
     text-decoration: none;
+    border-radius: var(--radius-sm);
     transition: color var(--transition-fast);
   }
 
   .dash__see-all:hover {
     color: var(--color-accent-hover);
+  }
+
+  .dash__see-all:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
   /* ════════════════════════════════════════════════════
@@ -909,7 +1348,7 @@ const L = t();
     border-left-color: var(--color-success);
   }
   .dash__session--in-progress {
-    border-left-color: hsl(217 80% 55%);
+    border-left-color: var(--color-info);
   }
   .dash__session--planned {
     border-left-color: var(--color-muted);
@@ -921,6 +1360,14 @@ const L = t();
     justify-content: space-between;
     gap: 1.2rem;
     min-width: 0;
+  }
+
+  .dash__session-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+    flex-shrink: 0;
   }
 
   .dash__session-name {
@@ -957,57 +1404,21 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     STATUS BADGE
-     ════════════════════════════════════════════════════ */
-  .dash__badge {
-    display: inline-flex;
-    align-items: center;
-    height: 2.4rem;
-    padding: 0 1rem;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    flex-shrink: 0;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-
-  .dash__badge--completed {
-    background-color: hsl(142 70% 45% / 0.12);
-    color: var(--color-success);
-    border: 1px solid hsl(142 70% 45% / 0.30);
-  }
-
-  .dash__badge--in-progress {
-    background-color: hsl(217 80% 55% / 0.12);
-    color: hsl(217 80% 65%);
-    border: 1px solid hsl(217 80% 55% / 0.30);
-  }
-
-  .dash__badge--planned {
-    background-color: var(--alpha-bg-soft);
-    color: var(--color-muted);
-    border: 1px solid var(--color-border);
-  }
-
-  /* ════════════════════════════════════════════════════
      REDUCED MOTION
      ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
-    .dash__action,
+    .dash__cta,
     .dash__session,
     .dash__see-all,
     .dash__goal-ring-fill,
     .dash__goal-bar-fill {
       transition: none;
     }
-    .dash__action:hover,
+    .dash__cta:hover,
     .dash__session:hover {
       transform: none;
     }
-    .dash__action:active,
+    .dash__cta:active,
     .dash__session:active {
       transform: none;
     }
@@ -1017,24 +1428,25 @@ const L = t();
      RESPONSIVE — small screens
      ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
-    .dash__goal-card {
+    .dash__hero {
       padding: 2rem;
     }
-    .dash__goal-head {
-      flex-direction: column-reverse;
+    .dash__hero-main {
+      flex-direction: column;
       align-items: flex-start;
       gap: 1.4rem;
     }
-    .dash__goal-ring {
-      align-self: flex-end;
+    .dash__hero-cta {
+      justify-content: flex-start;
     }
   }
 
   @media (max-width: 480px) {
-    .dash__action {
+    .dash__cta {
       font-size: 1.2rem;
-      height: 4.4rem;
       padding: 0 1.6rem;
+      width: 100%;
+      justify-content: center;
     }
 
     .dash__session {
@@ -1045,12 +1457,12 @@ const L = t();
       font-size: 1.6rem;
     }
 
-    .dash__goal-card {
+    .dash__hero {
       padding: 1.6rem;
     }
 
     .dash__goal-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
     }
 
     .dash__goal-unit {
