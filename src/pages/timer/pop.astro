@@ -14,10 +14,7 @@ const lang = Astro.currentLocale ?? defaultLocale;
     <title>Timer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap"
-    />
+    {/* Fonts come from the globals.css @import (Inter) — no separate link needed. */}
     <script is:inline>
       /* Match the app's theme (dark default) so the popup never flashes white. */
       (function () {

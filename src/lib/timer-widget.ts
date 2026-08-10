@@ -136,7 +136,7 @@ const WIDGET_CSS = `
   padding: 1.5rem 1.5rem 1.8rem;
   background: var(--tw-bg);
   color: var(--tw-text);
-  font-family: 'Barlow', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 1.6rem;
   display: flex;
   flex-direction: column;
@@ -157,7 +157,7 @@ html[data-theme="light"] .tw {
 .tw button { font-family: inherit; }
 .tw__head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; }
 .tw__title {
-  font-family: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -193,7 +193,7 @@ html[data-theme="light"] .tw {
 .tw__tab.is-active { background: var(--tw-accent); color: #fff; }
 .tw__clock-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; padding: 0.9rem 0 0.4rem; }
 .tw__clock {
-  font-family: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: clamp(3.4rem, 15vw, 5.2rem);
   font-weight: 700;
   line-height: 1;

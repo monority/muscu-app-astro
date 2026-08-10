@@ -1404,7 +1404,7 @@ const L = t();
       // ── Share image generation ──────────────────────
       // Builds a 1080×1080 PNG summary of the current session
       // and triggers a browser download. Pure canvas API — no
-      // external dependencies. Font fallback chain uses Barlow
+      // external dependencies. Font fallback chain uses Inter
       // (loaded via globals.css) and falls back to system sans.
       async generateShareCard(): Promise<void> {
         if (!this.session) return;
@@ -1428,8 +1428,8 @@ const L = t();
         const accent = '#D97706';
         const border = 'rgba(255, 255, 255, 0.08)';
         const accentSoft = 'rgba(217, 119, 6, 0.15)';
-        const fontCond = '"Barlow Condensed", "Barlow", sans-serif';
-        const fontBody = '"Barlow", sans-serif';
+        const fontCond = '"Inter", sans-serif';
+        const fontBody = '"Inter", sans-serif';
 
         // ── Background ──
         ctx.fillStyle = bg;

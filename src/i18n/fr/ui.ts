@@ -6,10 +6,10 @@ export default {
   sampleValue: 'Valeur d\'exemple',
 
   typography: 'Typographie',
-  typographyDesc: 'Échelle typographique avec Barlow pour le corps et Barlow Condensed pour les titres.',
+  typographyDesc: 'Échelle typographique avec Inter pour le corps et les titres.',
   demoDashboard: 'Tableau de bord',
   demoRecentSessions: 'Séances récentes',
-  bodyText: 'Corps de texte principal pour les paragraphes et descriptions. La police Barlow assure une lecture confortable à toutes les tailles d\'écran.',
+  bodyText: 'Corps de texte principal pour les paragraphes et descriptions. La police Inter assure une lecture confortable à toutes les tailles d\'écran.',
   captionText: 'Légende, métadonnées, horodatages, identifiants.',
 
   colors: 'Couleurs',

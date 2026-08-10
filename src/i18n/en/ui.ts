@@ -6,10 +6,10 @@ export default {
   sampleValue: 'Example value',
 
   typography: 'Typography',
-  typographyDesc: 'Type scale with Barlow for body text and Barlow Condensed for headings.',
+  typographyDesc: 'Type scale with Inter for body text and headings.',
   demoDashboard: 'Dashboard',
   demoRecentSessions: 'Recent sessions',
-  bodyText: 'Main body text for paragraphs and descriptions. The Barlow typeface ensures comfortable reading at all screen sizes.',
+  bodyText: 'Main body text for paragraphs and descriptions. The Inter typeface ensures comfortable reading at all screen sizes.',
   captionText: 'Captions, metadata, timestamps, identifiers.',
 
   colors: 'Colors',
