@@ -13,6 +13,7 @@
 import Sidebar from "./Sidebar.astro";
 import Header from "./Header.astro";
 import { t, localizedPath } from "../../i18n";
+import { renderIcon, chevronDown } from "../../lib/nav-icons";
 
 export type NavLeaf = { label: string; href: string; active?: boolean };
 export type NavItem = {
@@ -21,6 +22,7 @@ export type NavItem = {
   icon?: string;
   children?: NavLeaf[];
   active?: boolean;
+  parentActive?: boolean;
 };
 export type NavGroup = { label: string; items: NavItem[] };
 
@@ -35,26 +37,12 @@ const L = t();
 
 const classes = ["app-shell", className].filter(Boolean).join(" ");
 
-// Icon registry — Lucide-style line icons, 20×20, stroke=currentColor.
-// The parent <a> sets the color (muted → accent on active), so the
-// SVG inherits the right tint without us hardcoding anything.
-const renderIcon = (name?: string): string => {
-  if (!name) return "";
-  const attrs =
-    'viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
-  const icons: Record<string, string> = {
-    dashboard: `<svg ${attrs}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>`,
-    clipboard: `<svg ${attrs}><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>`,
-    timer: `<svg ${attrs}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-    calendar: `<svg ${attrs}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-    dumbbell: `<svg ${attrs}><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>`,
-    "trending-up": `<svg ${attrs}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
-    calculator: `<svg ${attrs}><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="14" x2="12" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/></svg>`,
-    settings: `<svg ${attrs}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
-    zap: `<svg ${attrs}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
-  };
-  return icons[name] ?? "";
-};
+// Stable slug used as the drawer accordion group id (mirrors Sidebar's navId).
+const navId = (href: string): string =>
+  href
+    .replace(/^\/(en)?\//, "")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-+|-+$/g, "");
 ---
 
 <div class={classes} x-data="themeApp()" x-init="init()">
@@ -140,35 +128,70 @@ const renderIcon = (name?: string): string => {
               <div class="drawer__group-label">{group.label}</div>
               {group.items.map((item) => (
                 <div class="drawer__item-wrap">
-                  <a
-                    href={item.href}
-                    class:list={["drawer__item", item.active && "is-active"]}
-                    aria-current={item.active ? "page" : undefined}
-                  >
-                    {item.icon && (
-                      <span
-                        class="drawer__item-icon"
-                        aria-hidden="true"
-                        set:html={renderIcon(item.icon)}
-                      />
-                    )}
-                    <span class="drawer__item-label">{item.label}</span>
-                  </a>
-                  {item.children && item.children.length > 0 && (
-                    <div class="drawer__subitems">
-                      {item.children.map((child) => (
-                        <a
-                          href={child.href}
-                          class:list={[
-                            "drawer__subitem",
-                            child.active && "is-active",
-                          ]}
-                          aria-current={child.active ? "page" : undefined}
-                        >
-                          <span>{child.label}</span>
-                        </a>
-                      ))}
-                    </div>
+                  {item.children && item.children.length > 0 ? (
+                    <>
+                      <button
+                        type="button"
+                        class="drawer__item drawer__item--toggle"
+                        :class="{ 'drawer__item--open': isExpanded('{navId(item.href)}'), 'drawer__item--parent-active': item.parentActive }"
+                        :aria-expanded="isExpanded('{navId(item.href)}')"
+                        aria-controls="drawer-children-{navId(item.href)}"
+                        @click="toggleNav('{navId(item.href)}')"
+                      >
+                        {item.icon && (
+                          <span
+                            class="drawer__item-icon"
+                            aria-hidden="true"
+                            set:html={renderIcon(item.icon)}
+                          />
+                        )}
+                        <span class="drawer__item-label">{item.label}</span>
+                        <span
+                          class="drawer__item-chevron"
+                          aria-hidden="true"
+                          set:html={chevronDown}
+                        />
+                      </button>
+                      <div
+                        class="drawer__children"
+                        id="drawer-children-{navId(item.href)}"
+                        data-nav-group="{navId(item.href)}"
+                        :class="{ 'is-open': isExpanded('{navId(item.href)}') }"
+                        role="region"
+                      >
+                        <div class="drawer__children-inner">
+                          {item.children.map((child) => (
+                            <a
+                              href={child.href}
+                              class:list={[
+                                "drawer__subitem",
+                                child.active && "is-active",
+                              ]}
+                              aria-current={child.active ? "page" : undefined}
+                            >
+                              <span>{child.label}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href={item.href}
+                        class:list={["drawer__item", item.active && "is-active"]}
+                        aria-current={item.active ? "page" : undefined}
+                      >
+                        {item.icon && (
+                          <span
+                            class="drawer__item-icon"
+                            aria-hidden="true"
+                            set:html={renderIcon(item.icon)}
+                          />
+                        )}
+                        <span class="drawer__item-label">{item.label}</span>
+                      </a>
+                    </>
                   )}
                 </div>
               ))}
@@ -302,23 +325,31 @@ const renderIcon = (name?: string): string => {
     window.location.replace("/login");
   }
 
-  // ── Theme Alpine data factory (added 2026-08-04) ─────────
+  // ── Theme + nav accordion Alpine data factory (added 2026-08-04) ─
   // Exposed as `themeApp()` on the AppShell root. The <head> init
   // script in AppLayout.astro sets `data-theme` synchronously
   // before paint, so by the time Alpine boots we just need to
   // read the current value into reactive state and persist any
   // toggle to localStorage.
+  //
+  // The accordion state (`collapsed`) is shared between the desktop
+  // sidebar and the mobile drawer — both live under this single
+  // x-data root, so the same id toggles both copies.
   document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
 
+    const ACCORDION_KEY = "muscu:nav:collapsed";
+
     Alpine.data("themeApp", () => ({
       theme: "dark" as "dark" | "light",
+      collapsed: [] as string[],
 
       init() {
         const current =
           document.documentElement.getAttribute("data-theme") || "dark";
         this.theme = current === "light" ? "light" : "dark";
+        this.initAccordion();
       },
 
       toggleTheme() {
@@ -334,6 +365,50 @@ const renderIcon = (name?: string): string => {
 
       isDark(): boolean {
         return this.theme === "dark";
+      },
+
+      // ── Nav accordion ─────────────────────────────────────
+      // Groups are expanded by default; `collapsed` holds the ids of
+      // the collapsed groups (persisted under `muscu:nav:collapsed`).
+      isExpanded(id: string): boolean {
+        return !this.collapsed.includes(id);
+      },
+
+      toggleNav(id: string) {
+        const i = this.collapsed.indexOf(id);
+        if (i >= 0) this.collapsed.splice(i, 1);
+        else this.collapsed.push(id);
+        try {
+          window.localStorage.setItem(ACCORDION_KEY, JSON.stringify(this.collapsed));
+        } catch {
+          // private mode / quota — in-memory state still applies
+        }
+      },
+
+      initAccordion() {
+        try {
+          const raw = window.localStorage.getItem(ACCORDION_KEY);
+          const saved = raw ? JSON.parse(raw) : [];
+          this.collapsed = Array.isArray(saved) ? saved : [];
+        } catch {
+          this.collapsed = [];
+        }
+        // Auto-expand any group whose children contain the active page
+        // (e.g. /progression/records opens the "Progression" group even
+        // if the user collapsed it earlier).
+        this.$nextTick(() => {
+          this.$el
+            .querySelectorAll<HTMLElement>("[data-nav-group]")
+            .forEach((el) => {
+              if (el.querySelector(".is-active")) {
+                const id = el.getAttribute("data-nav-group");
+                if (id) {
+                  const i = this.collapsed.indexOf(id);
+                  if (i >= 0) this.collapsed.splice(i, 1);
+                }
+              }
+            });
+        });
       },
     }));
   });
@@ -508,6 +583,11 @@ const renderIcon = (name?: string): string => {
     background-color: var(--alpha-bg-soft);
   }
 
+  .drawer__close:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
   /* ── Drawer nav ────────────────────────────────────────── */
   .drawer__nav {
     flex: 1;
@@ -539,7 +619,14 @@ const renderIcon = (name?: string): string => {
     align-items: center;
     gap: 1.0rem;
     padding: 1.0rem 1.4rem;
-    border-radius: 0.8rem;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    -webkit-appearance: none;
+    appearance: none;
     color: var(--color-muted);
     text-decoration: none;
     font-family: var(--font-body);
@@ -547,7 +634,8 @@ const renderIcon = (name?: string): string => {
     font-weight: 500;
     line-height: 1.2;
     transition: background-color var(--transition-fast),
-      color var(--transition-fast);
+      color var(--transition-fast),
+      box-shadow var(--transition-fast);
   }
 
   .drawer__item:hover {
@@ -556,11 +644,15 @@ const renderIcon = (name?: string): string => {
   }
 
   .drawer__item.is-active {
-    background: none;
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
     color: var(--color-accent);
-    border-left: 3px solid var(--color-accent);
-    padding-left: calc(1.4rem - 3px);
-    box-shadow: -2px 0 8px rgba(217, 119, 6, 0.3);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  }
+
+  /* Parent with the deepest active child: accent text only (the pill
+     stays on the active leaf, matching the desktop sidebar). */
+  .drawer__item--parent-active {
+    color: var(--color-accent);
   }
 
   .drawer__item-icon {
@@ -582,15 +674,39 @@ const renderIcon = (name?: string): string => {
     min-width: 0;
   }
 
-  .drawer__subitems {
-    display: flex;
-    flex-direction: column;
-    padding-left: 3.2rem;
-    margin-top: 0.2rem;
+  /* Collapsible toggle chevron — rotates when the group is expanded. */
+  .drawer__item-chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: currentColor;
+    transition: transform var(--transition-fast);
+  }
+
+  .drawer__item--toggle.drawer__item--open .drawer__item-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── Drawer child items (accordion body) ── */
+  /* Same 0fr → 1fr grid animation as the desktop sidebar. */
+  .drawer__children {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 200ms ease;
+  }
+
+  .drawer__children.is-open {
+    grid-template-rows: 1fr;
+  }
+
+  .drawer__children > .drawer__children-inner {
+    overflow: hidden;
+    min-height: 0;
+    padding-left: 1.6rem;
   }
 
   .drawer__subitem {
     display: block;
+    min-height: 4.4rem;
     padding: 1.0rem 1.4rem;
     color: var(--color-muted);
     text-decoration: none;
@@ -598,9 +714,10 @@ const renderIcon = (name?: string): string => {
     font-size: 1.3rem;
     font-weight: 400;
     line-height: 1.2;
-    border-radius: 0.6rem;
+    border-radius: var(--radius-md);
     transition: background-color var(--transition-fast),
-      color var(--transition-fast);
+      color var(--transition-fast),
+      box-shadow var(--transition-fast);
   }
 
   .drawer__subitem:hover {
@@ -609,14 +726,13 @@ const renderIcon = (name?: string): string => {
   }
 
   .drawer__subitem.is-active {
-    background: none;
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
     color: var(--color-accent);
-    border-left: 2px solid var(--color-accent);
-    padding-left: calc(1.4rem - 2px);
-    box-shadow: -1px 0 6px rgba(217, 119, 6, 0.25);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
   }
 
   .drawer__item:focus-visible,
+  .drawer__item--toggle:focus-visible,
   .drawer__subitem:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
@@ -646,6 +762,8 @@ const renderIcon = (name?: string): string => {
     .drawer__backdrop,
     .drawer__panel,
     .drawer__item,
+    .drawer__children,
+    .drawer__item-chevron,
     .drawer__subitem,
     .drawer__logout,
     .drawer__logout:active {

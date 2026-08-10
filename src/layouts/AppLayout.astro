@@ -19,6 +19,7 @@ export type NavItem = {
   icon?: string;
   children?: NavLeaf[];
   active?: boolean;
+  parentActive?: boolean;
 };
 export type NavGroup = { label: string; items: NavItem[] };
 export type NavTree = NavGroup[];
@@ -98,17 +99,22 @@ const groupsWithActive = groups.map((g) => ({
     const isActive =
       currentPath === it.href ||
       (it.href !== "/" && currentPath.startsWith(it.href + "/"));
+    const children = it.children?.map((c) => ({
+      ...c,
+      // Leaves are terminal links, so they only highlight on an exact
+      // match. Using prefix matching here made the first child (whose
+      // href duplicates the parent, e.g. /progression) stay active on
+      // every deeper page (e.g. /progression/records).
+      active: currentPath === c.href,
+    }));
     return {
       ...it,
       active: isActive,
-      children: it.children?.map((c) => ({
-        ...c,
-        // Leaves are terminal links, so they only highlight on an exact
-        // match. Using prefix matching here made the first child (whose
-        // href duplicates the parent, e.g. /progression) stay active on
-        // every deeper page (e.g. /progression/records).
-        active: currentPath === c.href,
-      })),
+      children,
+      // "parent-active" — a collapsible group whose deepest active child
+      // is the current page gets accent TEXT only (the pill stays on the
+      // active leaf, never on the toggle).
+      parentActive: (children ?? []).some((c) => c.active),
     };
   }),
 }));
