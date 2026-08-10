@@ -29,6 +29,41 @@
   --color-stat-sessions: hsl(200 80% 50%);
   --color-stat-sessions-bg: hsl(200 80% 50% / 0.10);
 
+  /* Muscle category hues — one hue family per muscle group (see the
+     MUSCLE_TONE map in src/lib/colors.ts). 12 stored muscle groups
+     collapse into 6 families so the language stays compact. Hues are
+     the same families as the volume-donut palette (MUSCLE_PALETTE in
+     progression/stats.astro): chest=rose, back=indigo, shoulders=
+     bronze, arms=teal, legs=green, core=purple. Each has a 10% wash
+     (-bg) for badge/pill backgrounds. */
+  --color-cat-chest: hsl(345 65% 58%);
+  --color-cat-chest-bg: hsl(345 65% 58% / 0.10);
+  --color-cat-back: hsl(240 55% 62%);
+  --color-cat-back-bg: hsl(240 55% 62% / 0.10);
+  --color-cat-shoulders: hsl(28 45% 52%);
+  --color-cat-shoulders-bg: hsl(28 45% 52% / 0.10);
+  --color-cat-arms: hsl(175 55% 48%);
+  --color-cat-arms-bg: hsl(175 55% 48% / 0.10);
+  --color-cat-legs: hsl(170 55% 44%);
+  --color-cat-legs-bg: hsl(170 55% 44% / 0.10);
+  --color-cat-core: hsl(265 50% 60%);
+  --color-cat-core-bg: hsl(265 50% 60% / 0.10);
+
+  /* Superset group hues g1..g5 — the builder/detail group palette,
+     previously hardcoded hexes (#D97706, #38BDF8, #A855F7, #22C55E,
+     #F472B6), now tokenized. Same hues, dark theme tuned for text
+     contrast; -bg variants are the same 10% wash as the stat hues. */
+  --color-superset-g1: hsl(38 95% 45%);
+  --color-superset-g1-bg: hsl(38 95% 45% / 0.10);
+  --color-superset-g2: hsl(198 93% 60%);
+  --color-superset-g2-bg: hsl(198 93% 60% / 0.10);
+  --color-superset-g3: hsl(271 91% 65%);
+  --color-superset-g3-bg: hsl(271 91% 65% / 0.10);
+  --color-superset-g4: hsl(142 71% 45%);
+  --color-superset-g4-bg: hsl(142 71% 45% / 0.10);
+  --color-superset-g5: hsl(329 86% 70%);
+  --color-superset-g5-bg: hsl(329 86% 70% / 0.10);
+
   /* Spacing (0.4rem base) */
   --spacing-1: 0.4rem;
   --spacing-2: 0.8rem;
@@ -119,6 +154,33 @@
   --color-stat-streak-bg: hsl(38 85% 40% / 0.10);
   --color-stat-sessions: hsl(200 70% 40%);
   --color-stat-sessions-bg: hsl(200 70% 40% / 0.10);
+
+  /* Muscle category hues flip darker/less saturated so they keep
+     contrast on the near-white surfaces. */
+  --color-cat-chest: hsl(345 60% 40%);
+  --color-cat-chest-bg: hsl(345 60% 40% / 0.10);
+  --color-cat-back: hsl(240 50% 42%);
+  --color-cat-back-bg: hsl(240 50% 42% / 0.10);
+  --color-cat-shoulders: hsl(28 45% 35%);
+  --color-cat-shoulders-bg: hsl(28 45% 35% / 0.10);
+  --color-cat-arms: hsl(175 55% 30%);
+  --color-cat-arms-bg: hsl(175 55% 30% / 0.10);
+  --color-cat-legs: hsl(170 50% 34%);
+  --color-cat-legs-bg: hsl(170 50% 34% / 0.10);
+  --color-cat-core: hsl(265 45% 44%);
+  --color-cat-core-bg: hsl(265 45% 44% / 0.10);
+
+  /* Superset group hues flip darker so they stay readable on white. */
+  --color-superset-g1: hsl(38 85% 40%);
+  --color-superset-g1-bg: hsl(38 85% 40% / 0.10);
+  --color-superset-g2: hsl(198 85% 42%);
+  --color-superset-g2-bg: hsl(198 85% 42% / 0.10);
+  --color-superset-g3: hsl(271 90% 52%);
+  --color-superset-g3-bg: hsl(271 90% 52% / 0.10);
+  --color-superset-g4: hsl(142 65% 36%);
+  --color-superset-g4-bg: hsl(142 65% 36% / 0.10);
+  --color-superset-g5: hsl(329 80% 55%);
+  --color-superset-g5-bg: hsl(329 80% 55% / 0.10);
 
   /* Alpha overlays flip from white-on-dark to black-on-light so the
      nested surfaces / hovers / borders keep their contrast. */

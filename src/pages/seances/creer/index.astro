@@ -255,6 +255,7 @@ const setTypes = [
           x-cloak
           :class="'ses__ex-superset-bar--g' + ex.supersetId"
         >
+          <span class="ses__ex-superset-dot" aria-hidden="true"></span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -312,7 +313,11 @@ const setTypes = [
             <div class="ses__ex-toggle-main">
               <div class="ses__ex-head">
                 <h3 class="ses__ex-name" x-text="trExercise(ex.name)"></h3>
-                <Badge variant="accent" x-text="trMuscle(ex.muscle)"></Badge>
+                <Badge
+                  variant="category"
+                  :class="'badge--cat-' + muscleHue(ex.muscle)"
+                  x-text="trMuscle(ex.muscle)"
+                ></Badge>
               </div>
               <p
                 class="ses__ex-summary"
@@ -883,7 +888,12 @@ const setTypes = [
                 :aria-label="labels.addExoAria + ' ' + ex.name + ' ' + labels.toSession"
               >
                 <span class="ses__picker-name" x-text="trExercise(ex.name)"></span>
-                <span class="ses__picker-muscle" x-text="trMuscle(ex.muscle)"></span>
+                <Badge
+                  variant="category"
+                  size="sm"
+                  :class="'badge--cat-' + muscleHue(ex.muscle)"
+                  x-text="trMuscle(ex.muscle)"
+                ></Badge>
               </button>
               <button
                 type="button"
@@ -2803,14 +2813,24 @@ const setTypes = [
     min-width: 0;
     padding: 0.9rem 1.0rem;
     background-color: var(--color-surface-2);
-    border-left: 3px solid var(--color-accent);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    border-bottom: 1px solid var(--color-border);
-    border-top: 1px solid var(--color-border);
-    border-right: 1px solid var(--color-border);
     color: var(--color-muted);
     font-size: 1.2rem;
     line-height: 1.5;
+  }
+
+  /* Tip callout: no side-stripe (refonte §2 rule 4) — the leading accent
+     disc carries the highlight, same signal as the superset dot. */
+  .ses__picker-tip::before {
+    content: "";
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-right: 0.7rem;
+    vertical-align: middle;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-accent);
   }
 
   /* ── YouTube technique link (added 2026-08-04) ── */
@@ -2865,18 +2885,6 @@ const setTypes = [
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .ses__picker-muscle {
-    flex-shrink: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    padding: 0.3rem 0.9rem;
-    background-color: hsl(32 95% 50% / 0.10);
-    border: 1px solid hsl(32 95% 50% / 0.25);
-    border-radius: var(--radius-pill);
     white-space: nowrap;
   }
 
@@ -3011,7 +3019,6 @@ const setTypes = [
     background-color: var(--alpha-bg-soft);
     color: var(--color-text);
     border: 1px solid var(--color-border);
-    border-left: 4px solid var(--color-accent);
     border-radius: var(--radius-sm);
     font-size: 1.2rem;
     font-weight: 700;
@@ -3019,11 +3026,38 @@ const setTypes = [
     text-transform: uppercase;
   }
 
-  .ses__ex-superset-bar--g1 { border-left-color: #D97706; }
-  .ses__ex-superset-bar--g2 { border-left-color: #38BDF8; }
-  .ses__ex-superset-bar--g3 { border-left-color: #A855F7; }
-  .ses__ex-superset-bar--g4 { border-left-color: #22C55E; }
-  .ses__ex-superset-bar--g5 { border-left-color: #F472B6; }
+  /* Group colour comes from the tokenized superset palette
+     (--color-superset-gN, src/styles/tokens.css): the bar gets the
+     10% wash and the inline dot carries the full hue. No side-stripes
+     (refonte §2 rule 4). */
+  .ses__ex-superset-bar--g1 {
+    --ses-super-color: var(--color-superset-g1);
+    background-color: var(--color-superset-g1-bg);
+  }
+  .ses__ex-superset-bar--g2 {
+    --ses-super-color: var(--color-superset-g2);
+    background-color: var(--color-superset-g2-bg);
+  }
+  .ses__ex-superset-bar--g3 {
+    --ses-super-color: var(--color-superset-g3);
+    background-color: var(--color-superset-g3-bg);
+  }
+  .ses__ex-superset-bar--g4 {
+    --ses-super-color: var(--color-superset-g4);
+    background-color: var(--color-superset-g4-bg);
+  }
+  .ses__ex-superset-bar--g5 {
+    --ses-super-color: var(--color-superset-g5);
+    background-color: var(--color-superset-g5-bg);
+  }
+
+  .ses__ex-superset-dot {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--ses-super-color, var(--color-muted));
+    flex-shrink: 0;
+  }
 
   .ses__ex-superset-icon {
     width: 1.4rem;
@@ -3124,8 +3158,9 @@ const setTypes = [
     margin-bottom: 0.6rem;
     background-color: hsl(32 95% 50% / 0.08);
     border: 1px solid hsl(32 95% 50% / 0.28);
-    border-left: 4px solid var(--color-accent);
     border-radius: var(--radius-sm);
+    /* No side-stripe (refonte §2 rule 4): wash background + leading
+       accent icon already carry the status signal. */
   }
 
   .ses__ex-offer-icon {
@@ -3598,10 +3633,6 @@ const setTypes = [
     }
     .ses__picker-name {
       white-space: normal;
-    }
-    .ses__picker-muscle {
-      font-size: 1.1rem;
-      padding: 0.2rem 0.7rem;
     }
     .ses__rpe {
       gap: 1.0rem;

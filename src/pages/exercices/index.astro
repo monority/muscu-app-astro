@@ -3,6 +3,7 @@
 import { t, setLocale, defaultLocale } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
+import Badge from '../../components/ui/Badge.astro';
 import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
@@ -271,8 +272,13 @@ const categories = [
                 </p>
 
             <div class="exo__card-badges">
-              <span class="exo__badge exo__badge--muscle" x-text="trMuscle(ex.muscle)"></span>
-              <span class="exo__badge exo__badge--category" x-text="trCategory(ex.category)"></span>
+              <Badge
+                variant="category"
+                size="sm"
+                :class="'badge--cat-' + muscleHue(ex.muscle)"
+                x-text="trMuscle(ex.muscle)"
+              ></Badge>
+              <Badge variant="default" size="sm" x-text="trCategory(ex.category)"></Badge>
             </div>
 
             <footer class="exo__card-foot">
@@ -571,7 +577,12 @@ const categories = [
         <header class="exo__add-header">
           <div class="exo__add-header-text">
             <h2 class="exo__add-title" x-text="trExercise(addingExercise?.name)"></h2>
-            <p class="exo__add-muscle" x-text="trMuscle(addingExercise?.muscle)"></p>
+            <Badge
+              variant="category"
+              size="sm"
+              :class="'badge--cat-' + muscleHue(addingExercise?.muscle)"
+              x-text="trMuscle(addingExercise?.muscle)"
+            ></Badge>
           </div>
           <button
             type="button"
@@ -1598,30 +1609,6 @@ const categories = [
     gap: 0.6rem;
   }
 
-  .exo__badge {
-    display: inline-flex;
-    align-items: center;
-    height: 2.4rem;
-    padding: 0 1rem;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  .exo__badge--muscle {
-    background-color: hsl(32 95% 50% / 0.12);
-    color: var(--color-accent);
-    border: 1px solid hsl(32 95% 50% / 0.30);
-  }
-
-  .exo__badge--category {
-    background-color: var(--alpha-bg-soft);
-    color: var(--color-muted);
-    border: 1px solid var(--color-border);
-  }
-
   .exo__card-foot {
     display: flex;
     align-items: center;
@@ -1963,23 +1950,6 @@ const categories = [
     line-height: 1.2;
     color: var(--color-text);
     word-break: break-word;
-  }
-
-  .exo__add-muscle {
-    display: inline-flex;
-    align-items: center;
-    align-self: flex-start;
-    height: 2.4rem;
-    padding: 0 1rem;
-    background-color: hsl(32 95% 50% / 0.12);
-    border: 1px solid hsl(32 95% 50% / 0.30);
-    border-radius: var(--radius-pill);
-    color: var(--color-accent);
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1;
   }
 
   .exo__add-close {

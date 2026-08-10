@@ -3,6 +3,7 @@
 import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
+import Badge from '../../components/ui/Badge.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
@@ -149,7 +150,12 @@ const L = t();
             <div class="rec__card-main">
               <div class="rec__card-head">
                 <h3 class="rec__card-name" x-text="trExercise(rec.name)"></h3>
-                <span class="rec__muscle-badge" x-text="trMuscle(rec.muscle)"></span>
+                <Badge
+                  variant="category"
+                  size="sm"
+                  :class="'badge--cat-' + muscleHue(rec.muscle)"
+                  x-text="trMuscle(rec.muscle)"
+                ></Badge>
               </div>
 
               <div class="rec__card-stats">
@@ -713,23 +719,6 @@ const L = t();
     color: var(--color-text);
     margin: 0;
     word-break: break-word;
-  }
-
-  .rec__muscle-badge {
-    display: inline-flex;
-    align-items: center;
-    height: 2.4rem;
-    padding: 0 1rem;
-    background-color: hsl(32 95% 50% / 0.12);
-    border: 1px solid hsl(32 95% 50% / 0.30);
-    border-radius: var(--radius-pill);
-    color: var(--color-accent);
-    font-size: 1.0rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1;
-    flex-shrink: 0;
   }
 
   .rec__card-stats {

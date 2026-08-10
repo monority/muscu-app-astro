@@ -154,9 +154,11 @@ const groupsWithActive = groups.map((g) => ({
         lookup key by tips / rest-times / templates). */}
     <script>
       import { trExercise, trMuscle, trCategory } from "../i18n";
+      import { muscleHue } from "../lib/colors";
       (window as any).trExercise = trExercise;
       (window as any).trMuscle = trMuscle;
       (window as any).trCategory = trCategory;
+      (window as any).muscleHue = muscleHue;
     </script>
 
     {/* ── Theme bootstrap (added 2026-08-04) ──
