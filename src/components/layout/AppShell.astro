@@ -133,10 +133,10 @@ const navId = (href: string): string =>
                       <button
                         type="button"
                         class="drawer__item drawer__item--toggle"
-                        :class="{ 'drawer__item--open': isExpanded('{navId(item.href)}'), 'drawer__item--parent-active': item.parentActive }"
-                        :aria-expanded="isExpanded('{navId(item.href)}')"
-                        aria-controls="drawer-children-{navId(item.href)}"
-                        @click="toggleNav('{navId(item.href)}')"
+                        :class={`{ 'drawer__item--open': isExpanded('${navId(item.href)}'), 'drawer__item--parent-active': item.parentActive }`}
+                        :aria-expanded={`isExpanded('${navId(item.href)}')`}
+                        aria-controls={`drawer-children-${navId(item.href)}`}
+                        @click={`toggleNav('${navId(item.href)}')`}
                       >
                         {item.icon && (
                           <span
@@ -154,9 +154,9 @@ const navId = (href: string): string =>
                       </button>
                       <div
                         class="drawer__children"
-                        id="drawer-children-{navId(item.href)}"
-                        data-nav-group="{navId(item.href)}"
-                        :class="{ 'is-open': isExpanded('{navId(item.href)}') }"
+                        id={`drawer-children-${navId(item.href)}`}
+                        data-nav-group={navId(item.href)}
+                        :class={`{ 'is-open': isExpanded('${navId(item.href)}') }`}
                         role="region"
                       >
                         <div class="drawer__children-inner">
