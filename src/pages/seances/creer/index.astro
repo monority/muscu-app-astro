@@ -1,4 +1,4 @@
----
+﻿---
 import AppLayout from '../../../layouts/AppLayout.astro';
 import PageHeader from '../../../components/layout/PageHeader.astro';
 import Card from '../../../components/ui/Card.astro';
@@ -6,6 +6,8 @@ import CardHeader from '../../../components/ui/CardHeader.astro';
 import CardTitle from '../../../components/ui/CardTitle.astro';
 import CardContent from '../../../components/ui/CardContent.astro';
 import Badge from '../../../components/ui/Badge.astro';
+import Button from '../../../components/ui/Button.astro';
+import Input from '../../../components/ui/Input.astro';
 import Dialog from '../../../components/ui/Dialog.astro';
 import Toast from '../../../components/ui/Toast.astro';
 import { TRAINING_TEMPLATES } from '../../../lib/templates';
@@ -41,19 +43,17 @@ const setTypes = [
       description={L.builder.description}
     />
 
-    {/* ════════════════════════════════════════════════════
-        ACTION BAR — Annuler / Enregistrer
-        ════════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        ACTION BAR â€” Annuler / Enregistrer
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <div class="ses__actions">
-      <button
-        type="button"
+      <Button
         class="ses__btn ses__btn--secondary"
         @click="discard()"
       >
         {L.common.cancel}
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
         class="ses__btn ses__btn--primary"
         :disabled="!canSave"
         :class="{ 'is-disabled': !canSave }"
@@ -75,12 +75,12 @@ const setTypes = [
           <polyline points="7 3 7 8 15 8"></polyline>
         </svg>
         <span x-text="labels.saveSession">{L.builder.saveSession}</span>
-      </button>
+      </Button>
     </div>
 
-    {/* ════════════════════════════════════════════════════
-        SESSION INFO CARD — name + date
-        ════════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        SESSION INFO CARD â€” name + date
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <Card>
       <CardHeader>
         <CardTitle>Informations</CardTitle>
@@ -96,7 +96,7 @@ const setTypes = [
               id="ses-name"
               type="text"
               class="ses__input"
-              placeholder="Ex. Push day, Jambes, Full body…"
+              placeholder="Ex. Push day, Jambes, Full bodyâ€¦"
               x-model="sessionName"
               required
               autocomplete="off"
@@ -117,9 +117,9 @@ const setTypes = [
       </CardContent>
     </Card>
 
-    {/* ════════════════════════════════════════════════════
-        EMPTY STATE — no exercises added yet
-        ════════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        EMPTY STATE â€” no exercises added yet
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="exercises.length === 0">
       <Card>
         <div class="ses__empty">
@@ -144,8 +144,7 @@ const setTypes = [
           </div>
           <h3 class="ses__empty-title" x-text="labels.noExoAdded">{L.builder.noExoAdded}</h3>
           <p class="ses__empty-desc" x-text="labels.noExoDesc">{L.builder.noExoDesc}</p>
-          <button
-            type="button"
+          <Button
             class="ses__add-btn ses__add-btn--primary"
             @click="openPicker()"
           >
@@ -164,18 +163,18 @@ const setTypes = [
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
             <span>{L.builder.addExercise}</span>
-          </button>
+          </Button>
         </div>
       </Card>
     </template>
 
-    {/* ════════════════════════════════════════════════════
-        EXERCISE BLOCKS — one Card per added exercise
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        EXERCISE BLOCKS â€” one Card per added exercise
         Collapsible: header toggles a body that holds the sets table.
-        ════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-for="(ex, exIdx) in exercises" :key="ex.exerciseId + '-' + exIdx">
       <Card>
-        {/* ── Auto superset offer (added 2026-08-09) ──
+        {/* â”€â”€ Auto superset offer (added 2026-08-09) â”€â”€
             Shown right after the user completes a set on an exercise
             whose previous completed set belongs to a different exercise.
             One click groups both exercises through the existing
@@ -275,7 +274,7 @@ const setTypes = [
             <template x-if="supersetChainFor(ex.supersetId).length > 0">
               <span
                 class="ses__ex-superset-chain"
-                x-text="'· ' + supersetChainFor(ex.supersetId).join(' | ')"
+                x-text="'Â· ' + supersetChainFor(ex.supersetId).join(' | ')"
               ></span>
             </template>
           </span>
@@ -301,7 +300,7 @@ const setTypes = [
             </svg>
           </button>
         </div>
-        {/* ── Clickable header (always visible) ── */}
+        {/* â”€â”€ Clickable header (always visible) â”€â”€ */}
         <div class="ses__ex-header">
           <button
             type="button"
@@ -348,7 +347,7 @@ const setTypes = [
             :aria-label="labels.supersetFor + ' ' + ex.name"
             title={L.builder.moveToSuperset}
           >
-            <option :value="null">—</option>
+            <option :value="null">â€”</option>
             <template x-for="gId in availableSupersetIds()" :key="gId">
               <option :value="gId" x-text="labels.supersetLabel + ' ' + gId"></option>
             </template>
@@ -380,7 +379,7 @@ const setTypes = [
           </button>
         </div>
 
-        {/* ── Collapsible body (sets table + actions) ── */}
+        {/* â”€â”€ Collapsible body (sets table + actions) â”€â”€ */}
         <div
           :id="'ses-ex-body-' + exIdx"
           class="ses__ex-body"
@@ -388,7 +387,7 @@ const setTypes = [
           x-cloak
         >
           <CardContent>
-            {/* ── Sets table ── */}
+            {/* â”€â”€ Sets table â”€â”€ */}
             <div class="ses__table" role="table" :aria-label="labels.setsFor + ' ' + ex.name">
               <div class="ses__table-head" role="row">
                 <div class="ses__cell ses__cell--num" role="columnheader">#</div>
@@ -423,7 +422,7 @@ const setTypes = [
                         inputmode="decimal"
                         :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
                       />
-                      {/* ── MRV — suggested load (added 2026-08-10) ──
+                      {/* â”€â”€ MRV â€” suggested load (added 2026-08-10) â”€â”€
                           Subtle second tap target inside the weight cell.
                           Disabled when the exercise has no useful history
                           (title explains why). Click = confirmation: fills
@@ -465,7 +464,7 @@ const setTypes = [
                       :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
                     />
                   </div>
-                  {/* ── Per-set RPE / uRPE (added 2026-08-09) ──
+                  {/* â”€â”€ Per-set RPE / uRPE (added 2026-08-09) â”€â”€
                       Compact segmented RPE/uRPE toggle + 0.5-step select.
                       Shown once the set is marked complete; the value
                       persists on the set even if the set is later unmarked. */}
@@ -501,7 +500,7 @@ const setTypes = [
                         x-model="set.rpe"
                         :aria-label="labels.rpeForSet + ' ' + (setIdx + 1)"
                       >
-                        <option :value="null">—</option>
+                        <option :value="null">â€”</option>
                         <template x-for="v in rpeValues" :key="v">
                           <option :value="v" x-text="v"></option>
                         </template>
@@ -609,13 +608,12 @@ const setTypes = [
       </Card>
     </template>
 
-    {/* ════════════════════════════════════════════════════
-        ADD EXERCISE — bottom button (shown when ≥1 exercise)
-        ════════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        ADD EXERCISE â€” bottom button (shown when â‰¥1 exercise)
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="exercises.length > 0">
       <div class="ses__add-row">
-        <button
-          type="button"
+        <Button
           class="ses__add-btn"
           @click="openPicker()"
         >
@@ -634,13 +632,13 @@ const setTypes = [
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
           <span>{L.builder.addExercise}</span>
-        </button>
+        </Button>
       </div>
     </template>
 
-    {/* ════════════════════════════════════════════════════
-        SESSION NOTES — RPE / fatigue / mood / free text
-        ════════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        SESSION NOTES â€” RPE / fatigue / mood / free text
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="exercises.length > 0">
       <Card>
         <CardHeader>
@@ -648,7 +646,7 @@ const setTypes = [
         </CardHeader>
         <CardContent>
           <div class="ses__notes">
-            {/* ── RPE slider ── */}
+            {/* â”€â”€ RPE slider â”€â”€ */}
             <div class="ses__notes-field">
               <div class="ses__notes-label-row">
                 <label for="ses-rpe" class="ses__label">{L.builder.rpe}</label>
@@ -676,7 +674,7 @@ const setTypes = [
               </div>
             </div>
 
-            {/* ── Fatigue (1–5) ── */}
+            {/* â”€â”€ Fatigue (1â€“5) â”€â”€ */}
             <div class="ses__notes-field">
               <label class="ses__label">Fatigue</label>
               <div class="ses__fatigue" role="radiogroup" aria-label="Niveau de fatigue">
@@ -707,7 +705,7 @@ const setTypes = [
               </div>
             </div>
 
-            {/* ── Mood ── */}
+            {/* â”€â”€ Mood â”€â”€ */}
             <div class="ses__notes-field">
               <label class="ses__label">Humeur</label>
               <div class="ses__mood" role="radiogroup" aria-label={L.builder.moodAria}>
@@ -764,7 +762,7 @@ const setTypes = [
               </div>
             </div>
 
-            {/* ── Free-text notes ── */}
+            {/* â”€â”€ Free-text notes â”€â”€ */}
             <div class="ses__notes-field">
               <label for="ses-notes" class="ses__label">Notes</label>
               <textarea
@@ -781,9 +779,9 @@ const setTypes = [
       </Card>
     </template>
 
-    {/* ════════════════════════════════════════════════════
-        VALIDATION HINT — context-aware error message
-        ════════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        VALIDATION HINT â€” context-aware error message
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <div
       class="ses__hint"
       x-show="!canSave && (sessionName.trim() || exercises.length > 0)"
@@ -797,9 +795,9 @@ const setTypes = [
       </template>
     </div>
 
-    {/* ════════════════════════════════════════════════════
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         EXERCISE PICKER DIALOG
-        ════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <Dialog id="ses-picker-dialog" title="Choisir un exercice">
       <div class="ses__picker">
         <div class="ses__search">
@@ -817,10 +815,10 @@ const setTypes = [
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input
+          <Input
             type="search"
             class="ses__search-input"
-            placeholder="Rechercher un exercice…"
+            placeholder="Rechercher un exerciceâ€¦"
             x-model="exerciseSearch"
             aria-label="Rechercher un exercice"
             x-ref="pickerSearch"
@@ -829,7 +827,7 @@ const setTypes = [
           />
         </div>
 
-        {/* ── Templates (added 2026-08-04) ── */}
+        {/* â”€â”€ Templates (added 2026-08-04) â”€â”€ */}
         <div class="ses__templates" x-show="exerciseSearch.trim() === ''">
           <div class="ses__templates-head">
             <span class="ses__templates-eyebrow">Templates</span>
@@ -851,7 +849,7 @@ const setTypes = [
         </div>
 
         <div class="ses__picker-list" role="list">
-          {/* ── Library empty ── */}
+          {/* â”€â”€ Library empty â”€â”€ */}
           <template x-if="availableExercises.length === 0">
             <div class="ses__picker-empty">
               <p x-text="labels.emptyLibrary">{L.builder.emptyLibrary}</p>
@@ -861,21 +859,21 @@ const setTypes = [
             </div>
           </template>
 
-          {/* ── All exercises already added ── */}
+          {/* â”€â”€ All exercises already added â”€â”€ */}
           <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() === ''">
             <div class="ses__picker-empty">
               <p x-text="labels.allAdded">{L.builder.allAdded}</p>
             </div>
           </template>
 
-          {/* ── No match for search ── */}
+          {/* â”€â”€ No match for search â”€â”€ */}
           <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() !== ''">
             <div class="ses__picker-empty">
               <p x-text="labels.noSearchMatch">{L.builder.noSearchMatch}</p>
             </div>
           </template>
 
-          {/* ── Picker items ── */}
+          {/* â”€â”€ Picker items â”€â”€ */}
           <template x-for="ex in filteredExercises" :key="ex.id">
             <div
               class="ses__picker-item"
@@ -954,26 +952,25 @@ const setTypes = [
       </div>
 
       <div slot="footer">
-        <button
-          type="button"
+        <Button
           class="ses__btn ses__btn--secondary"
           data-dialog-close
         >
           Fermer
-        </button>
+        </Button>
       </div>
     </Dialog>
 
-    {/* ════════════════════════════════════════════════════
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         REST TIMER WIDGET (added 2026-08-04)
         Sticky bar that appears when the user marks a set as
         complete. The duration is sourced per-exercise from
         `getRestTime(name)` so each lift gets a tailored rest
         (compound lifts rest longer, isolation work rests
-        shorter). The label shows "Repos — <name> (M:SS)" and
+        shorter). The label shows "Repos â€” <name> (M:SS)" and
         the countdown ticks down every second; a Skip button
         dismisses the widget before the timer elapses.
-        ════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <div
       class="ses__rest-timer"
       x-show="restTimer.active"
@@ -1059,7 +1056,7 @@ const setTypes = [
   // Kept in sync with the "Autre" option on the exercices page.
   const TEMPLATE_FALLBACK_CATEGORY = 'Autre';
 
-  // RPE colour tone buckets — drive both the big number and the slider thumb.
+  // RPE colour tone buckets â€” drive both the big number and the slider thumb.
   function rpeToneFn(rpe: number): 'easy' | 'moderate' | 'hard' | 'max' {
     if (rpe <= 3) return 'easy';
     if (rpe <= 6) return 'moderate';
@@ -1088,28 +1085,28 @@ const setTypes = [
     const Alpine = (window as any).Alpine;
 
     Alpine.data('sessionBuilder', () => ({
-      // ── State ──
+      // â”€â”€ State â”€â”€
       sessionName: '',
       sessionDate: new Date().toISOString().split('T')[0],
       exercises: [] as BuilderExercise[],
       availableExercises: [] as Exercise[],
-      // Completed sessions snapshot read once at init — the MRV engine reads
+      // Completed sessions snapshot read once at init â€” the MRV engine reads
       // from it (never from localStorage) so row bindings stay cheap.
       allSessions: [] as Session[],
       exerciseSearch: '',
-      // Per-set RPE values (10 → 4 by 0.5) used by each set's select.
+      // Per-set RPE values (10 â†’ 4 by 0.5) used by each set's select.
       rpeValues: RPE_OPTIONS,
 
-      // ── Notes state (added 2026-08-04) ──
+      // â”€â”€ Notes state (added 2026-08-04) â”€â”€
       sessionRpe: 5,
       sessionFatigue: 0, // 0 = not set, 1-5 = level
       sessionMood: '' as SessionMood | '',
       sessionNotes: '',
 
-      // ── Collapse state (added 2026-08-04) ──
+      // â”€â”€ Collapse state (added 2026-08-04) â”€â”€
       expandedExercises: [] as number[],
 
-      // ── Auto-superset detection (added 2026-08-09) ──
+      // â”€â”€ Auto-superset detection (added 2026-08-09) â”€â”€
       // Remembers the exercise whose set was completed just before the
       // current action, so completing sets on two different exercises
       // in a row can be offered as a one-click superset. `supersetOffer`
@@ -1122,11 +1119,11 @@ const setTypes = [
         otherName: string;
       } | null,
 
-      // ── Picker tips (added 2026-08-04) ──
+      // â”€â”€ Picker tips (added 2026-08-04) â”€â”€
       // Set of exercise ids whose tip is currently expanded.
       openTips: [] as string[],
 
-      // ── Rest timer (added 2026-08-04) ──
+      // â”€â”€ Rest timer (added 2026-08-04) â”€â”€
       // Sticky widget that appears when a set is marked complete.
       // Duration is sourced from `getRestTime(ex.name)` so each
       // exercise gets a tailored default (compound lifts rest
@@ -1141,7 +1138,7 @@ const setTypes = [
         endTime: 0,
       },
 
-      // ── i18n labels (dynamic strings used in the template) ──
+      // â”€â”€ i18n labels (dynamic strings used in the template) â”€â”€
       labels: {
         saveSession: LABELS.builder.saveSession,
         noExoAdded: LABELS.builder.noExoAdded,
@@ -1201,7 +1198,7 @@ const setTypes = [
         units: LABELS.builder.units,
         rest: LABELS.builder.rest,
         discardTitle: LABELS.builder.discardTitle,
-        // ── MRV — suggested load (added 2026-08-10) ──
+        // â”€â”€ MRV â€” suggested load (added 2026-08-10) â”€â”€
         mrvSuggestFor: LABELS.builder.mrvSuggestFor,
         mrvNoHistory: LABELS.builder.mrvNoHistory,
         mrvFromHistory: LABELS.builder.mrvFromHistory,
@@ -1209,13 +1206,13 @@ const setTypes = [
         mrvToast: LABELS.builder.mrvToast,
       },
 
-      // ── Init ──
+      // â”€â”€ Init â”€â”€
       init() {
         this.availableExercises = getExercises();
         this.allSessions = getSessions();
       },
 
-      // ── Derived ──
+      // â”€â”€ Derived â”€â”€
       get filteredExercises(): Exercise[] {
         const q = this.exerciseSearch.trim().toLowerCase();
         const addedIds = new Set(this.exercises.map((se) => se.exerciseId));
@@ -1246,7 +1243,7 @@ const setTypes = [
         return rpeLabelFn(this.sessionRpe);
       },
 
-      // ── Collapse / expand (added 2026-08-04) ──
+      // â”€â”€ Collapse / expand (added 2026-08-04) â”€â”€
       isExpanded(exerciseIndex: number): boolean {
         return this.expandedExercises.includes(exerciseIndex);
       },
@@ -1278,7 +1275,7 @@ const setTypes = [
 
       /**
        * One-line summary shown when an exercise is collapsed:
-       * "X séries · Y kg · top set Z kg × N reps".
+       * "X sÃ©ries Â· Y kg Â· top set Z kg Ã— N reps".
        * Returns '' if the exercise has no sets.
        */
       exerciseSummary(exercise: SessionExercise): string {
@@ -1299,12 +1296,12 @@ const setTypes = [
         const setLabel = exercise.sets.length > 1 ? this.labels.setsPlural : this.labels.setsSingular;
         const volume = Math.round(totalVolume);
         const topLine = top && top.weight > 0
-          ? ` · ${this.labels.top} ${top.weight} kg × ${top.reps}`
+          ? ` Â· ${this.labels.top} ${top.weight} kg Ã— ${top.reps}`
           : '';
-        return `${exercise.sets.length} ${setLabel} · ${totalReps} reps · ${volume} kg${topLine}`;
+        return `${exercise.sets.length} ${setLabel} Â· ${totalReps} reps Â· ${volume} kg${topLine}`;
       },
 
-      // ── Actions ──
+      // â”€â”€ Actions â”€â”€
       openPicker() {
         this.exerciseSearch = '';
         this.openDialogById('ses-picker-dialog');
@@ -1340,12 +1337,12 @@ const setTypes = [
         this.closeDialogById('ses-picker-dialog');
       },
 
-      // ── Templates (added 2026-08-04) ──
+      // â”€â”€ Templates (added 2026-08-04) â”€â”€
       /**
        * Inserts every exercise from the template at the bottom of the
        * current session. Any referenced exercise missing from the user's
        * library is auto-created (from the template data) first, so a
-       * template always loads — even when defaults were renamed/deleted.
+       * template always loads â€” even when defaults were renamed/deleted.
        */
       loadTemplate(templateId: string) {
         const tpl = getTemplateById(templateId);
@@ -1401,7 +1398,7 @@ const setTypes = [
         return this.availableExercises.find((e) => e.name === name);
       },
 
-      // ── Tips (added 2026-08-04) ──
+      // â”€â”€ Tips (added 2026-08-04) â”€â”€
       hasTip(name: string): boolean {
         return getExerciseTip(name) != null;
       },
@@ -1422,7 +1419,7 @@ const setTypes = [
         }
       },
 
-      // ── Supersets (added 2026-08-04) ──
+      // â”€â”€ Supersets (added 2026-08-04) â”€â”€
       /**
        * List of currently used superset ids (1-based, sorted). Used
        * to populate the per-exercise superset dropdown.
@@ -1449,7 +1446,7 @@ const setTypes = [
        * Triggered when the user changes the superset select. We do
        * not need to do much because x-model.number already wrote
        * the new id onto the exercise, but we normalise the value
-       * (NaN → null) for the "no superset" case and drop any pending
+       * (NaN â†’ null) for the "no superset" case and drop any pending
        * auto-offer that involves this exercise.
        */
       onSupersetChange(exIdx: number) {
@@ -1463,7 +1460,7 @@ const setTypes = [
 
       /**
        * Pulls an exercise out of its current superset (if any). No
-       * effect on the other exercises in the group — they keep
+       * effect on the other exercises in the group â€” they keep
        * referencing the same supersetId; orphaned ids are pruned
        * at save time.
        */
@@ -1474,7 +1471,7 @@ const setTypes = [
         this.dropOfferForExercise(exIdx);
       },
 
-      // ── Auto supersets (added 2026-08-09) ──
+      // â”€â”€ Auto supersets (added 2026-08-09) â”€â”€
       /**
        * Translated exercise name, deferring to the global `trExercise`
        * helper exposed by AppLayout (falls back to the raw name).
@@ -1487,7 +1484,7 @@ const setTypes = [
 
       /**
        * Display names of every exercise sharing the given superset id.
-       * Drives the group badge chain, e.g. "· Développé couché | Rowing".
+       * Drives the group badge chain, e.g. "Â· DÃ©veloppÃ© couchÃ© | Rowing".
        */
       supersetChainFor(gid: number | null): string[] {
         if (gid == null) return [];
@@ -1616,11 +1613,11 @@ const setTypes = [
         return exercise.sets.some((s) => s.type === 'work' && s.weight > 0);
       },
 
-      // ── MRV — suggested load (added 2026-08-10) ──
-      // V1 prog. linéaire (src/lib/mrv.ts) : la charge proposée pour une
-      // série est calculée depuis l'historique des séances terminées
-      // (top set récent, ajustement reps/RPE, plafond 1RM Epley, arrondi
-      // 2,5 kg). Jamais appliquée sans clic explicite — clic = confirmation.
+      // â”€â”€ MRV â€” suggested load (added 2026-08-10) â”€â”€
+      // V1 prog. linÃ©aire (src/lib/mrv.ts) : la charge proposÃ©e pour une
+      // sÃ©rie est calculÃ©e depuis l'historique des sÃ©ances terminÃ©es
+      // (top set rÃ©cent, ajustement reps/RPE, plafond 1RM Epley, arrondi
+      // 2,5 kg). Jamais appliquÃ©e sans clic explicite â€” clic = confirmation.
       mrvSuggestion(
         exerciseIndex: number,
         setIndex: number,
@@ -1634,13 +1631,13 @@ const setTypes = [
         });
       },
 
-      /** True quand le bouton ⚡ est cliquable (une suggestion existe). */
+      /** True quand le bouton âš¡ est cliquable (une suggestion existe). */
       mrvEnabled(exerciseIndex: number, setIndex: number): boolean {
         const s = this.mrvSuggestion(exerciseIndex, setIndex);
         return Boolean(s && s.weight != null);
       },
 
-      /** Raison localisée de la suggestion (tooltip du bouton ⚡). */
+      /** Raison localisÃ©e de la suggestion (tooltip du bouton âš¡). */
       mrvTitle(exerciseIndex: number, setIndex: number): string {
         const s = this.mrvSuggestion(exerciseIndex, setIndex);
         if (!s || s.reason === 'none') return this.labels.mrvNoHistory;
@@ -1649,9 +1646,9 @@ const setTypes = [
       },
 
       /**
-       * Click = confirmation : remplit le poids de la série avec la charge
-       * suggérée + toast. Ne fait rien quand aucune suggestion n'existe (le
-       * bouton est désactivé) — et n'écrit JAMAIS de poids sans ce clic.
+       * Click = confirmation : remplit le poids de la sÃ©rie avec la charge
+       * suggÃ©rÃ©e + toast. Ne fait rien quand aucune suggestion n'existe (le
+       * bouton est dÃ©sactivÃ©) â€” et n'Ã©crit JAMAIS de poids sans ce clic.
        */
       applyMrv(exerciseIndex: number, setIndex: number) {
         const ex = this.exercises[exerciseIndex];
@@ -1716,13 +1713,13 @@ const setTypes = [
         this.exercises.splice(exerciseIndex, 1);
       },
 
-      // ── Set completion (added 2026-08-04) ──
+      // â”€â”€ Set completion (added 2026-08-04) â”€â”€
       /**
        * Toggle a set's `completed` flag. When the set becomes complete
        * we start the rest timer using the per-exercise default from
        * `getRestTime(name)` (longer for compound lifts, shorter for
        * isolation). Unchecking stops the timer only if it was started
-       * for that same set — otherwise the timer keeps running.
+       * for that same set â€” otherwise the timer keeps running.
        */
       toggleSetComplete(exerciseIndex: number, setIndex: number) {
         const ex = this.exercises[exerciseIndex];
@@ -1739,7 +1736,7 @@ const setTypes = [
         }
       },
 
-      // ── Rest timer (added 2026-08-04) ──
+      // â”€â”€ Rest timer (added 2026-08-04) â”€â”€
       /**
        * Starts (or restarts) the rest timer for the given exercise.
        * Duration is computed from `getRestTime(name)` so the user
@@ -1767,7 +1764,7 @@ const setTypes = [
       },
 
       /**
-       * Internal — decrements the remaining seconds and stops the
+       * Internal â€” decrements the remaining seconds and stops the
        * interval when the timer hits zero. Beep on completion if
        * the user enabled sound alerts in their settings (we re-read
        * the flag at tick time so a settings change is picked up).
@@ -1802,13 +1799,13 @@ const setTypes = [
       },
 
       /**
-       * "Repos — <name> (<mm:ss>)" label for the timer widget.
+       * "Repos â€” <name> (<mm:ss>)" label for the timer widget.
        * Returns the empty string when the timer is not active so
        * the binding is always safe to render.
        */
       restTimerLabel(): string {
         if (!this.restTimer.active) return '';
-        return `${this.labels.rest} — ${this.restTimer.exerciseName} (${formatRestTime(this.restTimer.duration)})`;
+        return `${this.labels.rest} â€” ${this.restTimer.exerciseName} (${formatRestTime(this.restTimer.duration)})`;
       },
 
       restTimerDisplay(): string {
@@ -1844,7 +1841,7 @@ const setTypes = [
         playBeep();
       },
 
-      // ── Notes actions ──
+      // â”€â”€ Notes actions â”€â”€
       setFatigue(level: number) {
         // Toggle: clicking the currently active level unsets fatigue.
         if (this.sessionFatigue === level) {
@@ -1905,7 +1902,7 @@ const setTypes = [
         window.location.href = localizedPath('/seances');
       },
 
-      // ── Dialog helpers (wrap the global Dialog API) ──
+      // â”€â”€ Dialog helpers (wrap the global Dialog API) â”€â”€
       openDialogById(id: string) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fn = (window as any).openDialog as ((i: string) => void) | undefined;
@@ -1920,7 +1917,7 @@ const setTypes = [
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+{/* Alpine.js CDN â€” MUST be AFTER the app script (type="module" runs before defer) */}
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
@@ -1929,9 +1926,9 @@ const setTypes = [
     display: none !important;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      CONTAINER
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses {
     max-width: 96rem;
     margin: 0 auto;
@@ -1941,11 +1938,11 @@ const setTypes = [
     gap: 1.6rem;
   }
 
-  /* ════════════════════════════════════════════════════
-     ACTION BAR — Annuler / Enregistrer
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     ACTION BAR â€” Annuler / Enregistrer
      Sticky to the viewport bottom so the primary action is
      always reachable, even with many exercises added.
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__actions {
     position: sticky;
     bottom: 0;
@@ -1962,9 +1959,9 @@ const setTypes = [
     border-top: 1px solid var(--color-border);
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      BUTTONS (reusable variants)
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__btn {
     display: inline-flex;
     align-items: center;
@@ -1991,8 +1988,13 @@ const setTypes = [
     transform: scale(0.97);
   }
 
+  .ses__btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
   .ses__btn--sm {
-    height: 4.0rem;
+    height: 4.4rem;
     padding: 0 1.4rem;
     font-size: 1.2rem;
   }
@@ -2001,12 +2003,12 @@ const setTypes = [
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
     border-color: var(--color-accent);
-    box-shadow: 0 2px 8px hsl(32 95% 50% / 0.25);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 
   .ses__btn--primary:hover:not(:disabled):not(.is-disabled) {
     background-color: var(--color-accent-hover);
-    box-shadow: 0 4px 14px hsl(32 95% 50% / 0.40);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 40%, transparent);
   }
 
   .ses__btn--primary:disabled,
@@ -2036,9 +2038,9 @@ const setTypes = [
     height: 1.5rem;
   }
 
-  /* ════════════════════════════════════════════════════
-     SESSION INFO — form grid
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     SESSION INFO â€” form grid
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__info-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -2137,11 +2139,11 @@ const setTypes = [
     color-scheme: dark;
   }
 
-  /* ════════════════════════════════════════════════════
-     EXERCISE BLOCK — header + table
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     EXERCISE BLOCK â€” header + table
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-  /* ── Collapsible header (always visible) ── */
+  /* â”€â”€ Collapsible header (always visible) â”€â”€ */
   .ses__ex-header {
     display: flex;
     align-items: center;
@@ -2228,13 +2230,13 @@ const setTypes = [
     color: var(--color-accent);
   }
 
-  /* ── Collapsible body (the sets table + actions) ── */
+  /* â”€â”€ Collapsible body (the sets table + actions) â”€â”€ */
   .ses__ex-body {
     border-top: 1px solid var(--color-border);
     padding-top: var(--spacing-3);
   }
 
-  /* ── Sets table ── */
+  /* â”€â”€ Sets table â”€â”€ */
   .ses__table {
     display: flex;
     flex-direction: column;
@@ -2247,7 +2249,7 @@ const setTypes = [
   .ses__table-head,
   .ses__table-row {
     display: grid;
-    grid-template-columns: 3.2rem minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.1fr) 3.2rem;
+    grid-template-columns: 3.2rem minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1fr) 9.6rem;
     align-items: center;
     gap: 0.4rem;
     padding: 0 1.0rem;
@@ -2297,7 +2299,7 @@ const setTypes = [
     justify-content: stretch;
   }
 
-  /* ── Per-set RPE control (added 2026-08-09) ──
+  /* â”€â”€ Per-set RPE control (added 2026-08-09) â”€â”€
      Compact segmented RPE/uRPE toggle + 0.5-step value select,
      shown once the set is marked complete. Stays inline so rows
      keep their 6-column grid on desktop. */
@@ -2324,7 +2326,7 @@ const setTypes = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.4rem;
+    min-height: 4.4rem;
     padding: 0 0.8rem;
     background-color: transparent;
     border: none;
@@ -2345,7 +2347,7 @@ const setTypes = [
   .ses__rpe-toggle-btn.is-active {
     background-color: var(--color-surface);
     color: var(--color-text);
-    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.30);
+    box-shadow: var(--shadow-1);
   }
 
   .ses__rpe-toggle-btn:focus-visible {
@@ -2361,9 +2363,10 @@ const setTypes = [
 
   .ses__cell--action {
     justify-content: flex-end;
+    gap: 0.4rem;
   }
 
-  /* ── Exercise block footer actions ── */
+  /* â”€â”€ Exercise block footer actions â”€â”€ */
   .ses__ex-actions {
     display: flex;
     flex-wrap: wrap;
@@ -2373,7 +2376,7 @@ const setTypes = [
     padding-top: 1.0rem;
   }
 
-  /* ── Warmup auto-generation button (dashed accent) ── */
+  /* â”€â”€ Warmup auto-generation button (dashed accent) â”€â”€ */
   .ses__btn--warmup {
     background-color: transparent;
     color: var(--color-accent);
@@ -2382,7 +2385,7 @@ const setTypes = [
   }
 
   .ses__btn--warmup:hover:not(:disabled):not(.is-disabled) {
-    background-color: hsl(32 95% 50% / 0.10);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
     border-style: solid;
   }
 
@@ -2397,9 +2400,9 @@ const setTypes = [
     box-shadow: none;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      ICON BUTTONS (remove exercise / remove set)
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__icon-btn {
     display: inline-flex;
     align-items: center;
@@ -2427,14 +2430,20 @@ const setTypes = [
     transform: scale(0.94);
   }
 
+  .ses__icon-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--alpha-border);
+  }
+
   .ses__icon-btn--sm {
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 4.4rem;
+    height: 4.4rem;
   }
 
   .ses__icon-btn--danger:hover {
-    background-color: hsl(0 80% 55% / 0.12);
-    border-color: hsl(0 80% 55% / 0.40);
+    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-destructive) 40%, transparent);
     color: var(--color-destructive);
   }
 
@@ -2448,7 +2457,7 @@ const setTypes = [
     height: 1.6rem;
   }
 
-  /* ── Set completion toggle (added 2026-08-04) ──
+  /* â”€â”€ Set completion toggle (added 2026-08-04) â”€â”€
      Inline check button on the right side of each set row. Outlined
      when incomplete, filled accent when complete. Clicking it also
      starts the per-exercise rest timer. */
@@ -2456,8 +2465,8 @@ const setTypes = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background-color: transparent;
     border: 1.5px solid var(--color-border);
     border-radius: 50%;
@@ -2471,7 +2480,7 @@ const setTypes = [
   }
 
   .ses__set-complete:hover {
-    background-color: hsl(142 70% 45% / 0.10);
+    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
     border-color: var(--color-success);
     color: var(--color-success);
   }
@@ -2483,12 +2492,17 @@ const setTypes = [
   .ses__set-complete.is-complete {
     background-color: var(--color-success);
     border-color: var(--color-success);
-    color: hsl(0 0% 5%);
+    color: var(--color-bg);
   }
 
   .ses__set-complete.is-complete:hover {
-    background-color: hsl(142 70% 50%);
-    border-color: hsl(142 70% 50%);
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+  }
+
+  .ses__set-complete:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
   .ses__set-complete svg {
@@ -2496,7 +2510,7 @@ const setTypes = [
     height: 1.6rem;
   }
 
-  /* ── MRV — suggested-load button in the weight cell (added 2026-08-10) ──
+  /* â”€â”€ MRV â€” suggested-load button in the weight cell (added 2026-08-10) â”€â”€
      Small bolt next to the weight input. Disabled (dimmed) when the
      exercise has no exploitable history; the title localises the reason. */
   .ses__weight-cell {
@@ -2516,8 +2530,8 @@ const setTypes = [
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 4.0rem;
+    height: 4.0rem;
     padding: 0;
     background-color: transparent;
     border: 1px solid transparent;
@@ -2532,7 +2546,7 @@ const setTypes = [
   }
 
   .ses__mrv-btn:hover:not(.is-disabled):not(:disabled) {
-    background-color: hsl(32 95% 50% / 0.12);
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
     border-color: var(--color-accent);
     color: var(--color-accent);
   }
@@ -2552,9 +2566,9 @@ const setTypes = [
     cursor: not-allowed;
   }
 
-  /* ════════════════════════════════════════════════════
-     ADD EXERCISE — empty state + bottom row
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     ADD EXERCISE â€” empty state + bottom row
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__add-row {
     display: flex;
     justify-content: center;
@@ -2593,19 +2607,24 @@ const setTypes = [
     transform: scale(0.98);
   }
 
+  .ses__add-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
   .ses__add-btn--primary {
     border-style: solid;
     border-color: var(--color-accent);
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
-    box-shadow: 0 2px 8px hsl(32 95% 50% / 0.25);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 
   .ses__add-btn--primary:hover {
     background-color: var(--color-accent-hover);
     border-color: var(--color-accent-hover);
     color: var(--color-accent-foreground);
-    box-shadow: 0 4px 14px hsl(32 95% 50% / 0.40);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 40%, transparent);
   }
 
   .ses__add-icon {
@@ -2613,9 +2632,9 @@ const setTypes = [
     height: 1.6rem;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      EMPTY STATE
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__empty {
     display: flex;
     flex-direction: column;
@@ -2632,7 +2651,7 @@ const setTypes = [
     width: 5.6rem;
     height: 5.6rem;
     border-radius: 50%;
-    background-color: hsl(32 95% 50% / 0.10);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
     color: var(--color-accent);
   }
 
@@ -2657,23 +2676,23 @@ const setTypes = [
     line-height: 1.5;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      VALIDATION HINT
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__hint {
-    background-color: hsl(0 80% 55% / 0.08);
-    border: 1px solid hsl(0 80% 55% / 0.25);
+    background-color: color-mix(in srgb, var(--color-destructive) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-destructive) 25%, transparent);
     border-radius: var(--radius-md);
-    color: hsl(0 80% 75%);
+    color: var(--color-destructive);
     font-size: 1.2rem;
     font-weight: 500;
     padding: 1rem 1.4rem;
     text-align: center;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      EXERCISE PICKER (inside Dialog)
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__picker {
     display: flex;
     flex-direction: column;
@@ -2696,7 +2715,10 @@ const setTypes = [
     pointer-events: none;
   }
 
-  .ses__search-input {
+  /* Search field renders via the Input primitive (child component), so
+     the scoped override must target it with :global() â€” same convention
+     as the sÃ©ances list (index.astro). */
+  .ses__search :global(.ses__search-input) {
     width: 100%;
     height: 4.4rem;
     padding: 0 1.4rem 0 4.2rem;
@@ -2710,16 +2732,16 @@ const setTypes = [
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   }
 
-  .ses__search-input::placeholder {
+  .ses__search :global(.ses__search-input)::placeholder {
     color: var(--alpha-text-faint);
   }
 
-  .ses__search-input::-webkit-search-cancel-button {
+  .ses__search :global(.ses__search-input)::-webkit-search-cancel-button {
     -webkit-appearance: none;
     appearance: none;
   }
 
-  .ses__search-input:focus {
+  .ses__search :global(.ses__search-input):focus {
     border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
   }
@@ -2755,7 +2777,7 @@ const setTypes = [
   }
 
   .ses__picker-item:hover {
-    background-color: hsl(32 95% 50% / 0.08);
+    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
   }
 
   .ses__picker-item-main {
@@ -2781,8 +2803,8 @@ const setTypes = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -2820,7 +2842,7 @@ const setTypes = [
     line-height: 1.5;
   }
 
-  /* Tip callout: no side-stripe (refonte §2 rule 4) — the leading accent
+  /* Tip callout: no side-stripe (refonte Â§2 rule 4) â€” the leading accent
      disc carries the highlight, same signal as the superset dot. */
   .ses__picker-tip::before {
     content: "";
@@ -2833,17 +2855,17 @@ const setTypes = [
     background-color: var(--color-accent);
   }
 
-  /* ── YouTube technique link (added 2026-08-04) ── */
+  /* â”€â”€ YouTube technique link (added 2026-08-04) â”€â”€ */
   .ses__tip-video {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.8rem;
     padding: 0.5rem 0.9rem;
-    background-color: hsl(0 80% 55% / 0.10);
-    border: 1px solid hsl(0 80% 55% / 0.32);
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-destructive) 32%, transparent);
     border-radius: var(--radius-pill);
-    color: hsl(0 80% 60%);
+    color: var(--color-destructive);
     font-family: var(--font-body);
     font-size: 1.15rem;
     font-weight: 700;
@@ -2856,9 +2878,9 @@ const setTypes = [
   }
 
   .ses__tip-video:hover {
-    background-color: hsl(0 80% 55% / 0.18);
-    border-color: hsl(0 80% 55% / 0.50);
-    color: hsl(0 80% 65%);
+    background-color: color-mix(in srgb, var(--color-destructive) 18%, transparent);
+    border-color: color-mix(in srgb, var(--color-destructive) 50%, transparent);
+    color: var(--color-destructive);
   }
 
   .ses__tip-video:active {
@@ -2908,9 +2930,9 @@ const setTypes = [
     font-size: 1.3rem;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      TEMPLATES (added 2026-08-04)
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__templates {
     display: flex;
     flex-direction: column;
@@ -3007,9 +3029,9 @@ const setTypes = [
     font-weight: 700;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      SUPERSET UI (added 2026-08-04)
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__ex-superset-bar {
     display: flex;
     align-items: center;
@@ -3029,7 +3051,7 @@ const setTypes = [
   /* Group colour comes from the tokenized superset palette
      (--color-superset-gN, src/styles/tokens.css): the bar gets the
      10% wash and the inline dot carries the full hue. No side-stripes
-     (refonte §2 rule 4). */
+     (refonte Â§2 rule 4). */
   .ses__ex-superset-bar--g1 {
     --ses-super-color: var(--color-superset-g1);
     background-color: var(--color-superset-g1-bg);
@@ -3071,8 +3093,8 @@ const setTypes = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.2rem;
-    height: 3.2rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background: transparent;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -3089,8 +3111,8 @@ const setTypes = [
   }
 
   .ses__ex-superset-remove:hover {
-    background-color: hsl(0 80% 55% / 0.10);
-    border-color: hsl(0 80% 55% / 0.35);
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-destructive) 35%, transparent);
     color: var(--color-destructive);
   }
 
@@ -3129,7 +3151,7 @@ const setTypes = [
     box-shadow: var(--focus-ring);
   }
 
-  /* ── Superset bar label + member chain (added 2026-08-09) ── */
+  /* â”€â”€ Superset bar label + member chain (added 2026-08-09) â”€â”€ */
   .ses__ex-superset-label {
     display: flex;
     align-items: center;
@@ -3149,17 +3171,17 @@ const setTypes = [
     white-space: nowrap;
   }
 
-  /* ── Auto-superset offer bar (added 2026-08-09) ── */
+  /* â”€â”€ Auto-superset offer bar (added 2026-08-09) â”€â”€ */
   .ses__ex-offer {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     padding: 0.8rem 1.2rem;
     margin-bottom: 0.6rem;
-    background-color: hsl(32 95% 50% / 0.08);
-    border: 1px solid hsl(32 95% 50% / 0.28);
+    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
     border-radius: var(--radius-sm);
-    /* No side-stripe (refonte §2 rule 4): wash background + leading
+    /* No side-stripe (refonte Â§2 rule 4): wash background + leading
        accent icon already carry the status signal. */
   }
 
@@ -3206,7 +3228,7 @@ const setTypes = [
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    height: 3.6rem;
+    height: 4.4rem;
     padding: 0 1.2rem;
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
@@ -3242,8 +3264,8 @@ const setTypes = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 3.6rem;
-    height: 3.6rem;
+    width: 4.4rem;
+    height: 4.4rem;
     background-color: transparent;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -3281,13 +3303,13 @@ const setTypes = [
     }
   }
 
-  /* ════════════════════════════════════════════════════
-     SESSION NOTES — RPE / fatigue / mood / textarea
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     SESSION NOTES â€” RPE / fatigue / mood / textarea
      Compact spacing (2026-08-04): the four blocks (RPE, fatigue,
      mood, free-text) used to eat ~50% of the page height. Tightened
      gaps + smaller RPE value chip + shorter textarea so the whole
      notes card fits comfortably without dominating the screen.
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__notes {
     display: flex;
     flex-direction: column;
@@ -3307,7 +3329,7 @@ const setTypes = [
     gap: 1rem;
   }
 
-  /* ── RPE slider ── */
+  /* â”€â”€ RPE slider â”€â”€ */
   .ses__rpe {
     display: flex;
     align-items: center;
@@ -3343,7 +3365,7 @@ const setTypes = [
     border-radius: 50%;
     background-color: var(--color-success);
     border: 3px solid var(--color-surface);
-    box-shadow: 0 2px 8px hsl(0 0% 0% / 0.45);
+    box-shadow: var(--shadow-2);
     cursor: grab;
     transition: background-color var(--transition-fast),
                 transform var(--transition-fast),
@@ -3362,7 +3384,7 @@ const setTypes = [
     border-radius: 50%;
     background-color: var(--color-success);
     border: 3px solid var(--color-surface);
-    box-shadow: 0 2px 8px hsl(0 0% 0% / 0.45);
+    box-shadow: var(--shadow-2);
     cursor: grab;
     transition: background-color var(--transition-fast),
                 transform var(--transition-fast);
@@ -3377,7 +3399,7 @@ const setTypes = [
   .ses__rpe-input--max::-webkit-slider-thumb { background-color: var(--color-destructive); }
   .ses__rpe-input--max::-moz-range-thumb     { background-color: var(--color-destructive); }
 
-  /* ── RPE value chip + label readout ── */
+  /* â”€â”€ RPE value chip + label readout â”€â”€ */
   .ses__rpe-value {
     flex-shrink: 0;
     display: inline-flex;
@@ -3392,33 +3414,33 @@ const setTypes = [
     font-weight: 700;
     line-height: 1;
     font-variant-numeric: tabular-nums;
-    background-color: hsl(142 70% 45% / 0.12);
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
-    border: 1px solid hsl(142 70% 45% / 0.30);
+    border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
     transition: background-color var(--transition-fast),
                 color var(--transition-fast),
                 border-color var(--transition-fast);
   }
 
   .ses__rpe-value--easy {
-    background-color: hsl(142 70% 45% / 0.12);
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
-    border-color: hsl(142 70% 45% / 0.30);
+    border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
   }
   .ses__rpe-value--moderate {
-    background-color: hsl(48 95% 55% / 0.14);
+    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
     color: var(--color-warning);
-    border-color: hsl(48 95% 55% / 0.32);
+    border-color: color-mix(in srgb, var(--color-warning) 32%, transparent);
   }
   .ses__rpe-value--hard {
-    background-color: hsl(32 95% 50% / 0.14);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
     color: var(--color-accent);
-    border-color: hsl(32 95% 50% / 0.34);
+    border-color: color-mix(in srgb, var(--color-accent) 34%, transparent);
   }
   .ses__rpe-value--max {
-    background-color: hsl(0 80% 55% / 0.14);
+    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
     color: var(--color-destructive);
-    border-color: hsl(0 80% 55% / 0.34);
+    border-color: color-mix(in srgb, var(--color-destructive) 34%, transparent);
   }
 
   .ses__rpe-readout {
@@ -3433,7 +3455,7 @@ const setTypes = [
     color: var(--color-muted);
   }
 
-  /* ── Fatigue (5 flame icons) ── */
+  /* â”€â”€ Fatigue (5 flame icons) â”€â”€ */
   .ses__fatigue {
     display: inline-flex;
     align-items: center;
@@ -3473,13 +3495,19 @@ const setTypes = [
     transform: scale(0.94);
   }
 
-  .ses__fatigue-btn.is-active {
-    filter: none;
-    background-color: hsl(32 95% 50% / 0.12);
-    border-color: hsl(32 95% 50% / 0.40);
+  .ses__fatigue-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--alpha-border);
   }
 
-  /* ── Mood (5 Lucide icons) ── */
+  .ses__fatigue-btn.is-active {
+    filter: none;
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  }
+
+  /* â”€â”€ Mood (5 Lucide icons) â”€â”€ */
   .ses__mood {
     display: inline-flex;
     align-items: center;
@@ -3520,14 +3548,20 @@ const setTypes = [
     transform: scale(0.94);
   }
 
-  .ses__mood-btn.is-active {
-    filter: none;
-    background-color: hsl(32 95% 50% / 0.14);
-    border-color: hsl(32 95% 50% / 0.45);
-    box-shadow: 0 0 0 2px hsl(32 95% 50% / 0.18);
+  .ses__mood-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--alpha-border);
   }
 
-  /* ── Textarea ── */
+  .ses__mood-btn.is-active {
+    filter: none;
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+
+  /* â”€â”€ Textarea â”€â”€ */
   .ses__notes-textarea {
     width: 100%;
     min-height: 7.2rem;
@@ -3553,11 +3587,11 @@ const setTypes = [
     box-shadow: var(--focus-ring);
   }
 
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     RESPONSIVE â€” small screens
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (max-width: 640px) {
-    /* Sticky bar stacks the buttons on mobile — give the container
+    /* Sticky bar stacks the buttons on mobile â€” give the container
        enough trailing space so the last content is never hidden. */
     .ses {
       padding-bottom: 16rem;
@@ -3647,12 +3681,12 @@ const setTypes = [
     }
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      REST TIMER WIDGET (added 2026-08-04)
      Sticky bar that pops up at the bottom of the page when
      the user marks a set as complete. Shows the exercise
      name + total rest time and counts down every second.
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .ses__rest-timer {
     position: fixed;
     left: 50%;
@@ -3664,12 +3698,12 @@ const setTypes = [
     gap: 1.2rem;
     width: min(48rem, calc(100% - 3.2rem));
     padding: 1.0rem 1.2rem;
-    background-color: hsl(0 0% 5% / 0.92);
+    background-color: color-mix(in srgb, var(--color-surface-2) 92%, transparent);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid var(--color-accent);
     border-radius: var(--radius-lg);
-    box-shadow: 0 12px 36px hsl(0 0% 0% / 0.55),
+    box-shadow: var(--shadow-2),
                 0 0 0 1px var(--alpha-bg-subtle);
   }
 
@@ -3680,7 +3714,7 @@ const setTypes = [
     width: 4.0rem;
     height: 4.0rem;
     border-radius: 50%;
-    background-color: hsl(32 95% 50% / 0.18);
+    background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
     color: var(--color-accent);
     flex-shrink: 0;
   }
@@ -3727,7 +3761,7 @@ const setTypes = [
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    height: 3.6rem;
+    height: 4.4rem;
     padding: 0 1.2rem;
     background-color: var(--alpha-bg-soft);
     border: 1px solid var(--color-border);
@@ -3776,9 +3810,9 @@ const setTypes = [
     }
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      REDUCED MOTION
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (prefers-reduced-motion: reduce) {
     .ses__btn,
     .ses__icon-btn,

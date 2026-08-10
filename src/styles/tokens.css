@@ -12,6 +12,8 @@
   --color-accent-hover: hsl(32 55% 35%);
   --color-accent-foreground: #FFFFFF;
   --color-success: #22C55E;
+  /* Deep-green foreground for text/icons sitting on the success fill. */
+  --color-success-foreground: hsl(150 90% 10%);
   --color-destructive: #EF4444;
   --color-warning: #EAB308;
   --color-info: #3B82F6;
@@ -142,7 +144,9 @@
   --color-text-secondary: #4B5563;
   --color-muted: #6B7280;
   /* Accent + state colors stay the same — they have enough contrast
-     on either surface to remain readable. */
+     on either surface to remain readable. The success fill stays
+     #22C55E, so the dark-green foreground reads on it unchanged. */
+  --color-success-foreground: hsl(150 90% 10%);
 
   /* Stat hues flip darker/less saturated so they keep contrast on the
      near-white surfaces; tinted backgrounds get a lighter wash. */

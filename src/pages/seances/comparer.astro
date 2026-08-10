@@ -7,6 +7,7 @@ import Card from '../../components/ui/Card.astro';
 import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
+import Badge from '../../components/ui/Badge.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -23,7 +24,7 @@ const L = t();
       description={L.comparer.description}
     />
 
-    {/* ── Back link ── */}
+    {/* â”€â”€ Back link â”€â”€ */}
     <a href={localizedPath("/seances")} class="comp__back">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -41,9 +42,9 @@ const L = t();
       <span>{L.comparer.back}</span>
     </a>
 
-    {/* ════════════════════════════════════════════════════
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         SESSION PICKERS
-        ════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <Card>
       <CardHeader>
         <CardTitle>{L.comparer.selection}</CardTitle>
@@ -139,9 +140,9 @@ const L = t();
       </CardContent>
     </Card>
 
-    {/* ════════════════════════════════════════════════════
-        HINT — show "select both" message
-        ════════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        HINT â€” show "select both" message
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="allSessions.length < 2">
       <Card>
         <div class="comp__hint">
@@ -190,12 +191,12 @@ const L = t();
       </Card>
     </template>
 
-    {/* ════════════════════════════════════════════════════
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         COMPARISON COLUMNS
-        ════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="session1 && session2">
       <div class="comp__content">
-        {/* ── Summary deltas at the top ── */}
+        {/* â”€â”€ Summary deltas at the top â”€â”€ */}
         <div class="comp__summary">
           <h2 class="comp__section-title">{L.comparer.summaryTitle}</h2>
           <div class="comp__summary-grid">
@@ -439,7 +440,7 @@ const L = t();
           </div>
         </div>
 
-        {/* ── Per-session columns ── */}
+        {/* â”€â”€ Per-session columns â”€â”€ */}
         <div class="comp__columns">
           {/* Session 1 column */}
           <section class="comp__col" aria-label={L.comparer.detailsAria1}>
@@ -479,7 +480,13 @@ const L = t();
                   <header class="comp__exo-head">
                     <div class="comp__exo-id">
                       <h4 class="comp__exo-name" x-text="trExercise(item.name)"></h4>
-                      <span class="comp__exo-muscle" x-text="trMuscle(item.muscle)"></span>
+                      <Badge
+                        variant="category"
+                        size="sm"
+                        :class="'badge--cat-' + muscleHue(item.muscle)"
+                        class="self-start"
+                        x-text="trMuscle(item.muscle)"
+                      ></Badge>
                     </div>
                     <div class="comp__exo-volume" x-show="item.session1Ex">
                       <span class="comp__exo-volume-label">{L.sessions.volume}</span>
@@ -563,7 +570,13 @@ const L = t();
                   <header class="comp__exo-head">
                     <div class="comp__exo-id">
                       <h4 class="comp__exo-name" x-text="trExercise(item.name)"></h4>
-                      <span class="comp__exo-muscle" x-text="trMuscle(item.muscle)"></span>
+                      <Badge
+                        variant="category"
+                        size="sm"
+                        :class="'badge--cat-' + muscleHue(item.muscle)"
+                        class="self-start"
+                        x-text="trMuscle(item.muscle)"
+                      ></Badge>
                     </div>
                     <div class="comp__exo-volume" x-show="item.session2Ex">
                       <span class="comp__exo-volume-label">{L.sessions.volume}</span>
@@ -627,7 +640,7 @@ const L = t();
 
   const LABELS = t();
 
-  // ── Pure helpers (module scope) ────────────────────────────
+  // â”€â”€ Pure helpers (module scope) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function statusLabelFn(s: SessionStatus): string {
     if (s === 'completed') return LABELS.comparer.completed;
     if (s === 'in-progress') return LABELS.comparer.inProgress;
@@ -656,11 +669,11 @@ const L = t();
       hour: '2-digit',
       minute: '2-digit',
     });
-    return date + ' · ' + time;
+    return date + ' Â· ' + time;
   }
 
   function formatDurationFn(seconds?: number): string {
-    if (!seconds || seconds <= 0) return '—';
+    if (!seconds || seconds <= 0) return 'â€”';
     const total = Math.floor(seconds);
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
@@ -706,7 +719,7 @@ const L = t();
     return best;
   }
 
-  // ── Delta computation ──────────────────────────────────────
+  // â”€â”€ Delta computation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Direction is from session2's perspective: "up" if session2 > session1.
   type Direction = 'up' | 'down' | 'equal';
   function deltaFn(
@@ -729,7 +742,7 @@ const L = t();
     }
     return {
       direction: 'down',
-      label: downLabel + ' (−' + formatter(a - b) + ')',
+      label: downLabel + ' (âˆ’' + formatter(a - b) + ')',
       diff: a - b,
     };
   }
@@ -739,14 +752,14 @@ const L = t();
     const Alpine = (window as any).Alpine;
 
     Alpine.data('comparisonApp', () => ({
-      // ── State ──
+      // â”€â”€ State â”€â”€
       allSessions: [] as Session[],
       session1Id: '' as string,
       session2Id: '' as string,
       session1: null as Session | null,
       session2: null as Session | null,
 
-      // ── Init ──
+      // â”€â”€ Init â”€â”€
       init() {
         this.allSessions = getSessions().sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -770,7 +783,7 @@ const L = t();
         }
       },
 
-      // ── Computed ──
+      // â”€â”€ Computed â”€â”€
       get unionExercises(): Array<{
         exerciseId: string;
         name: string;
@@ -821,7 +834,7 @@ const L = t();
 
       get volumeDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: '—', diff: 0 };
+          return { direction: 'equal' as Direction, label: 'â€”', diff: 0 };
         }
         return deltaFn(
           this.totalVolume(this.session1),
@@ -835,7 +848,7 @@ const L = t();
 
       get exercisesDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: '—', diff: 0 };
+          return { direction: 'equal' as Direction, label: 'â€”', diff: 0 };
         }
         return deltaFn(
           this.session1.exercises.length,
@@ -849,7 +862,7 @@ const L = t();
 
       get setsDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: '—', diff: 0 };
+          return { direction: 'equal' as Direction, label: 'â€”', diff: 0 };
         }
         return deltaFn(
           this.totalSets(this.session1),
@@ -863,7 +876,7 @@ const L = t();
 
       get bestSetDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: '—', diff: 0 };
+          return { direction: 'equal' as Direction, label: 'â€”', diff: 0 };
         }
         return deltaFn(
           this.bestSet(this.session1),
@@ -875,10 +888,10 @@ const L = t();
         );
       },
 
-      // ── Helpers ──
+      // â”€â”€ Helpers â”€â”€
       formatOption(s: Session) {
         const date = formatDateFn(s.date);
-        return s.name + ' — ' + date;
+        return s.name + ' â€” ' + date;
       },
 
       statusLabel(s: SessionStatus) {
@@ -925,7 +938,7 @@ const L = t();
         return bestSetFn(session);
       },
 
-      // ── Actions ──
+      // â”€â”€ Actions â”€â”€
       onSession1Change(id: string) {
         this.session1 = id ? this.allSessions.find((s) => s.id === id) || null : null;
         this.syncUrl();
@@ -951,7 +964,7 @@ const L = t();
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+{/* Alpine.js CDN â€” MUST be AFTER the app script (type="module" runs before defer) */}
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
@@ -960,9 +973,9 @@ const L = t();
     display: none !important;
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      CONTAINER
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp {
     max-width: 140rem;
     margin: 0 auto;
@@ -978,9 +991,9 @@ const L = t();
     gap: var(--spacing-5);
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      BACK LINK
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp__back {
     display: inline-flex;
     align-items: center;
@@ -1012,9 +1025,9 @@ const L = t();
     height: 1.8rem;
   }
 
-  /* ════════════════════════════════════════════════════
-     PICKERS — two selects separated by VS
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     PICKERS â€” two selects separated by VS
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp__pickers {
     display: grid;
     grid-template-columns: 1fr;
@@ -1088,7 +1101,8 @@ const L = t();
     background-repeat: no-repeat;
   }
 
-  .comp__select:focus {
+  .comp__select:focus,
+  .comp__select:focus-visible {
     border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
   }
@@ -1111,9 +1125,9 @@ const L = t();
     padding: 0 1.4rem;
     border-radius: 50%;
     background: linear-gradient(135deg,
-      hsl(32 95% 50% / 0.18),
-      hsl(32 95% 50% / 0.05));
-    border: 1px solid hsl(32 95% 50% / 0.35);
+      color-mix(in srgb, var(--color-accent) 18%, transparent),
+      color-mix(in srgb, var(--color-accent) 5%, transparent));
+    border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
     color: var(--color-accent);
     font-family: var(--font-display);
     font-size: 1.8rem;
@@ -1122,9 +1136,9 @@ const L = t();
     line-height: 1;
   }
 
-  /* ════════════════════════════════════════════════════
-     HINT — info box when no comparison possible
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     HINT â€” info box when no comparison possible
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp__hint {
     display: flex;
     align-items: center;
@@ -1147,7 +1161,7 @@ const L = t();
     height: 3.4rem;
     flex-shrink: 0;
     border-radius: 50%;
-    background-color: hsl(32 95% 50% / 0.10);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
     color: var(--color-accent);
   }
 
@@ -1162,9 +1176,15 @@ const L = t();
     margin-left: 0.4rem;
   }
 
-  /* ════════════════════════════════════════════════════
+  .comp__hint-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--radius-sm);
+  }
+
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      SECTION TITLE
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp__section-title {
     font-family: var(--font-display);
     font-size: 1.1rem;
@@ -1175,9 +1195,9 @@ const L = t();
     margin: 0 0 var(--spacing-3) 0;
   }
 
-  /* ════════════════════════════════════════════════════
-     SUMMARY DELTAS — 4 cards (volume, exercises, sets, 1RM)
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     SUMMARY DELTAS â€” 4 cards (volume, exercises, sets, 1RM)
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp__summary {
     display: flex;
     flex-direction: column;
@@ -1265,7 +1285,7 @@ const L = t();
     letter-spacing: -0.01em;
   }
 
-  /* ── Delta pill (center) ── */
+  /* â”€â”€ Delta pill (center) â”€â”€ */
   .comp__summary-delta {
     display: inline-flex;
     align-items: center;
@@ -1294,15 +1314,15 @@ const L = t();
   }
 
   .comp__summary-delta--up {
-    background-color: hsl(142 70% 45% / 0.12);
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
-    border: 1px solid hsl(142 70% 45% / 0.30);
+    border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
   }
 
   .comp__summary-delta--down {
-    background-color: hsl(0 80% 55% / 0.12);
+    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
     color: var(--color-destructive);
-    border: 1px solid hsl(0 80% 55% / 0.30);
+    border: 1px solid color-mix(in srgb, var(--color-destructive) 30%, transparent);
   }
 
   .comp__summary-delta--equal {
@@ -1311,9 +1331,9 @@ const L = t();
     border: 1px solid var(--color-border);
   }
 
-  /* ════════════════════════════════════════════════════
-     COMPARISON COLUMNS — 2-col grid (stacks on mobile)
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     COMPARISON COLUMNS â€” 2-col grid (stacks on mobile)
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp__columns {
     display: grid;
     grid-template-columns: 1fr;
@@ -1336,7 +1356,7 @@ const L = t();
     border-radius: var(--radius-lg);
   }
 
-  /* ── Column header ── */
+  /* â”€â”€ Column header â”€â”€ */
   .comp__col-head {
     display: flex;
     flex-direction: column;
@@ -1363,8 +1383,8 @@ const L = t();
   }
 
   .comp__col-tag--alt {
-    background-color: hsl(32 95% 50% / 0.12);
-    border-color: hsl(32 95% 50% / 0.30);
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
     color: var(--color-accent);
   }
 
@@ -1392,7 +1412,7 @@ const L = t();
     line-height: 1.3;
   }
 
-  /* ── Status badge ── */
+  /* â”€â”€ Status badge â”€â”€ */
   .comp__status {
     display: inline-flex;
     align-items: center;
@@ -1409,15 +1429,15 @@ const L = t();
   }
 
   .comp__status--completed {
-    background-color: hsl(142 70% 45% / 0.12);
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
-    border: 1px solid hsl(142 70% 45% / 0.30);
+    border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
   }
 
   .comp__status--in-progress {
-    background-color: hsl(217 80% 55% / 0.12);
-    color: hsl(217 80% 65%);
-    border: 1px solid hsl(217 80% 55% / 0.30);
+    background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
+    color: var(--color-info);
+    border: 1px solid color-mix(in srgb, var(--color-info) 30%, transparent);
   }
 
   .comp__status--planned {
@@ -1426,7 +1446,7 @@ const L = t();
     border: 1px solid var(--color-border);
   }
 
-  /* ── Column quick stats (duration + volume) ── */
+  /* â”€â”€ Column quick stats (duration + volume) â”€â”€ */
   .comp__col-stats {
     display: flex;
     gap: var(--spacing-4);
@@ -1458,9 +1478,9 @@ const L = t();
     line-height: 1.1;
   }
 
-  /* ════════════════════════════════════════════════════
-     EXERCISES LIST — within each column
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     EXERCISES LIST â€” within each column
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .comp__exercises {
     display: flex;
     flex-direction: column;
@@ -1474,7 +1494,7 @@ const L = t();
     padding: var(--spacing-4) 0;
   }
 
-  /* ── Single exercise card ── */
+  /* â”€â”€ Single exercise card â”€â”€ */
   .comp__exo {
     display: flex;
     flex-direction: column;
@@ -1514,22 +1534,6 @@ const L = t();
     line-height: 1.2;
     word-break: break-word;
     margin: 0;
-  }
-
-  .comp__exo-muscle {
-    display: inline-flex;
-    align-items: center;
-    align-self: flex-start;
-    height: 2.2rem;
-    padding: 0 0.9rem;
-    border-radius: var(--radius-pill);
-    background-color: hsl(32 95% 50% / 0.12);
-    color: var(--color-accent);
-    border: 1px solid hsl(32 95% 50% / 0.30);
-    font-size: 1.0rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
   }
 
   .comp__exo-volume {
@@ -1575,7 +1579,7 @@ const L = t();
     flex-shrink: 0;
   }
 
-  /* ── Sets table (within exercise) ── */
+  /* â”€â”€ Sets table (within exercise) â”€â”€ */
   .comp__exo-table {
     display: flex;
     flex-direction: column;
@@ -1652,7 +1656,7 @@ const L = t();
     color: var(--color-text);
   }
 
-  /* ── Set type pill ── */
+  /* â”€â”€ Set type pill â”€â”€ */
   .comp__type-pill {
     display: inline-flex;
     align-items: center;
@@ -1669,8 +1673,8 @@ const L = t();
   }
 
   .comp__type-pill--warmup {
-    background-color: hsl(217 80% 55% / 0.14);
-    color: hsl(217 80% 70%);
+    background-color: color-mix(in srgb, var(--color-info) 14%, transparent);
+    color: var(--color-info);
   }
 
   .comp__type-pill--work {
@@ -1679,23 +1683,23 @@ const L = t();
   }
 
   .comp__type-pill--top {
-    background-color: hsl(32 95% 50% / 0.14);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
     color: var(--color-accent);
   }
 
   .comp__type-pill--drop {
-    background-color: hsl(48 95% 55% / 0.14);
+    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
     color: var(--color-warning);
   }
 
   .comp__type-pill--failure {
-    background-color: hsl(0 80% 55% / 0.14);
+    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
     color: var(--color-destructive);
   }
 
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
-     ════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     RESPONSIVE â€” small screens
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (max-width: 480px) {
     .comp__summary-value {
       font-size: 1.7rem;
@@ -1731,9 +1735,9 @@ const L = t();
     }
   }
 
-  /* ════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      REDUCED MOTION
-     ════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (prefers-reduced-motion: reduce) {
     .comp__back,
     .comp__select {

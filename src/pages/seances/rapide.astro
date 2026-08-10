@@ -7,19 +7,19 @@ const L = t();
 ---
 
 <AppLayout title={L.rapide.title}>
-  {/* ═══════════════════════════════════════════════════════
-      QUICK SESSION MODE — full-screen, distraction-free gym UI.
+  {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      QUICK SESSION MODE â€” full-screen, distraction-free gym UI.
       The `.qs` root uses position: fixed to overlay the
       sidebar + topbar so the user gets an unbroken dark canvas
       with nothing competing for their attention while lifting.
-      ═══════════════════════════════════════════════════════ */}
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
   <div
     class="qs"
     x-data="quickSessionApp()"
     x-init="init()"
     x-cloak
   >
-    {/* ── Top bar (always visible in working + resting) ── */}
+    {/* â”€â”€ Top bar (always visible in working + resting) â”€â”€ */}
     <template x-if="state === 'working' || state === 'resting'">
       <header class="qs__topbar">
         <button
@@ -37,7 +37,7 @@ const L = t();
         <div class="qs__progress">
           <span class="qs__progress-text">
             {L.rapide.setProgress} <strong x-text="currentSetIndex + 1"></strong>/<span x-text="currentExercise?.sets?.length || 0"></span>
-            <span class="qs__progress-sep">·</span>
+            <span class="qs__progress-sep">Â·</span>
             {L.rapide.exerciseProgress} <strong x-text="currentExerciseIndex + 1"></strong>/<span x-text="totalExercises"></span>
           </span>
           <div class="qs__progress-bar" aria-hidden="true">
@@ -62,9 +62,9 @@ const L = t();
       </header>
     </template>
 
-    {/* ═══════════════════════════════════════════════════
-        STATE 1 — Selecting a session
-        ═══════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        STATE 1 â€” Selecting a session
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="state === 'selecting'">
       <section class="qs__selecting">
         <div class="qs__selecting-inner">
@@ -89,7 +89,7 @@ const L = t();
               <template x-for="s in availableSessions" :key="s.id">
                 <option
                   :value="s.id"
-                  x-text="`${s.label} (${s.totalSets} ${setsShortLabel} · ${formatWeight(s.totalVolume)})`"
+                  x-text="`${s.label} (${s.totalSets} ${setsShortLabel} Â· ${formatWeight(s.totalVolume)})`"
                 ></option>
               </template>
             </select>
@@ -117,9 +117,9 @@ const L = t();
       </section>
     </template>
 
-    {/* ═══════════════════════════════════════════════════
-        STATE 2 — Working (one set at a time)
-        ═══════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        STATE 2 â€” Working (one set at a time)
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="state === 'working' && currentSet">
       <section
         class="qs__working"
@@ -144,7 +144,7 @@ const L = t();
               <span class="qs__num" x-text="formatWeight(currentSet.weight)"></span>
               <span class="qs__unit" x-text="weightUnit()"></span>
             </div>
-            <div class="qs__times" aria-hidden="true">×</div>
+            <div class="qs__times" aria-hidden="true">Ã—</div>
             <div class="qs__reps">
               <span class="qs__num" x-text="currentSet.reps"></span>
               <span class="qs__unit">{L.rapide.repsUnit}</span>
@@ -206,9 +206,9 @@ const L = t();
       </section>
     </template>
 
-    {/* ═══════════════════════════════════════════════════
-        STATE 3 — Resting (big countdown)
-        ═══════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        STATE 3 â€” Resting (big countdown)
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="state === 'resting'">
       <section class="qs__resting">
         <div class="qs__resting-inner">
@@ -227,7 +227,7 @@ const L = t();
               @click="addRestTime(-15)"
               aria-label={L.rapide.restMinusAria}
             >
-              −15s
+              âˆ’15s
             </button>
             <button
               type="button"
@@ -258,9 +258,9 @@ const L = t();
       </section>
     </template>
 
-    {/* ═══════════════════════════════════════════════════
-        STATE 4 — Completed (summary)
-        ═══════════════════════════════════════════════════ */}
+    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        STATE 4 â€” Completed (summary)
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <template x-if="state === 'completed'">
       <section class="qs__done-screen">
         <div class="qs__done-inner">
@@ -334,7 +334,7 @@ const L = t();
 
   const LABELS = t();
 
-  // ── Pure helpers (module scope) ────────────────────────────
+  // â”€â”€ Pure helpers (module scope) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function typeLabelFn(t: SetType): string {
     switch (t) {
       case 'warmup': return LABELS.rapide.typeWarmup;
@@ -378,11 +378,11 @@ const L = t();
     const Alpine = (window as any).Alpine;
 
     Alpine.data('quickSessionApp', () => ({
-      // ── State machine ──
+      // â”€â”€ State machine â”€â”€
       // 'selecting' | 'working' | 'resting' | 'completed'
       state: 'selecting' as 'selecting' | 'working' | 'resting' | 'completed',
 
-      // ── Data ──
+      // â”€â”€ Data â”€â”€
       availableSessions: [] as Array<{
         id: string;
         label: string;
@@ -392,29 +392,29 @@ const L = t();
       selectedSessionId: '',
       session: null as Session | null,
 
-      // ── Workout progress ──
+      // â”€â”€ Workout progress â”€â”€
       currentExerciseIndex: 0,
       currentSetIndex: 0,
       completedSets: 0,
       startTime: 0,
       endTime: 0,
 
-      // ── Rest timer ──
+      // â”€â”€ Rest timer â”€â”€
       restRemaining: 0,
       restInterval: null as number | null,
       restPaused: false,
 
-      // ── Wake Lock ──
+      // â”€â”€ Wake Lock â”€â”€
       wakeLock: null as any,
 
-      // ── Touch swipe ──
+      // â”€â”€ Touch swipe â”€â”€
       _touchStartX: 0,
       _touchStartY: 0,
 
-      // ── Keyboard ──
+      // â”€â”€ Keyboard â”€â”€
       _keyHandler: null as ((e: KeyboardEvent) => void) | null,
 
-      // ── Init ──
+      // â”€â”€ Init â”€â”€
       init() {
         this.loadSessions();
         this._installKeyboard();
@@ -443,11 +443,11 @@ const L = t();
         this._releaseWakeLock();
       },
 
-      // ── Sessions list ──
+      // â”€â”€ Sessions list â”€â”€
       loadSessions() {
         const all = getSessions();
         this.availableSessions = all
-          // Hide sessions that have no sets at all — nothing to do.
+          // Hide sessions that have no sets at all â€” nothing to do.
           .filter((s) => s.exercises.some((e) => e.sets.length > 0))
           .map((s) => {
             const totalSets = s.exercises.reduce(
@@ -470,12 +470,12 @@ const L = t();
               totalVolume,
             };
           })
-          // Newest first — the user is more likely to want the
+          // Newest first â€” the user is more likely to want the
           // latest planned session than an old one.
           .sort((a, b) => (a.label < b.label ? 1 : -1));
       },
 
-      // ── Start the workout ──
+      // â”€â”€ Start the workout â”€â”€
       startSession() {
         if (!this.selectedSessionId) return;
         const found = getSessions().find(
@@ -495,7 +495,7 @@ const L = t();
         this.state = 'working';
       },
 
-      // ── Computed ──
+      // â”€â”€ Computed â”€â”€
       get currentExercise() {
         return this.session?.exercises[this.currentExerciseIndex] ?? null;
       },
@@ -522,7 +522,7 @@ const L = t();
         const total = this.totalSets;
         if (total === 0) return 0;
         // Count completed sets across every exercise, not just
-        // the current one — the bar represents the whole session.
+        // the current one â€” the bar represents the whole session.
         let done = 0;
         if (this.session) {
           for (let i = 0; i < this.session.exercises.length; i++) {
@@ -558,7 +558,7 @@ const L = t();
         return Math.floor((end - this.startTime) / 1000);
       },
 
-      // ── Navigation ──
+      // â”€â”€ Navigation â”€â”€
       canGoPrev(): boolean {
         // True when there is at least one set before the current
         // cursor in the global flat ordering.
@@ -605,7 +605,7 @@ const L = t();
         }
       },
 
-      // ── Set completion ──
+      // â”€â”€ Set completion â”€â”€
       completeSet() {
         if (!this.session || !this.currentSet) return;
         const ex = this.currentExercise;
@@ -631,7 +631,7 @@ const L = t();
         }
       },
 
-      // ── Undo ──
+      // â”€â”€ Undo â”€â”€
       get canUndo(): boolean {
         return this.completedSets > 0;
       },
@@ -664,7 +664,7 @@ const L = t();
         this._requestWakeLock();
       },
 
-      // ── Rest timer ──
+      // â”€â”€ Rest timer â”€â”€
       _startRest() {
         this.restRemaining = DEFAULT_REST;
         this.restPaused = false;
@@ -702,7 +702,7 @@ const L = t();
         this.restRemaining = Math.max(0, this.restRemaining + delta);
       },
 
-      // ── Stop / finish ──
+      // â”€â”€ Stop / finish â”€â”€
       stopSession() {
         // Soft exit: keep the session in 'in-progress' state so the
         // user can come back later. Releases the wake lock + timer.
@@ -757,7 +757,7 @@ const L = t();
         this.state = 'selecting';
       },
 
-      // ── Touch gestures (swipe left = next, swipe right = prev) ──
+      // â”€â”€ Touch gestures (swipe left = next, swipe right = prev) â”€â”€
       onTouchStart(e: TouchEvent) {
         const t = e.touches[0];
         if (!t) return;
@@ -780,7 +780,7 @@ const L = t();
         }
       },
 
-      // ── Keyboard shortcuts ──
+      // â”€â”€ Keyboard shortcuts â”€â”€
       _installKeyboard() {
         this._keyHandler = (e: KeyboardEvent) => {
           // Don't hijack typing in form fields.
@@ -819,7 +819,7 @@ const L = t();
         window.addEventListener('keydown', this._keyHandler);
       },
 
-      // ── Wake Lock API (best effort) ──
+      // â”€â”€ Wake Lock API (best effort) â”€â”€
       async _requestWakeLock(): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const nav = navigator as any;
@@ -845,7 +845,7 @@ const L = t();
         this.wakeLock = null;
       },
 
-      // ── Formatters (re-export the pure helpers) ──
+      // â”€â”€ Formatters (re-export the pure helpers) â”€â”€
       setsShortLabel: LABELS.rapide.setsShort,
       typeLabel(t: SetType): string {
         return typeLabelFn(t);
@@ -874,13 +874,13 @@ const L = t();
         if (!set) return '';
         const weight = this.formatWeight(set.weight);
         const unit = this.weightUnit();
-        return `${LABELS.rapide.nextUp} ${weight} ${unit} × ${set.reps}`;
+        return `${LABELS.rapide.nextUp} ${weight} ${unit} Ã— ${set.reps}`;
       },
     }));
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
+{/* Alpine.js CDN â€” MUST be AFTER the app script (type="module" runs before defer) */}
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
@@ -889,18 +889,18 @@ const L = t();
     display: none !important;
   }
 
-  /* ════════════════════════════════════════════════════════
-     ROOT — full-viewport dark overlay
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     ROOT â€” full-viewport dark overlay
      Sits above the sidebar + topbar so the workout UI owns
      the entire screen. Background is solid so the chrome
      underneath is invisible while the user is lifting.
-     ════════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .qs {
     position: fixed;
     inset: 0;
     z-index: 100;
 background-color: var(--color-bg);
-    color: #F6F6F6;
+    color: var(--color-text);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -909,9 +909,9 @@ background-color: var(--color-bg);
     font-family: var(--font-body);
   }
 
-  /* ════════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      TOP BAR
-     ════════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .qs__topbar {
     flex-shrink: 0;
     display: grid;
@@ -991,13 +991,13 @@ background-color: var(--color-bg);
 
   .qs__progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-accent), hsl(32 75% 55%));
+    background: linear-gradient(90deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 65%, white));
     transition: width 280ms ease;
   }
 
-  /* ════════════════════════════════════════════════════════
-     STATE 1 — SELECTING
-     ════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     STATE 1 â€” SELECTING
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .qs__selecting {
     flex: 1;
     display: flex;
@@ -1118,9 +1118,9 @@ background-color: var(--color-bg);
     text-decoration: underline;
   }
 
-  /* ════════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      BUTTONS
-     ════════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .qs__btn {
     display: inline-flex;
     align-items: center;
@@ -1167,7 +1167,7 @@ background-color: var(--color-bg);
   .qs__btn--primary {
     background-color: var(--color-accent);
     border-color: var(--color-accent);
-    color: #FFFFFF;
+    color: var(--color-accent-foreground);
   }
 
   .qs__btn--primary:hover:not(:disabled) {
@@ -1182,7 +1182,7 @@ background-color: var(--color-bg);
   .qs__btn--accent {
     background-color: var(--color-accent);
     border-color: var(--color-accent);
-    color: #FFFFFF;
+    color: var(--color-accent-foreground);
   }
 
   .qs__btn--accent:hover:not(:disabled) {
@@ -1190,9 +1190,9 @@ background-color: var(--color-bg);
     border-color: var(--color-accent-hover);
   }
 
-  /* ════════════════════════════════════════════════════════
-     STATE 2 — WORKING
-     ════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     STATE 2 â€” WORKING
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .qs__working {
     flex: 1;
     display: flex;
@@ -1255,33 +1255,33 @@ background-color: var(--color-bg);
   }
 
   .qs__set-type--work {
-    background-color: hsl(32 55% 45% / 0.15);
+    background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
     color: var(--color-accent);
-    border-color: hsl(32 55% 45% / 0.35);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
   }
 
   .qs__set-type--warmup {
-    background-color: hsl(45 80% 50% / 0.12);
+    background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
     color: var(--color-warning);
-    border-color: hsl(45 80% 50% / 0.30);
+    border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
   }
 
   .qs__set-type--top {
-    background-color: hsl(280 70% 60% / 0.12);
-    color: hsl(280 70% 75%);
-    border-color: hsl(280 70% 60% / 0.30);
+    background-color: color-mix(in srgb, var(--color-cat-core) 12%, transparent);
+    color: var(--color-cat-core);
+    border-color: color-mix(in srgb, var(--color-cat-core) 30%, transparent);
   }
 
   .qs__set-type--drop {
-    background-color: hsl(217 80% 55% / 0.12);
-    color: hsl(217 80% 70%);
-    border-color: hsl(217 80% 55% / 0.30);
+    background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
+    color: var(--color-info);
+    border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
   }
 
   .qs__set-type--failure {
-    background-color: hsl(0 80% 55% / 0.12);
+    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
     color: var(--color-destructive);
-    border-color: hsl(0 80% 55% / 0.30);
+    border-color: color-mix(in srgb, var(--color-destructive) 30%, transparent);
   }
 
   .qs__load {
@@ -1327,14 +1327,14 @@ background-color: var(--color-bg);
     line-height: 1;
   }
 
-  /* ── Terminé (main action) ── */
+  /* â”€â”€ TerminÃ© (main action) â”€â”€ */
   .qs__done {
     width: 100%;
     max-width: 60rem;
     min-height: 8rem;
     padding: 0 2.4rem;
     background-color: var(--color-success);
-    color: #04240F;
+    color: var(--color-success-foreground);
     border: none;
     border-radius: var(--radius-lg);
     font-family: var(--font-body);
@@ -1348,7 +1348,7 @@ background-color: var(--color-bg);
     align-items: center;
     justify-content: center;
     gap: 1.2rem;
-    box-shadow: 0 8px 24px hsl(142 70% 45% / 0.30);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-success) 30%, transparent);
     transition:
       background-color var(--transition-fast),
       transform var(--transition-fast),
@@ -1356,7 +1356,7 @@ background-color: var(--color-bg);
   }
 
   .qs__done:hover {
-    background-color: hsl(142 70% 50%);
+    background-color: color-mix(in srgb, var(--color-success) 90%, white);
   }
 
   .qs__done:focus-visible {
@@ -1417,9 +1417,9 @@ background-color: var(--color-bg);
     cursor: not-allowed;
   }
 
-  /* ════════════════════════════════════════════════════════
-     STATE 3 — RESTING
-     ════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     STATE 3 â€” RESTING
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .qs__resting {
     flex: 1;
     display: flex;
@@ -1503,9 +1503,9 @@ background-color: var(--color-bg);
     opacity: 0.35;
   }
 
-  /* ════════════════════════════════════════════════════════
-     STATE 4 — COMPLETED
-     ════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     STATE 4 â€” COMPLETED
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .qs__done-screen {
     flex: 1;
     display: flex;
@@ -1529,7 +1529,7 @@ background-color: var(--color-bg);
     width: 12rem;
     height: 12rem;
     border-radius: 50%;
-    background-color: hsl(142 70% 45% / 0.12);
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
     display: inline-flex;
     align-items: center;
@@ -1611,9 +1611,9 @@ background-color: var(--color-bg);
     }
   }
 
-  /* ════════════════════════════════════════════════════════
-     RESPONSIVE — keep touch targets huge on small phones
-     ════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     RESPONSIVE â€” keep touch targets huge on small phones
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (max-width: 480px) {
     .qs__topbar {
       grid-template-columns: 5.2rem 1fr 5.2rem;
@@ -1638,9 +1638,9 @@ background-color: var(--color-bg);
     }
   }
 
-  /* ════════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      REDUCED MOTION
-     ════════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (prefers-reduced-motion: reduce) {
     .qs__resting-timer--low,
     .qs__done,
