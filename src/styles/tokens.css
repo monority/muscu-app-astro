@@ -17,6 +17,18 @@
   --color-info: #3B82F6;
   --color-border: hsl(0 0% 100% / 0.08);
 
+  /* Stat hues — one hue per dashboard stat category. Hue carries
+     meaning: green = volume, purple = PRs, amber = streak, blue =
+     sessions. Each has a soft tinted background for icon discs. */
+  --color-stat-volume: hsl(152 60% 42%);
+  --color-stat-volume-bg: hsl(152 60% 42% / 0.10);
+  --color-stat-pr: hsl(270 60% 55%);
+  --color-stat-pr-bg: hsl(270 60% 55% / 0.10);
+  --color-stat-streak: hsl(38 90% 50%);
+  --color-stat-streak-bg: hsl(38 90% 50% / 0.10);
+  --color-stat-sessions: hsl(200 80% 50%);
+  --color-stat-sessions-bg: hsl(200 80% 50% / 0.10);
+
   /* Spacing (0.4rem base) */
   --spacing-1: 0.4rem;
   --spacing-2: 0.8rem;
@@ -96,6 +108,17 @@
   --color-muted: #6B7280;
   /* Accent + state colors stay the same — they have enough contrast
      on either surface to remain readable. */
+
+  /* Stat hues flip darker/less saturated so they keep contrast on the
+     near-white surfaces; tinted backgrounds get a lighter wash. */
+  --color-stat-volume: hsl(152 55% 35%);
+  --color-stat-volume-bg: hsl(152 55% 35% / 0.08);
+  --color-stat-pr: hsl(270 50% 45%);
+  --color-stat-pr-bg: hsl(270 50% 45% / 0.08);
+  --color-stat-streak: hsl(38 85% 40%);
+  --color-stat-streak-bg: hsl(38 85% 40% / 0.08);
+  --color-stat-sessions: hsl(200 70% 40%);
+  --color-stat-sessions-bg: hsl(200 70% 40% / 0.08);
 
   /* Alpha overlays flip from white-on-dark to black-on-light so the
      nested surfaces / hovers / borders keep their contrast. */

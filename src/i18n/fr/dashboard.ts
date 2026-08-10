@@ -30,4 +30,10 @@ export default {
   sessionsUnit: 'séances',
   exercisesUnit: 'exercices',
   daysUnit: 'jours',
+  todayVolume: "Volume aujourd'hui",
+  weeklyVolumeTrend: 'Volume hebdomadaire',
+  emptyTitle: 'Bienvenue !',
+  browseExercises: 'Voir les exercices',
+  sessionCount: '{count} séance',
+  exerciseCount: '{count} exercice',
 };

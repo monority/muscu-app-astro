@@ -2,7 +2,6 @@
 import AppLayout from '../layouts/AppLayout.astro';
 import PageHeader from '../components/layout/PageHeader.astro';
 import Card from '../components/ui/Card.astro';
-import EmptyState from '../components/ui/EmptyState.astro';
 import Badge from '../components/ui/Badge.astro';
 import { t, setLocale, defaultLocale, localizedPath } from '../i18n';
 
@@ -19,49 +18,67 @@ const L = t();
   />
 
   <div class="dash" x-data="dashboardApp()" x-init="init()" x-cloak>
+    {/* ── Quick actions — always visible in BOTH states ── */}
+    <div class="dash__actions">
+      <a href={localizedPath("/seances/creer")} class="dash__action dash__action--primary">
+        <svg
+          class="dash__action-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>{L.dashboard.newSession}</span>
+      </a>
+      <a href={localizedPath("/timer")} class="dash__action dash__action--secondary">
+        <svg
+          class="dash__action-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="13" r="8"></circle>
+          <path d="M12 9v4l2 2"></path>
+          <path d="M5 3 2 6"></path>
+          <path d="m22 6-3-3"></path>
+          <path d="M6.38 18.7 4 21"></path>
+          <path d="M17.64 18.67 20 21"></path>
+        </svg>
+        <span>{L.dashboard.stopwatch}</span>
+      </a>
+    </div>
+
     {/* ── Main dashboard (once training has started) ── */}
     <div x-show="hasSessions">
-      {/* ── Quick actions ── */}
-      <div class="dash__actions">
-        <a href={localizedPath("/seances/creer")} class="dash__action dash__action--primary">
-          <svg
-            class="dash__action-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>{L.dashboard.newSession}</span>
-        </a>
-        <a href={localizedPath("/timer")} class="dash__action dash__action--secondary">
-          <svg
-            class="dash__action-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="13" r="8"></circle>
-            <path d="M12 9v4l2 2"></path>
-            <path d="M5 3 2 6"></path>
-            <path d="m22 6-3-3"></path>
-            <path d="M6.38 18.7 4 21"></path>
-            <path d="M17.64 18.67 20 21"></path>
-          </svg>
-          <span>{L.dashboard.stopwatch}</span>
-        </a>
-      </div>
+      {/* ── Hero: today's volume ── */}
+      <section class="dash__hero" aria-label={L.dashboard.todayVolume}>
+        <span class="dash__hero-label">{L.dashboard.todayVolume}</span>
+        <div class="dash__hero-value">
+          <span class="dash__hero-number" x-text="formatVolume(todayVolume)"></span>
+          <span class="dash__hero-unit" x-text="todayVolume > 0 ? labels.kg : ''"></span>
+        </div>
+        <div class="dash__hero-context" x-show="todaySessions > 0">
+          <span
+            x-text="todaySessions === 1 ? labels.sessionCount.replace('{count}', todaySessions) : todaySessions + ' ' + labels.sessionsUnit"
+          ></span>
+          <span class="dash__hero-context-sep" aria-hidden="true">·</span>
+          <span
+            x-text="todayExercises === 1 ? labels.exerciseCount.replace('{count}', todayExercises) : todayExercises + ' ' + labels.exercisesUnit"
+          ></span>
+        </div>
+      </section>
 
       {/* ── Weekly goal card ── */}
       <section class="dash__goal" aria-label={L.dashboard.goalCardAria}>
@@ -78,13 +95,14 @@ const L = t();
               cy="22"
               r="18"
               class="dash__goal-ring-fill"
+              :class="{ 'dash__goal-ring-fill--complete': weeklyDone >= settings.weeklyGoal }"
               :stroke-dasharray="`${weeklyProgress * 113.1} 113.1`"
             ></circle>
           </svg>
           <span
             class="dash__goal-ring-pct"
             x-text="`${Math.round(weeklyProgress * 100)}%`"
-          >0%</span>
+          ></span>
         </div>
 
         <div class="dash__goal-text">
@@ -93,7 +111,7 @@ const L = t();
             x-text="labels.weeklyGoalEyebrow"
           >{L.dashboard.weeklyGoalEyebrow}</span>
           <h2 class="dash__goal-title">
-            <span class="dash__goal-done" x-text="weeklyDone">0</span>
+            <span class="dash__goal-done" x-text="weeklyDone"></span>
             <span class="dash__goal-sep" aria-hidden="true">/</span>
             <span class="dash__goal-target" x-text="settings.weeklyGoal">3</span>
             <span
@@ -135,32 +153,32 @@ const L = t();
       {/* ── KPI band ── */}
       <section class="dash__kpis" aria-label={L.dashboard.kpisAria}>
         {/* Volume */}
-        <Card class="dash__kpi" padding="md">
+        <Card class="dash__kpi dash__kpi--volume" padding="md">
           <div class="flex flex-col gap-1">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
               </span>
               <span class="dash__kpi-label">{L.dashboard.totalVolume}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="formatVolume(kpis.totalVolume)">0</span>
+              <span class="dash__kpi-value" x-text="formatVolume(kpis.totalVolume)"></span>
               <span class="dash__kpi-unit">{L.common.kg}</span>
             </div>
           </div>
         </Card>
 
         {/* Séances */}
-        <Card class="dash__kpi" padding="md">
+        <Card class="dash__kpi dash__kpi--sessions" padding="md">
           <div class="flex flex-col gap-1">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </span>
               <span class="dash__kpi-label">{L.dashboard.totalSessions}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="kpis.totalSessions">0</span>
+              <span class="dash__kpi-value" x-text="kpis.totalSessions"></span>
               <span
                 class="dash__kpi-unit"
                 x-text="kpis.totalSessions === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
@@ -169,17 +187,17 @@ const L = t();
           </div>
         </Card>
 
-        {/* PRs */}
-        <Card class="dash__kpi" padding="md">
+        {/* Meilleurs PRs */}
+        <Card class="dash__kpi dash__kpi--pr" padding="md">
           <div class="flex flex-col gap-1">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
               </span>
               <span class="dash__kpi-label">{L.dashboard.bestPRs}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="kpis.bestPRs">0</span>
+              <span class="dash__kpi-value" x-text="kpis.bestPRs"></span>
               <span
                 class="dash__kpi-unit"
                 x-text="kpis.bestPRs === 1 ? labels.exoSingular.trim() : labels.exercisesUnit"
@@ -193,27 +211,50 @@ const L = t();
           </div>
         </Card>
 
-        {/* Streak */}
-        <Card class="dash__kpi" padding="md">
+        {/* Série en cours */}
+        <Card class="dash__kpi dash__kpi--streak" padding="md">
           <div class="flex flex-col gap-1">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
               </span>
               <span class="dash__kpi-label">{L.dashboard.streak}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="kpis.streak">0</span>
+              <span class="dash__kpi-value" x-text="kpis.streak"></span>
               <span
                 class="dash__kpi-unit"
                 x-text="kpis.streak === 1 ? labels.daysSingular : labels.daysUnit"
-              >{L.dashboard.daysPlural}</span>
+              >{L.dashboard.daysUnit}</span>
             </div>
             <div
               class="dash__kpi-sub"
               x-show="kpis.streak === 0 && kpis.totalSessions > 0"
               x-text="labels.noRecent"
             ></div>
+          </div>
+        </Card>
+      </section>
+
+      {/* ── Weekly volume trend ── */}
+      <section class="dash__trend" aria-label={L.dashboard.weeklyVolumeTrend}>
+        <Card padding="md">
+          <header class="dash__section-head dash__trend-head">
+            <h2>{L.dashboard.weeklyVolumeTrend}</h2>
+          </header>
+          <div class="dash__trend-chart">
+            <template x-for="(v, i) in weeklyVolumeByDay" :key="i">
+              <div class="dash__trend-col">
+                <div class="dash__trend-bar-wrap">
+                  <div
+                    class="dash__trend-bar"
+                    :class="i === todayIdx ? 'dash__trend-bar--today' : (v > 0 && i < todayIdx ? 'dash__trend-bar--past' : 'dash__trend-bar--empty')"
+                    :style="`height: ${v > 0 ? Math.round((v / maxVol) * 100) : 0}%`"
+                  ></div>
+                </div>
+                <span class="dash__trend-day" x-text="dayLabels[i]"></span>
+              </div>
+            </template>
           </div>
         </Card>
       </section>
@@ -225,12 +266,11 @@ const L = t();
           <a
             href={localizedPath("/seances")}
             class="dash__see-all"
-            x-show="hasSessions"
             x-text="labels.viewAll"
           >{L.dashboard.viewAll} →</a>
         </header>
 
-        <div class="dash__sessions" x-show="hasSessions">
+        <div class="dash__sessions">
           <template x-for="s in recentSessions" :key="s.id">
             <a
               :href="localizedPath('/seances/detail?id=' + s.id)"
@@ -260,7 +300,10 @@ const L = t();
                   <span x-text="sessionExercisesCount(s) > 1 ? labels.exoPlural : labels.exoSingular"></span>
                 </span>
                 <span class="dash__session-sep" aria-hidden="true">·</span>
-                <span class="dash__session-volume" x-text="formatVolume(sessionVolume(s)) + ' ' + labels.kg">0 kg</span>
+                <span class="dash__session-volume" x-text="formatVolume(sessionVolume(s)) + ' ' + labels.kg"></span>
+                <div class="dash__session-muscle" x-show="sessionPrimaryMuscle(s)">
+                  <Badge variant="default" size="sm"><span x-text="muscleLabel(sessionPrimaryMuscle(s))"></span></Badge>
+                </div>
               </div>
             </a>
           </template>
@@ -268,16 +311,78 @@ const L = t();
       </section>
     </div>
 
-    {/* ── Empty (first run: no sessions yet) ── */}
-    <div x-show="!hasSessions">
-      <Card>
-        <EmptyState
-          title={L.dashboard.noSessions}
-          description={L.dashboard.emptyDesc}
-          actionLabel={L.dashboard.createFirst}
-          actionHref={localizedPath("/seances/creer")}
-        />
-      </Card>
+    {/* ── Empty (first run: no sessions yet) — decorative, no zeros ── */}
+    <div class="dash__empty" x-show="!hasSessions">
+      <div class="dash__empty-ring" aria-hidden="true">
+        <svg viewBox="0 0 100 100" class="dash__empty-ring-svg">
+          <circle cx="50" cy="50" r="46" class="dash__empty-ring-track"></circle>
+          <circle cx="50" cy="50" r="46" class="dash__empty-ring-fill"></circle>
+        </svg>
+        <div class="dash__empty-disc">
+          <svg
+            viewBox="0 0 24 24"
+            class="dash__empty-dumbbell"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M14.4 14.4 9.6 9.6"/>
+            <path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/>
+            <path d="m21.5 21.5-1.4-1.4"/>
+            <path d="M3.9 3.9 2.5 2.5"/>
+            <path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="dash__empty-title">{L.dashboard.emptyTitle}</h1>
+      <p class="dash__empty-desc">{L.dashboard.emptyDesc}</p>
+
+      <div class="dash__empty-actions">
+        <a href={localizedPath("/seances/creer")} class="dash__action dash__action--primary">
+          <svg
+            class="dash__action-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>{L.dashboard.createFirst}</span>
+        </a>
+        <a href={localizedPath("/timer")} class="dash__action dash__action--secondary">
+          <svg
+            class="dash__action-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="13" r="8"></circle>
+            <path d="M12 9v4l2 2"></path>
+            <path d="M5 3 2 6"></path>
+            <path d="m22 6-3-3"></path>
+            <path d="M6.38 18.7 4 21"></path>
+            <path d="M17.64 18.67 20 21"></path>
+          </svg>
+          <span>{L.dashboard.stopwatch}</span>
+        </a>
+        <a href={localizedPath("/exercices")} class="dash__empty-link">
+          {L.dashboard.browseExercises}
+        </a>
+      </div>
     </div>
   </div>
 </AppLayout>
@@ -353,6 +458,10 @@ const L = t();
         viewAll: LABELS.dashboard.viewAllArrow,
         recentSessions: LABELS.dashboard.recentSessions,
         kg: LABELS.common.kg,
+        todayVolume: LABELS.dashboard.todayVolume,
+        weeklyVolumeTrend: LABELS.dashboard.weeklyVolumeTrend,
+        sessionCount: LABELS.dashboard.sessionCount,
+        exerciseCount: LABELS.dashboard.exerciseCount,
       },
 
       // Expose localizedPath to Alpine expressions (uses window.__LOCALE__).
@@ -374,6 +483,10 @@ const L = t();
         return this.sessions.length > 0;
       },
 
+      get hasCompletedSessions(): boolean {
+        return this.sessions.some((s) => s.status === 'completed');
+      },
+
       get recentSessions(): Session[] {
         return this.sessions.slice(0, 5);
       },
@@ -383,6 +496,66 @@ const L = t();
         const target = this.settings.weeklyGoal;
         if (!Number.isFinite(target) || target <= 0) return 0;
         return Math.min(1, Math.max(0, this.weeklyDone / target));
+      },
+
+      // ── Today ──
+      /** Sum of weight × reps over completed sets of today's sessions. */
+      get todayVolume(): number {
+        const key = dateKey(new Date());
+        return this.sessions
+          .filter((s) => dateKey(new Date(s.date)) === key)
+          .reduce((sum, s) => sum + this.sessionVolume(s), 0);
+      },
+
+      get todaySessions(): number {
+        const key = dateKey(new Date());
+        return this.sessions.filter(
+          (s) => dateKey(new Date(s.date)) === key,
+        ).length;
+      },
+
+      /** Count of distinct exercises across today's sessions. */
+      get todayExercises(): number {
+        const key = dateKey(new Date());
+        const seen = new Set<string>();
+        for (const s of this.sessions) {
+          if (dateKey(new Date(s.date)) !== key) continue;
+          for (const ex of s.exercises) seen.add(ex.exerciseId);
+        }
+        return seen.size;
+      },
+
+      // ── Weekly trend ──
+      /** Per-day volume sums (index = getDay(), 0 = Sunday), this week. */
+      get weeklyVolumeByDay(): number[] {
+        const arr = new Array(7).fill(0);
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+        startOfWeek.setHours(0, 0, 0, 0);
+        for (const s of this.sessions) {
+          const d = new Date(s.date);
+          if (d < startOfWeek) continue;
+          arr[d.getDay()] += this.sessionVolume(s);
+        }
+        return arr;
+      },
+
+      /** Today's weekday index (getDay(): 0 = Sunday … 6 = Saturday). */
+      get todayIdx(): number {
+        return new Date().getDay();
+      },
+
+      /** Scale for the trend bars — never 0 so empty weeks render 0%. */
+      get maxVol(): number {
+        return Math.max(...this.weeklyVolumeByDay, 1);
+      },
+
+      /** Locale-aware day labels, Sun → Sat. */
+      get dayLabels(): string[] {
+        return getLocale() === 'fr'
+          ? ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+          : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
       },
 
       // ── KPIs (recomputed on demand; Alpine caches via getters) ──
@@ -502,6 +675,30 @@ const L = t();
         return s.exercises.length;
       },
 
+      /** Most frequent muscle across the session's exercises ('' when none). */
+      sessionPrimaryMuscle(s: Session): string {
+        const counts = new Map<string, number>();
+        for (const ex of s.exercises) {
+          if (!ex.muscle) continue;
+          counts.set(ex.muscle, (counts.get(ex.muscle) ?? 0) + 1);
+        }
+        let best = '';
+        let bestCount = 0;
+        for (const [muscle, count] of counts) {
+          if (count > bestCount) {
+            best = muscle;
+            bestCount = count;
+          }
+        }
+        return best;
+      },
+
+      /** Translated stored muscle group for display (FR stays as-is). */
+      muscleLabel(name: string): string {
+        const tr = (window as { trMuscle?: (m: string) => string }).trMuscle;
+        return tr ? tr(name) : name;
+      },
+
       // ── Formatters / helpers exposed to the template ──
       statusLabel(status: SessionStatus): string {
         return statusLabel(status);
@@ -537,7 +734,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     QUICK ACTIONS — two pill CTAs
+     QUICK ACTIONS — two pill CTAs (always visible)
      ════════════════════════════════════════════════════ */
   .dash__actions {
     display: flex;
@@ -560,11 +757,11 @@ const L = t();
     text-transform: uppercase;
     text-decoration: none;
     transition:
-      background-color 200ms ease,
-      color 200ms ease,
-      border-color 200ms ease,
-      box-shadow 200ms ease,
-      transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+      background-color var(--transition-base),
+      color var(--transition-base),
+      border-color var(--transition-base),
+      box-shadow var(--transition-base),
+      transform var(--transition-base);
   }
 
   .dash__action:focus-visible {
@@ -575,17 +772,13 @@ const L = t();
   .dash__action--primary {
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
-    box-shadow:
-      0 4px 18px hsl(32 95% 50% / 0.32),
-      inset 0 1px 0 var(--alpha-highlight);
+    box-shadow: var(--shadow-1), inset 0 1px 0 var(--alpha-highlight);
   }
 
   .dash__action--primary:hover {
     background-color: var(--color-accent-hover);
     color: var(--color-accent-foreground);
-    box-shadow:
-      0 6px 22px hsl(32 95% 50% / 0.45),
-      inset 0 1px 0 var(--alpha-highlight);
+    box-shadow: var(--shadow-2), inset 0 1px 0 var(--alpha-highlight);
     transform: translateY(-1px);
   }
 
@@ -616,6 +809,67 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
+     HERO — today's volume
+     ════════════════════════════════════════════════════ */
+  .dash__hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 3.2rem;
+    padding: 2.6rem 2.4rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-stat-volume);
+    border-radius: var(--radius-lg);
+  }
+
+  .dash__hero-label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  .dash__hero-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+  }
+
+  .dash__hero-number {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash__hero-unit {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .dash__hero-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  .dash__hero-context-sep {
+    color: var(--alpha-text-faint);
+  }
+
+  /* ════════════════════════════════════════════════════
      WEEKLY GOAL CARD
      ════════════════════════════════════════════════════ */
   .dash__goal {
@@ -626,11 +880,6 @@ const L = t();
     margin-bottom: 3.2rem;
     padding: 2.4rem;
     background-color: var(--color-surface);
-    background-image: radial-gradient(
-      ellipse at top right,
-      hsl(32 95% 50% / 0.10),
-      transparent 60%
-    );
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -692,8 +941,8 @@ const L = t();
   .dash__goal-ring {
     position: relative;
     flex-shrink: 0;
-    width: 6.0rem;
-    height: 6.0rem;
+    width: 7.2rem;
+    height: 7.2rem;
   }
 
   .dash__goal-ring-svg {
@@ -705,17 +954,22 @@ const L = t();
 
   .dash__goal-ring-track {
     fill: none;
-    stroke: var(--color-border);
-    stroke-width: 3;
+    stroke: var(--color-surface-3);
+    stroke-width: 4;
   }
 
   .dash__goal-ring-fill {
     fill: none;
     stroke: var(--color-accent);
-    stroke-width: 3;
+    stroke-width: 4;
     stroke-linecap: round;
-    transition: stroke-dasharray 320ms cubic-bezier(0.4, 0, 0.2, 1),
-                stroke 200ms ease;
+    transition:
+      stroke var(--transition-base),
+      stroke-dasharray var(--transition-base);
+  }
+
+  .dash__goal-ring-fill--complete {
+    stroke: var(--color-success);
   }
 
   .dash__goal-ring-pct {
@@ -725,7 +979,7 @@ const L = t();
     align-items: center;
     justify-content: center;
     font-family: var(--font-display);
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--color-text);
     font-variant-numeric: tabular-nums;
@@ -739,26 +993,19 @@ const L = t();
     border: 1px solid var(--color-border);
     border-radius: 999px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.30);
   }
 
   .dash__goal-bar-fill {
     height: 100%;
-    background-image: linear-gradient(
-      90deg,
-      var(--color-accent),
-      hsl(32 95% 60%)
-    );
+    background-color: var(--color-accent);
     border-radius: 999px;
-    box-shadow: 0 0 12px hsl(32 95% 50% / 0.45);
-    transition: width 360ms cubic-bezier(0.4, 0, 0.2, 1),
-                background-color 200ms ease,
-                box-shadow 200ms ease;
+    transition:
+      width var(--transition-base),
+      background-color var(--transition-base);
   }
 
   .dash__goal-bar-fill--complete {
-    background-image: linear-gradient(90deg, var(--color-success), var(--color-success));
-    box-shadow: 0 0 12px hsl(142 70% 45% / 0.45);
+    background-color: var(--color-success);
   }
 
   .dash__goal-hint {
@@ -783,7 +1030,7 @@ const L = t();
     margin-bottom: 3.2rem;
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 480px) {
     .dash__kpis {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -802,23 +1049,23 @@ const L = t();
   .dash__kpi-head {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.8rem;
   }
 
   .dash__kpi-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.0rem;
-    height: 2.0rem;
-    background-color: var(--alpha-bg-subtle);
+    width: 2.8rem;
+    height: 2.8rem;
     border-radius: 50%;
-    color: var(--color-muted);
     flex-shrink: 0;
   }
 
   .dash__kpi-icon svg {
     display: block;
+    width: 1.6rem;
+    height: 1.6rem;
   }
 
   .dash__kpi-label {
@@ -854,6 +1101,36 @@ const L = t();
     margin-top: 0.2rem;
   }
 
+  /* One hue per stat category — tinted disc + tinted value */
+  .dash__kpi--volume .dash__kpi-icon {
+    background-color: var(--color-stat-volume-bg);
+    color: var(--color-stat-volume);
+  }
+  .dash__kpi--volume .dash__kpi-value {
+    color: var(--color-stat-volume);
+  }
+  .dash__kpi--sessions .dash__kpi-icon {
+    background-color: var(--color-stat-sessions-bg);
+    color: var(--color-stat-sessions);
+  }
+  .dash__kpi--sessions .dash__kpi-value {
+    color: var(--color-stat-sessions);
+  }
+  .dash__kpi--pr .dash__kpi-icon {
+    background-color: var(--color-stat-pr-bg);
+    color: var(--color-stat-pr);
+  }
+  .dash__kpi--pr .dash__kpi-value {
+    color: var(--color-stat-pr);
+  }
+  .dash__kpi--streak .dash__kpi-icon {
+    background-color: var(--color-stat-streak-bg);
+    color: var(--color-stat-streak);
+  }
+  .dash__kpi--streak .dash__kpi-value {
+    color: var(--color-stat-streak);
+  }
+
   /* ════════════════════════════════════════════════════
      SECTION HEAD
      ════════════════════════════════════════════════════ */
@@ -882,7 +1159,7 @@ const L = t();
     color: var(--color-accent);
     text-decoration: none;
     border-radius: var(--radius-sm);
-    transition: color var(--transition-fast);
+    transition: color var(--transition-base);
   }
 
   .dash__see-all:hover {
@@ -892,6 +1169,73 @@ const L = t();
   .dash__see-all:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
+  }
+
+  /* ════════════════════════════════════════════════════
+     WEEKLY VOLUME TREND
+     ════════════════════════════════════════════════════ */
+  .dash__trend {
+    margin-bottom: 3.2rem;
+  }
+
+  .dash__trend-head {
+    margin-bottom: 1.2rem;
+  }
+
+  .dash__trend-head h2 {
+    font-size: 1.2rem;
+  }
+
+  .dash__trend-chart {
+    display: flex;
+    gap: 0.8rem;
+    align-items: stretch;
+  }
+
+  .dash__trend-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .dash__trend-bar-wrap {
+    display: flex;
+    align-items: flex-end;
+    height: 6rem;
+  }
+
+  .dash__trend-bar {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    transition:
+      height var(--transition-base),
+      background-color var(--transition-base),
+      opacity var(--transition-base);
+  }
+
+  .dash__trend-bar--past {
+    background-color: var(--color-stat-volume);
+    opacity: 0.4;
+  }
+
+  .dash__trend-bar--today {
+    background-color: var(--color-stat-volume);
+  }
+
+  .dash__trend-bar--empty {
+    background-color: var(--color-surface-3);
+    min-height: 4px;
+  }
+
+  .dash__trend-day {
+    font-size: 1.0rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    text-align: center;
   }
 
   /* ════════════════════════════════════════════════════
@@ -910,7 +1254,7 @@ const L = t();
     padding: 2rem;
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-left: 3px solid var(--color-border);
+    border-left: 4px solid var(--color-border);
     border-radius: var(--radius-lg);
     text-decoration: none;
     color: inherit;
@@ -922,7 +1266,7 @@ const L = t();
   .dash__session:hover {
     color: inherit;
     border-color: var(--alpha-border);
-    box-shadow: 0 8px 24px hsl(0 0% 0% / 0.42);
+    box-shadow: var(--shadow-2);
     transform: translateY(-2px);
   }
 
@@ -991,6 +1335,118 @@ const L = t();
     font-variant-numeric: tabular-nums;
   }
 
+  .dash__session-muscle {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ════════════════════════════════════════════════════
+     EMPTY STATE — welcome (no zeros anywhere)
+     ════════════════════════════════════════════════════ */
+  .dash__empty {
+    max-width: 48rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2.4rem;
+    padding: 4rem 0 6rem;
+  }
+
+  .dash__empty-ring {
+    position: relative;
+    width: 12rem;
+    height: 12rem;
+    flex-shrink: 0;
+  }
+
+  .dash__empty-ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    overflow: visible;
+  }
+
+  .dash__empty-ring-track {
+    fill: none;
+    stroke: var(--color-surface-3);
+    stroke-width: 6;
+  }
+
+  .dash__empty-ring-fill {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+    opacity: 0.25;
+    stroke-dasharray: 82 244;
+  }
+
+  .dash__empty-disc {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    background-color: var(--color-surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted);
+  }
+
+  .dash__empty-dumbbell {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+
+  .dash__empty-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--color-text);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .dash__empty-desc {
+    font-size: 1.4rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+    max-width: 36rem;
+    margin: 0;
+  }
+
+  .dash__empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+  }
+
+  .dash__empty-link {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 0.8rem;
+    transition: color var(--transition-base);
+  }
+
+  .dash__empty-link:hover {
+    color: var(--color-text);
+  }
+
+  .dash__empty-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
   /* ════════════════════════════════════════════════════
      REDUCED MOTION
      ════════════════════════════════════════════════════ */
@@ -998,8 +1454,10 @@ const L = t();
     .dash__action,
     .dash__session,
     .dash__see-all,
+    .dash__empty-link,
     .dash__goal-ring-fill,
-    .dash__goal-bar-fill {
+    .dash__goal-bar-fill,
+    .dash__trend-bar {
       transition: none;
     }
     .dash__action:hover,

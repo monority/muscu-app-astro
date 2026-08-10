@@ -30,4 +30,10 @@ export default {
   sessionsUnit: 'sessions',
   exercisesUnit: 'exercises',
   daysUnit: 'days',
+  todayVolume: "Today's volume",
+  weeklyVolumeTrend: 'Weekly volume',
+  emptyTitle: 'Welcome!',
+  browseExercises: 'Browse exercises',
+  sessionCount: '{count} session',
+  exerciseCount: '{count} exercise',
 };
