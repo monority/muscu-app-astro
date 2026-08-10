@@ -117,18 +117,66 @@ function beep(): void {
   playBeep();
 }
 
+/**
+ * Widget → app token map. The injected stylesheet only ever references
+ * --tw-* vars; resolveTwTokens() fills them at mount time from the host
+ * document's app tokens (globals.css is in scope both on /timer/pop and in
+ * a Picture-in-Picture window, whose document copies the opener's
+ * stylesheets). Reading the computed host tokens — AFTER data-theme has been
+ * applied — makes the widget inherit the host theme, so the old
+ * `html[data-theme="light"] .tw` override block is no longer needed.
+ *
+ * `fallback` is the pre-existing widget palette default (dark) and is used
+ * ONLY when the app token (and its alternate) is absent.
+ */
+const TW_TOKEN_MAP: {
+  tw: string;
+  app: string;
+  /** Alternate app token tried when `app` is empty. */
+  alt?: string;
+  /** Pre-existing widget default — no-token fallback only. */
+  fallback: string;
+}[] = [
+  { tw: '--tw-bg', app: '--color-bg', fallback: '#0d0d0d' },
+  { tw: '--tw-surface', app: '--color-surface', fallback: '#171717' },
+  { tw: '--tw-surface-2', app: '--color-surface-2', fallback: '#202020' },
+  { tw: '--tw-border', app: '--color-border', fallback: 'rgba(255, 255, 255, 0.09)' },
+  { tw: '--tw-text', app: '--color-text', fallback: '#f2f2f2' },
+  { tw: '--tw-muted', app: '--color-muted', fallback: '#8f8f8f' },
+  { tw: '--tw-accent', app: '--color-accent', fallback: 'hsl(32, 95%, 50%)' },
+  // Text/icon color on the accent fill (active tab). Pure white, as before.
+  { tw: '--tw-accent-fg', app: '--color-accent-foreground', fallback: '#fff' },
+  { tw: '--tw-ok', app: '--color-success', fallback: '#22c35d' },
+  // --color-warning is the real app token; --color-stat-streak covers token
+  // sets where the amber only existed on the streak stat.
+  { tw: '--tw-warn', app: '--color-warning', alt: '--color-stat-streak', fallback: '#f0b429' },
+  { tw: '--tw-danger', app: '--color-destructive', fallback: '#ef4444' },
+];
+
+/**
+ * Resolve the mapped app tokens and write them as inline --tw-* vars on the
+ * widget root, so WIDGET_CSS needs no hardcoded color of its own. Runs at
+ * mount time, after the host theme is applied (data-theme is set pre-paint
+ * on /timer/pop and in attachPip() before mountTimerWidget() is called).
+ */
+function resolveTwTokens(host: HTMLElement): void {
+  const doc = host.ownerDocument;
+  const cs = doc.defaultView
+    ? doc.defaultView.getComputedStyle(doc.documentElement)
+    : getComputedStyle(doc.documentElement);
+  for (const { tw, app, alt, fallback } of TW_TOKEN_MAP) {
+    const value = cs.getPropertyValue(app).trim() || (alt ? cs.getPropertyValue(alt).trim() : '');
+    host.style.setProperty(tw, value || fallback);
+  }
+}
+
 const WIDGET_CSS = `
+/* Palette: every --tw-* var is resolved at mount time by resolveTwTokens()
+   from the host document's app tokens (see TW_TOKEN_MAP). No hardcoded
+   color lives here; the widget inherits the host theme — including the
+   [data-theme="light"] token overrides — because the computed token values
+   are read after the theme has been applied. */
 .tw {
-  --tw-bg: #0d0d0d;
-  --tw-surface: #171717;
-  --tw-surface-2: #202020;
-  --tw-border: rgba(255, 255, 255, 0.09);
-  --tw-text: #f2f2f2;
-  --tw-muted: #8f8f8f;
-  --tw-accent: hsl(32, 95%, 50%);
-  --tw-ok: #22c35d;
-  --tw-warn: #f0b429;
-  --tw-danger: #ef4444;
   box-sizing: border-box;
   width: 100%;
   min-height: 100vh;
@@ -142,14 +190,6 @@ const WIDGET_CSS = `
   flex-direction: column;
   gap: 1.1rem;
   user-select: none;
-}
-html[data-theme="light"] .tw {
-  --tw-bg: #fafafa;
-  --tw-surface: #ffffff;
-  --tw-surface-2: #efefef;
-  --tw-border: rgba(0, 0, 0, 0.13);
-  --tw-text: #141414;
-  --tw-muted: #6b6b6b;
 }
 .tw *,
 .tw *::before,
@@ -190,7 +230,7 @@ html[data-theme="light"] .tw {
   transition: background 0.2s ease, color 0.2s ease;
 }
 .tw__tab:hover { color: var(--tw-text); }
-.tw__tab.is-active { background: var(--tw-accent); color: #fff; }
+.tw__tab.is-active { background: var(--tw-accent); color: var(--tw-accent-fg); }
 .tw__clock-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; padding: 0.9rem 0 0.4rem; }
 .tw__clock {
   font-family: 'Inter', system-ui, sans-serif;
@@ -335,6 +375,7 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
   style.textContent = WIDGET_CSS;
   root.appendChild(style);
   root.appendChild(host);
+  resolveTwTokens(host);
 
   const $ = <T extends HTMLElement>(sel: string): T => host.querySelector(sel) as T;
   const clock = $<HTMLDivElement>('[data-ref="clock"]');

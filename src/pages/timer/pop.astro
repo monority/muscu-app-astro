@@ -22,6 +22,16 @@ const lang = Astro.currentLocale ?? defaultLocale;
           var theme = localStorage.getItem('muscu-theme') || 'dark';
           if (theme !== 'light' && theme !== 'dark') theme = 'dark';
           document.documentElement.setAttribute('data-theme', theme);
+          // Sync the browser chrome color with the real --color-bg token
+          // (globals.css is imported above, so the token is in scope; data-theme
+          // is set first so light/dark resolves). The dark fallback value stays
+          // for a no-token edge. Runs pre-paint, before the native meta content
+          // can show.
+          var bg =
+            getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() ||
+            '#0d0d0d';
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.content = bg;
         } catch (e) {}
       })();
     </script>
@@ -30,7 +40,9 @@ const lang = Astro.currentLocale ?? defaultLocale;
       body {
         margin: 0;
         padding: 0;
-        background: #0d0d0d;
+        /* Token-driven — matches the widget .tw root. The plain fallback
+           for --color-bg comes from globals.css' own body rule. */
+        background: var(--color-bg);
       }
       #tw-mount {
         width: 100%;
