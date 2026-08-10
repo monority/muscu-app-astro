@@ -1,10 +1,10 @@
 # Roadmap — muscu-app
 
-> **Roadmap vivante** — mise à jour le **2026-08-10**
+> **Roadmap vivante** — mise à jour le **2026-08-11**
 > Projet : **muscu-app** — tracker de gym (Astro SSR + Alpine.js), persistance localStorage (`muscu:*`), i18n FR/EN.
 > Ce fichier est la **source de vérité** pour orienter les prochaines itérations : chaque item livré bascule dans « Récemment livré », puis est retiré des prochaines priorités.
 
-> **Note de vérification (2026-08-10)** : contrôle du code effectué avant rédaction. En place en amont : **export/import JSON (sauvegarde/restauration + export CSV)** (Réglages → section Données) et **toasts** (`Toast.astro`/API `window.showToast`). Depuis : **raccourcis clavier du timer**, puis l'ensemble du **P1** (tendance par exercice, rappels de séance, RPE/uRPE par série, supersets, fiche de séance imprimable + CSV), puis la **sync WebDAV** (sauvegarde/restauration), puis les **benchmarks V1** (opt-in + données de référence locales étiquetées, aucune collecte serveur), puis le **tableau de bord restauré** (retour au layout pré-refonte : objectif hebdo + bande KPIs + séances récentes + empty state, polish shadcn — la refonte hero/insights/onboarding a été **rejetée**), la **nav accordéon responsive** (persistance `muscu:nav:collapsed`) et la **typographie Inter**. La table **P0 est supprimée** (aucun item restant) et le **P1 est vide** — tout figure dans « ✅ Récemment livré ».
+> **Note de vérification (2026-08-11)** : contrôle du code effectué avant rédaction. En place en amont : **export/import JSON (sauvegarde/restauration + export CSV)** (Réglages → section Données) et **toasts** (`Toast.astro`/API `window.showToast`). Depuis : **raccourcis clavier du timer**, puis l'ensemble du **P1** (tendance par exercice, rappels de séance, RPE/uRPE par série, supersets, fiche de séance imprimable + CSV), puis la **sync WebDAV** (sauvegarde/restauration), puis les **benchmarks V1** (opt-in + données de référence locales étiquetées, aucune collecte serveur), puis le **tableau de bord restauré** (retour au layout pré-refonte : objectif hebdo + bande KPIs + séances récentes + empty state, polish shadcn — la refonte hero/insights/onboarding a été **rejetée**), la **nav accordéon responsive** (persistance `muscu:nav:collapsed`) et la **typographie Inter**. La table **P0 est supprimée** (aucun item restant) et le **P1 est vide** — tout figure dans « ✅ Récemment livré ».
 
 ---
 
@@ -45,6 +45,7 @@
 | Refonte UI — **Phase B (Séances)** | Pages séances alignées au design language : **liste** en cartes pattern dashboard (dot de statut + Badge + volume émeraude + badge catégorie muscle) ; **détail** tokenisé (tokens suggestion / RPE / mood) ; **builder + rapide + comparer** tokenisés `hsl→0` ; zones tactiles **4,4rem** (dont colonne d'actions des rangées de série) ; fixes texte mode clair ; token **`--success-foreground`** ajouté. | `src/styles/tokens.css`, `src/pages/seances/{index,detail,rapide,comparer}.astro`, `src/pages/seances/creer/index.astro` |
 | Refonte UI — **Phase C (Progression & Stats)** | Pages `progression/*` harmonisées : badges muscle teintes de catégorie (`muscleHue`) ; graphiques SVG token-driven via nouveau **`src/lib/css-var.ts`** (clair/sombre-aware, `hsl/hex→0`) ; donut volume **agrégé par 6 familles musculaires** ; zones tactiles **4,4rem**. | `src/lib/css-var.ts`, `src/pages/progression/{index,records,stats,poids}.astro` |
 | Refonte UI — **Phase D (Pages utilitaires & timer widget)** | Pages utilitaires tokenisées (`settings`/reminders/`calendrier`/`calculateur`/`login`/`timer` + pop/minuteur widget) : `hsl/hex→0` ; `timer-widget.ts` résout les tokens au mount dark/light ; zones tactiles **4,4rem** (dont popout **≤480px**) ; meta `theme-color` popup via tokens. | `src/lib/timer-widget.ts`, `src/pages/{settings/index,calendrier,calculateur,login,timer/index,timer/pop}.astro`, `src/components/params/ReminderSettings.astro` |
+| Refonte UI — **Phase E (UX cross-cutting)** | **QuickSearch** : filtrage exercices par muscle (clé FR / traduction EN via `trMuscle`), rank-boost préfixe, header renommé sur muscle exact ; raccourcis `Ctrl+K` / `/` documentés en footer palette. **Empty states consolidés** via primitif **`EmptyState`** (poids/calendrier/exercices, split bibliothèque-vs-recherche). **Purge couleurs (E2)** : exercices + components `hsl/hex→0` ; `debug.astro` documenté standalone (literals épinglés assumés) ; `ui.astro` swatches affichage assumé ; ombres `#000` via `color-mix` uniquement. **A11y** : pills `aria-pressed`, date courante `aria-current`, dots `role="img"`, légende donut, `keydown.stop` séances. **`ui.astro`** : showcase micro-patterns (dots / pills set-type / segmented). | `src/components/layout/{AppShell,QuickSearch,Sidebar}.astro`, `src/components/ui/{Dialog,Dropdown,Toggle}.astro`, `src/layouts/AppLayout.astro`, `src/pages/{calendrier,debug,ui}.astro`, `src/pages/exercices/{index,historique,tendance}.astro`, `src/pages/progression/{poids,stats}.astro`, `src/pages/seances/index.astro`, `src/i18n/{fr,en}/{command,ui,calendrier}.ts` |
 
 ---
 
@@ -54,6 +55,17 @@
 |---|---|---|---|---|
 | **MRV — V2 (algorithme intelligent)** | M | moyenne | `src/lib/mrv.ts` (V1 livrée), `src/pages/seances/creer/index.astro`, `src/lib/session-utils.ts` | **V1 = progression linéaire livrée** (voir « ✅ Récemment livré »). Reste : modèle de calcul avancé (progression non-linéaire, néo-RPE / vélocité, fatigue sessionnelle…) pour affiner la charge prescrite.<br><br>**Critères d'acceptation (V2)** : algorithme documenté et testé.<br>**Dépend de** : modèle de calcul v2 à définir. |
 | **Communauté / benchmarks** | L | haute | back-end Astro SSR + base de données (base : `docs/supabase-schema.sql`), `src/lib/auth.ts` | Comparer son volume/1RM à un recueil anonyme. Nécessite SQL + auth + politique de confidentialité — gros morceau, à ne pas lancer avant P1.<br><br>**Critères d'acceptation** : opt-in anonyme (aucune donnée personnelle), comparaison volume/1RM.<br>**Dépend de** : SQL (`docs/supabase-schema.sql`) + auth + politique de confidentialité.<br><br>**Progression — V1 benchmarks locaux livrée** : opt-in `settings.benchmarksOptIn` (intention seulement, aucun envoi réseau), table 1RM (Epley) vs **données de référence étiquetées** (`src/lib/benchmarks-data.ts` — standards d'entraînement, PAS une cohorte réelle, remplaçables dès la sync serveur). **Upload anonyme serveur dépend de** déploiement Supabase + base de données + politique de confidentialité. |
+
+---
+
+## Résiduels — Phase E (quick wins)
+
+| Élément | Effort | Description |
+|---|---|---|
+| `EmptyState` — vraie prop `iconName` | S | La primitif accepte un `icon` textuel ; brancher un vrai catalogue d'icônes SVG nommées (`iconName`). |
+| `Segmented` — centralisation composant | S | Le pattern segmented existe en inline (`ui.astro`, filtres) ; l'extraire en `src/components/ui/Segmented.astro` réutilisable. |
+| Type-check des pages Alpine | S | Gap de couverture `astro check` / `tsc` sur les attributs `x-*` ; documenter l'exception ou la combler. |
+| Rôles ARIA `grid` sur tableaux | S | Golden CSV + rangées de tableaux (exercices, calendrier) sans `role="grid"`/`aria-rowcount` — **won't-fix documenté** (tables denses, impact marginal). |
 
 ---
 
