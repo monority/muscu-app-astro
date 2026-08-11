@@ -399,7 +399,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     PAGE — full-viewport centered stage with subtle glow
+     PAGE — full-viewport centered stage
      ════════════════════════════════════════════════════ */
   .login {
     min-height: 100vh;
@@ -409,17 +409,7 @@ const L = t();
     justify-content: center;
     padding: 2.4rem 1.6rem 3.2rem;
     gap: 2.4rem;
-    background:
-      radial-gradient(
-        circle at 20% 10%,
-        color-mix(in srgb, var(--color-accent) 10%, transparent),
-        transparent 55%
-      ),
-      radial-gradient(
-        circle at 80% 90%,
-        color-mix(in srgb, var(--color-accent) 6%, transparent),
-        transparent 50%
-      );
+    background-color: var(--color-bg);
   }
 
   /* ── Nav: theme · logo · language ───────────────────────
