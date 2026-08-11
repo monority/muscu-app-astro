@@ -383,6 +383,7 @@ const L = t();
 <script>
   import { t, getLocale, localizedPath, trExercise, trMuscle } from "../../i18n";
   import { getExercises, getSessions } from "../../lib/storage";
+  import { normalize } from "../../lib/text";
   import type { Exercise, Session } from "../../lib/storage";
 
   declare global {
@@ -405,10 +406,6 @@ const L = t();
     title: string;
     items: QItem[];
   }
-
-  /** Lowercase + strip diacritics so "echec" matches "échec". */
-  const normalize = (s: string): string =>
-    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   const matches = (label: string, q: string): boolean =>
     normalize(label).includes(q);
