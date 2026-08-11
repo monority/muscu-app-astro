@@ -464,10 +464,15 @@ const setTypes = [
                       :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
                     />
                   </div>
-                  {/* â”€â”€ Per-set RPE / uRPE (added 2026-08-09) â”€â”€
+                  {/* ── Per-set RPE / uRPE (added 2026-08-09) ──
                       Compact segmented RPE/uRPE toggle + 0.5-step select.
                       Shown once the set is marked complete; the value
-                      persists on the set even if the set is later unmarked. */}
+                      persists on the set even if the set is later unmarked.
+                      NOT migrated to ui/Segmented.astro: this is a distinct
+                      compact pill pattern (surface-3, radius-pill, active =
+                      surface fill) and its active state is `set.rpeType
+                      !== 'urpe'` (undefined counts as active) — not a plain
+                      `model === value` match, so it is not a drop-in swap. */}
                   <div
                     class="ses__cell ses__cell--rpe"
                     role="cell"

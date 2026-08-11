@@ -3,6 +3,7 @@ import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Card from '../../components/ui/Card.astro';
+import Segmented from '../../components/ui/Segmented.astro';
 setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
@@ -108,24 +109,14 @@ const L = t();
               <span class="trend__label" id="trend-metric-label">
                 {L.tendance.metric}
               </span>
-              <div class="trend__segmented" role="group" aria-labelledby="trend-metric-label">
-                <button
-                  type="button"
-                  class="trend__seg"
-                  :class="{ 'is-active': metric === 'volume' }"
-                  @click="metric = 'volume'"
-                >
-                  {L.tendance.metricVolume}
-                </button>
-                <button
-                  type="button"
-                  class="trend__seg"
-                  :class="{ 'is-active': metric === 'rm' }"
-                  @click="metric = 'rm'"
-                >
-                  {L.tendance.metric1RM}
-                </button>
-              </div>
+              <Segmented
+                items={[
+                  { value: 'volume', label: L.tendance.metricVolume },
+                  { value: 'rm', label: L.tendance.metric1RM },
+                ]}
+                model="metric"
+                ariaLabel={L.tendance.metric}
+              />
             </div>
 
             {/* Period toggle */}
@@ -133,32 +124,15 @@ const L = t();
               <span class="trend__label" id="trend-period-label">
                 {L.tendance.period}
               </span>
-              <div class="trend__segmented" role="group" aria-labelledby="trend-period-label">
-                <button
-                  type="button"
-                  class="trend__seg"
-                  :class="{ 'is-active': period === 'all' }"
-                  @click="period = 'all'"
-                >
-                  {L.tendance.periodAll}
-                </button>
-                <button
-                  type="button"
-                  class="trend__seg"
-                  :class="{ 'is-active': period === '3m' }"
-                  @click="period = '3m'"
-                >
-                  {L.tendance.period3m}
-                </button>
-                <button
-                  type="button"
-                  class="trend__seg"
-                  :class="{ 'is-active': period === '1y' }"
-                  @click="period = '1y'"
-                >
-                  {L.tendance.period1y}
-                </button>
-              </div>
+              <Segmented
+                items={[
+                  { value: 'all', label: L.tendance.periodAll },
+                  { value: '3m', label: L.tendance.period3m },
+                  { value: '1y', label: L.tendance.period1y },
+                ]}
+                model="period"
+                ariaLabel={L.tendance.period}
+              />
             </div>
           </div>
         </Card>
@@ -624,49 +598,6 @@ const L = t();
     pointer-events: none;
   }
 
-  /* ── Segmented toggle ── */
-  .trend__segmented {
-    display: inline-flex;
-    align-items: center;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: 0.3rem;
-    gap: 0.3rem;
-    min-height: 4.4rem;
-    flex-wrap: wrap;
-  }
-
-  .trend__seg {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 3.6rem;
-    padding: 0 1.5rem;
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
-    color: var(--color-muted);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background-color var(--transition-fast),
-                border-color var(--transition-fast),
-                color var(--transition-fast);
-  }
-
-  .trend__seg:hover {
-    color: var(--color-text);
-  }
-
-  .trend__seg.is-active {
-    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-
   /* ════════════════════════════════════════════════════
      CHART
      ════════════════════════════════════════════════════ */
@@ -819,17 +750,12 @@ const L = t();
     .trend__field {
       min-width: 0;
     }
-
-    .trend__seg {
-      padding: 0 1.2rem;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .trend__back,
     .trend__error-link,
-    .trend__select,
-    .trend__seg {
+    .trend__select {
       transition: none;
     }
   }

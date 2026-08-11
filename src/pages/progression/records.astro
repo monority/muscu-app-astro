@@ -203,6 +203,7 @@ const L = t();
     <template x-if="allRecords.length === 0 && !hasData">
       <div class="rec__empty">
         <EmptyState
+          iconName="chart"
           title={L.records.noRecords}
           description={L.records.noRecordsDesc}
           actionLabel={L.common.startSession}
@@ -215,6 +216,7 @@ const L = t();
     <template x-if="allRecords.length > 0 && filteredRecords.length === 0">
       <div class="rec__empty">
         <EmptyState
+          iconName="chart"
           title={L.records.noResult}
           description={L.records.noResultDesc}
         />

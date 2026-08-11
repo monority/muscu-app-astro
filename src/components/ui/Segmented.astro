@@ -1,0 +1,109 @@
+---
+/**
+ * Segmented — design-system primitive (single-choice active-pill control).
+ *
+ * Centralizes the hand-rolled `.stats__seg` / `.trend__seg` groups. The
+ * binding style replicates those controls exactly so the swap is drop-in:
+ * `model` is an Alpine scope expression (e.g. "period", "metric") evaluated
+ * by the surrounding x-data root, producing the same
+ * `:class="{ 'is-active': … }"` + `@click="model = value"` directives.
+ */
+interface Props {
+  items: { value: string; label: string }[];
+  /** Alpine scope expression to read/write, e.g. "period" or "metric". */
+  model: string;
+  /** Optional `aria-label` for the group. */
+  ariaLabel?: string;
+  class?: string;
+}
+
+const {
+  items,
+  model,
+  ariaLabel,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['seg', className]}
+  role="group"
+  aria-label={ariaLabel}
+>
+  {
+    items.map((item) => (
+      <button
+        type="button"
+        class="seg__btn"
+        :class={`{ 'is-active': ${model} === '${item.value}' }`}
+        @click={`${model} = '${item.value}'`}
+        :aria-pressed={`${model} === '${item.value}'`}
+      >
+        {item.label}
+      </button>
+    ))
+  }
+</div>
+
+<style>
+  /* Same tokens as the retired .stats__segmented / .trend__segmented —
+     surface-2 container, accent wash + border on the active button. */
+  .seg {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem;
+    gap: 0.3rem;
+    min-height: 4.4rem;
+    flex-wrap: wrap;
+  }
+
+  .seg__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.4rem;
+    padding: 0 1.4rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast);
+  }
+
+  .seg__btn:hover {
+    color: var(--color-text);
+  }
+
+  .seg__btn.is-active {
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .seg__btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  @media (max-width: 380px) {
+    .seg__btn {
+      padding: 0 1.2rem;
+    }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .seg__btn {
+      transition: none;
+    }
+  }
+</style>
