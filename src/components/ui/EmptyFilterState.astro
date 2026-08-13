@@ -1,0 +1,57 @@
+---
+import EmptyState from './EmptyState.astro';
+import Button from './Button.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  searchValue?: string;
+  resetLabel?: string;
+  class?: string;
+}
+
+const {
+  title,
+  description,
+  searchValue,
+  resetLabel = 'Réinitialiser',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['empty-filter', className]}>
+  <EmptyState title={title} description={description} />
+  {(searchValue || resetLabel) && (
+    <div class="empty-filter__cta">
+      {searchValue && (
+        <p class="empty-filter__query">
+          Aucun résultat pour « <span x-text={searchValue}></span> ».
+        </p>
+      )}
+      <Button variant="ghost" size="sm" data-dialog-close x-on:click={searchValue ? `${searchValue} = ''` : undefined}>
+        {resetLabel}
+      </Button>
+    </div>
+  )}
+</div>
+
+<style>
+  .empty-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.6rem;
+    padding: 2rem;
+    text-align: center;
+  }
+  .empty-filter__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .empty-filter__query {
+    font-size: 1.3rem;
+    color: var(--color-muted);
+  }
+</style>

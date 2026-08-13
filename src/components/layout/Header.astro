@@ -25,7 +25,7 @@ import { t } from "../../i18n";
 
 const L = t();
 
-const { title, class: className = "" } = Astro.props;
+const { title, class: className = "" } = Astro.props as Props;
 ---
 
 <header class:list={["topbar", className]} data-topbar>
@@ -73,6 +73,11 @@ const { title, class: className = "" } = Astro.props;
       <span class="topbar__search-hint">{L.layout.searchPlaceholder}</span>
       <kbd aria-hidden="true">/</kbd>
     </button>
+
+    <div class="topbar__context" aria-live="polite">
+      <span class="topbar__context-kicker">{L.layout.workspaceKicker}</span>
+      <strong class="topbar__title">{title}</strong>
+    </div>
 
     <div class="topbar__right">
       <slot name="actions" />
@@ -208,8 +213,6 @@ const { title, class: className = "" } = Astro.props;
       locale: getLocale(),
       switchToLight: L.layout.switchToLight,
       switchToDark: L.layout.switchToDark,
-      themeLight: L.layout.themeLight,
-      themeDark: L.layout.themeDark,
       switchLocaleAria: L.layout.switchLocale,
 
       get localeLabel(): string {
@@ -257,18 +260,34 @@ const { title, class: className = "" } = Astro.props;
     display: flex;
     align-items: center;
     gap: 1.2rem;
-    height: 5.6rem;
-    padding: 0 1.6rem;
+    height: var(--topbar-height);
+    padding: 0 var(--page-padding-tablet);
   }
 
   /* ── Page title ────────────────────────────────────────── */
+  .topbar__context {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .topbar__context-kicker {
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
   .topbar__title {
     font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: var(--color-text);
-    letter-spacing: 0.02em;
-    line-height: 1;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -494,22 +513,33 @@ const { title, class: className = "" } = Astro.props;
       display: none;
     }
     .topbar__inner {
-      padding: 0 2.4rem;
+      padding: 0 var(--page-padding-desktop);
     }
   }
 
   @media (max-width: 640px) {
     .topbar__inner {
-      padding: 0 1.2rem;
+      padding: 0 var(--page-padding-mobile);
     }
+    .topbar__context-kicker { display: none; }
     .topbar__title {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
     }
-    /* Save topbar space on small screens — keep the icons, drop
-       the text (user email + locale label). */
+    /* Save topbar space on small screens — keep the controls usable
+       without allowing the search hint to push the right cluster offscreen. */
     .topbar__user-email,
-    .topbar__control-label {
+    .topbar__control-label,
+    .topbar__search-hint,
+    .topbar__search kbd {
       display: none;
+    }
+    .topbar__search {
+      width: 4.4rem;
+      padding: 0;
+      justify-content: center;
+    }
+    .topbar__inner {
+      gap: 0.6rem;
     }
   }
 
@@ -519,4 +549,12 @@ const { title, class: className = "" } = Astro.props;
       transition: none;
     }
   }
+  /* ── Performance command bar overrides ───────────────── */
+  .topbar { background: color-mix(in srgb, var(--color-bg) 94%, transparent); backdrop-filter: blur(12px); }
+  .topbar__inner { gap: 1.6rem; }
+  .topbar__context { border-left: 1px solid var(--color-border); padding-left: 1.6rem; }
+  .topbar__search { background: var(--alpha-bg-subtle); border-color: var(--color-border); }
+  .topbar__search:hover { background: var(--alpha-bg-soft); }
+  .topbar__control, .topbar__logout, .topbar__hamburger { border-radius: var(--radius-sm); }
+
 </style>

@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import type { Session } from '../storage';
-import { undoLastCompletedSet, completedVolume } from '../session-utils';
+import {
+  undoLastCompletedSet,
+  completedVolume,
+  completedVolumeBetween,
+  countCompletedSessionsBetween,
+} from '../session-utils';
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -81,6 +86,33 @@ describe('undoLastCompletedSet', () => {
     const s = makeSession();
     undoLastCompletedSet(s);
     expect(s.exercises[1].sets[0].completed).toBe(true);
+  });
+});
+
+describe('countCompletedSessionsBetween', () => {
+  it('counts completed sessions in a half-open measurement interval', () => {
+    const sessions = [
+      makeSession({ id: 'before', date: '2025-12-31', status: 'completed' }),
+      makeSession({ id: 'inside', date: '2026-01-03', status: 'completed' }),
+      makeSession({ id: 'planned', date: '2026-01-05', status: 'planned' }),
+      makeSession({ id: 'next', date: '2026-01-10', status: 'completed' }),
+    ];
+
+    expect(countCompletedSessionsBetween(sessions, '2026-01-01', '2026-01-10')).toBe(1);
+    expect(countCompletedSessionsBetween(sessions, '2026-01-10')).toBe(1);
+  });
+
+  it('supports ISO timestamps and rejects invalid interval starts', () => {
+    const session = makeSession({ date: '2026-02-04T18:30:00.000Z', status: 'completed' });
+    expect(countCompletedSessionsBetween([session], '2026-02-04', '2026-02-05')).toBe(1);
+    expect(countCompletedSessionsBetween([session], 'not-a-date')).toBe(0);
+  });
+
+  it('sums only completed volume in the interval', () => {
+    const inside = makeSession({ id: 'inside', date: '2026-02-03', status: 'completed' });
+    const outside = makeSession({ id: 'outside', date: '2026-02-10', status: 'completed' });
+    const planned = makeSession({ id: 'planned', date: '2026-02-04', status: 'planned' });
+    expect(completedVolumeBetween([inside, outside, planned], '2026-02-01', '2026-02-05')).toBe(580);
   });
 });
 

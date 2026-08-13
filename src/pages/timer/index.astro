@@ -1,10 +1,8 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import { t, setLocale, defaultLocale } from '../../i18n';
-
-
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { t } from '../../i18n';
+import { icons } from '../../lib/icons';
 const L = t();
 ---
 
@@ -29,21 +27,7 @@ const L = t();
       :aria-label="labels.popoutAria"
       :title="labels.popout"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <polyline points="15 3 21 3 21 9"></polyline>
-        <polyline points="9 21 3 21 3 15"></polyline>
-        <line x1="21" y1="3" x2="14" y2="10"></line>
-        <line x1="3" y1="21" x2="10" y2="14"></line>
-      </svg>
+      <Fragment set:html={icons.popout(18, 18)} />
       <span class="timer__popout-label" x-text="popupOpen ? labels.popoutOpen : labels.popout"></span>
     </button>
 
@@ -57,20 +41,7 @@ const L = t();
         :aria-selected="mode === 'countdown'"
         @click="setMode('countdown')"
       >
-        <svg
-          class="timer__mode-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
+        <span class="timer__mode-icon"><Fragment set:html={icons.countdown(20, 20)} /></span>
         <span>{L.timer.countdown}</span>
       </button>
       <button
@@ -81,21 +52,7 @@ const L = t();
         :aria-selected="mode === 'stopwatch'"
         @click="setMode('stopwatch')"
       >
-        <svg
-          class="timer__mode-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="10" y1="2" x2="14" y2="2"></line>
-          <line x1="12" y1="14" x2="12" y2="10"></line>
-          <circle cx="12" cy="14" r="8"></circle>
-        </svg>
+        <span class="timer__mode-icon"><Fragment set:html={icons.stopwatch(20, 20)} /></span>
         <span>{L.timer.stopwatch}</span>
       </button>
     </div>
@@ -103,7 +60,7 @@ const L = t();
     {/* ── Keyboard shortcut hints ── */}
     <div class="timer__shortcuts" aria-hidden="true">
       <span class="timer__shortcut">
-        <kbd class="timer__kbd">Espace</kbd>
+        <kbd class="timer__kbd" x-text="labels.spaceKey">{L.timer.spaceKey}</kbd>
         <span x-text="labels.shortcutsToggle"></span>
       </span>
       <span class="timer__shortcut">
@@ -226,7 +183,7 @@ const L = t();
           @click="reset()"
           x-text="labels.reset"
         >
-          Reset
+          {L.timer.reset}
         </button>
       </div>
 
@@ -238,22 +195,8 @@ const L = t();
           x-model="soundEnabled"
           class="timer__sound-input"
         />
-        <svg
-          class="timer__sound-icon"
-          :class="{ 'is-on': soundEnabled }"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-        </svg>
-        <span x-text="labels.soundAlert">Alerte sonore</span>
+        <span class="timer__sound-icon" :class="{ 'is-on': soundEnabled }"><Fragment set:html={icons.bell(20, 20)} /></span>
+        <span x-text="labels.soundAlert">{L.timer.soundAlert}</span>
       </label>
     </div>
     </div>
@@ -295,7 +238,7 @@ const L = t();
           :disabled="!sw.running"
           x-text="labels.lap"
         >
-          Tour
+          {L.timer.lap}
         </button>
         <button
           type="button"
@@ -303,7 +246,7 @@ const L = t();
           @click="swReset()"
           x-text="labels.reset"
         >
-          Reset
+          {L.timer.reset}
         </button>
       </div>
 
@@ -329,7 +272,7 @@ const L = t();
 </AppLayout>
 
 <script>
-  import { t, defaultLocale, localizedPath } from '../../i18n';
+  import { t, localizedPath } from '../../i18n';
   import {
     mountTimerWidget,
     widgetLabelsFrom,
@@ -339,6 +282,7 @@ const L = t();
   import { playBeep } from '../../lib/sound';
 
   const LABELS = t();
+  type TimerMode = 'countdown' | 'stopwatch';
 
   // Pop-out bridge kept OUTSIDE the reactive Alpine store: Alpine proxies
   // its state, which breaks exotic objects like BroadcastChannel. Only the
@@ -362,7 +306,7 @@ const L = t();
   document.addEventListener('alpine:init', () => {
     window.Alpine.data('timerApp', () => ({
       // ── Mode ──
-      mode: 'countdown',  // 'countdown' | 'stopwatch'
+      mode: 'countdown' as TimerMode,
 
       // ── Pop-out window ──
       popupOpen: false,
@@ -385,7 +329,7 @@ const L = t();
       customTime: 90,
       soundEnabled: true,
       circumference: 2 * Math.PI * 140,
-      intervalId: null,
+      intervalId: null as number | null,
       endTime: 0,
       lastTick: 0,
 
@@ -413,6 +357,7 @@ const L = t();
         popoutOpen: LABELS.timer.popoutOpen,
         shortcutsToggle: LABELS.timer.shortcutsToggle,
         shortcutsReset: LABELS.timer.shortcutsReset,
+        spaceKey: LABELS.timer.spaceKey,
       },
 
       // ── Keyboard ──
@@ -598,7 +543,7 @@ const L = t();
       // ════════════════════════════════════════════════
       // MODE
       // ════════════════════════════════════════════════
-      setMode(m) {
+      setMode(m: TimerMode) {
         if (m === this.mode) return;
         // Pause whichever is currently running before switching
         this.pause();
@@ -649,7 +594,7 @@ const L = t();
         return this.labels.ready;
       },
 
-      setPreset(seconds) {
+      setPreset(seconds: number) {
         this.pause();
         this.totalTime = seconds;
         this.remaining = seconds;
@@ -669,7 +614,7 @@ const L = t();
         this.broadcast();
       },
 
-      adjustCustom(delta) {
+      adjustCustom(delta: number) {
         this.customTime = Math.max(5, Math.min(600, (this.customTime || 0) + delta));
       },
 
@@ -788,14 +733,14 @@ const L = t();
       // ════════════════════════════════════════════════
       // FORMATTING
       // ════════════════════════════════════════════════
-      formatTime(seconds) {
+      formatTime(seconds: number) {
         const s = Math.max(0, Math.floor(seconds));
         const mm = Math.floor(s / 60).toString().padStart(2, '0');
         const ss = (s % 60).toString().padStart(2, '0');
         return mm + ':' + ss;
       },
 
-      formatShort(seconds) {
+      formatShort(seconds: number) {
         const mm = Math.floor(seconds / 60);
         const ss = seconds % 60;
         if (mm === 0) return ss + 's';
@@ -804,13 +749,13 @@ const L = t();
       },
 
       // Stopwatch formatter: ms → "MM:SS.cc" (< 1h) or "HH:MM:SS" (≥ 1h)
-      formatStopwatch(ms) {
+      formatStopwatch(ms: number) {
         const totalMs = Math.max(0, Math.floor(ms));
         const hours = Math.floor(totalMs / 3600000);
         const minutes = Math.floor((totalMs % 3600000) / 60000);
         const seconds = Math.floor((totalMs % 60000) / 1000);
         const centis = Math.floor((totalMs % 1000) / 10);
-        const pad = (n, w) => n.toString().padStart(w, '0');
+        const pad = (n: number, w: number) => n.toString().padStart(w, '0');
 
         if (hours > 0) {
           return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
@@ -861,9 +806,6 @@ const L = t();
     }));
   });
 </script>
-
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
   /* ════════════════════════════════════════════════════
@@ -1539,6 +1481,37 @@ const L = t();
       width: 4.4rem;
       justify-content: center;
       padding: 0;
+    }
+  }
+  @media (max-width: 360px) {
+    .timer {
+      gap: 2.6rem;
+      padding-inline: 0.4rem;
+    }
+    .timer__mode-btn {
+      min-width: 9.6rem;
+      padding-inline: 1rem;
+      font-size: 1.1rem;
+    }
+    .timer__stage {
+      width: 24rem;
+      height: 24rem;
+    }
+    .timer__presets {
+      gap: 0.4rem;
+    }
+    .timer__preset {
+      font-size: 1.2rem;
+      padding-inline: 0.4rem;
+    }
+    .timer__controls {
+      width: 100%;
+      gap: 0.8rem;
+    }
+    .timer__btn {
+      min-width: 0;
+      flex: 1 1 12rem;
+      padding-inline: 1rem;
     }
   }
 </style>

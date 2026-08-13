@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Card from '../../components/ui/Card.astro';
@@ -8,7 +8,8 @@ import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import Badge from '../../components/ui/Badge.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { icons } from '../../lib/icons';
+import BackLink from '../../components/ui/BackLink.astro';
 const L = t();
 ---
 
@@ -24,25 +25,9 @@ const L = t();
       description={L.comparer.description}
     />
 
-    {/* â”€â”€ Back link â”€â”€ */}
-    <a href={localizedPath("/seances")} class="comp__back">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      <span>{L.comparer.back}</span>
-    </a>
+    <BackLink href={localizedPath("/seances")} label={L.comparer.back} />
 
-    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    {/* ═══════════════════════════════════════════════════
         SESSION PICKERS
         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <Card>
@@ -54,27 +39,8 @@ const L = t();
           <div class="comp__picker">
             <label for="comp-s1" class="comp__picker-label">{L.comparer.session1Ref}</label>
             <div class="comp__picker-field">
-              <svg
-                class="comp__picker-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M6.5 6.5h11v11h-11z"></path>
-                <path d="M2 9v6"></path>
-                <path d="M22 9v6"></path>
-                <path d="M6.5 6.5L2 9"></path>
-                <path d="M17.5 6.5L22 9"></path>
-                <path d="M6.5 17.5L2 15"></path>
-                <path d="M17.5 17.5L22 15"></path>
-              </svg>
+              <Fragment set:html={icons.dumbbellBox(18, 18)} />
               <select
-                id="comp-s1"
                 class="comp__select"
                 x-model="session1Id"
                 @change="onSession1Change($event.target.value)"
@@ -99,25 +65,7 @@ const L = t();
           <div class="comp__picker">
             <label for="comp-s2" class="comp__picker-label">{L.comparer.session2}</label>
             <div class="comp__picker-field">
-              <svg
-                class="comp__picker-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M6.5 6.5h11v11h-11z"></path>
-                <path d="M2 9v6"></path>
-                <path d="M22 9v6"></path>
-                <path d="M6.5 6.5L2 9"></path>
-                <path d="M17.5 6.5L22 9"></path>
-                <path d="M6.5 17.5L2 15"></path>
-                <path d="M17.5 17.5L22 15"></path>
-              </svg>
+              <Fragment set:html={icons.dumbbellBox(18, 18)} />
               <select
                 id="comp-s2"
                 class="comp__select"
@@ -147,19 +95,7 @@ const L = t();
       <Card>
         <div class="comp__hint">
           <div class="comp__hint-icon" aria-hidden="true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
+            <Fragment set:html={icons.infoCircle(18, 18)} />
           </div>
           <p>
             {L.comparer.needTwo}
@@ -173,18 +109,7 @@ const L = t();
       <Card>
         <div class="comp__hint">
           <div class="comp__hint-icon" aria-hidden="true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-              <polyline points="16 7 22 7 22 13"></polyline>
-            </svg>
+            <Fragment set:html={icons.trendingUpLine(18, 18)} />
           </div>
           <p>{L.comparer.selectBoth}</p>
         </div>
@@ -203,23 +128,7 @@ const L = t();
             {/* Volume delta */}
             <article class="comp__summary-card">
               <div class="comp__summary-head">
-                <svg
-                  class="comp__summary-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M6.5 6.5h11"></path>
-                  <path d="M6.5 17.5h11"></path>
-                  <path d="M3 9v6"></path>
-                  <path d="M21 9v6"></path>
-                  <path d="M6.5 6.5 3 9v6l3.5 2.5h11L21 15V9l-3.5-2.5Z"></path>
-                </svg>
+                <Fragment set:html={icons.volumeBox(20, 20)} />
                 <span class="comp__summary-label">{L.comparer.volume}</span>
               </div>
               <div class="comp__summary-body">
@@ -233,21 +142,13 @@ const L = t();
                 >
                   <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="volumeDelta.direction === 'up'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                      </svg>
+                      <span style="transform:rotate(180deg);display:inline-flex"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="volumeDelta.direction === 'down'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                      </svg>
+                      <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="volumeDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </template>
                   </span>
                   <span class="comp__summary-delta-text" x-text="volumeDelta.label"></span>
@@ -262,24 +163,7 @@ const L = t();
             {/* Exercises delta */}
             <article class="comp__summary-card">
               <div class="comp__summary-head">
-                <svg
-                  class="comp__summary-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"></line>
-                  <line x1="8" y1="18" x2="21" y2="18"></line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
+                <Fragment set:html={icons.list(20, 20)} />
                 <span class="comp__summary-label">{L.comparer.exercises}</span>
               </div>
               <div class="comp__summary-body">
@@ -293,21 +177,13 @@ const L = t();
                 >
                   <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="exercisesDelta.direction === 'up'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                      </svg>
+                      <span style="transform:rotate(180deg);display:inline-flex"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="exercisesDelta.direction === 'down'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                      </svg>
+                      <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="exercisesDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </template>
                   </span>
                   <span class="comp__summary-delta-text" x-text="exercisesDelta.label"></span>
@@ -322,24 +198,7 @@ const L = t();
             {/* Sets delta */}
             <article class="comp__summary-card">
               <div class="comp__summary-head">
-                <svg
-                  class="comp__summary-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"></line>
-                  <line x1="8" y1="18" x2="21" y2="18"></line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
+                <Fragment set:html={icons.list(20, 20)} />
                 <span class="comp__summary-label">{L.comparer.sets}</span>
               </div>
               <div class="comp__summary-body">
@@ -353,21 +212,13 @@ const L = t();
                 >
                   <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="setsDelta.direction === 'up'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                      </svg>
+                      <span style="transform:rotate(180deg);display:inline-flex"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="setsDelta.direction === 'down'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                      </svg>
+                      <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="setsDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </template>
                   </span>
                   <span class="comp__summary-delta-text" x-text="setsDelta.label"></span>
@@ -382,23 +233,7 @@ const L = t();
             {/* Best 1RM delta */}
             <article class="comp__summary-card">
               <div class="comp__summary-head">
-                <svg
-                  class="comp__summary-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M14.4 14.4 9.6 9.6"></path>
-                  <path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"></path>
-                  <path d="m21.5 21.5-1.4-1.4"></path>
-                  <path d="M3.9 3.9 2.5 2.5"></path>
-                  <path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"></path>
-                </svg>
+                <Fragment set:html={icons.dumbbell(20, 20)} />
                 <span class="comp__summary-label">{L.comparer.best1RM}</span>
               </div>
               <div class="comp__summary-body">
@@ -412,21 +247,13 @@ const L = t();
                 >
                   <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="bestSetDelta.direction === 'up'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                      </svg>
+                      <span style="transform:rotate(180deg);display:inline-flex"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="bestSetDelta.direction === 'down'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                      </svg>
+                      <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="bestSetDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </template>
                   </span>
                   <span class="comp__summary-delta-text" x-text="bestSetDelta.label"></span>
@@ -516,8 +343,8 @@ const L = t();
                         <div class="comp__exo-cell comp__exo-cell--num" x-text="set.setNumber"></div>
                         <div class="comp__exo-cell comp__exo-cell--type">
                           <span
-                            class="comp__type-pill"
-                            :class="'comp__type-pill--' + set.type"
+                            class="type-pill"
+                            :class="'type-pill--' + set.type"
                             x-text="typeLabel(set.type)"
                           ></span>
                         </div>
@@ -606,8 +433,8 @@ const L = t();
                         <div class="comp__exo-cell comp__exo-cell--num" x-text="set.setNumber"></div>
                         <div class="comp__exo-cell comp__exo-cell--type">
                           <span
-                            class="comp__type-pill"
-                            :class="'comp__type-pill--' + set.type"
+                            class="type-pill"
+                            :class="'type-pill--' + set.type"
                             x-text="typeLabel(set.type)"
                           ></span>
                         </div>
@@ -636,7 +463,7 @@ const L = t();
     type SessionStatus,
     type SetType,
     } from '../../lib/storage';
-  import { t } from '../../i18n';
+  import { t, getLocale } from '../../i18n';
 
   const LABELS = t();
 
@@ -660,12 +487,12 @@ const L = t();
   function formatDateFn(iso: string): string {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    const date = d.toLocaleDateString('fr-FR', {
+    const date = d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     });
-    const time = d.toLocaleTimeString('fr-FR', {
+    const time = d.toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
       hour: '2-digit',
       minute: '2-digit',
     });
@@ -685,12 +512,12 @@ const L = t();
 
   function formatVolumeFn(v: number): string {
     if (!Number.isFinite(v) || v <= 0) return '0 kg';
-    return Math.round(v).toLocaleString('fr-FR') + ' kg';
+    return Math.round(v).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US') + ' kg';
   }
 
   function formatWeightFn(w: number): string {
     if (!Number.isFinite(w) || w <= 0) return '0 kg';
-    return Math.round(w).toLocaleString('fr-FR') + ' kg';
+    return Math.round(w).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US') + ' kg';
   }
 
   function exerciseVolumeFn(ex: SessionExercise | undefined): number {
@@ -964,14 +791,9 @@ const L = t();
   });
 </script>
 
-{/* Alpine.js CDN â€” MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
+
 
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      CONTAINER
@@ -989,40 +811,6 @@ const L = t();
     display: flex;
     flex-direction: column;
     gap: var(--spacing-5);
-  }
-
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     BACK LINK
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-  .comp__back {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    font-weight: 600;
-    text-decoration: none;
-    align-self: flex-start;
-    padding: 0.4rem 0.6rem 0.4rem 0.4rem;
-    margin-left: -0.4rem;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-fast),
-                background-color var(--transition-fast);
-  }
-
-  .comp__back:hover {
-    color: var(--color-accent);
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  .comp__back:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .comp__back svg {
-    width: 1.8rem;
-    height: 1.8rem;
   }
 
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -1656,46 +1444,7 @@ const L = t();
     color: var(--color-text);
   }
 
-  /* â”€â”€ Set type pill â”€â”€ */
-  .comp__type-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 2.2rem;
-    padding: 0 0.8rem;
-    border-radius: var(--radius-pill);
-    font-size: 1.0rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1;
-    white-space: nowrap;
-  }
-
-  .comp__type-pill--warmup {
-    background-color: color-mix(in srgb, var(--color-info) 14%, transparent);
-    color: var(--color-info);
-  }
-
-  .comp__type-pill--work {
-    background-color: var(--alpha-bg-soft);
-    color: var(--color-text);
-  }
-
-  .comp__type-pill--top {
-    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
-    color: var(--color-accent);
-  }
-
-  .comp__type-pill--drop {
-    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
-    color: var(--color-warning);
-  }
-
-  .comp__type-pill--failure {
-    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
-    color: var(--color-destructive);
-  }
+  /* ── Set type pill — now uses the global .type-pill system (globals.css) ── */
 
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      RESPONSIVE â€” small screens
@@ -1739,7 +1488,6 @@ const L = t();
      REDUCED MOTION
      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (prefers-reduced-motion: reduce) {
-    .comp__back,
     .comp__select {
       transition: none;
     }

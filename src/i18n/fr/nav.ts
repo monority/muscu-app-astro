@@ -1,8 +1,8 @@
 export default {
   groups: {
-    workout: 'Entraînement',
-    data: 'Données',
-    tools: 'Outils',
+    primary: 'Principal',
+    secondary: 'Analyse',
+    utility: 'Outils',
   },
   dashboard: 'Dashboard',
   seances: 'Séances',

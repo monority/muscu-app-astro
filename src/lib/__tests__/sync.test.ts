@@ -17,7 +17,6 @@ import {
   syncTest,
   SYNC_FILENAME,
   SyncError,
-  type SyncErrorCode,
 } from '../sync';
 import type { AppDataSnapshot } from '../storage';
 
@@ -39,6 +38,7 @@ function snapshot(): AppDataSnapshot {
       weeklyGoal: 3,
       reminders: { enabled: false, days: [1, 3, 5], time: '18:00' },
       webdav: { url: '', username: '', password: '' },
+      benchmarksOptIn: false,
     },
   };
 }

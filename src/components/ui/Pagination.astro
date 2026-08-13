@@ -117,10 +117,9 @@ const disabledClasses = 'opacity-40 pointer-events-none';
 
       {/* Page numbers + ellipsis */}
       {items.map((item) =>
-        item.kind === 'ellipsis' ? (
-          <span
-            key={item.key}
+        item.kind === 'ellipsis' ? (            <span
             class="inline-flex items-center justify-center min-w-[3.2rem] h-10 text-[1.2rem] text-[var(--color-muted)] select-none"
+
             aria-hidden="true"
           >
             …

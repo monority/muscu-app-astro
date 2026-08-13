@@ -1,8 +1,8 @@
 ---
 
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { icons } from '../../lib/icons';
 const L = t();
 ---
 
@@ -28,14 +28,11 @@ const L = t();
           @click="stopSession()"
           aria-label={L.rapide.quitAria}
         >
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="19" y1="12" x2="5" y2="12"/>
-            <polyline points="12 19 5 12 12 5"/>
-          </svg>
+          <Fragment set:html={icons.arrowLeft(24, 24)} />
         </button>
 
         <div class="qs__progress">
-          <span class="qs__progress-text">
+          <span class="qs__progress-text" aria-live="polite" aria-atomic="true">
             {L.rapide.setProgress} <strong x-text="currentSetIndex + 1"></strong>/<span x-text="currentExercise?.sets?.length || 0"></span>
             <span class="qs__progress-sep">Â·</span>
             {L.rapide.exerciseProgress} <strong x-text="currentExerciseIndex + 1"></strong>/<span x-text="totalExercises"></span>
@@ -55,9 +52,7 @@ const L = t();
           aria-label={L.rapide.finish}
           title={L.rapide.finish}
         >
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+          <Fragment set:html={icons.check(24, 24)} />
         </button>
       </header>
     </template>
@@ -69,9 +64,7 @@ const L = t();
       <section class="qs__selecting">
         <div class="qs__selecting-inner">
           <div class="qs__selecting-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
+            <Fragment set:html={icons.zap(64, 64)} />
           </div>
           <h1 class="qs__selecting-title">{L.rapide.title}</h1>
           <p class="qs__selecting-text">
@@ -127,10 +120,10 @@ const L = t();
         @touchend="onTouchEnd($event)"
       >
         <div class="qs__working-inner">
-          <div class="qs__exercise-name" x-text="trExercise(currentExercise?.name)"></div>
+          <div class="qs__exercise-name" x-text="trExercise(currentExercise?.name)" aria-live="polite" aria-atomic="true"></div>
           <div class="qs__exercise-muscle" x-text="trMuscle(currentExercise?.muscle)"></div>
 
-          <div class="qs__set-number">
+          <div class="qs__set-number" aria-live="polite" aria-atomic="true">
             {L.rapide.setProgress} <span x-text="currentSet.setNumber"></span>
             <span
               class="qs__set-type"
@@ -157,9 +150,7 @@ const L = t();
             @click="completeSet()"
             aria-label={L.rapide.completeSetAria}
           >
-            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+            <Fragment set:html={icons.check(36, 36)} />
             <span>{L.rapide.done}</span>
           </button>
 
@@ -169,10 +160,7 @@ const L = t();
             :disabled="!canUndo"
             @click="undoLastSet()"
           >
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-            </svg>
+            <Fragment set:html={icons.undo(18, 18)} />
             <span>{L.rapide.undoLast}</span>
           </button>
 
@@ -184,9 +172,7 @@ const L = t();
               @click="prevSet()"
               aria-label={L.rapide.prevSetAria}
             >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="15 18 9 12 15 6"/>
-              </svg>
+              <Fragment set:html={icons.chevronLeft(20, 20)} />
               <span>{L.rapide.prev}</span>
             </button>
             <button
@@ -197,9 +183,7 @@ const L = t();
               aria-label={L.rapide.nextSetAria}
             >
               <span>{L.rapide.next}</span>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
+              <Fragment set:html={icons.chevronRight(20, 20)} />
             </button>
           </div>
         </div>
@@ -212,13 +196,18 @@ const L = t();
     <template x-if="state === 'resting'">
       <section class="qs__resting">
         <div class="qs__resting-inner">
+          <div class="qs__resting-confirmation" role="status" aria-live="polite">
+            {L.rapide.setRecorded}
+          </div>
           <div class="qs__resting-label">{L.rapide.resting}</div>
           <div
             class="qs__resting-timer"
+            role="timer"
+            aria-live="polite"
             :class="{ 'qs__resting-timer--low': restRemaining <= 10 && restRemaining > 0 }"
             x-text="formatRestTime()"
           ></div>
-          <div class="qs__resting-next" x-text="restNextLabel()"></div>
+          <div class="qs__resting-next" x-text="restNextLabel()" aria-live="polite" aria-atomic="true"></div>
 
           <div class="qs__resting-actions">
             <button
@@ -264,22 +253,24 @@ const L = t();
     <template x-if="state === 'completed'">
       <section class="qs__done-screen">
         <div class="qs__done-inner">
-          <div class="qs__done-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
+          <div
+            class="qs__done-icon"
+            :class="{ 'qs__done-icon--partial': recordedSets < totalSets }"
+            aria-hidden="true"
+          >
+            <Fragment set:html={icons.checkCircle(80, 80)} />
           </div>
-          <h1 class="qs__done-title">{L.rapide.allDone}</h1>
+          <h1 class="qs__done-title" x-text="completionTitle"></h1>
           <p class="qs__done-name" x-text="session?.name"></p>
+          <p class="qs__done-message" x-text="completionMessage" role="status"></p>
 
           <div class="qs__done-stats">
             <div class="qs__done-stat">
-              <div class="qs__done-stat-value" x-text="completedSets"></div>
+              <div class="qs__done-stat-value" x-text="`${recordedSets} / ${totalSets}`"></div>
               <div class="qs__done-stat-label">{L.rapide.setsDone}</div>
             </div>
             <div class="qs__done-stat">
-              <div class="qs__done-stat-value" x-text="totalExercises"></div>
+              <div class="qs__done-stat-value" x-text="`${completedExercises} / ${totalExercises}`"></div>
               <div class="qs__done-stat-label">{L.rapide.exercises}</div>
             </div>
             <div class="qs__done-stat">
@@ -295,7 +286,7 @@ const L = t();
           <div class="qs__done-actions">
             <a
               class="qs__btn qs__btn--primary"
-              :href="`/seances/detail?id=${session?.id || ''}`"
+              :href="detailHref(session?.id)"
             >
               {L.rapide.viewSession}
             </a>
@@ -355,6 +346,10 @@ const L = t();
       : rounded.toFixed(1).replace(/\.0$/, '');
   }
 
+  function todayISO(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
   function formatDurationFn(seconds?: number): string {
     if (!seconds || seconds <= 0 || !Number.isFinite(seconds)) return '0' + LABELS.rapide.minShort;
     const total = Math.floor(seconds);
@@ -369,9 +364,6 @@ const L = t();
   // Standard rest period between work sets (seconds). Mirrors the
   // default setting of 90s in storage.ts.
   const DEFAULT_REST = 90;
-
-  // Threshold for "low time" pulse on the rest timer.
-  const LOW_REST_THRESHOLD = 10;
 
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -417,6 +409,10 @@ const L = t();
       // â”€â”€ Init â”€â”€
       init() {
         this.loadSessions();
+        const requestedSessionId = new URLSearchParams(window.location.search).get('session');
+        if (requestedSessionId && this.availableSessions.some((s) => s.id === requestedSessionId)) {
+          this.selectedSessionId = requestedSessionId;
+        }
         this._installKeyboard();
         // Try to acquire the screen wake lock so the phone doesn't
         // dim during a set. Best-effort: silently no-op on browsers
@@ -488,10 +484,16 @@ const L = t();
         this.completedSets = 0;
         this.startTime = Date.now();
         this.endTime = 0;
-        // Mark the session as in-progress so the detail page
-        // reflects reality.
+        // A planned date is the scheduling date. Once the workout starts,
+        // persist today's actual training date so progression, Records and
+        // calendar all point to the session that was really performed.
+        const actualDate = todayISO();
+        this.session.date = actualDate;
         this.session.status = 'in-progress';
-        updateSession(this.session.id, { status: 'in-progress' });
+        updateSession(this.session.id, {
+          date: actualDate,
+          status: 'in-progress',
+        });
         this.state = 'working';
       },
 
@@ -514,6 +516,14 @@ const L = t();
         if (!this.session) return 0;
         return this.session.exercises.reduce(
           (sum, ex) => sum + ex.sets.length,
+          0,
+        );
+      },
+
+      get recordedSets(): number {
+        if (!this.session) return 0;
+        return this.session.exercises.reduce(
+          (sum, ex) => sum + ex.sets.filter((set) => set.completed).length,
           0,
         );
       },
@@ -556,6 +566,26 @@ const L = t();
         if (!this.startTime) return 0;
         const end = this.endTime || Date.now();
         return Math.floor((end - this.startTime) / 1000);
+      },
+
+      get completedExercises(): number {
+        if (!this.session) return 0;
+        return this.session.exercises.filter(
+          (ex) => ex.sets.length > 0 && ex.sets.every((set) => set.completed),
+        ).length;
+      },
+
+      get completionTitle(): string {
+        return this.recordedSets >= this.totalSets
+          ? LABELS.rapide.allDone
+          : LABELS.rapide.endedEarly;
+      },
+
+      get completionMessage(): string {
+        if (this.recordedSets >= this.totalSets) {
+          return LABELS.rapide.completionFull;
+        }
+        return `${LABELS.rapide.completionPartial} · ${this.recordedSets}/${this.totalSets} ${LABELS.rapide.setsShort}`;
       },
 
       // â”€â”€ Navigation â”€â”€
@@ -856,6 +886,9 @@ const L = t();
       formatDuration(s?: number): string {
         return formatDurationFn(s);
       },
+      detailHref(id?: string): string {
+        return localizedPath('/seances/detail?id=' + encodeURIComponent(id || ''));
+      },
       weightUnit(): string {
         // Quick mode is short-lived; default to kg. Settings
         // lookup would be overkill for the gym context where
@@ -880,14 +913,9 @@ const L = t();
   });
 </script>
 
-{/* Alpine.js CDN â€” MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
+
 
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      ROOT â€” full-viewport dark overlay
@@ -1438,6 +1466,15 @@ background-color: var(--color-bg);
     text-align: center;
   }
 
+  .qs__resting-confirmation {
+    color: var(--color-success);
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .qs__resting-label {
     font-family: var(--font-display);
     font-size: 2.0rem;
@@ -1553,6 +1590,21 @@ background-color: var(--color-bg);
     margin: 0;
   }
 
+  .qs__done-message {
+    font-size: 1.4rem;
+    color: var(--color-success);
+    margin: -0.4rem 0 0;
+  }
+
+  .qs__done-icon--partial {
+    background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
+    color: var(--color-warning);
+  }
+
+  .qs__done-icon--partial + .qs__done-title + .qs__done-name + .qs__done-message {
+    color: var(--color-warning);
+  }
+
   .qs__done-stats {
     width: 100%;
     display: grid;
@@ -1649,6 +1701,96 @@ background-color: var(--color-bg);
     .qs__btn {
       animation: none;
       transition: none;
+    }
+  }
+  /* On small phones, keep each workout state focused and scrollable.
+     The active workout must never hide its primary control below the fold. */
+  @media (max-width: 480px) {
+    .qs__selecting {
+      align-items: flex-start;
+      padding: 2rem 1rem;
+    }
+    .qs__selecting-inner,
+    .qs__working-inner,
+    .qs__resting-inner,
+    .qs__done-inner {
+      gap: 1.2rem;
+    }
+    .qs__selecting-icon {
+      width: 7.2rem;
+      height: 7.2rem;
+    }
+    .qs__selecting-title {
+      font-size: clamp(2.6rem, 11vw, 3.8rem);
+    }
+    .qs__selecting-actions {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .qs__selecting-actions .qs__btn {
+      width: 100%;
+    }
+    .qs__working {
+      align-items: flex-start;
+      padding: 1.6rem 1rem;
+      overflow-y: auto;
+    }
+    .qs__load {
+      gap: clamp(1.2rem, 8vw, 2.4rem);
+    }
+    .qs__resting {
+      align-items: flex-start;
+      padding: 2rem 1rem;
+      overflow-y: auto;
+    }
+    .qs__resting-timer {
+      font-size: clamp(8rem, 32vw, 12rem);
+    }
+    .qs__resting-actions {
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+    }
+    .qs__resting-actions .qs__undo {
+      grid-column: auto;
+      order: 3;
+    }
+    .qs__done-screen {
+      align-items: flex-start;
+      padding: 2rem 1rem;
+    }
+    .qs__done-icon {
+      width: 8rem;
+      height: 8rem;
+    }
+    .qs__done-stats {
+      gap: 0.8rem;
+    }
+    .qs__done-stat {
+      padding: 1.2rem 0.6rem;
+    }
+    .qs__done-stat-label {
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .qs__topbar {
+      grid-template-columns: 4.8rem minmax(0, 1fr) 4.8rem;
+      gap: 0.6rem;
+    }
+    .qs__icon-btn {
+      width: 4.8rem;
+      height: 4.8rem;
+    }
+    .qs__progress-text {
+      font-size: 1.1rem;
+    }
+    .qs__exercise-name {
+      font-size: 2.2rem;
+    }
+    .qs__num {
+      font-size: clamp(4.6rem, 18vw, 7rem);
     }
   }
 </style>

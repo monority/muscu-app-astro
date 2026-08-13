@@ -5,6 +5,9 @@ export default {
   best1RMGlobal: 'Meilleur 1RM global',
   totalPRs: 'Records',
   recentPRs: 'Nouveaux (30 j)',
+  since30Days: 'depuis 30 jours',
+  sortLabel: 'Trier par',
+  viewHistoryAriaPrefix: 'Voir l’historique de ',
   on: 'sur ',
   exercisesTracked: 'exercices suivis',
   exerciseTracked: 'exercice suivi',
@@ -24,4 +27,6 @@ export default {
   date: 'Date',
   sessions: 'séances',
   sessionSingular: 'séance',
+  lastSession: 'Dernière séance',
+  prDate: 'Record le',
 };

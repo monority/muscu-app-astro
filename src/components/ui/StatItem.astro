@@ -1,0 +1,74 @@
+---
+interface Props {
+  label: string;
+  value: string | number;
+  unit?: string;
+  foot?: string;
+  variant?: 'default' | 'hero';
+  class?: string;
+}
+
+const {
+  label,
+  value,
+  unit,
+  foot,
+  variant = 'default',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['stat-item', variant === 'hero' && 'stat-item--hero', className]}>
+  <span class="stat-item__label">{label}</span>
+  <div class="stat-item__value-row">
+    <span class="stat-item__value">{value}</span>
+    {unit && <span class="stat-item__unit">{unit}</span>}
+  </div>
+  {foot && <span class="stat-item__foot">{foot}</span>}
+</div>
+
+<style>
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1.2rem;
+    border-radius: var(--radius-sm);
+    background: var(--alpha-bg-subtle);
+  }
+  .stat-item--hero {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  }
+  .stat-item__label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .stat-item__value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+  .stat-item__value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+  .stat-item--hero .stat-item__value {
+    color: var(--color-accent);
+  }
+  .stat-item__unit {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+  .stat-item__foot {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+  }
+</style>

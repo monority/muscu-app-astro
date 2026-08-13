@@ -579,8 +579,9 @@ const L = t();
           const n = this.flatItems.length;
           if (!n) return;
           this.highlight = (this.highlight + dir + n) % n;
-          this.$nextTick(() => {
-            const el = this.$el.querySelector(`[data-qsi="${this.highlight}"]`);
+          const alpine = this as unknown as AlpineMagicThis;
+          alpine.$nextTick(() => {
+            const el = alpine.$el.querySelector(`[data-qsi="${this.highlight}"]`);
             if (el) el.scrollIntoView({ block: "nearest" });
           });
         },

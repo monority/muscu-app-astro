@@ -1,10 +1,10 @@
 ---
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Card from '../../components/ui/Card.astro';
 import Segmented from '../../components/ui/Segmented.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { icons } from '../../lib/icons';
 const L = t();
 ---
 
@@ -22,19 +22,7 @@ const L = t();
   >
     {/* ── Back link ── */}
     <a href={localizedPath("/exercices")} class="trend__back">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
+      <Fragment set:html={icons.arrowLeft()} />
       <span>{L.tendance.back}</span>
     </a>
 
@@ -43,19 +31,7 @@ const L = t();
       <Card>
         <div class="trend__error">
           <div class="trend__error-icon" aria-hidden="true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
+            <Fragment set:html={icons.infoCircle(30, 30)} />
           </div>
           <h2 class="trend__error-title">{L.tendance.notFound}</h2>
           <p class="trend__error-text">{L.tendance.notFoundDesc}</p>
@@ -88,19 +64,7 @@ const L = t();
                     <option :value="ex.id" x-text="trExercise(ex.name)"></option>
                   </template>
                 </select>
-                <svg
-                  class="trend__select-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+                <Fragment set:html={icons.chevronDown(16, 16)} />
               </div>
             </div>
 
@@ -147,7 +111,14 @@ const L = t();
 
             {/* Empty state: 0 points, or <2 points (not enough to draw a curve) */}
             <template x-if="points.length < 2">
-              <p class="trend__chart-empty" x-text="emptyMessage"></p>
+              <div class="trend__empty" role="status">
+                <div class="trend__empty-mark" aria-hidden="true">—</div>
+                <h3 class="trend__empty-title">{L.tendance.emptyTitle}</h3>
+                <p class="trend__empty-text" x-text="emptyMessage"></p>
+                <a href={localizedPath("/seances/rapide")} class="trend__empty-link">
+                  {L.common.startSession}
+                </a>
+              </div>
             </template>
 
             <template x-if="points.length >= 2">
@@ -457,15 +428,7 @@ const L = t();
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
-
   /* ════════════════════════════════════════════════════
      CONTAINER
      ════════════════════════════════════════════════════ */
@@ -632,12 +595,69 @@ const L = t();
     font-weight: 500;
   }
 
-  .trend__chart-empty {
+  .trend__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 2.8rem 1.2rem 2.4rem;
+    text-align: center;
+  }
+
+  .trend__empty-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.4rem;
+    height: 4.4rem;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .trend__empty-title {
+    margin: 0.4rem 0 0;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+
+  .trend__empty-text {
+    max-width: 34rem;
+    margin: 0;
     color: var(--color-muted);
     font-size: 1.3rem;
     line-height: 1.5;
-    text-align: center;
-    padding: 2.4rem 1.2rem;
+  }
+
+  .trend__empty-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.2rem;
+    margin-top: 0.6rem;
+    padding: 0 1.6rem;
+    border-radius: var(--radius-md);
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .trend__empty-link:hover {
+    background-color: var(--color-accent-hover);
+    color: var(--color-accent-foreground);
+  }
+
+  .trend__empty-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
   .trend__chart-wrap {
@@ -754,6 +774,7 @@ const L = t();
 
   @media (prefers-reduced-motion: reduce) {
     .trend__back,
+    .trend__empty-link,
     .trend__error-link,
     .trend__select {
       transition: none;

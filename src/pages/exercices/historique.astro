@@ -1,12 +1,13 @@
 ---
 
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Badge from '../../components/ui/Badge.astro';
 import Card from '../../components/ui/Card.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
+import BackLink from '../../components/ui/BackLink.astro';
+import { icons } from '../../lib/icons';
 const L = t();
 ---
 
@@ -23,41 +24,14 @@ const L = t();
     x-cloak
   >
     {/* ── Back link ── */}
-    <a href={localizedPath("/exercices")} class="hist__back">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      <span>{L.historique.back}</span>
-    </a>
+    <BackLink href={localizedPath("/exercices")} label={L.historique.back} />
 
     {/* ── Not found state ── */}
     <template x-if="notFound">
       <Card>
         <div class="hist__error">
           <div class="hist__error-icon" aria-hidden="true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
+            <Fragment set:html={icons.infoCircle(30, 30)} />
           </div>
           <h2 class="hist__error-title">{L.historique.notFound}</h2>
           <p class="hist__error-text">
@@ -78,23 +52,7 @@ const L = t();
           <div class="hist__header-row">
             <div class="hist__title-block">
               <div class="hist__title-icon" aria-hidden="true">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M6.5 6.5h11v11h-11z"></path>
-                  <path d="M2 9v6"></path>
-                  <path d="M22 9v6"></path>
-                  <path d="M6.5 6.5L2 9"></path>
-                  <path d="M17.5 6.5L22 9"></path>
-                  <path d="M6.5 17.5L2 15"></path>
-                  <path d="M17.5 17.5L22 15"></path>
-                </svg>
+                <Fragment set:html={icons.dumbbellBox(24, 24)} />
               </div>
               <h1 class="hist__title" x-text="trExercise(exercise.name)"></h1>
             </div>
@@ -197,20 +155,7 @@ const L = t();
             {/* Best 1RM */}
             <div class="hist__stat hist__stat--hero">
               <div class="hist__stat-head">
-                <svg
-                  class="hist__stat-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                  <polyline points="16 7 22 7 22 13"></polyline>
-                </svg>
+                <span class="hist__stat-icon"><Fragment set:html={icons.trendingUp(16, 16)} /></span>
                 <span class="hist__stat-label">{L.historique.best1RM}</span>
               </div>
               <div class="hist__stat-value-row">
@@ -223,23 +168,7 @@ const L = t();
             {/* Best weight */}
             <div class="hist__stat">
               <div class="hist__stat-head">
-                <svg
-                  class="hist__stat-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M6.5 6.5h11"></path>
-                  <path d="M6.5 17.5h11"></path>
-                  <path d="M3 9v6"></path>
-                  <path d="M21 9v6"></path>
-                  <path d="M6.5 6.5 3 9v6l3.5 2.5h11L21 15V9l-3.5-2.5Z"></path>
-                </svg>
+                <span class="hist__stat-icon"><Fragment set:html={icons.volumeBox(16, 16)} /></span>
                 <span class="hist__stat-label">{L.historique.bestWeight}</span>
               </div>
               <div class="hist__stat-value-row">
@@ -252,22 +181,7 @@ const L = t();
             {/* Max reps */}
             <div class="hist__stat">
               <div class="hist__stat-head">
-                <svg
-                  class="hist__stat-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="17 1 21 5 17 9"></polyline>
-                  <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-                  <polyline points="7 23 3 19 7 15"></polyline>
-                  <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-                </svg>
+                <span class="hist__stat-icon"><Fragment set:html={icons.arrowUpDown(16, 16)} /></span>
                 <span class="hist__stat-label">{L.historique.maxReps}</span>
               </div>
               <div class="hist__stat-value-row">
@@ -280,20 +194,7 @@ const L = t();
             {/* Total volume */}
             <div class="hist__stat">
               <div class="hist__stat-head">
-                <svg
-                  class="hist__stat-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M3 3v18h18"></path>
-                  <path d="M7 14l4-4 4 4 5-5"></path>
-                </svg>
+                <span class="hist__stat-icon"><Fragment set:html={icons.trendingUpLine(16, 16)} /></span>
                 <span class="hist__stat-label">{L.historique.totalVolume}</span>
               </div>
               <div class="hist__stat-value-row">
@@ -352,8 +253,8 @@ const L = t();
                       <td class="hist__num" data-label={L.historique.colRpe} x-text="formatRpe(row)"></td>
                       <td data-label={L.historique.colType}>
                         <span
-                          class="hist__type"
-                          :class="'hist__type--' + row.type"
+                          class="type-pill"
+                          :class="'type-pill--' + row.type"
                           x-text="typeLabel(row.type)"
                         ></span>
                       </td>
@@ -695,14 +596,8 @@ const L = t();
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
+
 
   /* ════════════════════════════════════════════════════
      CONTAINER
@@ -720,40 +615,6 @@ const L = t();
     display: flex;
     flex-direction: column;
     gap: 2rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     BACK LINK
-     ════════════════════════════════════════════════════ */
-  .hist__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    font-weight: 600;
-    text-decoration: none;
-    align-self: flex-start;
-    padding: 0.4rem 0.6rem 0.4rem 0.4rem;
-    margin-left: -0.4rem;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-fast),
-                background-color var(--transition-fast);
-  }
-
-  .hist__back:hover {
-    color: var(--color-accent);
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  .hist__back:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .hist__back svg {
-    width: 1.8rem;
-    height: 1.8rem;
   }
 
   /* ════════════════════════════════════════════════════
@@ -897,17 +758,23 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     STATS GRID — 4 cards (1 hero + 3 standard)
+     STATS BAND — open performance signals
      ════════════════════════════════════════════════════ */
   .hist__stats {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.2rem;
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
 
   @media (min-width: 640px) {
     .hist__stats {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hist__stat:nth-child(even) {
+      border-left: 1px solid var(--color-border);
     }
   }
 
@@ -915,21 +782,30 @@ const L = t();
     .hist__stats {
       grid-template-columns: repeat(4, 1fr);
     }
+
+    .hist__stat {
+      border-bottom: 0;
+    }
+
+    .hist__stat + .hist__stat {
+      border-left: 1px solid var(--color-border);
+    }
   }
 
   .hist__stat {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    min-width: 0;
     padding: 1.8rem 2rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
   }
 
   .hist__stat--hero {
-    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background-color: transparent;
   }
 
   .hist__stat-head {
@@ -1067,44 +943,7 @@ const L = t();
     text-transform: capitalize;
   }
 
-  /* ── Set type pill (shared style language with /seances/detail) ── */
-  .hist__type {
-    display: inline-flex;
-    align-items: center;
-    height: 2.4rem;
-    padding: 0 0.8rem;
-    border-radius: var(--radius-pill);
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1;
-  }
-
-  .hist__type--warmup {
-    background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
-    color: var(--color-info);
-  }
-
-  .hist__type--work {
-    background-color: var(--alpha-bg-soft);
-    color: var(--color-text);
-  }
-
-  .hist__type--top {
-    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
-    color: var(--color-accent);
-  }
-
-  .hist__type--drop {
-    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
-    color: var(--color-warning);
-  }
-
-  .hist__type--failure {
-    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
-    color: var(--color-destructive);
-  }
+  /* ── Set type pill — now uses the global .type-pill system (globals.css) ── */
 
   /* ════════════════════════════════════════════════════
      NOT FOUND STATE
@@ -1205,8 +1044,19 @@ const L = t();
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      min-width: 0;
       padding: 0.4rem 0;
       border-bottom: none;
+    }
+
+    .hist__table td > * {
+      min-width: 0;
+      max-width: calc(100% - 9rem);
+      text-align: right;
+    }
+
+    .hist__table td > .hist__date {
+      overflow-wrap: anywhere;
     }
 
     .hist__table td::before {
@@ -1221,6 +1071,10 @@ const L = t();
 
     .hist__num {
       text-align: right;
+    }
+
+    .hist__date-main {
+      overflow-wrap: anywhere;
     }
   }
 
@@ -1256,7 +1110,6 @@ const L = t();
      REDUCED MOTION
      ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
-    .hist__back,
     .hist__error-link {
       transition: none;
     }

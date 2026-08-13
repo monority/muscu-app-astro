@@ -1,0 +1,56 @@
+---
+interface Props {
+  icon?: string;
+  title: string;
+  description?: string;
+  class?: string;
+}
+
+const { icon, title, description, class: className = '' } = Astro.props;
+---
+
+<div class:list={['section-heading', className]}>
+  {icon && (
+    <span class="section-heading__icon" aria-hidden="true">
+      <Fragment set:html={icon} />
+    </span>
+  )}
+  <h2 class="section-heading__title">{title}</h2>
+</div>
+{description && <p class="section-heading__sub">{description}</p>}
+
+<style>
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-heading__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: var(--radius-sm);
+    background: var(--alpha-bg-soft);
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+  .section-heading__icon :global(svg) {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+  .section-heading__title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  .section-heading__sub {
+    font-size: 1.3rem;
+    color: var(--color-muted);
+    margin-top: 0.4rem;
+    margin-bottom: 1.6rem;
+    line-height: 1.5;
+  }
+</style>

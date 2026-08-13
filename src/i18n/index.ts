@@ -36,6 +36,10 @@ export function localizedPath(path: string): string {
   return `/${locale}${path}`;
 }
 
+/** Locale string for Intl formatting (fr-FR or en-GB). */
+export const DATE_LOCALE = () =>
+  getLocale() === 'en' ? 'en-GB' : 'fr-FR';
+
 export function getStaticPaths() {
   return locales.map((lang) => ({ params: { lang } }));
 }

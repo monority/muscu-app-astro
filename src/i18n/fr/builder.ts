@@ -3,6 +3,7 @@ export default {
   description: "Construisez votre séance, ajoutez vos exercices et enregistrez vos séries.",
   name: 'Nom de la séance',
   namePlaceholder: 'Ex. Push day, Jambes, Full body…',
+  infoTitle: 'Informations',
   date: 'Date',
   addExercise: 'Ajouter un exercice',
   addSet: 'Ajouter une série',

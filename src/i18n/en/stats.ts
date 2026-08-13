@@ -24,6 +24,9 @@ export default {
   noTimed: 'no timed sessions',
   regularity: 'Consistency',
   last12wKg: 'last 12 weeks · kg lifted',
+  volumeTotalMeta: 'by total volume (12 weeks)',
+  activeWeek: 'active week',
+  activeWeeks: 'active weeks',
   last8w: 'last 8 weeks',
   // ── Benchmarks (roadmap P2 « Community / benchmarks », local V1) ──
   benchmarksTitle: 'Benchmarks',

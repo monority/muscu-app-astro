@@ -6,12 +6,11 @@ import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import Badge from '../../components/ui/Badge.astro';
 import Button from '../../components/ui/Button.astro';
-import Input from '../../components/ui/Input.astro';
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import SearchInput from '../../components/ui/SearchInput.astro';
+import IconButton from '../../components/ui/IconButton.astro';
+import { icons } from '../../lib/icons';
+import { t, localizedPath } from '../../i18n';
 
-
-
-setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
 
@@ -31,29 +30,12 @@ const L = t();
   >
     {/* ── Toolbar: search ── */}
     <div class="sess__toolbar">
-      <div class="sess__search">
-        <svg
-          class="sess__search-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <Input
-          type="search"
-          class="sess__search-input"
-          placeholder={L.sessions.search}
-          x-model="search"
-          aria-label={L.sessions.search}
-        />
-      </div>
+      <SearchInput
+        class="sess__search"
+        placeholder={L.sessions.search}
+        x-model="search"
+        label={L.sessions.search}
+      />
     </div>
 
     {/* ── Meta row: count ── */}
@@ -73,28 +55,12 @@ const L = t();
             @keydown.space.prevent="navigateTo(session.id)"
             tabindex="0"
             role="link"
-            :aria-label="labels.seenAriaPrefix + session.name"
+            :aria-label="labels.seenAriaPrefix + session.name + ' · ' + statusLabel(session.status)"
           >
             <header class="sess__card-head">
               <div class="sess__card-title">
                 <span class="sess__card-icon" aria-hidden="true">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M6.5 6.5h11v11h-11z"></path>
-                    <path d="M2 9v6"></path>
-                    <path d="M22 9v6"></path>
-                    <path d="M6.5 6.5L2 9"></path>
-                    <path d="M17.5 6.5L22 9"></path>
-                    <path d="M6.5 17.5L2 15"></path>
-                    <path d="M17.5 17.5L22 15"></path>
-                  </svg>
+                  <Fragment set:html={icons.dumbbellBox()} />
                 </span>
                 <div class="sess__card-name-row">
                   <span class="sess__card-dot" aria-hidden="true"></span>
@@ -129,44 +95,12 @@ const L = t();
 
             <div class="sess__card-meta">
               <div class="sess__meta-item">
-                <svg
-                  class="sess__meta-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M14.4 14.4 9.6 9.6"></path>
-                  <path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"></path>
-                  <path d="m21.5 21.5-1.4-1.4"></path>
-                  <path d="M3.9 3.9 2.5 2.5"></path>
-                  <path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"></path>
-                </svg>
+                <Fragment set:html={icons.dumbbell()} />
                 <span class="sess__meta-value" x-text="session.exercises.length"></span>
                 <span class="sess__meta-label" x-text="session.exercises.length > 1 ? labels.exoPlural : labels.exoSingular"></span>
               </div>
               <div class="sess__volume-badge">
-                <svg
-                  class="sess__volume-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M6.5 6.5h11"></path>
-                  <path d="M6.5 17.5h11"></path>
-                  <path d="M3 9v6"></path>
-                  <path d="M21 9v6"></path>
-                  <path d="M6.5 6.5 3 9v6l3.5 2.5h11L21 15V9l-3.5-2.5Z"></path>
-                </svg>
+                <Fragment set:html={icons.volumeBox()} />
                 <span x-text="formatVolume(totalVolume(session))"></span>
               </div>
               <div class="sess__muscle" x-show="primaryMuscle(session)">
@@ -181,59 +115,25 @@ const L = t();
             </div>
 
             <footer class="sess__card-foot">
-              <button
-                type="button"
-                class="sess__icon-btn"
+              <IconButton
+                variant="ghost"
+                icon={icons.dots()}
+                label={L.sessions.moreActions}
                 @click.stop="menuId = menuId === session.id ? '' : session.id"
                 @keydown.enter.stop
                 @keydown.space.stop
                 :aria-expanded="(menuId === session.id).toString()"
-                :aria-label="labels.moreActions"
-                :title="labels.moreActions"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="sess__icon"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="5" r="1"></circle>
-                  <circle cx="12" cy="12" r="1"></circle>
-                  <circle cx="12" cy="19" r="1"></circle>
-                </svg>
-              </button>
-              <button
-                type="button"
-                class="sess__icon-btn sess__icon-btn--danger"
+                title={L.sessions.moreActions}
+              />
+              <IconButton
+                variant="danger"
+                icon={icons.trash()}
+                label={L.sessions.delete}
+                title={L.sessions.delete}
                 @click.stop="deleteSession(session.id)"
                 @keydown.enter.stop
                 @keydown.space.stop
-                aria-label={L.sessions.delete}
-                title={L.sessions.delete}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="sess__icon"
-                  aria-hidden="true"
-                >
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                  <path d="M10 11v6"></path>
-                  <path d="M14 11v6"></path>
-                  <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
+              />
 
               <template x-if="menuId === session.id">
                 {/* Enter/Space inside the popover must NOT bubble to the
@@ -369,56 +269,17 @@ const L = t();
     type SessionMood,
     type SessionStatus,
   } from '../../lib/storage';
-  import { t, defaultLocale, getLocale, localizedPath } from '../../i18n';
+  import { t, localizedPath } from '../../i18n';
+  import { formatDateTime as formatDate, formatVolume } from '../../lib/format';
+  import { statusLabel as statusLabelFn, type StatusLabels } from '../../lib/session-utils';
+  import { moodSvg } from '../../lib/mood';
 
   const LABELS = t();
-  const DATE_LOCALE = getLocale() === 'en' ? 'en-GB' : 'fr-FR';
-
-  // ── Pure helpers (module scope) ────────────────────────────
-  function statusLabel(status: SessionStatus): string {
-    if (status === 'completed') return LABELS.sessions.completed;
-    if (status === 'in-progress') return LABELS.sessions.inProgress;
-    return LABELS.sessions.planned;
-  }
-
-  function formatDate(iso: string): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    const date = d.toLocaleDateString(DATE_LOCALE, {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-    const time = d.toLocaleTimeString(DATE_LOCALE, {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    return date + ' · ' + time;
-  }
-
-  function formatVolume(volume: number): string {
-    if (!Number.isFinite(volume) || volume <= 0) return '0 kg';
-    return Math.round(volume).toLocaleString(DATE_LOCALE) + ' kg';
-  }
-
-  // Mood helpers return inline Lucide SVG markup so they can be
-  // rendered via x-html. The colour is inherited from
-  // .sess__mood-indicator via currentColor.
-  const MOOD_SVG_ATTRS = 'viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
-  const MOOD_SMILE  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
-  const MOOD_HEART  = `<svg ${MOOD_SVG_ATTRS}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
-  const MOOD_MEH    = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
-  const MOOD_FROWN  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
-  const MOOD_BED    = `<svg ${MOOD_SVG_ATTRS}><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
+  const statusLabels: StatusLabels = { completed: LABELS.sessions.completed, inProgress: LABELS.sessions.inProgress, planned: LABELS.sessions.planned };
+  function statusLabel(status: SessionStatus): string { return statusLabelFn(status, statusLabels); }
 
   function moodEmojiFn(mood: SessionMood | undefined | null): string {
-    if (!mood) return '';
-    if (mood === 'great') return MOOD_SMILE;
-    if (mood === 'good') return MOOD_HEART;
-    if (mood === 'ok') return MOOD_MEH;
-    if (mood === 'tired') return MOOD_FROWN;
-    return MOOD_BED;
+    return moodSvg(mood);
   }
 
   function moodLabelFn(mood: SessionMood | undefined | null): string {
@@ -611,9 +472,6 @@ const L = t();
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <style>
   /* ════════════════════════════════════════════════════
      CONTAINER
@@ -723,7 +581,7 @@ const L = t();
     flex-direction: column;
     gap: 1.2rem;
     padding: 2rem;
-    background-color: var(--color-surface);
+    background-color: var(--surface-panel);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     cursor: pointer;
@@ -749,7 +607,7 @@ const L = t();
   }
 
   .sess__card:hover:not(:has(.sess__menu)) {
-    background-color: var(--color-surface-2);
+    background-color: var(--surface-panel-elevated);
     border-color: var(--alpha-border);
     box-shadow: var(--shadow-2);
     transform: translateY(-2px);
@@ -763,6 +621,11 @@ const L = t();
   .sess__card:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
+  }
+
+  .sess__card:focus-visible::after {
+    opacity: 0.7;
+    transform: translateX(0);
   }
 
   /* Status signal: inline dot next to the name (no border stripe) */
@@ -959,43 +822,7 @@ const L = t();
     padding-top: 0.4rem;
   }
 
-  .sess__icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.4rem;
-    height: 4.4rem;
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
-    color: var(--color-muted);
-    cursor: pointer;
-    transition: background-color var(--transition-fast),
-                border-color var(--transition-fast),
-                color var(--transition-fast),
-                transform var(--transition-fast);
-  }
 
-  .sess__icon-btn:hover {
-    background-color: var(--alpha-bg-soft);
-    border-color: var(--alpha-border-faint);
-    color: var(--color-text);
-  }
-
-  .sess__icon-btn:active {
-    transform: scale(0.94);
-  }
-
-  .sess__icon-btn--danger:hover {
-    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
-    border-color: color-mix(in srgb, var(--color-destructive) 40%, transparent);
-    color: var(--color-destructive);
-  }
-
-  .sess__icon {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
 
   /* ════════════════════════════════════════════════════
      QUICK-ACTIONS MENU
@@ -1161,7 +988,6 @@ const L = t();
   @media (prefers-reduced-motion: reduce) {
     .sess__card,
     .sess__card::after,
-    .sess__icon-btn,
     .sess__reset-btn,
     .sess__menu-item {
       transition: none;
@@ -1169,10 +995,26 @@ const L = t();
     .sess__card:hover {
       transform: none;
     }
-    .sess__icon-btn:active,
     .sess__reset-btn:active,
     .sess__menu-item:active {
       transform: none;
     }
   }
+  /* ── Workout log composition ───────────────────────────── */
+  .sess__grid { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--color-border); }
+  .sess__card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem 2rem; padding: 2.2rem 0; background: transparent; border: 0; border-bottom: 1px solid var(--color-border); border-radius: 0; box-shadow: none; }
+  .sess__card::after { content: '↗'; top: 2.1rem; right: 0; opacity: 0.45; transform: none; color: var(--color-accent); }
+  .sess__card:hover:not(:has(.sess__menu)) { background: var(--alpha-bg-subtle); border-color: var(--color-border); box-shadow: none; transform: none; }
+  .sess__card:hover::after, .sess__card:focus-visible::after { opacity: 1; transform: none; }
+  .sess__card-head { grid-column: 1 / -1; }
+  .sess__card-date { grid-column: 1; grid-row: 2; }
+  .sess__card-meta { grid-column: 1; grid-row: 3; padding-top: 0.4rem; }
+  .sess__card-icon { display: none; }
+  .sess__card-name { font-size: 2.2rem; letter-spacing: -0.04em; }
+  .sess__volume-badge { border-radius: var(--radius-sm); }
+  @media (max-width: 640px) {
+    .sess__card { grid-template-columns: minmax(0, 1fr) auto; padding: 1.8rem 0; }
+    .sess__card-name { font-size: 1.8rem; }
+  }
+
 </style>

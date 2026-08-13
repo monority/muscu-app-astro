@@ -35,4 +35,5 @@ export default {
   disconnected: 'Recherche du timer…',
   shortcutsToggle: 'Pause / reprise',
   shortcutsReset: 'Réinitialiser',
+  spaceKey: 'Espace',
 };

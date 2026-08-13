@@ -3,6 +3,7 @@ export default {
   description: 'Build your session, add exercises and log your sets.',
   name: 'Session name',
   namePlaceholder: 'E.g. Push day, Legs, Full body…',
+  infoTitle: 'Session information',
   date: 'Date',
   addExercise: 'Add exercise',
   addSet: 'Add set',

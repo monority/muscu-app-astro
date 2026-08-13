@@ -1,15 +1,40 @@
 ---
+type InputType =
+  | 'button'
+  | 'checkbox'
+  | 'date'
+  | 'datetime-local'
+  | 'email'
+  | 'file'
+  | 'hidden'
+  | 'image'
+  | 'month'
+  | 'number'
+  | 'password'
+  | 'radio'
+  | 'range'
+  | 'reset'
+  | 'search'
+  | 'submit'
+  | 'tel'
+  | 'text'
+  | 'time'
+  | 'url'
+  | 'week';
+
 interface Props {
   label?: string;
   hint?: string;
   error?: string;
   disabled?: boolean;
   required?: boolean;
-  type?: string;
+  type?: InputType;
   placeholder?: string;
   name?: string;
   id?: string;
   value?: string;
+  autocomplete?: string;
+  maxlength?: number;
   class?: string;
 }
 

@@ -347,17 +347,6 @@ export function setStore<T>(key: string, value: T): void {
   }
 }
 
-function removeStore(key: string): void {
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return;
-  }
-  try {
-    window.localStorage.removeItem(key);
-  } catch {
-    // ignore
-  }
-}
-
 // ============================================================================
 // Utilities
 // ============================================================================
@@ -476,8 +465,35 @@ export function toggleExerciseFavorite(id: string): boolean {
 // Sessions
 // ============================================================================
 
+/**
+ * Normalizes numeric fields at the read boundary. Older local-first
+ * versions and JSON imports may contain input values as strings; keeping
+ * that detail out of the progression screens prevents valid historical
+ * sessions from disappearing when `Number.isFinite` is used in calculations.
+ */
+function normalizeSession(session: Session): Session {
+  return {
+    ...session,
+    exercises: Array.isArray(session.exercises)
+      ? session.exercises.map((exercise) => ({
+          ...exercise,
+          sets: Array.isArray(exercise.sets)
+            ? exercise.sets.map((set) => ({
+                ...set,
+                setNumber: Number(set.setNumber) || 0,
+                weight: Number(set.weight) || 0,
+                reps: Number(set.reps) || 0,
+                rpe: set.rpe == null ? set.rpe : Number(set.rpe),
+              }))
+            : [],
+        }))
+      : [],
+  };
+}
+
 export function getSessions(): Session[] {
-  return getStore<Session[]>(STORAGE_KEYS.sessions, []);
+  const raw = getStore<Session[]>(STORAGE_KEYS.sessions, []);
+  return Array.isArray(raw) ? raw.map(normalizeSession) : [];
 }
 
 export function saveSession(session: Omit<Session, 'id'>): Session {
@@ -585,7 +601,22 @@ export function addProgressRecord(
  */
 export function getBodyRecords(): BodyRecord[] {
   const raw = getStore<BodyRecord[]>(STORAGE_KEYS.body, []);
-  return [...raw].sort((a, b) => {
+  const normalized = Array.isArray(raw)
+    ? raw.map((record) => ({
+        ...record,
+        weight: Number(record.weight) || 0,
+        ...(record.arm == null ? {} : { arm: Number(record.arm) || 0 }),
+        ...(record.chest == null ? {} : { chest: Number(record.chest) || 0 }),
+        ...(record.waist == null ? {} : { waist: Number(record.waist) || 0 }),
+        ...(record.hips == null ? {} : { hips: Number(record.hips) || 0 }),
+      }))
+    : [];
+  // Imports from older versions may contain duplicate daily snapshots.
+  // Keep the last value for a date, matching addBodyRecord's upsert rule.
+  const byDate = new Map<string, BodyRecord>();
+  for (const record of normalized) byDate.set(record.date, record);
+
+  return [...byDate.values()].sort((a, b) => {
     const ta = new Date(a.date).getTime();
     const tb = new Date(b.date).getTime();
     if (isNaN(ta) && isNaN(tb)) return 0;
@@ -601,7 +632,14 @@ export function getBodyRecords(): BodyRecord[] {
  */
 export function addBodyRecord(record: BodyRecord): void {
   const all = getStore<BodyRecord[]>(STORAGE_KEYS.body, []);
-  all.push(record);
+  const existingIndex = all.findIndex((entry) => entry.date === record.date);
+  if (existingIndex >= 0) {
+    // A body snapshot is daily: editing today's entry replaces it instead
+    // of creating duplicate chart points and ambiguous interval boundaries.
+    all[existingIndex] = record;
+  } else {
+    all.push(record);
+  }
   setStore(STORAGE_KEYS.body, all);
   // Mirror the latest weight into settings for quick display.
   if (Number.isFinite(record.weight) && record.weight > 0) {
@@ -614,6 +652,14 @@ export function deleteBodyRecord(date: string): void {
     (r) => r.date !== date,
   );
   setStore(STORAGE_KEYS.body, filtered);
+
+  // Keep the settings mirror aligned when the latest measurement is removed.
+  const bodyRecords = getBodyRecords();
+  const latest = bodyRecords[bodyRecords.length - 1];
+  const settings = getSettings();
+  if (latest) settings.bodyWeight = latest.weight;
+  else delete settings.bodyWeight;
+  saveSettings(settings);
 }
 
 // ============================================================================

@@ -15,42 +15,36 @@ const {
   class: className = '',
 } = Astro.props;
 
-const paddingMap: Record<NonNullable<Props['padding']>, string> = {
-  none: 'p-0',
-  sm: 'p-3',
-  md: 'p-4',
-  lg: 'p-6',
-};
-
-const variantClasses: Record<NonNullable<Props['variant']>, string> = {
-  default:
-    'bg-[var(--color-surface)] border border-[var(--color-border)]',
-  elevated:
-    'bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-[var(--shadow-1)]',
-  interactive:
-    'bg-[var(--color-surface)] border border-[var(--color-border)] hover:shadow-[var(--shadow-2)] hover:border-[var(--color-accent)]/20 cursor-pointer',
-};
-
-const baseClasses = 'rounded-[var(--radius-lg)] transition-all duration-200';
-
-const hoverClasses = hover
-  ? 'hover:shadow-[var(--shadow-2)] hover:border-[var(--color-accent)]/20'
-  : '';
-
-const clickableClasses = clickable ? 'cursor-pointer' : '';
-
 const classes = [
-  baseClasses,
-  variantClasses[variant],
-  paddingMap[padding],
-  hoverClasses,
-  clickableClasses,
+  'surface',
+  `surface--${variant}`,
+  `surface--pad-${padding}`,
+  (hover || clickable || variant === 'interactive') && 'surface--interactive',
   className,
-]
-  .filter(Boolean)
-  .join(' ');
+].filter(Boolean).join(' ');
 ---
 
 <div class={classes}>
   <slot />
 </div>
+
+<style>
+  .surface {
+    min-width: 0;
+    background: var(--surface-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .surface--elevated { background: var(--surface-panel-elevated); border-color: var(--color-border-strong); }
+  .surface--interactive { transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast); }
+  .surface--interactive:hover { background: var(--surface-panel-elevated); border-color: var(--alpha-border); }
+  .surface--interactive:active { transform: translateY(1px); }
+
+  .surface--pad-none { padding: 0; }
+  .surface--pad-sm { padding: 1.2rem; }
+  .surface--pad-md { padding: 1.6rem; }
+  .surface--pad-lg { padding: 2.4rem; }
+
+  @media (prefers-reduced-motion: reduce) { .surface--interactive { transition: none; } }
+</style>

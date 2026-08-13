@@ -1,0 +1,51 @@
+---
+interface Props {
+  label: string;
+  for?: string;
+  required?: boolean;
+  hint?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  label,
+  for: forId,
+  required = false,
+  hint,
+  class: className = '',
+  ...rest
+} = Astro.props;
+---
+
+<div class:list={['form-field', className]}>
+  <label for={forId} class="form-field__label">
+    {label}
+    {required && <span class="form-field__req" aria-hidden="true">*</span>}
+  </label>
+  <slot />
+  {hint && <p class="form-field__hint">{hint}</p>}
+</div>
+
+<style>
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .form-field__label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    line-height: 1.3;
+  }
+  .form-field__req {
+    color: var(--color-destructive);
+    margin-left: 0.2rem;
+  }
+  .form-field__hint {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+  }
+</style>

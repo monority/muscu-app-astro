@@ -1,12 +1,12 @@
 ---
 
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import Card from '../../components/ui/Card.astro';
 import Badge from '../../components/ui/Badge.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { icons } from '../../lib/icons';
 const L = t();
 ---
 
@@ -26,65 +26,17 @@ const L = t();
     <div class="prog__toolbar" x-show="exerciseStats.length > 0">
       <div class="prog__summary">
         <div class="prog__summary-item">
-          <svg
-            class="prog__summary-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M6.5 6.5h11v11h-11z"></path>
-            <path d="M2 9v6"></path>
-            <path d="M22 9v6"></path>
-            <path d="M6.5 6.5L2 9"></path>
-            <path d="M17.5 6.5L22 9"></path>
-            <path d="M6.5 17.5L2 15"></path>
-            <path d="M17.5 17.5L22 15"></path>
-          </svg>
+          <Fragment set:html={icons.dumbbellBox()} />
           <span class="prog__summary-value" x-text="exerciseStats.length"></span>
           <span class="prog__summary-label">{L.progression.exerciseSingular}<span x-show="exerciseStats.length > 1">s</span></span>
         </div>
         <div class="prog__summary-item">
-          <svg
-            class="prog__summary-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-            <polyline points="16 7 22 7 22 13"></polyline>
-          </svg>
+          <Fragment set:html={icons.trendingUp()} />
           <span class="prog__summary-value" x-text="formatNumber(max1RM)"></span>
           <span class="prog__summary-label">{L.progression.kg} {L.progression.max1RM}</span>
         </div>
         <div class="prog__summary-item">
-          <svg
-            class="prog__summary-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
+          <Fragment set:html={icons.list()} />
           <span class="prog__summary-value" x-text="totalSessions"></span>
           <span class="prog__summary-label">{L.records.sessionSingular}<span x-show="totalSessions > 1">s</span></span>
         </div>
@@ -95,29 +47,10 @@ const L = t();
     <template x-if="exerciseStats.length > 0">
       <div class="prog__grid">
         <template x-for="stat in exerciseStats" :key="stat.exerciseId">
-          <Card hover={true}>
-            <article class="prog__item">
+          <article class="prog__item">
               <header class="prog__item-head">
                 <div class="prog__item-title">
-                  <svg
-                    class="prog__item-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M6.5 6.5h11v11h-11z"></path>
-                    <path d="M2 9v6"></path>
-                    <path d="M22 9v6"></path>
-                    <path d="M6.5 6.5L2 9"></path>
-                    <path d="M17.5 6.5L22 9"></path>
-                    <path d="M6.5 17.5L2 15"></path>
-                    <path d="M17.5 17.5L22 15"></path>
-                  </svg>
+                  <Fragment set:html={icons.dumbbellBox()} />
                   <h3 class="prog__item-name" x-text="trExercise(stat.name)"></h3>
                 </div>
                 <Badge
@@ -159,25 +92,13 @@ const L = t();
               </div>
 
               <footer class="prog__item-foot">
-                <div class="prog__meta">
-                  <svg
-                    class="prog__meta-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                  </svg>
+              <div class="prog__meta">
+                <Fragment set:html={icons.calendar()} />
                   <span x-text="stat.sessionCount"></span>
                   <span class="prog__meta-label">{L.records.sessionSingular}<span x-show="stat.sessionCount > 1">s</span></span>
+                  <span class="prog__meta-separator" aria-hidden="true">·</span>
+                  <span class="prog__meta-date-label">{L.records.lastSession}</span>
+                  <span class="prog__meta-date" x-text="formatDate(stat.lastSessionDate)"></span>
                 </div>
                 <div class="prog__history" x-show="stat.history.length > 1">
                   <span class="prog__history-label">{L.historique.titleShort}</span>
@@ -192,8 +113,7 @@ const L = t();
                   </div>
                 </div>
               </footer>
-            </article>
-          </Card>
+          </article>
         </template>
       </div>
     </template>
@@ -220,6 +140,7 @@ const L = t();
     type SessionExercise,
     type ProgressRecord,
   } from '../../lib/storage';
+  import { formatNumPositive, formatDateShort } from '../../lib/format';
 
   /**
    * Per-exercise progression row.
@@ -235,24 +156,9 @@ const L = t();
     bestWeight: number;
     bestReps: number;
     date: string;
+    lastSessionDate: string;
     sessionCount: number;
     history: ProgressRecord[];
-  }
-
-  function fmtNum(n: number): string {
-    if (!Number.isFinite(n) || n <= 0) return '0';
-    return Math.round(n).toLocaleString('fr-FR');
-  }
-
-  function fmtDate(iso: string): string {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
   }
 
   document.addEventListener('alpine:init', () => {
@@ -292,9 +198,9 @@ const L = t();
           }
         }
 
-        this.exerciseStats = Array.from(map.values()).sort(
-          (a, b) => b.estimated1RM - a.estimated1RM,
-        );
+        this.exerciseStats = Array.from(map.values())
+          .filter((stat) => stat.history.length > 0)
+          .sort((a, b) => b.estimated1RM - a.estimated1RM);
       },
 
       accumulateExercise(
@@ -312,15 +218,16 @@ const L = t();
             bestWeight: 0,
             bestReps: 0,
             date: '',
+            lastSessionDate: '',
             sessionCount: 0,
             history: [],
           };
           map.set(ex.exerciseId, stat);
         }
-        stat.sessionCount += 1;
-
+        let trackedInSession = false;
         for (const set of ex.sets) {
           if (!set.completed) continue;
+          trackedInSession = true;
           const record: ProgressRecord = {
             exerciseId: ex.exerciseId,
             date: sessionDate,
@@ -336,15 +243,22 @@ const L = t();
             stat.date = record.date;
           }
         }
+        if (trackedInSession) {
+          stat.sessionCount += 1;
+          if (!stat.lastSessionDate || sessionDate > stat.lastSessionDate) {
+            stat.lastSessionDate = sessionDate;
+          }
+        }
       },
 
       // ── Display helpers ──
       formatNumber(n: number): string {
-        return fmtNum(n);
+        return formatNumPositive(n);
       },
 
       formatDate(iso: string): string {
-        return fmtDate(iso);
+        if (!iso) return '—';
+        return formatDateShort(iso);
       },
 
       /**
@@ -362,22 +276,14 @@ const L = t();
 
       historyTooltip(history: ProgressRecord[]): string {
         return history
-          .map((r) => `${fmtNum(r.estimated1RM)} kg · ${fmtDate(r.date)}`)
+          .map((r) => `${formatNumPositive(r.estimated1RM)} kg · ${formatDateShort(r.date)}`)
           .join('\n');
       },
     }));
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
-
   /* ════════════════════════════════════════════════════
      CONTAINER
      ════════════════════════════════════════════════════ */
@@ -401,10 +307,10 @@ const L = t();
     display: flex;
     flex-wrap: wrap;
     gap: 1.2rem 2.4rem;
-    padding: 1.6rem 2rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    padding: 1.6rem 0;
+    background-color: transparent;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
 
   .prog__summary-item {
@@ -444,34 +350,36 @@ const L = t();
   .prog__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.6rem;
+    column-gap: 3.2rem;
   }
 
   @media (min-width: 640px) {
     .prog__grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr;
     }
-  }
 
-  @media (min-width: 1024px) {
-    .prog__grid {
-      grid-template-columns: repeat(2, 1fr);
+    .prog__stat:nth-child(4) {
+      border-left: 1px solid var(--color-border);
+      padding-left: 1.6rem;
     }
   }
 
   /* ════════════════════════════════════════════════════
-     ITEM — one exercise card
+     ITEM — open exercise record
      ════════════════════════════════════════════════════ */
   .prog__item {
-    display: flex;
-    flex-direction: column;
-    gap: 1.4rem;
-    border-radius: var(--radius-md);
+    display: grid;
+    grid-template-columns: minmax(20rem, 0.8fr) minmax(0, 1.45fr) minmax(14rem, 0.55fr);
+    align-items: center;
+    gap: 2.4rem;
+    min-width: 0;
+    padding: 2.4rem 0;
+    border-bottom: 1px solid var(--color-border);
     transition: background-color var(--transition-normal);
   }
 
   .prog__item:hover {
-    background-color: var(--color-surface-2);
+    background-color: var(--alpha-bg-subtle);
   }
 
   .prog__item-head {
@@ -517,16 +425,17 @@ const L = t();
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    padding: 1.2rem 1.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    padding: 1.1rem 0;
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .prog__stat--hero {
     grid-column: 1 / -1;
-    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    padding-top: 0;
+    padding-bottom: 1.4rem;
+    border-bottom-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
   }
 
   .prog__stat-label {
@@ -573,12 +482,14 @@ const L = t();
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    min-width: 0;
     padding-top: 0.4rem;
   }
 
   .prog__meta {
     display: inline-flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.6rem;
     color: var(--color-muted);
     font-size: 1.2rem;
@@ -590,11 +501,25 @@ const L = t();
     flex-shrink: 0;
   }
 
-  .prog__meta-label {
+  .prog__meta-label,
+  .prog__meta-date-label {
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-size: 1.1rem;
     font-weight: 600;
+  }
+
+  .prog__meta-separator {
+    color: var(--color-border-strong);
+  }
+
+  .prog__meta-date-label {
+    color: var(--color-muted);
+  }
+
+  .prog__meta-date {
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
   }
 
   .prog__history {
@@ -645,9 +570,15 @@ const L = t();
   /* ════════════════════════════════════════════════════
      RESPONSIVE — small screens
      ════════════════════════════════════════════════════ */
+  @media (max-width: 900px) {
+    .prog__item { grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr); }
+    .prog__item-foot { grid-column: 1 / -1; }
+  }
+
   @media (max-width: 480px) {
+    .prog__item { display: flex; flex-direction: column; align-items: stretch; gap: 1.4rem; }
     .prog__summary {
-      padding: 1.2rem 1.4rem;
+      padding: 1.2rem 0;
       gap: 1rem 1.6rem;
     }
     .prog__summary-value {
@@ -656,6 +587,12 @@ const L = t();
     .prog__item-stats {
       grid-template-columns: 1fr;
     }
+
+    .prog__stat:nth-child(4) {
+      border-left: 0;
+      padding-left: 0;
+    }
+
     .prog__stat-value {
       font-size: 1.8rem;
     }

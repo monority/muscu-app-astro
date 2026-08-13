@@ -81,6 +81,12 @@ const navId = (href: string): string =>
     </div>
   </div>
 
+  <div class="sidebar__status" aria-label="Training workspace status">
+    <span class="sidebar__status-line"></span>
+    <span class="sidebar__status-label">{L.layout.railLabel}</span>
+    <span class="sidebar__status-value">{L.layout.railStatus}</span>
+  </div>
+
   {/* Nav */}
   <nav class="sidebar__nav">
     {
@@ -169,7 +175,7 @@ const navId = (href: string): string =>
      exercises + notes). Hidden on mobile via the responsive block
      at the bottom, where `position` is irrelevant. */
   .sidebar {
-    width: 26rem;
+    width: var(--sidebar-width);
     /* Translucent so the decorative background shows through the
        rail; blur keeps text crisp (solid fallback below). */
     background-color: color-mix(in srgb, var(--color-surface) 64%, transparent);
@@ -660,4 +666,33 @@ const navId = (href: string): string =>
       transform: none;
     }
   }
+  /* ── Performance rail overrides ────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+    border-right: 1px solid var(--color-border);
+    backdrop-filter: none;
+  }
+  .sidebar__logo { padding: 2.4rem 1.8rem 1.6rem; }
+  .sidebar__logo-icon { width: 3.6rem; height: 3.6rem; border-radius: var(--radius-sm); background: var(--color-accent); color: var(--color-accent-foreground); border: 0; }
+  .sidebar__logo-name { letter-spacing: -0.04em; font-size: 1.8rem; }
+  .sidebar__logo-subtitle { color: var(--color-accent); font-size: 0.8rem; }
+  .sidebar__status { display: grid; grid-template-columns: auto 1fr; gap: 0 0.8rem; align-items: center; margin: 0 1.8rem 2.2rem; padding: 1rem 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+  .sidebar__status-line { grid-row: span 2; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 12%, transparent); }
+  .sidebar__status-label { color: var(--color-muted); font-size: 0.85rem; font-weight: 800; letter-spacing: 0.14em; }
+  .sidebar__status-value { color: var(--color-text); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em; }
+  .sidebar__nav { padding: 0 1rem; }
+  .nav-group { margin-bottom: 2.4rem; }
+  .nav-group__label { padding: 0.8rem 1rem; color: var(--color-muted); font-size: 0.85rem; letter-spacing: 0.18em; }
+  .nav-item { min-height: 4.2rem; border-radius: var(--radius-sm); font-size: 1.3rem; }
+  .nav-item.is-active, .nav-child.is-active { position: relative; background: var(--alpha-bg-soft); color: var(--color-text); box-shadow: none; }
+  .nav-item.is-active::before, .nav-child.is-active::before { content: ""; position: absolute; left: 0; top: 0.8rem; bottom: 0.8rem; width: 0.3rem; background: var(--color-accent); border-radius: 0 2px 2px 0; }
+  .nav-item--parent-active { color: var(--color-accent); }
+  .nav-child { min-height: 3.8rem; font-size: 1.2rem; border-radius: var(--radius-sm); }
+  .sidebar__footer { margin: 1rem; padding: 1.2rem 0; border-top: 1px solid var(--color-border); }
+
+  @media (max-width: 640px) {
+    .sidebar__status { margin-left: 1.6rem; margin-right: 1.6rem; }
+  }
+
 </style>

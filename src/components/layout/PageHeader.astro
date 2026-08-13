@@ -1,13 +1,9 @@
 ---
-/**
- * PageHeader — design-system primitive.
- *
- * Standard page title block. Renders a left-aligned title (and optional
- * description) with an optional right-aligned primary action link.
- *
- * Layout: row with `justify-between` on desktop, stacks vertically on
- * mobile (<640px) so the action button falls below the title block.
- */
+import Button from '../ui/Button.astro';
+import { t } from '../../i18n';
+
+const L = t();
+
 interface Props {
   title: string;
   description?: string;
@@ -16,46 +12,42 @@ interface Props {
   class?: string;
 }
 
-const {
-  title,
-  description,
-  actionLabel,
-  actionHref,
-  class: className = '',
-} = Astro.props;
-
+const { title, description, actionLabel, actionHref, class: className = '' } = Astro.props as Props;
 const hasAction = Boolean(actionLabel && actionHref);
-
-const wrapperClasses = [
-  'flex flex-col gap-3 items-start',
-  'sm:flex-row sm:items-center sm:justify-between sm:gap-4',
-  'mb-6',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<header class={wrapperClasses}>
-  <div class="min-w-0">
-    <h1
-      class="font-[var(--font-display)] font-bold leading-tight text-[clamp(1.6rem,3vw,2rem)] text-[var(--color-text)]"
-    >
-      {title}
-    </h1>
-    {description && (
-      <p class="text-[1.2rem] text-[var(--color-muted)] mt-1">
-        {description}
-      </p>
-    )}
+<header class:list={['page-header', className]}>
+  <div class="page-header__copy">
+    <span class="page-header__eyebrow">GYM EMPIRE / {L.layout.workspaceKicker}</span>
+    <h1 class="page-header__title">{title}</h1>
+    {description && <p class="page-header__description">{description}</p>}
   </div>
-
   {hasAction && (
-    <a
-      href={actionHref}
-      class="inline-flex items-center justify-center bg-[var(--color-accent)] text-white rounded-[var(--radius-md)] px-4 py-2 text-[1.3rem] font-semibold transition-all duration-[160ms] hover:brightness-110 active:scale-[0.97] shrink-0"
-    >
+    <Button href={actionHref} variant="primary" size="md" class="page-header__action">
       {actionLabel}
-    </a>
+    </Button>
   )}
 </header>
+
+<style>
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2.4rem;
+    max-width: 112rem;
+    margin: 0 auto 4rem;
+    padding-bottom: 2.4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .page-header__copy { min-width: 0; }
+  .page-header__eyebrow { display: block; margin-bottom: 1rem; color: var(--color-accent); font-size: 1rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+  .page-header__title { margin: 0; color: var(--color-text); font-family: var(--font-display); font-size: clamp(3rem, 5vw, 5.6rem); font-weight: 700; letter-spacing: -0.055em; line-height: 0.98; text-wrap: balance; }
+  .page-header__description { max-width: 58rem; margin: 1.2rem 0 0; color: var(--color-muted); font-size: 1.4rem; line-height: 1.5; }
+  .page-header__action { flex: 0 0 auto; }
+
+  @media (max-width: 640px) {
+    .page-header { align-items: stretch; flex-direction: column; gap: 2rem; margin-bottom: 2.8rem; padding-bottom: 1.8rem; }
+    .page-header__action { width: 100%; }
+  }
+</style>

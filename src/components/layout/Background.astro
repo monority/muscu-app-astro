@@ -6,10 +6,9 @@
  * none) so every surface — sidebar, topbar, drawer, page background —
  * can let it show through via translucency + backdrop blur.
  *
- * “Ambient” aesthetic (2026 soft-design direction): three large,
- * heavily-blurred aurora fields in the accent family with a slow
- * drift, a fine film-grain layer for premium texture, and a soft
- * vignette that gives the canvas depth. Everything is low-contrast
+ * Atmospheric signal layer: three large, slowly drifting aurora fields,
+ * a few thin trajectories and orbital arcs, three restrained data nodes,
+ * a fine film-grain layer, and a soft vignette. Everything is low-contrast
  * on purpose — the content stays the hero.
  *
  * All colors come from the --bg-* tokens (tokens.css), which flip
@@ -19,11 +18,38 @@
 ---
 
 <div class="bg" aria-hidden="true">
+  <div class="bg__grid"></div>
+  <div class="bg__scanline"></div>
   <div class="bg__aurora">
     <div class="bg__aurora-field bg__aurora-field--1"></div>
     <div class="bg__aurora-field bg__aurora-field--2"></div>
     <div class="bg__aurora-field bg__aurora-field--3"></div>
   </div>
+
+  {/*
+    Training as data in motion: a few large trajectories and nodes create
+    direction without becoming a particle field. SVG keeps the layer cheap,
+    scalable, and independent from the workout data model.
+  */}
+  <svg
+    class="bg__signal"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <g class="bg__signal-flow">
+      <path class="bg__signal-path bg__signal-path--warm" d="M-120 720C220 500 470 760 760 480S1170 170 1560 330" />
+      <path class="bg__signal-path bg__signal-path--cool" d="M-100 210C220 70 450 350 730 260S1150 40 1540 170" />
+      <path class="bg__signal-arc bg__signal-arc--warm" d="M-160 430A760 520 0 0 1 1510 180" />
+      <path class="bg__signal-arc bg__signal-arc--cool" d="M180 1000A720 520 0 0 1 1580 560" />
+    </g>
+    <g class="bg__signal-nodes">
+      <circle cx="454" cy="612" r="2.5" />
+      <circle cx="932" cy="382" r="2" />
+      <circle cx="1190" cy="574" r="3" />
+    </g>
+  </svg>
 
   <svg
     class="bg__grain"
@@ -115,6 +141,64 @@
     to   { transform: translate3d(-3vw, -4vh, 0) scale(1.1); }
   }
 
+  /* ── Signal layer ─────────────────────────────────────── */
+  .bg__signal {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    opacity: 0.7;
+  }
+
+  .bg__signal-flow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bg-signal-drift 52s ease-in-out infinite alternate;
+  }
+
+  .bg__signal-path,
+  .bg__signal-arc {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+  }
+
+  .bg__signal-path {
+    stroke-width: 1;
+    opacity: 0.46;
+  }
+
+  .bg__signal-path--warm,
+  .bg__signal-arc--warm {
+    stroke: var(--bg-signal-1);
+  }
+
+  .bg__signal-path--cool,
+  .bg__signal-arc--cool {
+    stroke: var(--bg-signal-2);
+  }
+
+  .bg__signal-arc {
+    stroke-width: 0.8;
+    opacity: 0.55;
+  }
+
+  .bg__signal-nodes {
+    fill: var(--bg-node);
+    animation: bg-node-breathe 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes bg-signal-drift {
+    from { transform: translate3d(-0.5%, 0, 0) scale(1); }
+    to { transform: translate3d(0.5%, -0.8%, 0) scale(1.015); }
+  }
+
+  @keyframes bg-node-breathe {
+    from { opacity: 0.35; transform: scale(0.9); }
+    to { opacity: 0.85; transform: scale(1.08); }
+  }
+
   /* ── Film grain ────────────────────────────────────────── */
   /* Monochrome fractal noise at a few percent opacity — the
      premium “paper” texture. Static (not animated) so it is
@@ -140,9 +224,28 @@
   }
 
   /* ── Reduced motion ────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .bg__signal {
+      opacity: 0.35;
+    }
+
+    .bg__signal-nodes {
+      display: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .bg__aurora-field {
+    .bg__aurora-field,
+    .bg__signal-flow,
+    .bg__signal-nodes {
       animation: none;
     }
   }
+  /* ── Signal canvas: a quiet technical grid replaces decorative clutter ── */
+  .bg__grid { position: absolute; inset: 0; opacity: 0.34; background-image: linear-gradient(to right, color-mix(in srgb, var(--color-text) 4%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--color-text) 4%, transparent) 1px, transparent 1px); background-size: 8rem 8rem; mask-image: linear-gradient(to bottom, black, transparent 74%); }
+  .bg__scanline { position: absolute; top: 18%; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--bg-signal-1), transparent); opacity: 0.5; }
+  .bg__aurora-field { filter: blur(96px) saturate(0.8); }
+  .bg__signal { opacity: 0.42; }
+  .bg__vignette { background: radial-gradient(ellipse at 55% 34%, transparent 44%, var(--bg-vignette) 100%); }
+
 </style>

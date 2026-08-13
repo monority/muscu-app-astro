@@ -35,4 +35,5 @@ export default {
   disconnected: 'Looking for the timer…',
   shortcutsToggle: 'Pause / resume',
   shortcutsReset: 'Reset',
+  spaceKey: 'Space',
 };

@@ -12,6 +12,7 @@ export default {
   period1y: '1 an',
   chartVolumeTitle: 'Volume (kg × reps)',
   chart1RMTitle: '1RM estimé (Epley)',
+  emptyTitle: 'Pas encore de tendance',
   noSessions: 'Aucune séance enregistrée pour cet exercice.',
   minPoints: 'Au moins 2 séances pour tracer la courbe.',
   trendAria: 'Voir la tendance pour',

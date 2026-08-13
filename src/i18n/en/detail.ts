@@ -55,6 +55,7 @@ export default {
   skipRest: 'Skip rest',
   close: 'Close',
   skip: 'Skip',
+  comingSoon: 'Coming soon',
   fatigue: 'Fatigue',
   fatigueAria: 'Fatigue level',
   notes: 'Notes',

@@ -188,12 +188,16 @@ const { duration = 3000 } = Astro.props;
         // Resolve the configurable duration from the data attribute the
         // Astro prop rendered (avoids inlining expressions into inline
         // scripts, which Astro deliberately leaves unevaluated).
-        const attr = this.$el.getAttribute('data-duration');
+        const root = (this as unknown as { $el: HTMLElement }).$el;
+        const attr = root.getAttribute('data-duration');
         const parsed = attr ? Number(attr) : NaN;
         if (Number.isFinite(parsed) && parsed > 0) this.defaultDuration = parsed;
 
         // Expose the global API: window.showToast(message, variant?)
-        window.showToast = (message: string, variant: string = 'info') => {
+        const win = window as Window & {
+          showToast?: (message: string, variant?: string) => void;
+        };
+        win.showToast = (message: string, variant: string = 'info') => {
           this.show(message, variant);
         };
       },

@@ -1,0 +1,106 @@
+---
+interface Props {
+  variant?: 'default' | 'danger' | 'accent' | 'ghost';
+  size?: 'sm' | 'md';
+  icon: string;
+  label: string;
+  title?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  icon,
+  label,
+  title,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const sizeClasses = {
+  sm: 'icon-btn--sm',
+  md: 'icon-btn--md',
+};
+
+const variantClasses = {
+  default: '',
+  danger: 'icon-btn--danger',
+  accent: 'icon-btn--accent',
+  ghost: 'icon-btn--ghost',
+};
+---
+
+<button
+  type="button"
+  class:list={['icon-btn', sizeClasses[size], variantClasses[variant], className]}
+  aria-label={label}
+  title={title ?? label}
+  {...rest}
+>
+  <Fragment set:html={icon} />
+</button>
+
+<style>
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+  .icon-btn :global(svg) {
+    width: 1.8rem;
+    height: 1.8rem;
+    flex-shrink: 0;
+  }
+  .icon-btn--sm {
+    min-width: 3.2rem;
+    min-height: 3.2rem;
+    padding: 0.4rem;
+  }
+  .icon-btn--md {
+    min-width: 3.6rem;
+    min-height: 3.6rem;
+    padding: 0.6rem;
+  }
+  .icon-btn:hover {
+    background: var(--alpha-bg-subtle);
+    color: var(--color-text);
+  }
+  .icon-btn:active {
+    transform: scale(0.95);
+  }
+  .icon-btn--danger {
+    color: var(--color-destructive);
+  }
+  .icon-btn--danger:hover {
+    background: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+  }
+  .icon-btn--accent {
+    color: var(--color-accent);
+  }
+  .icon-btn--accent:hover {
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+  .icon-btn--ghost {
+    color: var(--color-muted);
+  }
+  .icon-btn--ghost:hover {
+    color: var(--color-text);
+    background: var(--alpha-bg-subtle);
+  }
+  .icon-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+</style>

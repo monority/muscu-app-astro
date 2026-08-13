@@ -4,11 +4,10 @@ import Badge from '../../components/ui/Badge.astro';
 import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import Toast from '../../components/ui/Toast.astro';
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import { icons } from '../../lib/icons';
+import { t, localizedPath } from '../../i18n';
+import BackLink from '../../components/ui/BackLink.astro';
 
-
-
-setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
 
@@ -22,41 +21,14 @@ const L = t();
     x-cloak
   >
     {/* ── Back link ── */}
-    <a href={localizedPath("/seances")} class="detail__back">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      <span x-text="labels.backToSessions">{L.detail.backToSessions}</span>
-    </a>
+    <BackLink href={localizedPath("/seances")} label={L.detail.backToSessions} />
 
     {/* ── Not found state ── */}
     <template x-if="notFound">
       <Card>
         <div class="detail__error">
           <div class="detail__error-icon" aria-hidden="true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
+            <Fragment set:html={icons.infoCircle()} />
           </div>
           <h2 class="detail__error-title" x-text="labels.notFound">{L.detail.notFound}</h2>
           <p class="detail__error-text" x-text="labels.notFoundDesc">
@@ -134,20 +106,7 @@ const L = t();
         <div class="detail__stats">
           <div class="detail__stat">
             <div class="detail__stat-label">
-              <svg
-                class="detail__stat-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
+              <Fragment set:html={icons.clockStopwatch()} />
               <span x-text="labels.duration">{L.detail.duration}</span>
             </div>
             <div
@@ -157,23 +116,7 @@ const L = t();
           </div>
           <div class="detail__stat detail__stat--volume">
             <div class="detail__stat-label">
-              <svg
-                class="detail__stat-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M6.5 6.5h11"></path>
-                <path d="M6.5 17.5h11"></path>
-                <path d="M3 9v6"></path>
-                <path d="M21 9v6"></path>
-                <path d="M6.5 6.5 3 9v6l3.5 2.5h11L21 15V9l-3.5-2.5Z"></path>
-              </svg>
+              <Fragment set:html={icons.volumeBox()} />
               <span x-text="labels.totalVolume">{L.detail.totalVolume}</span>
             </div>
             <div
@@ -183,24 +126,7 @@ const L = t();
           </div>
           <div class="detail__stat">
             <div class="detail__stat-label">
-              <svg
-                class="detail__stat-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
-              </svg>
+              <Fragment set:html={icons.list()} />
               <span x-text="labels.exercises">{L.detail.exercises}</span>
             </div>
             <div
@@ -212,10 +138,32 @@ const L = t();
 
         {/* Actions */}
         <div class="detail__actions">
+          {/* ── Démarrer — primary workout action ── */}
+          <a
+            class="detail__btn detail__btn--accent"
+            :href="quickSessionHref()"
+            :aria-label="labels.startSession"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="detail__btn-icon"
+              aria-hidden="true"
+            >
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span x-text="labels.startSession">{L.detail.startSession}</span>
+          </a>
+
           {/* ── Partager (génère une image téléchargeable) ── */}
           <button
             type="button"
-            class="detail__btn detail__btn--accent"
+            class="detail__btn detail__btn--secondary"
             @click="generateShareCard()"
             aria-label={L.detail.shareAria}
           >
@@ -242,7 +190,7 @@ const L = t();
           {/* ── Comparer (lien vers la page de comparaison) ── */}
           <a
             class="detail__btn detail__btn--secondary"
-            :href="`/seances/comparer?id1=${session?.id || ''}`"
+            :href="compareHref()"
             :aria-disabled="!session?.id"
             aria-label={L.detail.compareAria}
           >
@@ -351,23 +299,7 @@ const L = t();
             @click="openDeleteDialog"
             aria-label={L.detail.deleteAria}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="detail__btn-icon"
-              aria-hidden="true"
-            >
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-              <path d="M10 11v6"></path>
-              <path d="M14 11v6"></path>
-              <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
-            </svg>
+            <Fragment set:html={icons.trash()} />
             <span x-text="labels.delete">{L.detail.delete}</span>
           </button>
         </div>
@@ -513,8 +445,8 @@ const L = t();
                       type="button"
                       class="exo-row__rest"
                       @click="startRestTimer(ex.name)"
-                      :aria-label="'{L.detail.startRestFor}' + ex.name"
-                      :title="'{L.detail.recommendedRest}' + formatRestTime(getRestTime(ex.name))"
+                      :aria-label="labels.startRestFor + ' ' + trName(ex)"
+                      :title="labels.recommendedRest + formatRestTime(getRestTime(ex.name))"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -616,8 +548,8 @@ const L = t();
                           <td class="exo-row__num" x-text="set.setNumber"></td>
                           <td>
                             <span
-                              class="exo-row__type"
-                              :class="'exo-row__type--' + set.type"
+                              class="type-pill"
+                              :class="'type-pill--' + set.type"
                               x-text="typeLabel(set.type)"
                             ></span>
                           </td>
@@ -625,20 +557,7 @@ const L = t();
                           <td class="exo-row__num" x-text="set.reps"></td>
                           <td x-text="formatSetRpe(set)"></td>
                           <td class="exo-row__td-end">
-                            <svg
-                              x-show="set.completed"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2.2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              class="exo-row__check"
-                              aria-label={L.detail.setCompleted}
-                            >
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
+                            <Fragment set:html={icons.check()} />
                             <span
                               x-show="!set.completed"
                               class="exo-row__dash"
@@ -707,19 +626,7 @@ const L = t();
         @click="dismissRestTimer()"
         :aria-label="restTimerDone ? labels.closeRestTimer : labels.skipRest"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <Fragment set:html={icons.closeX()} />
         <span x-text="restTimerDone ? labels.close : labels.skip"></span>
       </button>
     </div>
@@ -829,8 +736,12 @@ const L = t();
   import { getRestTime, formatRestTime } from '../../lib/rest-times';
   import { playBeep } from '../../lib/sound';
   import { t, localizedPath } from '../../i18n';
+  import { formatDateTime, formatVolume, formatDuration } from '../../lib/format';
+  import { statusLabel as statusLabelFn, type StatusLabels } from '../../lib/session-utils';
+  import { moodSvg as moodSvgFn, moodLabel as moodLabelFn } from '../../lib/mood';
 
   const LABELS = t();
+  const statusLabels: StatusLabels = { completed: LABELS.detail.completed, inProgress: LABELS.detail.inProgress, planned: LABELS.detail.planned };
 
   // ── Sheet helpers (CSV download) ─────────────────────────
   function downloadBlob(filename: string, content: string, mime: string): void {
@@ -858,10 +769,8 @@ const L = t();
   }
 
   // ── Pure helpers (module scope) ────────────────────────────
-  function statusLabelFn(s: SessionStatus): string {
-    if (s === 'completed') return LABELS.detail.completed;
-    if (s === 'in-progress') return LABELS.detail.inProgress;
-    return LABELS.detail.planned;
+  function sessionStatusLabel(s: SessionStatus): string {
+    return statusLabelFn(s, statusLabels);
   }
 
   function typeLabelFn(t: SetType): string {
@@ -875,46 +784,20 @@ const L = t();
   }
 
   function formatDateTimeFn(iso: string): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    const date = d.toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-    const time = d.toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    // Capitalize first letter
-    const cap = date.charAt(0).toUpperCase() + date.slice(1);
-    return cap + ' ' + LABELS.detail.at + ' ' + time;
+    return formatDateTime(iso);
   }
 
   function formatDurationFn(seconds?: number): string {
     if (!seconds || seconds <= 0) return '—';
-    const total = Math.floor(seconds);
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60;
-    if (h > 0) {
-      return `${h}h ${m.toString().padStart(2, '0')}m`;
-    }
-    if (m > 0) {
-      return `${m}m ${s.toString().padStart(2, '0')}s`;
-    }
-    return `${s}s`;
+    return formatDuration(seconds);
   }
 
   function formatVolumeFn(v: number): string {
-    if (!Number.isFinite(v) || v <= 0) return '0 kg';
-    return Math.round(v).toLocaleString('fr-FR') + ' kg';
+    return formatVolume(v);
   }
 
   function formatWeightFn(w: number): string {
-    if (!Number.isFinite(w) || w <= 0) return '0 kg';
-    return Math.round(w).toLocaleString('fr-FR') + ' kg';
+    return formatVolume(w);
   }
 
   function formatRpeFn(rpe: number): string {
@@ -963,40 +846,14 @@ const L = t();
     return LABELS.detail.fatigueExhausted;
   }
 
-  // Mood helpers return inline Lucide SVG markup so they can be
-  // rendered via x-html. Stroke + color are inherited from
-  // the .notes__mood--* modifier on the parent pill.
-  const MOOD_SVG_ATTRS = 'viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
-  const MOOD_SMILE  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
-  const MOOD_HEART  = `<svg ${MOOD_SVG_ATTRS}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
-  const MOOD_MEH    = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
-  const MOOD_FROWN  = `<svg ${MOOD_SVG_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
-  const MOOD_BED    = `<svg ${MOOD_SVG_ATTRS}><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
-
-  function moodEmojiFn(mood: SessionMood | undefined | null): string {
-    if (!mood) return '';
-    if (mood === 'great') return MOOD_SMILE;
-    if (mood === 'good') return MOOD_HEART;
-    if (mood === 'ok') return MOOD_MEH;
-    if (mood === 'tired') return MOOD_FROWN;
-    return MOOD_BED;
-  }
-
-  function moodLabelFn(mood: SessionMood | undefined | null): string {
-    if (!mood) return '';
-    if (mood === 'great') return LABELS.sessions.moodGreat;
-    if (mood === 'good') return LABELS.sessions.moodGood;
-    if (mood === 'ok') return LABELS.sessions.moodOk;
-    if (mood === 'tired') return LABELS.sessions.moodTired;
-    return LABELS.sessions.moodBad;
-  }
+  // Mood rendering uses the centralized helpers from src/lib/mood.ts.
 
   function hasNotesFn(s: Session | null): boolean {
     if (!s) return false;
     return (
       (s.rpe != null && Number.isFinite(s.rpe)) ||
       (s.fatigue != null && s.fatigue > 0) ||
-      (s.mood != null && s.mood !== '') ||
+      s.mood != null ||
       (s.notes != null && s.notes.trim() !== '')
     );
   }
@@ -1071,8 +928,8 @@ const L = t();
        * only). Returns count=0 when no RPE is recorded → the suggestion
        * UI stays hidden.
        */
-      get rpeStats(): { count: number; avg: number; max: number } {
-        if (!this.session) return { count: 0, avg: 0, max: 0 };
+      get rpeStats(): { count: number; avg: number; max: number; allTen: boolean } {
+        if (!this.session) return { count: 0, avg: 0, max: 0, allTen: false };
         let count = 0;
         let sum = 0;
         let max = 0;
@@ -1087,7 +944,7 @@ const L = t();
             if (set.rpe < 10) allTen = false;
           }
         }
-        if (count === 0) return { count: 0, avg: 0, max: 0 };
+        if (count === 0) return { count: 0, avg: 0, max: 0, allTen: false };
         return { count, avg: sum / count, max, allTen };
       },
 
@@ -1196,7 +1053,7 @@ const L = t();
       },
 
       statusLabel(s: SessionStatus): string {
-        return statusLabelFn(s);
+        return sessionStatusLabel(s);
       },
 
       typeLabel(t: SetType): string {
@@ -1205,6 +1062,10 @@ const L = t();
 
       formatDateTime(iso: string): string {
         return formatDateTimeFn(iso);
+      },
+
+      compareHref(): string {
+        return localizedPath('/seances/comparer?id1=' + encodeURIComponent(this.session?.id || ''));
       },
 
       formatDuration(seconds?: number): string {
@@ -1233,15 +1094,7 @@ const L = t();
        */
       formatShareDate(iso?: string): string {
         if (!iso) return '';
-        const d = new Date(iso);
-        if (isNaN(d.getTime())) return iso;
-        const formatted = d.toLocaleDateString('fr-FR', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        });
-        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        return formatDateTime(iso);
       },
 
       rpeTone(rpe: number | undefined | null) {
@@ -1257,7 +1110,7 @@ const L = t();
       },
 
       moodEmoji(mood: SessionMood | undefined | null) {
-        return moodEmojiFn(mood);
+        return moodSvgFn(mood);
       },
 
       moodLabel(mood: SessionMood | undefined | null) {
@@ -1277,6 +1130,11 @@ const L = t();
       },
 
       // ── Actions ──
+      quickSessionHref(): string {
+        if (!this.session) return localizedPath('/seances/rapide');
+        return `${localizedPath('/seances/rapide')}?session=${encodeURIComponent(this.session.id)}`;
+      },
+
       updateStatus(status: SessionStatus) {
         if (!this.session) return;
         this.session.status = status;
@@ -1675,15 +1533,7 @@ const L = t();
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
-
   /* ════════════════════════════════════════════════════
      CONTAINER
      ════════════════════════════════════════════════════ */
@@ -1700,41 +1550,6 @@ const L = t();
     display: flex;
     flex-direction: column;
     gap: 2rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     BACK LINK
-     ════════════════════════════════════════════════════ */
-  .detail__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    font-weight: 600;
-    text-decoration: none;
-    align-self: flex-start;
-    min-height: 4.4rem;
-    padding: 0 0.6rem 0 0.4rem;
-    margin-left: -0.4rem;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-fast),
-                background-color var(--transition-fast);
-  }
-
-  .detail__back:hover {
-    color: var(--color-accent);
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  .detail__back:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .detail__back svg {
-    width: 1.8rem;
-    height: 1.8rem;
   }
 
   /* ════════════════════════════════════════════════════
@@ -2388,43 +2203,7 @@ const L = t();
   }
 
   /* ── Set type pill ── */
-  .exo-row__type {
-    display: inline-flex;
-    align-items: center;
-    height: 2.4rem;
-    padding: 0 0.8rem;
-    border-radius: var(--radius-pill);
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1;
-  }
-
-  .exo-row__type--warmup {
-    background-color: var(--color-stat-sessions-bg);
-    color: var(--color-stat-sessions);
-  }
-
-  .exo-row__type--work {
-    background-color: var(--alpha-bg-soft);
-    color: var(--color-text);
-  }
-
-  .exo-row__type--top {
-    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
-    color: var(--color-accent);
-  }
-
-  .exo-row__type--drop {
-    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
-    color: var(--color-warning);
-  }
-
-  .exo-row__type--failure {
-    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
-    color: var(--color-destructive);
-  }
+  /* ── Set type pill — now uses the global .type-pill system (globals.css) ── */
 
   /* ── Check / dash ── */
   .exo-row__check {
@@ -3082,7 +2861,6 @@ const L = t();
      ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
     .detail__btn,
-    .detail__back,
     .detail__error-link,
     .notes__fatigue-icon,
     .exo-row__rest,
@@ -3095,6 +2873,27 @@ const L = t();
     .detail__rest-timer-skip:active,
     .detail__status-btn:active {
       transform: none;
+    }
+  }
+  /* Compact rest feedback on very narrow screens: the icon remains a
+     labelled control for assistive technology while the visual label is
+     removed to protect the exercise table's reading area. */
+  @media (max-width: 360px) {
+    .detail__rest-timer-skip {
+      width: 4.4rem;
+      padding: 0;
+      justify-content: center;
+    }
+    .detail__rest-timer-skip span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
   }
 </style>

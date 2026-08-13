@@ -1,14 +1,16 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../../i18n';
+import { t } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Badge from '../../components/ui/Badge.astro';
 import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
+import SearchInput from '../../components/ui/SearchInput.astro';
+import IconButton from '../../components/ui/IconButton.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
+import { icons } from '../../lib/icons';
 
-setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 
 /**
@@ -41,29 +43,7 @@ const categories = [
   >
     {/* ── Toolbar: search + filter ── */}
     <div class="exo__toolbar">
-      <div class="exo__search">
-        <svg
-          class="exo__search-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input
-          type="search"
-          class="exo__search-input"
-          placeholder={L.exercices.searchPlaceholder}
-          x-model="search"
-          aria-label={L.exercices.search}
-        />
-      </div>
+      <SearchInput class="exo__search" placeholder={L.exercices.searchPlaceholder} x-model="search" label={L.exercices.search} />
 
       <div class="exo__filters" role="group" aria-label={L.exercices.filterAria}>
         <button
@@ -120,20 +100,7 @@ const categories = [
         @click="openAdd()"
         aria-label={L.exercices.add}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="exo__add-icon"
-          aria-hidden="true"
-        >
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
+        <Fragment set:html={icons.plus()} />
         <span>{L.exercices.add}</span>
       </button>
     </div>
@@ -145,51 +112,9 @@ const categories = [
               <article class="exo__card">
                 <header class="exo__card-head">
                   <div class="exo__card-title">
-                    <svg
-                      class="exo__card-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M6.5 6.5h11v11h-11z"></path>
-                      <path d="M2 9v6"></path>
-                      <path d="M22 9v6"></path>
-                      <path d="M6.5 6.5L2 9"></path>
-                      <path d="M17.5 6.5L22 9"></path>
-                      <path d="M6.5 17.5L2 15"></path>
-                      <path d="M17.5 17.5L22 15"></path>
-                    </svg>
+                    <Fragment set:html={icons.dumbbellBox()} />
                     <h3 class="exo__card-name" x-text="trExercise(ex.name)"></h3>
-                    <button
-                      type="button"
-                      class="exo__tip-toggle"
-                      @click="toggleTip(ex.id)"
-                      :aria-expanded="isTipOpen(ex.id).toString()"
-                      :aria-label="labels.showTipAria + ' ' + ex.name"
-                      title={L.exercices.tipLabel}
-                      x-show="hasTip(ex.name)"
-                      x-cloak
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                      </svg>
-                    </button>
+                    <IconButton variant="ghost" icon={icons.infoCircle()} label={L.exercices.tipLabel} :aria-label="labels.showTipAria + ' ' + ex.name" title={L.exercices.tipLabel} @click="toggleTip(ex.id)" :aria-expanded="isTipOpen(ex.id).toString()" x-show="hasTip(ex.name)" x-cloak />
                   </div>
                   <span
                     class="exo__set-badge"
@@ -358,22 +283,7 @@ const categories = [
                 aria-label={L.exercices.delete}
                 title={L.exercices.delete}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="exo__icon"
-                  aria-hidden="true"
-                >
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                  <path d="M10 11v6"></path>
-                  <path d="M14 11v6"></path>
-                </svg>
+                <Fragment set:html={icons.trash()} />
               </button>
             </footer>
           </article>
@@ -628,19 +538,7 @@ const categories = [
             aria-label={L.common.close}
             @click="closeAddToSession()"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            <Fragment set:html={icons.closeX()} />
           </button>
         </header>
 
@@ -854,19 +752,7 @@ const categories = [
       role="status"
       aria-live="polite"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.4"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="exo__toast-icon"
-        aria-hidden="true"
-      >
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
+      <Fragment set:html={icons.check()} />
       <span x-text="toast.message"></span>
     </div>
   </div>
@@ -1262,9 +1148,6 @@ const categories = [
     }));
   });
 </script>
-
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
   /* ════════════════════════════════════════════════════

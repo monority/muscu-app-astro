@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale, localizedPath } from '../i18n';
+import { t, localizedPath } from '../i18n';
 import AppLayout from '../layouts/AppLayout.astro';
 import Button from '../components/ui/Button.astro';
 import Card from '../components/ui/Card.astro';
@@ -33,7 +33,6 @@ import Segmented from '../components/ui/Segmented.astro';
 import StatsCard from '../components/workout/StatsCard.astro';
 import ExerciseCard from '../components/workout/ExerciseCard.astro';
 import WorkoutCard from '../components/workout/WorkoutCard.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 
 // Design-token showcase — the `value` strings below deliberately mirror
@@ -45,7 +44,7 @@ const swatches = [
   { name: 'surface', token: '--color-surface', value: '#0B0B0B' },
   { name: 'surface-2', token: '--color-surface-2', value: '#111111' },
   { name: 'surface-3', token: '--color-surface-3', value: '#151515' },
-  { name: 'accent', token: '--color-accent', value: 'hsl(32 55% 45%)' },
+  { name: 'accent', token: '--color-accent', value: 'hsl(30 92% 58%)' },
   { name: 'success', token: '--color-success', value: '#22C55E' },
   { name: 'destructive', token: '--color-destructive', value: '#EF4444' },
   { name: 'warning', token: '--color-warning', value: '#EAB308' },

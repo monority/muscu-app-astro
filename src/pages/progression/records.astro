@@ -1,11 +1,11 @@
 ---
 
-import { t, setLocale, defaultLocale, localizedPath } from '../../i18n';
+import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Badge from '../../components/ui/Badge.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { icons } from '../../lib/icons';
 const L = t();
 ---
 
@@ -48,7 +48,7 @@ const L = t();
             <span class="rec__stat-value" x-text="recentPRs"></span>
             <span class="rec__stat-unit">PR</span>
           </div>
-          <span class="rec__stat-foot">depuis 30 jours</span>
+          <span class="rec__stat-foot">{L.records.since30Days}</span>
         </div>
       </div>
     </template>
@@ -57,20 +57,7 @@ const L = t();
     <template x-if="allRecords.length > 0">
       <div class="rec__toolbar">
         <label class="rec__search">
-          <svg
-            class="rec__search-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+          <Fragment set:html={icons.searchLine(20, 20)} />
           <input
             type="search"
             class="rec__search-input"
@@ -81,7 +68,7 @@ const L = t();
         </label>
 
         <div class="rec__sort">
-          <span class="rec__sort-label">Trier par</span>
+          <span class="rec__sort-label">{L.records.sortLabel}</span>
           <div class="rec__sort-group" role="radiogroup" aria-label={L.records.sortAria}>
             <button
               type="button"
@@ -124,27 +111,11 @@ const L = t();
         <template x-for="rec in filteredRecords" :key="rec.exerciseId">
           <a
             class="rec__card"
-            :href="'/exercices/historique?id=' + rec.exerciseId"
-            :aria-label="'Voir l\u2019historique de ' + rec.name"
+            :href="historyHref(rec.exerciseId)"
+            :aria-label="labels.viewHistoryAriaPrefix + rec.name"
           >
             <div class="rec__card-icon" aria-hidden="true">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M6.5 6.5h11v11h-11z"></path>
-                <path d="M2 9v6"></path>
-                <path d="M22 9v6"></path>
-                <path d="M6.5 6.5L2 9"></path>
-                <path d="M17.5 6.5L22 9"></path>
-                <path d="M6.5 17.5L2 15"></path>
-                <path d="M17.5 17.5L22 15"></path>
-              </svg>
+              <Fragment set:html={icons.dumbbellBox(24, 24)} />
             </div>
 
             <div class="rec__card-main">
@@ -179,19 +150,11 @@ const L = t();
             </div>
 
             <div class="rec__card-side">
-              <span class="rec__card-date" x-text="formatDate(rec.date)"></span>
+              <span class="rec__card-date-label">{L.records.lastSession}</span>
+              <span class="rec__card-date" x-text="formatDate(rec.lastSessionDate)"></span>
+              <span class="rec__card-date rec__card-date--pr">{L.records.prDate} <span x-text="formatDate(rec.date)"></span></span>
               <span class="rec__card-cta" aria-hidden="true">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
+                <Fragment set:html={icons.chevronRight(16, 16)} />
               </span>
             </div>
           </a>
@@ -233,7 +196,7 @@ const L = t();
     type ProgressRecord,
   } from '../../lib/storage';
 
-  import { t } from '../../i18n';
+  import { t, getLocale, localizedPath } from '../../i18n';
 
   const LABELS = t();
 
@@ -249,6 +212,7 @@ const L = t();
     bestWeight: number;
     bestReps: number;
     date: string;
+    lastSessionDate: string;
     sessionCount: number;
   }
 
@@ -256,14 +220,14 @@ const L = t();
 
   function fmtNum(n: number): string {
     if (!Number.isFinite(n) || n <= 0) return '0';
-    return Math.round(n).toLocaleString('fr-FR');
+    return Math.round(n).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US');
   }
 
   function fmtDate(iso: string): string {
     if (!iso) return '—';
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString('fr-FR', {
+    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -281,6 +245,7 @@ const L = t();
         exercisesTracked: LABELS.records.exercisesTracked,
         exerciseTracked: LABELS.records.exerciseTracked,
         kg: LABELS.common.kg,
+        viewHistoryAriaPrefix: LABELS.records.viewHistoryAriaPrefix,
       },
 
       // ── State ──
@@ -359,7 +324,9 @@ const L = t();
       // ── Computations ──
       recompute() {
         const sessions = getSessions();
-        this.hasData = sessions.length > 0;
+        this.hasData = sessions.some((session) =>
+          session.exercises.some((ex) => ex.sets.some((set) => set.completed)),
+        );
         if (!this.hasData) {
           this.allRecords = [];
           return;
@@ -373,7 +340,10 @@ const L = t();
           }
         }
 
-        this.allRecords = Array.from(map.values());
+        this.allRecords = Array.from(map.values()).filter(
+          (record) => record.estimated1RM > 0,
+        );
+        this.hasData = this.allRecords.length > 0;
       },
 
       accumulate(
@@ -391,14 +361,15 @@ const L = t();
             bestWeight: 0,
             bestReps: 0,
             date: '',
+            lastSessionDate: '',
             sessionCount: 0,
           };
           map.set(ex.exerciseId, rec);
         }
-        rec.sessionCount += 1;
-
+        let trackedInSession = false;
         for (const set of ex.sets) {
           if (!set.completed) continue;
+          trackedInSession = true;
           const rm: ProgressRecord = {
             exerciseId: ex.exerciseId,
             date: sessionDate,
@@ -413,6 +384,15 @@ const L = t();
             rec.date = rm.date;
           }
         }
+        // A session counts only when this exercise has at least one
+        // completed set. Planned or untouched sessions must not inflate
+        // the "sessions" figure on a record.
+        if (trackedInSession) {
+          rec.sessionCount += 1;
+          if (!rec.lastSessionDate || sessionDate > rec.lastSessionDate) {
+            rec.lastSessionDate = sessionDate;
+          }
+        }
       },
 
       // ── Display helpers ──
@@ -422,18 +402,15 @@ const L = t();
       formatDate(iso: string): string {
         return fmtDate(iso);
       },
+
+      historyHref(id: string): string {
+        return localizedPath('/exercices/historique?id=' + encodeURIComponent(id));
+      },
     }));
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <style>
-  [x-cloak] {
-    display: none !important;
-  }
-
   /* ════════════════════════════════════════════════════
      CONTAINER
      ════════════════════════════════════════════════════ */
@@ -461,19 +438,37 @@ const L = t();
     }
   }
 
+  .rec__stats {
+    grid-template-columns: 1.4fr 0.8fr 0.8fr;
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
   .rec__stat {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    min-width: 0;
     padding: 1.6rem 1.8rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+  }
+
+  @media (min-width: 640px) {
+    .rec__stat {
+      border-bottom: 0;
+    }
+
+    .rec__stat + .rec__stat {
+      border-left: 1px solid var(--color-border);
+    }
   }
 
   .rec__stat--hero {
-    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background-color: transparent;
   }
 
   .rec__stat-label {
@@ -524,10 +519,9 @@ const L = t();
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
-    padding: 1.4rem 1.6rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    padding: 1.4rem 0;
+    background-color: transparent;
+    border-bottom: 1px solid var(--color-border);
   }
 
   @media (min-width: 640px) {
@@ -651,31 +645,30 @@ const L = t();
   .rec__list {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
   }
 
   /* ════════════════════════════════════════════════════
-     CARD — horizontal row
+     RECORD — open performance row
      ════════════════════════════════════════════════════ */
   .rec__card {
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 1.4rem;
-    padding: 1.4rem 1.6rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    padding: 2rem 0;
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
     text-decoration: none;
     color: inherit;
     transition: background-color var(--transition-normal),
-                border-color var(--transition-normal),
-                transform var(--transition-fast);
+                color var(--transition-normal);
   }
 
   .rec__card:hover {
-    background-color: var(--color-surface-2);
-    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background-color: var(--alpha-bg-subtle);
+    color: inherit;
   }
 
   .rec__card:focus-visible {
@@ -683,19 +676,16 @@ const L = t();
     box-shadow: var(--focus-ring);
   }
 
-  .rec__card:active {
-    transform: scale(0.998);
-  }
-
   .rec__card-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 4.2rem;
-    height: 4.2rem;
-    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    width: 3.2rem;
+    height: 3.2rem;
+    background-color: transparent;
     color: var(--color-accent);
-    border-radius: var(--radius-md);
+    border-right: 1px solid var(--color-border);
+    padding-right: 1rem;
     flex-shrink: 0;
   }
 
@@ -776,12 +766,26 @@ const L = t();
     flex-shrink: 0;
   }
 
+  .rec__card-date-label {
+    color: var(--color-muted);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .rec__card-date {
     font-size: 1.2rem;
-    color: var(--color-muted);
-    font-weight: 600;
+    color: var(--color-text);
+    font-weight: 700;
     text-align: right;
     white-space: nowrap;
+  }
+
+  .rec__card-date--pr {
+    color: var(--color-muted);
+    font-size: 1rem;
+    font-weight: 500;
   }
 
   .rec__card-cta {
@@ -809,16 +813,16 @@ const L = t();
      EMPTY
      ════════════════════════════════════════════════════ */
   .rec__empty {
-    padding: 1.6rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    padding: 2.4rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
 
   /* ════════════════════════════════════════════════════
      RESPONSIVE
      ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
+    .rec__stats { grid-template-columns: 1fr; }
     .rec__card {
       grid-template-columns: auto 1fr;
       grid-template-areas:
@@ -829,7 +833,7 @@ const L = t();
 
     .rec__card-icon {
       grid-area: icon;
-      width: 3.8rem;
+      width: 3.2rem;
       height: 3.8rem;
     }
 

@@ -14,11 +14,15 @@ import {
   generateId,
   getExercises,
   getSessions,
+  getBodyRecords,
+  addBodyRecord,
+  deleteBodyRecord,
   getSessionsByDate,
   getSessionsByMonth,
   getSettings,
   saveExercise,
   saveSession,
+  updateSession,
   toggleExerciseFavorite,
   DEFAULT_REMINDERS,
   DEFAULT_WEBDAV,
@@ -194,6 +198,125 @@ describe('saveSession + getSessions', () => {
     expect(all[0].id).toBe(created.id);
     expect(all[0].name).toBe('Push day');
     expect(all[0].exercises[0].sets[0].weight).toBe(80);
+  });
+
+  it('persists completion updates used by progression screens', () => {
+    const created = saveSession({
+      name: 'Planned push',
+      date: '2026-08-12',
+      exercises: [
+        {
+          exerciseId: 'ex-1',
+          name: 'Développé couché',
+          muscle: 'Pectoraux',
+          sets: [
+            { exerciseId: 'ex-1', setNumber: 1, weight: 80, reps: 8, type: 'work', completed: false },
+          ],
+        },
+      ],
+      status: 'planned',
+    });
+
+    const exercises = getSessions()[0].exercises.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map((set) => ({ ...set, completed: true })),
+    }));
+    updateSession(created.id, { status: 'completed', exercises });
+
+    const updated = getSessions()[0];
+    expect(updated.status).toBe('completed');
+    expect(updated.exercises[0].sets[0].completed).toBe(true);
+  });
+});
+
+describe('legacy numeric payloads', () => {
+  beforeEach(() => {
+    clearLocalStorage();
+  });
+
+  it('normalizes session input values stored as strings', () => {
+    window.localStorage.setItem(
+      STORAGE_KEYS.sessions,
+      JSON.stringify([
+        {
+          id: 'legacy-session',
+          name: 'Legacy push',
+          date: '2026-08-04',
+          status: 'completed',
+          exercises: [
+            {
+              exerciseId: 'ex-1',
+              name: 'Développé couché',
+              muscle: 'Pectoraux',
+              sets: [
+                {
+                  exerciseId: 'ex-1',
+                  setNumber: '1',
+                  weight: '80',
+                  reps: '8',
+                  type: 'work',
+                  completed: true,
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    );
+
+    const [session] = getSessions();
+    expect(session.exercises[0].sets[0].weight).toBe(80);
+    expect(session.exercises[0].sets[0].reps).toBe(8);
+    expect(calculate1RM(session.exercises[0].sets[0].weight, session.exercises[0].sets[0].reps)).toBeCloseTo(101.33, 1);
+  });
+
+  it('normalizes body measurements stored as strings', () => {
+    window.localStorage.setItem(
+      'muscu:body',
+      JSON.stringify([
+        { date: '2026-08-04', weight: '82.5', arm: '36.2' },
+      ]),
+    );
+
+    const [record] = getBodyRecords();
+    expect(record.weight).toBe(82.5);
+    expect(record.arm).toBe(36.2);
+  });
+
+  it('deduplicates duplicate daily snapshots from imported data', () => {
+    window.localStorage.setItem(
+      'muscu:body',
+      JSON.stringify([
+        { date: '2026-08-08', weight: 80 },
+        { date: '2026-08-08', weight: 81 },
+      ]),
+    );
+
+    const records = getBodyRecords();
+    expect(records).toHaveLength(1);
+    expect(records[0].weight).toBe(81);
+  });
+
+  it('replaces an existing measurement for the same date', () => {
+    addBodyRecord({ date: '2026-08-08', weight: 80 });
+    addBodyRecord({ date: '2026-08-08', weight: 81, waist: 82 });
+
+    const records = getBodyRecords();
+    expect(records).toHaveLength(1);
+    expect(records[0].weight).toBe(81);
+    expect(records[0].waist).toBe(82);
+  });
+
+  it('keeps the settings weight mirror aligned after deleting measurements', () => {
+    addBodyRecord({ date: '2026-08-01', weight: 80 });
+    addBodyRecord({ date: '2026-08-08', weight: 81 });
+    expect(getSettings().bodyWeight).toBe(81);
+
+    deleteBodyRecord('2026-08-08');
+    expect(getSettings().bodyWeight).toBe(80);
+
+    deleteBodyRecord('2026-08-01');
+    expect(getSettings().bodyWeight).toBeUndefined();
   });
 });
 

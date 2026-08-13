@@ -1,6 +1,6 @@
 ---
 
-import { t, setLocale, defaultLocale } from '../i18n';
+import { t } from '../i18n';
 import AppLayout from '../layouts/AppLayout.astro';
 import PageHeader from '../components/layout/PageHeader.astro';
 import Card from '../components/ui/Card.astro';
@@ -8,7 +8,7 @@ import CardHeader from '../components/ui/CardHeader.astro';
 import CardTitle from '../components/ui/CardTitle.astro';
 import CardContent from '../components/ui/CardContent.astro';
 import EmptyState from '../components/ui/EmptyState.astro';
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { icons } from '../lib/icons';
 const L = t();
 ---
 
@@ -27,18 +27,7 @@ const L = t();
         @click="prevMonth()"
         aria-label={L.calendrier.prevMonth}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+        <Fragment set:html={icons.chevronLeft()} />
       </button>
 
       <h2 class="cal__month-name" x-text="monthName()"></h2>
@@ -49,18 +38,7 @@ const L = t();
         @click="nextMonth()"
         aria-label={L.calendrier.nextMonth}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+        <Fragment set:html={icons.chevronRight()} />
       </button>
 
       <button type="button" class="cal__today-btn" @click="goToday()">
@@ -86,13 +64,11 @@ const L = t();
             <button
               type="button"
               class="cal__day"
-              :class="{
-                'cal__day--other': !day.isCurrentMonth,
-                'cal__day--today': day.isToday,
-                'cal__day--selected': selectedDate === day.date
-              }"
+              :class="{ 'cal__day--other': !day.isCurrentMonth, 'cal__day--today': day.isToday, 'cal__day--selected': selectedDate === day.date }"
               :disabled="!day.isCurrentMonth"
-              :aria-current="selectedDate === day.date ? 'date' : false"
+              :aria-label="dayAriaLabel(day)"
+              :aria-current="day.isToday ? 'date' : false"
+              :aria-pressed="selectedDate === day.date"
               @click="selectDate(day)"
             >
               <span class="cal__day-num" x-text="day.dayNum"></span>
@@ -156,7 +132,7 @@ const L = t();
             <div class="cal__day-sessions">
               <template x-for="s in selectedSessions" :key="s.id">
                 <a
-                  :href="'/seances/detail?id=' + s.id"
+                  :href="localizedPath('/seances/detail?id=' + encodeURIComponent(s.id))"
                   class="cal__session-item"
                 >
                   <div class="cal__session-info">
@@ -219,10 +195,13 @@ const L = t();
 
 <script>
   import { getSessions, type Session } from '../lib/storage';
-  import { t, getLocale } from '../i18n';
+  import { t, localizedPath } from '../i18n';
+  import { formatDateLong, formatNumber as formatNumberFn } from '../lib/format';
+  import { statusLabel as statusLabelFn, type StatusLabels } from '../lib/session-utils';
 
   const LABELS = t();
-  const DATE_LOCALE = getLocale() === 'en' ? 'en-GB' : 'fr-FR';
+  const statusLabels: StatusLabels = { completed: LABELS.sessions.completed, inProgress: LABELS.sessions.inProgress, planned: LABELS.sessions.planned };
+  function statusLabel(status: string): string { return statusLabelFn(status as 'completed' | 'in-progress' | 'planned', statusLabels); }
 
   /** Format a Date as local YYYY-MM-DD (no UTC shift). */
   function formatISO(d: Date): string {
@@ -252,6 +231,7 @@ const L = t();
       selectedSessions: [] as Session[],
       allSessions: [] as Session[],
       weekdays: LABELS.calendrier.weekdays,
+      localizedPath,
 
       // ── Init ──
       init() {
@@ -356,6 +336,24 @@ const L = t();
         this.selectedSessions = day.sessions;
       },
 
+      dayAriaLabel(day: CalendarDay): string {
+        const date = this.formatDate(day.date);
+        if (day.sessions.length === 0) return date;
+
+        const statusCounts = new Map<string, number>();
+        for (const session of day.sessions) {
+          statusCounts.set(session.status, (statusCounts.get(session.status) ?? 0) + 1);
+        }
+        const statusSummary = Array.from(statusCounts.entries())
+          .map(([status, count]) => `${count} ${this.statusLabel(status).toLowerCase()}`)
+          .join(', ');
+        const sessionLabel =
+          day.sessions.length === 1
+            ? LABELS.sessions.seanceSingular
+            : LABELS.sessions.seancePlural;
+        return `${date} — ${day.sessions.length} ${sessionLabel}: ${statusSummary}`;
+      },
+
       monthName(): string {
         return `${LABELS.calendrier.monthNames[this.currentMonth]} ${this.currentYear}`;
       },
@@ -445,39 +443,21 @@ const L = t();
 
       // ── Display helpers ──
       statusLabel(status: string): string {
-        if (status === 'completed') return LABELS.sessions.completed;
-        if (status === 'in-progress') return LABELS.sessions.inProgress;
-        if (status === 'planned') return LABELS.sessions.planned;
-        return status;
+        return statusLabel(status as 'completed' | 'in-progress' | 'planned');
       },
 
       formatDate(iso: string): string {
-        const d = new Date(iso);
-        if (isNaN(d.getTime())) return iso;
-        return d.toLocaleDateString(DATE_LOCALE, {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        });
+        return formatDateLong(iso);
       },
 
       formatNumber(n: number): string {
-        if (!Number.isFinite(n)) return '0';
-        return new Intl.NumberFormat(DATE_LOCALE).format(Math.round(n));
+        return formatNumberFn(n);
       },
     }));
   });
 </script>
 
-{/* Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
 <style>
-  [x-cloak] {
-    display: none !important;
-  }
-
   .cal {
     max-width: 88rem;
     margin: 0 auto;
@@ -798,12 +778,18 @@ const L = t();
   .cal__stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.2rem;
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
 
   @media (min-width: 640px) {
     .cal__stats {
       grid-template-columns: repeat(4, 1fr);
+    }
+
+    .cal__stat + .cal__stat {
+      border-left: 1px solid var(--color-border);
     }
   }
 
@@ -811,10 +797,18 @@ const L = t();
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    padding: 1.4rem 1.6rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    min-width: 0;
+    padding: 1.6rem 1.4rem;
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+  }
+
+  @media (min-width: 640px) {
+    .cal__stat {
+      border-bottom: 0;
+    }
   }
 
   .cal__stat-label {
@@ -846,6 +840,19 @@ const L = t();
   }
 
   /* ═══ Responsive ═══ */
+  @media (max-width: 480px) {
+    .cal__controls {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+    }
+
+    .cal__today-btn {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+
   @media (max-width: 640px) {
     .cal__day {
       min-height: 5rem;
@@ -879,4 +886,10 @@ const L = t();
       transform: none;
     }
   }
+  /* ── Calendar canvas ───────────────────────────────────── */
+  :global(.cal > .surface) { background: transparent; border: 0; border-top: 1px solid var(--color-border); border-radius: 0; }
+  :global(.cal > .surface:last-child) { border-bottom: 1px solid var(--color-border); }
+  :global(.cal > .surface > .p-4), :global(.cal > .surface > .p-6) { padding-left: 0; padding-right: 0; }
+  .cal__controls { border-bottom: 1px solid var(--color-border); padding-bottom: 1.6rem; }
+
 </style>

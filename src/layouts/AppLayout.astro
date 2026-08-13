@@ -35,7 +35,7 @@ const L = t();
 
 const defaultGroups: NavTree = [
   {
-    label: L.nav.groups.workout,
+    label: L.nav.groups.primary,
     items: [
       { label: L.nav.dashboard, href: localizedPath("/"), icon: "dashboard" },
       {
@@ -48,14 +48,6 @@ const defaultGroups: NavTree = [
         ],
       },
       { label: L.nav.rapide, href: localizedPath("/seances/rapide"), icon: "zap" },
-      { label: L.nav.timer, href: localizedPath("/timer"), icon: "timer" },
-      { label: L.nav.calendrier, href: localizedPath("/calendrier"), icon: "calendar" },
-    ],
-  },
-  {
-    label: L.nav.groups.data,
-    items: [
-      { label: L.nav.exercices, href: localizedPath("/exercices"), icon: "dumbbell" },
       {
         label: L.nav.progression,
         href: localizedPath("/progression"),
@@ -70,9 +62,17 @@ const defaultGroups: NavTree = [
     ],
   },
   {
-    label: L.nav.groups.tools,
+    label: L.nav.groups.secondary,
     items: [
+      { label: L.nav.exercices, href: localizedPath("/exercices"), icon: "dumbbell" },
+      { label: L.nav.calendrier, href: localizedPath("/calendrier"), icon: "calendar" },
+      { label: L.nav.timer, href: localizedPath("/timer"), icon: "timer" },
       { label: L.nav.calculateur, href: localizedPath("/calculateur"), icon: "calculator" },
+    ],
+  },
+  {
+    label: L.nav.groups.utility,
+    items: [
       { label: L.nav.settings, href: localizedPath("/settings"), icon: "settings" },
     ],
   },
@@ -136,10 +136,12 @@ const groupsWithActive = groups.map((g) => ({
     {/* theme-color cannot read CSS vars at rest — the attribute below is a
         static fallback; the theme bootstrap script overwrites it with the
         real --color-accent value (pop.astro precedent). */}
-    <meta name="theme-color" content="#D97706" />
+    <meta name="theme-color" content="#F59A3D" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="muscu.app" />
+
+    <script is:inline defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
     {/* ── Locale bootstrap ──
         Exposes the server-rendered locale so client-side Alpine
@@ -316,7 +318,7 @@ const groupsWithActive = groups.map((g) => ({
             const el = node as HTMLElement;
             if (isTarget(el)) enhance(el as HTMLInputElement);
             el
-              .querySelectorAll?.('input[type="number"]:not(.no-spinner)')
+              .querySelectorAll<HTMLInputElement>('input[type="number"]:not(.no-spinner)')
               .forEach(enhance);
           }
         }

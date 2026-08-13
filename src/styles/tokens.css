@@ -2,15 +2,16 @@
 
 @theme {
   /* Colors mapped to Tailwind v4 namespace */
-  --color-bg: #050505;
-  --color-surface: #0B0B0B;
-  --color-surface-2: #111111;
-  --color-surface-3: #151515;
-  --color-text: #F6F6F6;
-  --color-muted: #9CA3AF;
-  --color-accent: hsl(32 55% 45%);
-  --color-accent-hover: hsl(32 55% 35%);
-  --color-accent-foreground: #FFFFFF;
+  --color-bg: #080B0F;
+  --color-surface: #0D1218;
+  --color-surface-2: #131A22;
+  --color-surface-3: #1A232D;
+  --color-text: #F2F5F4;
+  --color-muted: #8C9898;
+  --color-accent: hsl(30 92% 58%);
+  --color-accent-hover: hsl(30 92% 50%);
+  --color-accent-foreground: #1B1005;
+  --color-border-strong: hsl(0 0% 100% / 0.16);
   --color-success: #22C55E;
   /* Deep-green foreground for text/icons sitting on the success fill. */
   --color-success-foreground: hsl(150 90% 10%);
@@ -76,10 +77,10 @@
   --spacing-8: 3.2rem;
 
   /* Border radius */
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
   --radius-pill: 999px;
 
   /* Typography */
@@ -90,11 +91,11 @@
 /* ── Raw CSS variables (for use outside Tailwind utilities) ── */
 :root {
   /* Shadows */
-  --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.22);
-  --shadow-2: 0 6px 14px hsl(0 0% 0% / 0.24);
+  --shadow-1: 0 1px 2px hsl(220 30% 2% / 0.28);
+  --shadow-2: 0 12px 28px hsl(220 30% 2% / 0.22);
 
   /* Focus ring */
-  --focus-ring: 0 0 0 3px hsl(32 95% 50% / 0.35);
+  --focus-ring: 0 0 0 3px hsl(30 92% 58% / 0.42);
 
   /* Transitions */
   --transition-fast: 140ms ease;
@@ -102,14 +103,25 @@
   --transition-normal: 240ms ease;
 
   /* Layout */
-  --sidebar-width: 26rem;
+  --sidebar-width: 22rem;
   --bottom-nav-height: 5.6rem;
-  --topbar-height: 5.6rem;
-  --page-padding-desktop: 2.4rem;
-  --page-padding-tablet: 1.6rem;
-  --page-padding-mobile: 1.2rem;
+  --topbar-height: 6.4rem;
+  --page-padding-desktop: 4.8rem;
+  --page-padding-tablet: 2.4rem;
+  --page-padding-mobile: 1.6rem;
   --gap-card: 1.2rem;
   --gap-section: 1.6rem;
+
+  /* Shared panel surfaces. Keeping these semantic prevents each page from
+     inventing a slightly different card treatment. */
+  --surface-panel: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  --surface-panel-elevated: color-mix(in srgb, var(--color-surface-2) 90%, transparent);
+
+  /* Typography anchors. Pages can share hierarchy without repeating
+     one-off clamp values or drifting line-height decisions. */
+  --text-page-title: clamp(2.4rem, 4vw, 3.6rem);
+  --text-page-title-leading: 1.02;
+  --text-page-title-tracking: -0.03em;
 
   /* Secondary text — referenced by some components. Falls back to
      --color-muted when no override is provided. */
@@ -131,30 +143,34 @@
      aesthetic: diffuse aurora fields, film grain and a soft
      vignette. Low-contrast on purpose so content stays readable;
      the light theme overrides the washes below. */
-  --bg-aurora-1: hsl(32 90% 62% / 0.14);
-  --bg-aurora-2: hsl(262 65% 64% / 0.12);
-  --bg-aurora-3: hsl(190 65% 58% / 0.08);
+  --bg-aurora-1: hsl(30 92% 58% / 0.07);
+  --bg-aurora-2: hsl(190 55% 48% / 0.07);
+  --bg-aurora-3: hsl(260 48% 58% / 0.05);
+  --bg-signal-1: hsl(30 92% 58% / 0.13);
+  --bg-signal-2: hsl(190 60% 58% / 0.08);
+  --bg-node: hsl(30 92% 58% / 0.24);
   --bg-grain-opacity: 0.035;
-  --bg-vignette: hsl(0 0% 0% / 0.45);
+  --bg-vignette: hsl(220 35% 2% / 0.52);
 }
 
 /* ── Light theme override ────────────────────────────────────
  * Activated by setting `data-theme="light"` on <html> (see
  * AppLayout.astro init script + AppShell toggle button). Keeps
  * the same variable names as the dark default so every component
- * switches automatically. The accent is unchanged — orange reads
- * well on both surfaces. */
+ * switches automatically. The accent remains warm and restrained on
+ * both surfaces. */
 [data-theme="light"] {
-  --color-bg: #FFFFFF;
-  --color-surface: #F8F9FA;
-  --color-surface-2: #F0F1F3;
-  --color-surface-3: #E5E7EB;
-  --color-border: #D1D5DB;
-  --color-text: #111827;
-  --color-text-secondary: #4B5563;
-  --color-muted: #6B7280;
+  --color-bg: #F5F7F5;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #E9EEE9;
+  --color-surface-3: #DDE5DE;
+  --color-border: #CBD5CC;
+  --color-border-strong: #AEBCAF;
+  --color-text: #172018;
+  --color-text-secondary: #4C5A4E;
+  --color-muted: #68766A;
   /* Accent + state colors stay the same — they have enough contrast
-     on either surface to remain readable. The success fill stays
+     on either surface to remain readable. The accent stays warm and the success fill stays
      #22C55E, so the dark-green foreground reads on it unchanged. */
   --color-success-foreground: hsl(150 90% 10%);
 
@@ -213,9 +229,12 @@
 
   /* Aurora washes flip to lighter, lower-contrast pastels so the
      glow stays airy on the near-white surfaces. */
-  --bg-aurora-1: hsl(32 95% 55% / 0.12);
-  --bg-aurora-2: hsl(262 55% 58% / 0.09);
-  --bg-aurora-3: hsl(190 60% 50% / 0.06);
+  --bg-aurora-1: hsl(30 78% 46% / 0.08);
+  --bg-aurora-2: hsl(190 45% 42% / 0.06);
+  --bg-aurora-3: hsl(260 42% 52% / 0.05);
+  --bg-signal-1: hsl(30 72% 42% / 0.12);
+  --bg-signal-2: hsl(190 50% 38% / 0.08);
+  --bg-node: hsl(30 72% 42% / 0.20);
   --bg-grain-opacity: 0.05;
-  --bg-vignette: hsl(0 0% 0% / 0.045);
+  --bg-vignette: hsl(120 20% 18% / 0.07);
 }

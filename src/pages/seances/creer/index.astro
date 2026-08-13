@@ -11,10 +11,8 @@ import Input from '../../../components/ui/Input.astro';
 import Dialog from '../../../components/ui/Dialog.astro';
 import Toast from '../../../components/ui/Toast.astro';
 import { TRAINING_TEMPLATES } from '../../../lib/templates';
-import { t, setLocale, defaultLocale, localizedPath, trTemplateName, trTemplateDesc } from '../../../i18n';
-
-
-setLocale(Astro.currentLocale ?? defaultLocale);
+import { t, localizedPath, trTemplateName, trTemplateDesc } from '../../../i18n';
+import { icons } from '../../../lib/icons';
 
 const L = t();
 /**
@@ -59,21 +57,7 @@ const setTypes = [
         :class="{ 'is-disabled': !canSave }"
         @click="save()"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="ses__btn-icon"
-          aria-hidden="true"
-        >
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-          <polyline points="17 21 17 13 7 13 7 21"></polyline>
-          <polyline points="7 3 7 8 15 8"></polyline>
-        </svg>
+        <span class="ses__btn-icon"><Fragment set:html={icons.save(18, 18)} /></span>
         <span x-text="labels.saveSession">{L.builder.saveSession}</span>
       </Button>
     </div>
@@ -83,7 +67,7 @@ const setTypes = [
         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     <Card>
       <CardHeader>
-        <CardTitle>Informations</CardTitle>
+        <CardTitle>{L.builder.infoTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="ses__info-grid">
@@ -96,7 +80,7 @@ const setTypes = [
               id="ses-name"
               type="text"
               class="ses__input"
-              placeholder="Ex. Push day, Jambes, Full bodyâ€¦"
+              placeholder={L.builder.namePlaceholder}
               x-model="sessionName"
               required
               autocomplete="off"
@@ -124,23 +108,7 @@ const setTypes = [
       <Card>
         <div class="ses__empty">
           <div class="ses__empty-icon" aria-hidden="true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M6.5 6.5h11v11h-11z"></path>
-              <path d="M2 9v6"></path>
-              <path d="M22 9v6"></path>
-              <path d="M6.5 6.5L2 9"></path>
-              <path d="M17.5 6.5L22 9"></path>
-              <path d="M6.5 17.5L2 15"></path>
-              <path d="M17.5 17.5L22 15"></path>
-            </svg>
+            <Fragment set:html={icons.dumbbellBox(48, 48)} />
           </div>
           <h3 class="ses__empty-title" x-text="labels.noExoAdded">{L.builder.noExoAdded}</h3>
           <p class="ses__empty-desc" x-text="labels.noExoDesc">{L.builder.noExoDesc}</p>
@@ -148,25 +116,14 @@ const setTypes = [
             class="ses__add-btn ses__add-btn--primary"
             @click="openPicker()"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="ses__add-icon"
-              aria-hidden="true"
-            >
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
+            <span class="ses__add-icon"><Fragment set:html={icons.plus(20, 20)} /></span>
             <span>{L.builder.addExercise}</span>
           </Button>
         </div>
       </Card>
     </template>
+
+    {/* superset offer — link icon and check/close icons */}
 
     {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         EXERCISE BLOCKS â€” one Card per added exercise
@@ -211,18 +168,7 @@ const setTypes = [
               class="ses__ex-offer-btn"
               @click="commitSupersetOffer()"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M20 6L9 17l-5-5"></path>
-              </svg>
+              <Fragment set:html={icons.check(20, 20)} />
               <span x-text="labels.supersetGroupBtn"></span>
             </button>
             <button
@@ -232,19 +178,7 @@ const setTypes = [
               :aria-label="labels.supersetDismiss"
               :title="labels.supersetDismiss"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+              <Fragment set:html={icons.closeX(20, 20)} />
             </button>
           </div>
         </div>
@@ -285,19 +219,7 @@ const setTypes = [
             :aria-label="labels.supersetRemove"
             :title="labels.supersetRemove"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+              <Fragment set:html={icons.closeX(18, 18)} />
           </button>
         </div>
         {/* â”€â”€ Clickable header (always visible) â”€â”€ */}
@@ -325,20 +247,7 @@ const setTypes = [
                 x-text="exerciseSummary(ex)"
               ></p>
             </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="ses__ex-chevron"
-              :class="{ 'is-open': isExpanded(exIdx) }"
-              aria-hidden="true"
-            >
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
+            <span class="ses__ex-chevron" :class="{ 'is-open': isExpanded(exIdx) }"><Fragment set:html={icons.chevronDown(20, 20)} /></span>
           </button>
           <select
             class="ses__ex-superset-select"
@@ -360,22 +269,7 @@ const setTypes = [
             aria-label={L.builder.removeExerciseAria}
             title="Retirer l'exercice"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="ses__icon"
-              aria-hidden="true"
-            >
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-              <path d="M10 11v6"></path>
-              <path d="M14 11v6"></path>
-            </svg>
+            <span class="ses__icon"><Fragment set:html={icons.trash(18, 18)} /></span>
           </button>
         </div>
 
@@ -437,19 +331,7 @@ const setTypes = [
                         :aria-label="labels.mrvSuggestFor + ' ' + (setIdx + 1)"
                         @click="applyMrv(exIdx, setIdx)"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="ses__icon"
-                          aria-hidden="true"
-                        >
-                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                        </svg>
+                        <span class="ses__icon"><Fragment set:html={icons.zap(16, 16)} /></span>
                       </button>
                     </div>
                   </div>
@@ -522,18 +404,7 @@ const setTypes = [
                       :aria-pressed="set.completed"
                       :title="set.completed ? labels.unmarkTitle : labels.markTitle"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.4"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
+                      <Fragment set:html={icons.check(24, 24)} />
                     </button>
                     <button
                       type="button"
@@ -542,20 +413,7 @@ const setTypes = [
                       :aria-label="labels.deleteSet + ' ' + (setIdx + 1)"
                       title={L.builder.deleteSet}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="ses__icon"
-                        aria-hidden="true"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
+                      <span class="ses__icon"><Fragment set:html={icons.closeX(18, 18)} /></span>
                     </button>
                   </div>
                 </div>
@@ -568,20 +426,7 @@ const setTypes = [
                 class="ses__btn ses__btn--secondary ses__btn--sm"
                 @click="addSet(exIdx)"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="ses__btn-icon"
-                  aria-hidden="true"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
+                <span class="ses__btn-icon"><Fragment set:html={icons.plus(18, 18)} /></span>
                 <span>{L.builder.addSet}</span>
               </button>
               <button
@@ -622,20 +467,7 @@ const setTypes = [
           class="ses__add-btn"
           @click="openPicker()"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="ses__add-icon"
-            aria-hidden="true"
-          >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
+          <span class="ses__add-icon"><Fragment set:html={icons.plus(20, 20)} /></span>
           <span>{L.builder.addExercise}</span>
         </Button>
       </div>
@@ -806,26 +638,13 @@ const setTypes = [
     <Dialog id="ses-picker-dialog" title="Choisir un exercice">
       <div class="ses__picker">
         <div class="ses__search">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="ses__search-icon"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+          <span class="ses__search-icon"><Fragment set:html={icons.searchLine(20, 20)} /></span>
           <Input
             type="search"
             class="ses__search-input"
-            placeholder="Rechercher un exerciceâ€¦"
+            placeholder={L.builder.searchPlaceholder}
             x-model="exerciseSearch"
-            aria-label="Rechercher un exercice"
+            aria-label={L.builder.searchAria}
             x-ref="pickerSearch"
             @keydown.escape="closeDialogById('ses-picker-dialog')"
             autocomplete="off"
@@ -907,20 +726,7 @@ const setTypes = [
                 title="Conseils"
                 x-show="hasTip(ex.name)"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
+                <Fragment set:html={icons.infoCircle(18, 18)} />
               </button>
               <p
                 class="ses__picker-tip"
@@ -985,18 +791,7 @@ const setTypes = [
       aria-live="polite"
     >
       <div class="ses__rest-timer-icon" aria-hidden="true">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
+        <Fragment set:html={icons.countdown(24, 24)} />
       </div>
       <div class="ses__rest-timer-body">
         <div class="ses__rest-timer-label" x-text="restTimerLabel()"></div>
@@ -1012,19 +807,7 @@ const setTypes = [
         @click="dismissRestTimer()"
         :aria-label="restTimerDone ? labels.closeRest : labels.skipRest"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <Fragment set:html={icons.closeX(20, 20)} />
         <span x-text="restTimerDone ? labels.close : labels.skip"></span>
       </button>
     </div>
@@ -1045,12 +828,12 @@ const setTypes = [
     type SessionMood,
     type SetType,
   } from '../../../lib/storage';
-  import { TRAINING_TEMPLATES, getTemplateById, type TemplateExercise } from '../../../lib/templates';
+  import { getTemplateById, type TemplateExercise } from '../../../lib/templates';
   import { getExerciseTip } from '../../../lib/exercise-tips';
   import { getRestTime, formatRestTime } from '../../../lib/rest-times';
   import { playBeep } from '../../../lib/sound';
   import { suggestLoadSuggestion } from '../../../lib/mrv';
-  import { t, defaultLocale, getLocale, localizedPath } from '../../../i18n';
+  import { t, getLocale, localizedPath } from '../../../i18n';
 
   const LABELS = t();
 
@@ -1922,8 +1705,6 @@ const setTypes = [
   });
 </script>
 
-{/* Alpine.js CDN â€” MUST be AFTER the app script (type="module" runs before defer) */}
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 <style>
   /* Hide Alpine elements until initialized (prevents flash) */
@@ -3840,6 +3621,65 @@ const setTypes = [
     .ses__mrv-btn,
     .ses__actions {
       transition: none;
+    }
+  }
+  /* Narrow-phone layout: keep exercise controls readable instead of
+     compressing the header into three competing inline controls. */
+  @media (max-width: 480px) {
+    .ses__ex-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 4.4rem;
+      align-items: start;
+    }
+    .ses__ex-toggle {
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+    }
+    .ses__ex-header > .ses__ex-superset-select {
+      grid-column: 1;
+      grid-row: 2;
+      width: 100%;
+      max-width: none;
+      margin-top: 0.2rem;
+    }
+    .ses__ex-header > .ses__icon-btn {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .ses__ex-head {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ses__ex-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .ses__ex-actions .ses__btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .ses__rest-timer-skip {
+      width: 4.4rem;
+      padding: 0;
+      justify-content: center;
+    }
+    .ses__rest-timer-skip span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .ses__rpe-toggle-btn {
+      padding-inline: 0.65rem;
     }
   }
 </style>

@@ -17,7 +17,7 @@
  * absent de la liste n'a simplement aucune bande (ligne « — » en UI).
  */
 
-import type { ReferenceBands, ReferenceLift } from './benchmarks';
+import type { ReferenceLift } from './benchmarks';
 
 /** Statut des données chargées : toujours `'reference'` tant que le serveur n'est pas branché. */
 export const BENCHMARKS_DATA_STATUS: 'reference' | 'community' = 'reference';

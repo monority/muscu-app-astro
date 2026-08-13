@@ -24,6 +24,9 @@ export default {
   noTimed: 'aucune séance chronométrée',
   regularity: 'Régularité',
   last12wKg: '12 dernières semaines · kg soulevés',
+  volumeTotalMeta: 'par volume total (12 sem.)',
+  activeWeek: 'semaine active',
+  activeWeeks: 'semaines actives',
   last8w: '8 dernières semaines',
   // ── Benchmarks (roadmap P2 « Communauté / benchmarks », V1 locale) ──
   benchmarksTitle: 'Benchmarks',

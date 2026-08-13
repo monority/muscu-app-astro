@@ -6,6 +6,26 @@
 
 import type { Session, SessionSet } from './storage';
 
+type SessionStatus = 'completed' | 'in-progress' | 'planned';
+
+/** Status labels object with translations for each status. */
+export interface StatusLabels {
+  completed: string;
+  inProgress: string;
+  planned: string;
+}
+
+/**
+ * Returns the localized status label for a session status.
+ * The caller provides the translated labels to keep this module
+ * i18n-agnostic.
+ */
+export function statusLabel(status: SessionStatus, labels: StatusLabels): string {
+  if (status === 'completed') return labels.completed;
+  if (status === 'in-progress') return labels.inProgress;
+  return labels.planned;
+}
+
 export interface UndoLastSetResult {
   /** A shallow copy of the session with the last completed set reverted. */
   session: Session;
@@ -38,6 +58,51 @@ export function undoLastCompletedSet(session: Session): UndoLastSetResult | null
     }
   }
   return null;
+}
+
+/**
+ * Counts completed sessions in a measurement interval. The start is
+ * inclusive; the next measurement date is exclusive so a session is
+ * attributed to exactly one interval. When no end is supplied, the count
+ * covers everything from the measurement to today.
+ */
+function sessionsInInterval(
+  sessions: Session[],
+  startDate: string,
+  endDate?: string,
+): Session[] {
+  const start = startDate.slice(0, 10);
+  const end = endDate ? endDate.slice(0, 10) : '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return [];
+
+  return sessions.filter((session) => {
+    if (session.status !== 'completed') return false;
+    const date = session.date.slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < start) return false;
+    return !end || date < end;
+  });
+}
+
+export function countCompletedSessionsBetween(
+  sessions: Session[],
+  startDate: string,
+  endDate?: string,
+): number {
+  return sessionsInInterval(sessions, startDate, endDate).length;
+}
+
+/**
+ * Sums completed-set volume in the same interval used for body measurements.
+ */
+export function completedVolumeBetween(
+  sessions: Session[],
+  startDate: string,
+  endDate?: string,
+): number {
+  return sessionsInInterval(sessions, startDate, endDate).reduce(
+    (total, session) => total + completedVolume(session),
+    0,
+  );
 }
 
 /** Total volume (kg × reps) of the completed sets only. */
