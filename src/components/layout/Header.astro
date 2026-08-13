@@ -10,6 +10,9 @@
  *   sidebar's navigation.
  * - The brand logo lives in the Sidebar; this topbar stays minimal
  *   so the IA is owned by the side nav on every screen size.
+ * - Quick-search trigger (icon + hint + "/" shortcut) sits right
+ *   next to the hamburger in the topbar, always visible, so it stays
+ *   reachable on every screen size.
  * - `title` is the current page title — shows the heading right
  *   where the user is looking, no need to scroll the content.
  */
@@ -41,7 +44,10 @@ const { title, class: className = "" } = Astro.props;
       <span class="topbar__hamburger-bar"></span>
     </button>
 
-    {/* Search (mobile/tablet only — opens the quick-search palette) */}
+    {
+      /* Search — opens the global quick-search palette on every
+        screen size. */
+    }
     <button
       type="button"
       class="topbar__search"
@@ -51,7 +57,6 @@ const { title, class: className = "" } = Astro.props;
       title={L.layout.searchAria}
     >
       <svg
-        class="topbar__search-icon"
         viewBox="0 0 24 24"
         width="18"
         height="18"
@@ -65,23 +70,187 @@ const { title, class: className = "" } = Astro.props;
         <circle cx="11" cy="11" r="8"></circle>
         <path d="m21 21-4.3-4.3"></path>
       </svg>
+      <span class="topbar__search-hint">{L.layout.searchPlaceholder}</span>
+      <kbd aria-hidden="true">/</kbd>
     </button>
-
-    {title && <span class="topbar__title">{title}</span>}
 
     <div class="topbar__right">
       <slot name="actions" />
+
+      {
+        /* User / theme / locale controls — moved up from the sidebar
+          footer so they stay reachable on every screen size. */
+      }
+      <div class="topbar__controls" x-data="localeApp()">
+        {/* User info (populated by the AppShell auth script) */}
+        <div class="topbar__user" data-user-zone hidden>
+          <span class="topbar__user-name" data-user-name>—</span>
+          <span class="topbar__user-email" data-user-email>—</span>
+        </div>
+
+        {/* Logout */}
+        <button
+          type="button"
+          class="topbar__logout"
+          data-logout
+          aria-label={L.layout.logoutAria}
+          title={L.layout.logoutAria}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+
+        {
+          /* Theme toggle — toggleTheme()/isDark() resolve from the
+            parent themeApp scope on the AppShell root. */
+        }
+        <button
+          type="button"
+          class="topbar__control"
+          @click="toggleTheme()"
+          :aria-label="isDark() ? switchToLight : switchToDark"
+          :title="isDark() ? switchToLight : switchToDark"
+        >
+          <span
+            class="topbar__control-icon topbar__control-icon--sun"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="4"></circle>
+              <path
+                d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+              ></path>
+            </svg>
+          </span>
+          <span
+            class="topbar__control-icon topbar__control-icon--moon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </span>
+        </button>
+
+        {/* Locale switcher */}
+        <button
+          type="button"
+          class="topbar__control"
+          @click="switchLocale()"
+          :aria-label="switchLocaleAria"
+          :title="switchLocaleAria"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path
+              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            ></path>
+          </svg>
+          <span class="topbar__control-label" x-text="localeLabel"></span>
+        </button>
+      </div>
     </div>
   </div>
 </header>
+
+<script>
+  import { t, getLocale } from "../../i18n";
+
+  const L = t();
+
+  document.addEventListener("alpine:init", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Alpine = (window as any).Alpine;
+
+    Alpine.data("localeApp", () => ({
+      locale: getLocale(),
+      switchToLight: L.layout.switchToLight,
+      switchToDark: L.layout.switchToDark,
+      themeLight: L.layout.themeLight,
+      themeDark: L.layout.themeDark,
+      switchLocaleAria: L.layout.switchLocale,
+
+      get localeLabel(): string {
+        return this.locale === "en" ? L.layout.langEn : L.layout.langFr;
+      },
+
+      switchLocale() {
+        const path = window.location.pathname;
+        const search = window.location.search;
+        const hash = window.location.hash;
+        let target: string;
+        if (this.locale === "en") {
+          target = path.startsWith("/en") ? path.slice(3) : path;
+          if (!target) target = "/";
+        } else {
+          target = "/en" + (path === "/" ? "" : path);
+        }
+        window.location.href = target + search + hash;
+      },
+    }));
+  });
+</script>
 
 <style>
   /* ── Shell ─────────────────────────────────────────────── */
   .topbar {
     top: 0;
     z-index: 2;
-   background-color: var(--color-surface);
+    /* Translucent + blur so the decorative background shows through
+       a soft glass edge; solid fallback if unsupported. */
+    background-color: color-mix(in srgb, var(--color-surface) 78%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
     border-bottom: 1px solid var(--color-border);
+  }
+
+  /* ── Solid fallback when backdrop-filter is unavailable ── */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .topbar {
+      background-color: var(--color-surface);
+    }
   }
 
   .topbar__inner {
@@ -157,21 +326,19 @@ const { title, class: className = "" } = Astro.props;
     transform: translateY(-6px) rotate(-45deg);
   }
 
-  /* ── Mobile search trigger ────────────────────────────── */
+  /* ── Search trigger ───────────────────────────────────── */
   /* Same visual language as the hamburger; opens the global
-     quick-search palette on handheld/tablet screens. Hidden on
-     desktop because the sidebar already has a search field. */
+     quick-search palette on every screen size. */
   .topbar__search {
-    display: none;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 4.4rem;
+    gap: 0.5rem;
     height: 4.4rem;
+    padding: 0 1.2rem;
     background: transparent;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    padding: 0;
     color: var(--color-text);
     flex: 0 0 auto;
     transition: background-color var(--transition-fast);
@@ -181,18 +348,147 @@ const { title, class: className = "" } = Astro.props;
     background-color: var(--alpha-bg-subtle);
   }
 
-  .topbar__search-icon {
-    display: block;
-    color: currentColor;
+  .topbar__search-hint {
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+
+  .topbar__search kbd {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.4rem;
+    padding: 0.1rem 0.6rem;
+    line-height: 1.2;
+    pointer-events: none;
+  }
+
+  /* ── User / theme / locale controls ────────────────────── */
+  .topbar__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex: 0 0 auto;
+  }
+
+  /* User chip (name + email), compact inside the slim topbar. */
+  .topbar__user {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    min-width: 0;
+    max-width: 16rem;
+    margin-right: 0.4rem;
+    line-height: 1.2;
+  }
+
+  .topbar__user[hidden] {
+    display: none;
+  }
+
+  .topbar__user-name {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topbar__user-email {
+    font-size: 1.05rem;
+    color: var(--color-muted);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Icon buttons — same visual language as the hamburger/search. */
+  .topbar__logout,
+  .topbar__control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-width: 4.4rem;
+    height: 4.4rem;
+    padding: 0 1rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--color-text);
+    flex: 0 0 auto;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .topbar__logout:hover,
+  .topbar__control:hover {
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .topbar__logout:focus-visible,
+  .topbar__control:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .topbar__logout:active,
+  .topbar__control:active {
+    transform: scale(0.98);
+  }
+
+  /* Logout keeps its destructive hint on hover. */
+  .topbar__logout:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--color-destructive) 10%,
+      transparent
+    );
+    border-color: color-mix(in srgb, var(--color-destructive) 35%, transparent);
+    color: var(--color-destructive);
+  }
+
+  .topbar__control-label {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex: 0 0 auto;
+  }
+
+  /* Sun visible in dark mode (suggests "switch to light"),
+     moon visible in light mode (suggests "switch to dark"). */
+  .topbar__control-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .topbar__control-icon--sun {
+    display: inline-flex;
+  }
+  .topbar__control-icon--moon {
+    display: none;
+  }
+  :global([data-theme="light"]) .topbar__control-icon--sun {
+    display: none;
+  }
+  :global([data-theme="light"]) .topbar__control-icon--moon {
+    display: inline-flex;
   }
 
   /* ── Responsive ────────────────────────────────────────── */
-  @media (max-width: 1023px) {
-    .topbar__search {
-      display: inline-flex;
-    }
-  }
-
   @media (min-width: 1024px) {
     .topbar__hamburger {
       display: none;
@@ -208,6 +504,12 @@ const { title, class: className = "" } = Astro.props;
     }
     .topbar__title {
       font-size: 1.4rem;
+    }
+    /* Save topbar space on small screens — keep the icons, drop
+       the text (user email + locale label). */
+    .topbar__user-email,
+    .topbar__control-label {
+      display: none;
     }
   }
 

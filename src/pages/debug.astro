@@ -2,9 +2,8 @@
 import { setLocale, defaultLocale } from '../i18n';
 import '../styles/globals.css';
 
-// Dev-only tool page: generates/clears demo data in localStorage. Kept out
-// of the static shell (SSR) so it never ships as a user-facing route.
-export const prerender = false;
+// Dev-only tool page: generates/clears demo data in localStorage.
+// Ships as a static /debug page (client-side only, no server logic).
 
 setLocale(Astro.currentLocale ?? defaultLocale);
 ---

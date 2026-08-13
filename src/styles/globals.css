@@ -33,7 +33,12 @@ html {
 }
 
 body {
-  background-color: var(--color-bg, #050505);
+  /* Transparent on purpose: the fixed decorative layer
+     (Background.astro, z-index: -1) must paint ABOVE the canvas
+     color but BELOW the content. If body carried an opaque
+     background here, it would be painted on top of that layer
+     (in-flow block background) and hide it. <html> keeps the
+     solid --color-bg as the FOUC-safe base. */
   color: var(--color-text);
   font-family: var(--font-body);
   font-size: 1.6rem;
@@ -41,8 +46,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  /* Same safety net on body — useful when the html element is
-     replaced (e.g. inside an iframe). */
   overflow-x: hidden;
 }
 

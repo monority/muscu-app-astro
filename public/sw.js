@@ -15,7 +15,7 @@
  * and navigate between cached pages without a connection.
  * ───────────────────────────────────────────────────────────── */
 
-const VERSION = "muscu-app-v4";
+const VERSION = "muscu-app-v6";
 const STATIC_CACHE = `${VERSION}-shell`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 
@@ -160,9 +160,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2) Static assets — cache-first, populate cache on miss.
+  // 2) Static assets. Only Astro's prod bundles under /_astro/ carry
+  //    content-hashed filenames → immutable → cache-first. Everything
+  //    else (dev sources like /src/styles/*.css, public files) changes
+  //    in place → network-first so edits and HMR actually show up
+  //    instead of stale cached CSS/JS.
   if (isStaticAsset(request, url)) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(
+      url.pathname.includes("/_astro/")
+        ? cacheFirst(request)
+        : networkFirst(request)
+    );
     return;
   }
 

@@ -126,6 +126,16 @@
   --alpha-border: hsl(0 0% 100% / 0.18);
   --alpha-text-faint: hsl(0 0% 100% / 0.25);
   --alpha-highlight: hsl(0 0% 100% / 0.22);
+
+  /* Decorative background (Background.astro) — “ambient” 2026
+     aesthetic: diffuse aurora fields, film grain and a soft
+     vignette. Low-contrast on purpose so content stays readable;
+     the light theme overrides the washes below. */
+  --bg-aurora-1: hsl(32 90% 62% / 0.14);
+  --bg-aurora-2: hsl(262 65% 64% / 0.12);
+  --bg-aurora-3: hsl(190 65% 58% / 0.08);
+  --bg-grain-opacity: 0.035;
+  --bg-vignette: hsl(0 0% 0% / 0.45);
 }
 
 /* ── Light theme override ────────────────────────────────────
@@ -200,4 +210,12 @@
      on a white surface. */
   --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.08);
   --shadow-2: 0 6px 14px hsl(0 0% 0% / 0.08);
+
+  /* Aurora washes flip to lighter, lower-contrast pastels so the
+     glow stays airy on the near-white surfaces. */
+  --bg-aurora-1: hsl(32 95% 55% / 0.12);
+  --bg-aurora-2: hsl(262 55% 58% / 0.09);
+  --bg-aurora-3: hsl(190 60% 50% / 0.06);
+  --bg-grain-opacity: 0.05;
+  --bg-vignette: hsl(0 0% 0% / 0.045);
 }

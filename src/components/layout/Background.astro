@@ -1,0 +1,148 @@
+---
+/**
+ * Background — decorative full-viewport layer.
+ *
+ * Painted BEHIND the app shell (fixed, z-index: -1, pointer-events:
+ * none) so every surface — sidebar, topbar, drawer, page background —
+ * can let it show through via translucency + backdrop blur.
+ *
+ * “Ambient” aesthetic (2026 soft-design direction): three large,
+ * heavily-blurred aurora fields in the accent family with a slow
+ * drift, a fine film-grain layer for premium texture, and a soft
+ * vignette that gives the canvas depth. Everything is low-contrast
+ * on purpose — the content stays the hero.
+ *
+ * All colors come from the --bg-* tokens (tokens.css), which flip
+ * between the dark and light themes. Motion is disabled under
+ * prefers-reduced-motion.
+ */
+---
+
+<div class="bg" aria-hidden="true">
+  <div class="bg__aurora">
+    <div class="bg__aurora-field bg__aurora-field--1"></div>
+    <div class="bg__aurora-field bg__aurora-field--2"></div>
+    <div class="bg__aurora-field bg__aurora-field--3"></div>
+  </div>
+
+  <svg
+    class="bg__grain"
+    xmlns="http://www.w3.org/2000/svg"
+    width="100%"
+    height="100%"
+    aria-hidden="true"
+  >
+    <filter id="bg-noise">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.82"
+        numOctaves="4"
+        stitchTiles="stitch"
+      />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#bg-noise)" />
+  </svg>
+
+  <div class="bg__vignette"></div>
+</div>
+
+<style>
+  /* ── Layer ─────────────────────────────────────────────── */
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    /* Sits above the html/body background, below every app surface. */
+  }
+
+  /* ── Aurora fields ─────────────────────────────────────── */
+  .bg__aurora {
+    position: absolute;
+    inset: 0;
+  }
+
+  .bg__aurora-field {
+    position: absolute;
+    border-radius: 50%;
+    /* Heavy blur turns the radial fills into diffuse light. */
+    filter: blur(72px) saturate(1.15);
+    will-change: transform;
+  }
+
+  /* Warm amber, top-right. */
+  .bg__aurora-field--1 {
+    top: -24vw;
+    right: -16vw;
+    width: 78vw;
+    height: 78vw;
+    background: radial-gradient(closest-side, var(--bg-aurora-1), transparent 70%);
+    animation: bg-aurora-1 74s ease-in-out infinite alternate;
+  }
+
+  /* Violet, bottom-left — pulls the eye across the canvas. */
+  .bg__aurora-field--2 {
+    left: -22vw;
+    bottom: -26vw;
+    width: 86vw;
+    height: 86vw;
+    background: radial-gradient(closest-side, var(--bg-aurora-2), transparent 70%);
+    animation: bg-aurora-2 88s ease-in-out infinite alternate;
+  }
+
+  /* Teal whisper, center-right. */
+  .bg__aurora-field--3 {
+    right: 6vw;
+    top: 42vh;
+    width: 46vw;
+    height: 46vw;
+    background: radial-gradient(closest-side, var(--bg-aurora-3), transparent 72%);
+    animation: bg-aurora-3 66s ease-in-out infinite alternate;
+  }
+
+  @keyframes bg-aurora-1 {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(-5vw, 4vh, 0) scale(1.08); }
+  }
+  @keyframes bg-aurora-2 {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(4vw, -5vh, 0) scale(1.07); }
+  }
+  @keyframes bg-aurora-3 {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(-3vw, -4vh, 0) scale(1.1); }
+  }
+
+  /* ── Film grain ────────────────────────────────────────── */
+  /* Monochrome fractal noise at a few percent opacity — the
+     premium “paper” texture. Static (not animated) so it is
+     rasterized once and costs nothing at runtime. */
+  .bg__grain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: var(--bg-grain-opacity);
+  }
+
+  /* ── Vignette ──────────────────────────────────────────── */
+  /* Gentle falloff toward the edges for depth. */
+  .bg__vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at 50% 42%,
+      transparent 52%,
+      var(--bg-vignette) 100%
+    );
+  }
+
+  /* ── Reduced motion ────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .bg__aurora-field {
+      animation: none;
+    }
+  }
+</style>
