@@ -18,30 +18,30 @@ const L = t();
     description={L.calendrier.description}
   />
 
-  <div class="cal" x-data="calendarApp()" x-init="init()" x-cloak>
+  <div class="cal max-w-[88rem] mx-auto pb-24 flex flex-col gap-8" x-data="calendarApp()" x-init="init()" x-cloak>
     {/* ═══ Month controls ═══ */}
-    <div class="cal__controls">
+    <div class="cal__controls flex items-center justify-between gap-2 flex-wrap border-b border-border pb-4">
       <button
         type="button"
-        class="cal__nav-btn"
+        class="cal__nav-btn inline-flex items-center justify-center min-h-[4.4rem] min-w-[4.4rem] p-0 bg-surface-2 border border-border rounded-sm text-text font-body text-[1.3rem] font-semibold cursor-pointer appearance-none transition-colors"
         @click="prevMonth()"
         aria-label={L.calendrier.prevMonth}
       >
         <Fragment set:html={icons.chevronLeft()} />
       </button>
 
-      <h2 class="cal__month-name" x-text="monthName()"></h2>
+      <h2 class="cal__month-name font-display font-bold text-text m-0 flex-1 text-center capitalize min-w-[12rem] leading-tight text-[clamp(1.5rem,2.4vw,2rem)]" x-text="monthName()"></h2>
 
       <button
         type="button"
-        class="cal__nav-btn"
+        class="cal__nav-btn inline-flex items-center justify-center min-h-[4.4rem] min-w-[4.4rem] p-0 bg-surface-2 border border-border rounded-sm text-text font-body text-[1.3rem] font-semibold cursor-pointer appearance-none transition-colors"
         @click="nextMonth()"
         aria-label={L.calendrier.nextMonth}
       >
         <Fragment set:html={icons.chevronRight()} />
       </button>
 
-      <button type="button" class="cal__today-btn" @click="goToday()">
+      <button type="button" class="cal__today-btn inline-flex items-center justify-center min-h-[4.4rem] px-6 bg-surface-2 border border-border rounded-sm text-text font-body text-[1.3rem] font-semibold cursor-pointer appearance-none transition-colors" @click="goToday()">
         {L.calendrier.today}
       </button>
     </div>
@@ -50,9 +50,9 @@ const L = t();
     <Card>
       <CardContent>
         {/* Weekday header */}
-        <div class="cal__weekdays" aria-hidden="true">
+        <div class="grid grid-cols-7 gap-[1px] mb-3" aria-hidden="true">
           <template x-for="day in weekdays" :key="day">
-            <div class="cal__weekday" x-text="day"></div>
+            <div class="cal__weekday font-display text-[1.1rem] text-muted uppercase tracking-[0.10em] font-bold text-center py-[0.4rem]" x-text="day"></div>
           </template>
         </div>
 
@@ -63,7 +63,7 @@ const L = t();
           <template x-for="day in calendarDays" :key="day.date">
             <button
               type="button"
-              class="cal__day"
+              class="cal__day min-h-26 py-3 px-[0.7rem] bg-surface border-0 text-left cursor-pointer font-body text-text flex flex-col gap-1 appearance-none transition-colors"
               :class="{ 'cal__day--other': !day.isCurrentMonth, 'cal__day--today': day.isToday, 'cal__day--selected': selectedDate === day.date }"
               :disabled="!day.isCurrentMonth"
               :aria-label="dayAriaLabel(day)"
@@ -71,19 +71,19 @@ const L = t();
               :aria-pressed="selectedDate === day.date"
               @click="selectDate(day)"
             >
-              <span class="cal__day-num" x-text="day.dayNum"></span>
+              <span class="cal__day-num text-[1.3rem] font-semibold tabular-nums leading-none" x-text="day.dayNum"></span>
               <template x-if="day.sessions.length > 0">
-                <div class="cal__dots">
+                <div class="flex gap-[3px] flex-wrap mt-auto items-center">
                   <template x-for="s in day.sessions.slice(0, 3)" :key="s.id">
                     <span
-                      class="cal__dot"
+                      class="w-[6px] h-[6px] rounded-full inline-block"
                       :class="'cal__dot--' + s.status"
                       role="img"
                       :aria-label="statusLabel(s.status)"
                     ></span>
                   </template>
                   <span
-                    class="cal__more"
+                    class="text-xs text-muted font-bold ml-[2px] leading-none"
                     x-show="day.sessions.length > 3"
                     x-text="'+' + (day.sessions.length - 3)"
                   ></span>
@@ -94,17 +94,17 @@ const L = t();
         </div>
 
         {/* Legend */}
-        <div class="cal__legend" aria-hidden="true">
-          <span class="cal__legend-item">
-            <span class="cal__dot cal__dot--completed"></span>
+        <div class="flex gap-8 flex-wrap mt-6 pt-6 border-t border-border" aria-hidden="true">
+          <span class="inline-flex items-center gap-2 text-[1.2rem] text-muted font-medium">
+            <span class="w-[6px] h-[6px] rounded-full inline-block bg-success"></span>
             {L.sessions.completed}
           </span>
-          <span class="cal__legend-item">
-            <span class="cal__dot cal__dot--in-progress"></span>
+          <span class="inline-flex items-center gap-2 text-[1.2rem] text-muted font-medium">
+            <span class="w-[6px] h-[6px] rounded-full inline-block bg-info"></span>
             {L.sessions.inProgress}
           </span>
-          <span class="cal__legend-item">
-            <span class="cal__dot cal__dot--planned"></span>
+          <span class="inline-flex items-center gap-2 text-[1.2rem] text-muted font-medium">
+            <span class="w-[6px] h-[6px] rounded-full inline-block bg-muted"></span>
             {L.sessions.planned}
           </span>
         </div>
@@ -129,21 +129,21 @@ const L = t();
             />
           </template>
           <template x-if="selectedSessions.length > 0">
-            <div class="cal__day-sessions">
+            <div class="flex flex-col gap-2">
               <template x-for="s in selectedSessions" :key="s.id">
                 <a
                   :href="localizedPath('/seances/detail?id=' + encodeURIComponent(s.id))"
-                  class="cal__session-item"
+                  class="cal__session-item flex items-center justify-between gap-4 py-6 px-6 bg-surface-2 border border-border rounded-md no-underline text-text min-h-[4.4rem] transition-colors"
                 >
-                  <div class="cal__session-info">
-                    <span class="cal__session-name" x-text="s.name"></span>
-                    <span class="cal__session-meta">
+                  <div class="flex flex-col gap-[0.2rem] min-w-0">
+                    <span class="font-display text-[1.4rem] font-semibold leading-tight overflow-hidden text-ellipsis whitespace-nowrap" x-text="s.name"></span>
+                    <span class="text-[1.2rem] text-muted leading-tight">
                       <span x-text="s.exercises.length"></span>
                       {L.sessions.exoSingular}<span x-show="s.exercises.length > 1">{L.sessions.pluralS}</span>
                     </span>
                   </div>
                   <span
-                    class="cal__session-status"
+                    class="cal__session-status text-[1.1rem] font-bold uppercase tracking-[0.08em] py-2 px-4 rounded-sm shrink-0"
                     :class="'cal__session-status--' + s.status"
                     x-text="statusLabel(s.status)"
                   ></span>
@@ -161,30 +161,30 @@ const L = t();
         <CardTitle>{L.calendrier.monthlyStats}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="cal__stats">
-          <div class="cal__stat">
-            <span class="cal__stat-label">{L.calendrier.sessionsThisMonth}</span>
-            <span class="cal__stat-value" x-text="monthSessionCount"></span>
+        <div class="cal__stats grid grid-cols-2 gap-0 border-t border-b border-border">
+          <div class="cal__stat flex flex-col gap-1 min-w-0 py-6 px-6 bg-transparent border-0 border-b border-border rounded-none">
+            <span class="text-xs text-muted uppercase tracking-[0.10em] font-bold leading-tight">{L.calendrier.sessionsThisMonth}</span>
+            <span class="font-display text-[2.2rem] font-bold text-text tabular-nums leading-[1.1] inline-flex items-baseline gap-1" x-text="monthSessionCount"></span>
           </div>
-          <div class="cal__stat">
-            <span class="cal__stat-label">{L.dashboard.totalVolume}</span>
-            <span class="cal__stat-value">
+          <div class="cal__stat flex flex-col gap-1 min-w-0 py-6 px-6 bg-transparent border-0 border-b border-border rounded-none">
+            <span class="text-xs text-muted uppercase tracking-[0.10em] font-bold leading-tight">{L.dashboard.totalVolume}</span>
+            <span class="font-display text-[2.2rem] font-bold text-text tabular-nums leading-[1.1] inline-flex items-baseline gap-1">
               <span x-text="formatNumber(monthVolume)"></span>
-              <span class="cal__stat-unit">{L.common.kg}</span>
+              <span class="font-body text-[1.2rem] text-muted font-semibold">{L.common.kg}</span>
             </span>
           </div>
-          <div class="cal__stat">
-            <span class="cal__stat-label">{L.calendrier.currentStreak}</span>
-            <span class="cal__stat-value">
+          <div class="cal__stat flex flex-col gap-1 min-w-0 py-6 px-6 bg-transparent border-0 border-b border-border rounded-none">
+            <span class="text-xs text-muted uppercase tracking-[0.10em] font-bold leading-tight">{L.calendrier.currentStreak}</span>
+            <span class="font-display text-[2.2rem] font-bold text-text tabular-nums leading-[1.1] inline-flex items-baseline gap-1">
               <span x-text="currentStreak"></span>
-              <span class="cal__stat-unit">{L.calendrier.daysShort}</span>
+              <span class="font-body text-[1.2rem] text-muted font-semibold">{L.calendrier.daysShort}</span>
             </span>
           </div>
-          <div class="cal__stat">
-            <span class="cal__stat-label">{L.calendrier.longestStreak}</span>
-            <span class="cal__stat-value">
+          <div class="cal__stat flex flex-col gap-1 min-w-0 py-6 px-6 bg-transparent border-0 border-b border-border rounded-none">
+            <span class="text-xs text-muted uppercase tracking-[0.10em] font-bold leading-tight">{L.calendrier.longestStreak}</span>
+            <span class="font-display text-[2.2rem] font-bold text-text tabular-nums leading-[1.1] inline-flex items-baseline gap-1">
               <span x-text="longestStreak"></span>
-              <span class="cal__stat-unit">{L.calendrier.daysShort}</span>
+              <span class="font-body text-[1.2rem] text-muted font-semibold">{L.calendrier.daysShort}</span>
             </span>
           </div>
         </div>
@@ -458,63 +458,14 @@ const L = t();
 </script>
 
 <style>
-  .cal {
-    max-width: 88rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  /* ═══ Controls ═══ */
-  .cal__controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-  }
-
-  .cal__month-name {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 2.4vw, 2rem);
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0;
-    flex: 1;
-    text-align: center;
-    text-transform: capitalize;
-    min-width: 12rem;
-    line-height: 1.2;
-  }
-
-  .cal__nav-btn,
-  .cal__today-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4.4rem;
-    padding: 0 1.4rem;
-    background-color: var(--color-surface-2);
+  .cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--color-border);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    font-weight: 600;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition:
-      background-color var(--transition-fast),
-      border-color var(--transition-fast),
-      color var(--transition-fast);
-  }
-
-  .cal__nav-btn {
-    min-width: 4.4rem;
-    padding: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
   }
 
   .cal__nav-btn:hover,
@@ -539,55 +490,6 @@ const L = t();
     height: 1.8rem;
   }
 
-  /* ═══ Weekday header ═══ */
-  .cal__weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    margin-bottom: 0.6rem;
-  }
-
-  .cal__weekday {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    font-weight: 700;
-    text-align: center;
-    padding: 0.4rem 0;
-  }
-
-  /* ═══ Day grid ═══ */
-  .cal__grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: var(--color-border);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
-
-  .cal__day {
-    min-height: 6.5rem;
-    padding: 0.6rem 0.7rem;
-    background: var(--color-surface);
-    border: 0;
-    text-align: left;
-    cursor: pointer;
-    font-family: var(--font-body);
-    color: var(--color-text);
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    -webkit-appearance: none;
-    appearance: none;
-    transition:
-      background-color var(--transition-fast),
-      outline-color var(--transition-fast);
-  }
-
   .cal__day:hover:not(:disabled) {
     background-color: var(--color-surface-2);
   }
@@ -610,7 +512,7 @@ const L = t();
     font-weight: 700;
   }
 
-  .cal__day--today .cal__more {
+  .cal__day--today .text-xs {
     color: var(--color-accent-foreground);
   }
 
@@ -630,28 +532,6 @@ const L = t();
     outline-offset: -2px;
   }
 
-  .cal__day-num {
-    font-size: 1.3rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .cal__dots {
-    display: flex;
-    gap: 3px;
-    flex-wrap: wrap;
-    margin-top: auto;
-    align-items: center;
-  }
-
-  .cal__dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-
   .cal__dot--completed {
     background: var(--color-success);
   }
@@ -664,58 +544,6 @@ const L = t();
     background: var(--color-muted);
   }
 
-  .cal__more {
-    font-size: 1.0rem;
-    color: var(--color-muted);
-    font-weight: 700;
-    margin-left: 2px;
-    line-height: 1;
-  }
-
-  /* ═══ Legend ═══ */
-  .cal__legend {
-    display: flex;
-    gap: 1.6rem;
-    flex-wrap: wrap;
-    margin-top: 1.2rem;
-    padding-top: 1.2rem;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .cal__legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    font-weight: 500;
-  }
-
-  /* ═══ Selected day ═══ */
-
-  .cal__day-sessions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .cal__session-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1.2rem 1.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    color: var(--color-text);
-    min-height: 4.4rem;
-    transition:
-      border-color var(--transition-fast),
-      background-color var(--transition-fast);
-  }
-
   .cal__session-item:hover {
     border-color: var(--color-accent);
     background-color: var(--alpha-bg-subtle);
@@ -724,39 +552,6 @@ const L = t();
   .cal__session-item:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
-  }
-
-  .cal__session-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
-  }
-
-  .cal__session-name {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 600;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .cal__session-meta {
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    line-height: 1.2;
-  }
-
-  .cal__session-status {
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 0.4rem 0.8rem;
-    border-radius: var(--radius-sm);
-    flex-shrink: 0;
   }
 
   .cal__session-status--completed {
@@ -774,15 +569,6 @@ const L = t();
     color: var(--color-muted);
   }
 
-  /* ═══ Stats ═══ */
-  .cal__stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
-
   @media (min-width: 640px) {
     .cal__stats {
       grid-template-columns: repeat(4, 1fr);
@@ -791,55 +577,12 @@ const L = t();
     .cal__stat + .cal__stat {
       border-left: 1px solid var(--color-border);
     }
-  }
 
-  .cal__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    min-width: 0;
-    padding: 1.6rem 1.4rem;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-  }
-
-  @media (min-width: 640px) {
     .cal__stat {
       border-bottom: 0;
     }
   }
 
-  .cal__stat-label {
-    font-size: 1.0rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .cal__stat-value {
-    font-family: var(--font-display);
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.4rem;
-  }
-
-  .cal__stat-unit {
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    font-weight: 600;
-  }
-
-  /* ═══ Responsive ═══ */
   @media (max-width: 480px) {
     .cal__controls {
       display: grid;
@@ -858,22 +601,25 @@ const L = t();
       min-height: 5rem;
       padding: 0.4rem 0.5rem;
     }
+
     .cal__day-num {
       font-size: 1.2rem;
     }
+
     .cal__weekday {
       font-size: 0.95rem;
     }
+
     .cal__controls {
       gap: 0.6rem;
     }
+
     .cal__month-name {
       font-size: 1.4rem;
       min-width: 8rem;
     }
   }
 
-  /* ═══ Reduced motion ═══ */
   @media (prefers-reduced-motion: reduce) {
     .cal__day,
     .cal__nav-btn,
@@ -881,15 +627,27 @@ const L = t();
     .cal__session-item {
       transition: none;
     }
+
     .cal__nav-btn:active,
     .cal__today-btn:active {
       transform: none;
     }
   }
-  /* ── Calendar canvas ───────────────────────────────────── */
-  :global(.cal > .surface) { background: transparent; border: 0; border-top: 1px solid var(--color-border); border-radius: 0; }
-  :global(.cal > .surface:last-child) { border-bottom: 1px solid var(--color-border); }
-  :global(.cal > .surface > .p-4), :global(.cal > .surface > .p-6) { padding-left: 0; padding-right: 0; }
-  .cal__controls { border-bottom: 1px solid var(--color-border); padding-bottom: 1.6rem; }
 
+  :global(.cal > .surface) {
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    border-radius: 0;
+  }
+
+  :global(.cal > .surface:last-child) {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  :global(.cal > .surface > .p-4),
+  :global(.cal > .surface > .p-6) {
+    padding-left: 0;
+    padding-right: 0;
+  }
 </style>

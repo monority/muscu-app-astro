@@ -18,7 +18,7 @@ const L = t();
   />
 
   <div
-    class="hist"
+    class="max-w-[96rem] mx-auto pb-[6rem] flex flex-col gap-5"
     x-data="exerciseHistoryApp()"
     x-init="init()"
     x-cloak
@@ -29,15 +29,15 @@ const L = t();
     {/* ── Not found state ── */}
     <template x-if="notFound">
       <Card>
-        <div class="hist__error">
-          <div class="hist__error-icon" aria-hidden="true">
+        <div class="flex flex-col items-center text-center gap-3 py-5 max-w-[32rem] mx-auto">
+          <div class="hist__error-icon inline-flex items-center justify-center w-[6rem] h-[6rem] rounded-full text-destructive" aria-hidden="true">
             <Fragment set:html={icons.infoCircle(30, 30)} />
           </div>
-          <h2 class="hist__error-title">{L.historique.notFound}</h2>
-          <p class="hist__error-text">
+          <h2 class="font-display text-[2rem] text-text">{L.historique.notFound}</h2>
+          <p class="text-muted text-[1.3rem] leading-normal">
             {L.historique.notFoundDesc}
           </p>
-          <a href={localizedPath("/exercices")} class="hist__error-link">
+          <a href={localizedPath("/exercices")} class="hist__error-link inline-flex items-center h-[4.2rem] px-[1.8rem] bg-accent text-accent-foreground rounded-md font-bold text-[1.3rem] no-underline mt-1 hover:bg-accent-hover">
             {L.historique.viewExercises}
           </a>
         </div>
@@ -46,17 +46,17 @@ const L = t();
 
     {/* ── Loaded exercise ── */}
     <template x-if="!notFound && exercise">
-      <div class="hist__content">
+      <div class="flex flex-col gap-5">
         {/* ── Header ── */}
-        <header class="hist__header">
-          <div class="hist__header-row">
-            <div class="hist__title-block">
-              <div class="hist__title-icon" aria-hidden="true">
+        <header class="flex flex-col gap-2">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="hist__title-icon inline-flex items-center justify-center w-[4.4rem] h-[4.4rem] shrink-0 rounded-md text-accent" aria-hidden="true">
                 <Fragment set:html={icons.dumbbellBox(24, 24)} />
               </div>
-              <h1 class="hist__title" x-text="trExercise(exercise.name)"></h1>
+              <h1 class="hist__title font-display font-bold text-text leading-[1.1] tracking-[-0.01em] break-words" x-text="trExercise(exercise.name)"></h1>
             </div>
-            <div class="hist__badges">
+            <div class="inline-flex flex-wrap gap-[0.6rem] items-center">
               <Badge
                 variant="category"
                 size="sm"
@@ -70,20 +70,20 @@ const L = t();
 
         {/* ── Chart ── */}
         <Card padding="lg">
-          <div class="hist__chart-section">
-            <header class="hist__section-head">
-              <h2 class="hist__section-title">{L.historique.historyTitle}</h2>
-              <span class="hist__section-meta" x-text="chartMeta"></span>
+          <div class="flex flex-col">
+            <header class="flex items-baseline justify-between gap-3 flex-wrap mb-[1.4rem]">
+              <h2 class="font-display text-[1.4rem] font-bold uppercase tracking-[0.14em] text-text m-0">{L.historique.historyTitle}</h2>
+              <span class="text-[1.2rem] text-muted font-medium" x-text="chartMeta"></span>
             </header>
 
             <template x-if="chartData.length === 0">
-              <p class="hist__chart-empty">
+              <p class="text-muted text-[1.3rem] leading-normal text-center py-6 px-3">
                 {L.historique.historyEmpty}
               </p>
             </template>
 
             <template x-if="chartData.length > 0">
-              <div class="hist__chart-wrap">
+              <div class="flex flex-col gap-2">
                 <svg
                   class="hist__chart"
                   viewBox="0 0 800 300"
@@ -134,10 +134,10 @@ const L = t();
                 </svg>
 
                 {/* X axis date labels (subset to avoid overlap) */}
-                <div class="hist__chart-x" x-show="chartData.length > 0">
+                <div class="flex justify-between py-0 px-3 text-muted text-[1.1rem] font-semibold uppercase tracking-[0.06em]" x-show="chartData.length > 0">
                   <template x-for="(d, i) in chartData" :key="'l' + i">
                     <span
-                      class="hist__chart-tick"
+                      class="tabular-nums"
                       :class="{ 'hist__chart-tick--start': i === 0, 'hist__chart-tick--end': i === chartData.length - 1 }"
                       x-show="i === 0 || i === chartData.length - 1 || i === Math.floor(chartData.length / 2)"
                       x-text="formatDateShort(d.date)"
@@ -151,66 +151,66 @@ const L = t();
 
         {/* ── Stats grid ── */}
         <template x-if="history.length > 0">
-          <div class="hist__stats">
+          <div class="hist__stats grid grid-cols-1 gap-0 border-t border-b border-border">
             {/* Best 1RM */}
-            <div class="hist__stat hist__stat--hero">
-              <div class="hist__stat-head">
-                <span class="hist__stat-icon"><Fragment set:html={icons.trendingUp(16, 16)} /></span>
-                <span class="hist__stat-label">{L.historique.best1RM}</span>
+            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
+              <div class="inline-flex items-center gap-[0.6rem]">
+                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.trendingUp(16, 16)} /></span>
+                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.best1RM}</span>
               </div>
-              <div class="hist__stat-value-row">
+              <div class="flex items-baseline gap-1">
                 <span class="hist__stat-value" x-text="formatNumber(best1RM)"></span>
-                <span class="hist__stat-unit">kg</span>
+                <span class="font-body text-[1.2rem] text-muted font-semibold">kg</span>
               </div>
-              <span class="hist__stat-foot" x-text="best1RMDate ? formatDate(best1RMDate) : '—'"></span>
+              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="best1RMDate ? formatDate(best1RMDate) : '—'"></span>
             </div>
 
             {/* Best weight */}
-            <div class="hist__stat">
-              <div class="hist__stat-head">
-                <span class="hist__stat-icon"><Fragment set:html={icons.volumeBox(16, 16)} /></span>
-                <span class="hist__stat-label">{L.historique.bestWeight}</span>
+            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
+              <div class="inline-flex items-center gap-[0.6rem]">
+                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.volumeBox(16, 16)} /></span>
+                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.bestWeight}</span>
               </div>
-              <div class="hist__stat-value-row">
+              <div class="flex items-baseline gap-1">
                 <span class="hist__stat-value" x-text="formatNumber(bestWeight)"></span>
-                <span class="hist__stat-unit">kg</span>
+                <span class="font-body text-[1.2rem] text-muted font-semibold">kg</span>
               </div>
-              <span class="hist__stat-foot" x-text="bestWeightDate ? formatDate(bestWeightDate) : '—'"></span>
+              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="bestWeightDate ? formatDate(bestWeightDate) : '—'"></span>
             </div>
 
             {/* Max reps */}
-            <div class="hist__stat">
-              <div class="hist__stat-head">
-                <span class="hist__stat-icon"><Fragment set:html={icons.arrowUpDown(16, 16)} /></span>
-                <span class="hist__stat-label">{L.historique.maxReps}</span>
+            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
+              <div class="inline-flex items-center gap-[0.6rem]">
+                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.arrowUpDown(16, 16)} /></span>
+                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.maxReps}</span>
               </div>
-              <div class="hist__stat-value-row">
+              <div class="flex items-baseline gap-1">
                 <span class="hist__stat-value" x-text="maxReps"></span>
-                <span class="hist__stat-unit">reps</span>
+                <span class="font-body text-[1.2rem] text-muted font-semibold">reps</span>
               </div>
-              <span class="hist__stat-foot" x-text="maxRepsDate ? formatDate(maxRepsDate) : '—'"></span>
+              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="maxRepsDate ? formatDate(maxRepsDate) : '—'"></span>
             </div>
 
             {/* Total volume */}
-            <div class="hist__stat">
-              <div class="hist__stat-head">
-                <span class="hist__stat-icon"><Fragment set:html={icons.trendingUpLine(16, 16)} /></span>
-                <span class="hist__stat-label">{L.historique.totalVolume}</span>
+            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
+              <div class="inline-flex items-center gap-[0.6rem]">
+                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.trendingUpLine(16, 16)} /></span>
+                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.totalVolume}</span>
               </div>
-              <div class="hist__stat-value-row">
+              <div class="flex items-baseline gap-1">
                 <span class="hist__stat-value" x-text="formatNumber(totalVolume)"></span>
-                <span class="hist__stat-unit">kg</span>
+                <span class="font-body text-[1.2rem] text-muted font-semibold">kg</span>
               </div>
-              <span class="hist__stat-foot" x-text="sessionCountLabel"></span>
+              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="sessionCountLabel"></span>
             </div>
           </div>
         </template>
 
         {/* ── History table ── */}
-        <section class="hist__table-section">
-          <header class="hist__section-head">
-            <h2 class="hist__section-title">{L.historique.tableTitle}</h2>
-            <span class="hist__section-meta" x-text="tableMeta"></span>
+        <section class="flex flex-col">
+          <header class="flex items-baseline justify-between gap-3 flex-wrap mb-[1.4rem]">
+            <h2 class="font-display text-[1.4rem] font-bold uppercase tracking-[0.14em] text-text m-0">{L.historique.tableTitle}</h2>
+            <span class="text-[1.2rem] text-muted font-medium" x-text="tableMeta"></span>
           </header>
 
           <template x-if="history.length === 0">
@@ -226,15 +226,15 @@ const L = t();
           </template>
 
           <template x-if="history.length > 0">
-            <div class="hist__table-wrap">
-              <table class="hist__table">
+            <div class="overflow-x-auto rounded-md border border-border">
+              <table class="hist__table w-full border-collapse text-[1.3rem]">
                 <thead>
                   <tr>
                     <th scope="col">{L.historique.colDate}</th>
                     <th scope="col">{L.historique.colWeight}</th>
                     <th scope="col">{L.historique.colReps}</th>
-                    <th scope="col" class="hist__th-num">{L.historique.col1RM}</th>
-                    <th scope="col" class="hist__th-num">{L.historique.colRpe}</th>
+                    <th scope="col" class="text-right!">{L.historique.col1RM}</th>
+                    <th scope="col" class="text-right!">{L.historique.colRpe}</th>
                     <th scope="col">{L.historique.colType}</th>
                   </tr>
                 </thead>
@@ -242,15 +242,15 @@ const L = t();
                   <template x-for="(row, idx) in historyDesc" :key="idx">
                     <tr class="hist__tr">
                       <td data-label={L.historique.colDate}>
-                        <div class="hist__date">
-                          <span class="hist__date-main" x-text="formatDate(row.date)"></span>
-                          <span class="hist__date-sub" x-text="row.sessionName"></span>
+                        <div class="hist__date flex flex-col gap-[0.2rem]">
+                          <span class="hist__date-main font-semibold text-text" x-text="formatDate(row.date)"></span>
+                          <span class="text-[1.1rem] text-muted capitalize" x-text="row.sessionName"></span>
                         </div>
                       </td>
-                      <td class="hist__num" data-label={L.historique.colWeight} x-text="formatNumber(row.weight) + ' kg'"></td>
-                      <td class="hist__num" data-label={L.historique.colReps} x-text="row.reps"></td>
-                      <td class="hist__num hist__num--accent" data-label={L.historique.col1RM} x-text="formatNumber(row.estimated1RM) + ' kg'"></td>
-                      <td class="hist__num" data-label={L.historique.colRpe} x-text="formatRpe(row)"></td>
+                      <td class="hist__num font-display tabular-nums font-semibold text-right" data-label={L.historique.colWeight} x-text="formatNumber(row.weight) + ' kg'"></td>
+                      <td class="hist__num font-display tabular-nums font-semibold text-right" data-label={L.historique.colReps} x-text="row.reps"></td>
+                      <td class="hist__num font-display tabular-nums font-semibold text-right text-accent" data-label={L.historique.col1RM} x-text="formatNumber(row.estimated1RM) + ' kg'"></td>
+                      <td class="hist__num font-display tabular-nums font-semibold text-right" data-label={L.historique.colRpe} x-text="formatRpe(row)"></td>
                       <td data-label={L.historique.colType}>
                         <span
                           class="type-pill"
@@ -597,133 +597,16 @@ const L = t();
 </script>
 
 <style>
-
-
-  /* ════════════════════════════════════════════════════
-     CONTAINER
-     ════════════════════════════════════════════════════ */
-  .hist {
-    max-width: 96rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .hist__content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     HEADER
-     ════════════════════════════════════════════════════ */
-  .hist__header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .hist__header-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.2rem;
-    flex-wrap: wrap;
-  }
-
-  .hist__title-block {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
   .hist__title-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.4rem;
-    height: 4.4rem;
-    flex-shrink: 0;
-    border-radius: var(--radius-md);
     background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
-    color: var(--color-accent);
   }
-
   .hist__title-icon svg {
     width: 2.4rem;
     height: 2.4rem;
   }
 
   .hist__title {
-    font-family: var(--font-display);
     font-size: clamp(2.4rem, 4.5vw, 3.4rem);
-    font-weight: 700;
-    line-height: 1.1;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-    word-break: break-word;
-  }
-
-  .hist__badges {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    align-items: center;
-  }
-
-  /* ════════════════════════════════════════════════════
-     SECTION HEAD — shared by chart + table
-     ════════════════════════════════════════════════════ */
-  .hist__section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1.2rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.4rem;
-  }
-
-  .hist__section-title {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--color-text);
-    margin: 0;
-  }
-
-  .hist__section-meta {
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    font-weight: 500;
-  }
-
-  /* ════════════════════════════════════════════════════
-     CHART
-     ════════════════════════════════════════════════════ */
-  .hist__chart-section {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .hist__chart-empty {
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    line-height: 1.5;
-    text-align: center;
-    padding: 2.4rem 1.2rem;
-  }
-
-  .hist__chart-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
   }
 
   .hist__chart {
@@ -736,43 +619,20 @@ const L = t();
     padding: 1.2rem;
   }
 
-  .hist__chart-x {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 1.2rem;
-    color: var(--color-muted);
-    font-size: 1.1rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  .hist__chart-tick {
-    font-variant-numeric: tabular-nums;
-  }
-
   .hist__chart-tick--start,
   .hist__chart-tick--end {
     color: var(--color-text);
     font-weight: 700;
   }
 
-  /* ════════════════════════════════════════════════════
-     STATS BAND — open performance signals
-     ════════════════════════════════════════════════════ */
   .hist__stats {
-    display: grid;
     grid-template-columns: 1fr;
-    gap: 0;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
   }
 
   @media (min-width: 640px) {
     .hist__stats {
       grid-template-columns: repeat(2, 1fr);
     }
-
     .hist__stat:nth-child(even) {
       border-left: 1px solid var(--color-border);
     }
@@ -782,57 +642,12 @@ const L = t();
     .hist__stats {
       grid-template-columns: repeat(4, 1fr);
     }
-
     .hist__stat {
       border-bottom: 0;
     }
-
     .hist__stat + .hist__stat {
       border-left: 1px solid var(--color-border);
     }
-  }
-
-  .hist__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    min-width: 0;
-    padding: 1.8rem 2rem;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-  }
-
-  .hist__stat--hero {
-    background-color: transparent;
-  }
-
-  .hist__stat-head {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .hist__stat-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    color: var(--color-accent);
-    flex-shrink: 0;
-  }
-
-  .hist__stat-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-  }
-
-  .hist__stat-value-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4rem;
   }
 
   .hist__stat-value {
@@ -844,43 +659,8 @@ const L = t();
     line-height: 1.1;
     letter-spacing: -0.01em;
   }
-
   .hist__stat--hero .hist__stat-value {
     color: var(--color-accent);
-  }
-
-  .hist__stat-unit {
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    font-weight: 600;
-  }
-
-  .hist__stat-foot {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: capitalize;
-    margin-top: 0.2rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     TABLE
-     ════════════════════════════════════════════════════ */
-  .hist__table-section {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .hist__table-wrap {
-    overflow-x: auto;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-  }
-
-  .hist__table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 1.3rem;
   }
 
   .hist__table thead th {
@@ -897,10 +677,6 @@ const L = t();
     white-space: nowrap;
   }
 
-  .hist__th-num {
-    text-align: right !important;
-  }
-
   .hist__table tbody td {
     padding: 1.0rem 1.4rem;
     border-bottom: 1px solid var(--color-border);
@@ -915,105 +691,23 @@ const L = t();
     background-color: var(--color-surface-2);
   }
 
-  .hist__num {
-    font-family: var(--font-display);
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    text-align: right;
-  }
-
-  .hist__num--accent {
-    color: var(--color-accent);
-  }
-
-  .hist__date {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
   .hist__date-main {
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .hist__date-sub {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: capitalize;
-  }
-
-  /* ── Set type pill — now uses the global .type-pill system (globals.css) ── */
-
-  /* ════════════════════════════════════════════════════
-     NOT FOUND STATE
-     ════════════════════════════════════════════════════ */
-  .hist__error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1.2rem;
-    padding: 2rem 0;
-    max-width: 32rem;
-    margin: 0 auto;
+    overflow-wrap: anywhere;
   }
 
   .hist__error-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 6rem;
-    height: 6rem;
-    border-radius: 50%;
     background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
-    color: var(--color-destructive);
   }
-
   .hist__error-icon svg {
     width: 3rem;
     height: 3rem;
   }
 
-  .hist__error-title {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    color: var(--color-text);
-  }
-
-  .hist__error-text {
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    line-height: 1.5;
-  }
-
   .hist__error-link {
-    display: inline-flex;
-    align-items: center;
-    height: 4.2rem;
-    padding: 0 1.8rem;
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 1.3rem;
-    text-decoration: none;
-    margin-top: 0.4rem;
     transition: background-color var(--transition-fast);
   }
 
-  .hist__error-link:hover {
-    background-color: var(--color-accent-hover);
-    color: var(--color-accent-foreground);
-  }
-
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
-     ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
-    /* Stack the table into cards so the date + RPE + type stay legible
-       on narrow viewports. The first two rows are the row's label badges;
-       remaining rows are the data cells. */
     .hist__table thead {
       display: none;
     }
@@ -1079,10 +773,6 @@ const L = t();
   }
 
   @media (max-width: 480px) {
-    .hist__header-row {
-      gap: 1rem;
-    }
-
     .hist__title-icon {
       width: 4.0rem;
       height: 4.0rem;
@@ -1106,9 +796,6 @@ const L = t();
     }
   }
 
-  /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
     .hist__error-link {
       transition: none;

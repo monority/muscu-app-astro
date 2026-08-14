@@ -12,63 +12,26 @@ const {
   variant = 'primary',
   class: className = '',
 } = Astro.props;
+
+const btnBase = 'inline-flex items-center justify-center min-h-[4.4rem] px-[1.6rem] rounded-[var(--radius-sm)] font-[var(--font-body)] text-[1.4rem] font-semibold cursor-pointer transition-[background-color,border-color,color,transform] duration-[var(--transition-fast)]';
 ---
 
-<div class:list={['dialog-footer', className]}>
-  <button type="button" class="dialog-footer__btn dialog-footer__btn--secondary" data-dialog-close>
+<div class:list={['flex justify-end gap-[0.8rem] pt-[1.6rem]', className]}>
+  <button type="button" class:list={[btnBase, 'bg-[var(--color-surface-2)] border border-[var(--color-border-strong)] text-[var(--color-text)] hover:bg-[var(--color-surface-3)]']} data-dialog-close>
     {cancelLabel}
   </button>
-  <button type="button" class:list={['dialog-footer__btn', `dialog-footer__btn--${variant}`]}>
+  <button type="button" class:list={[btnBase, variant === 'primary' && 'bg-[var(--color-accent)] border border-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:bg-[var(--color-accent-hover)]', variant === 'destructive' && 'dialog-btn-destructive']}>
     <slot />
   </button>
 </div>
 
 <style>
-  .dialog-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.8rem;
-    padding-top: 1.6rem;
-  }
-  .dialog-footer__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4.4rem;
-    padding: 0 1.6rem;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background-color var(--transition-fast),
-      border-color var(--transition-fast),
-      color var(--transition-fast),
-      transform var(--transition-fast);
-  }
-  .dialog-footer__btn--secondary {
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border-strong);
-    color: var(--color-text);
-  }
-  .dialog-footer__btn--secondary:hover {
-    background: var(--color-surface-3);
-  }
-  .dialog-footer__btn--primary {
-    background: var(--color-accent);
-    border: 1px solid var(--color-accent);
-    color: var(--color-accent-foreground);
-  }
-  .dialog-footer__btn--primary:hover {
-    background: var(--color-accent-hover);
-  }
-  .dialog-footer__btn--destructive {
+  .dialog-btn-destructive {
     background: transparent;
     border: 1px solid color-mix(in srgb, var(--color-destructive) 45%, transparent);
     color: var(--color-destructive);
   }
-  .dialog-footer__btn--destructive:hover {
+  .dialog-btn-destructive:hover {
     background: color-mix(in srgb, var(--color-destructive) 10%, transparent);
   }
 </style>

@@ -23,15 +23,15 @@ const L = t();
   />
 
   <div
-    class="sess"
+    class="max-w-96rem mx-auto pb-16"
     x-data="sessionsApp()"
     x-init="init()"
     x-cloak
   >
     {/* ── Toolbar: search ── */}
-    <div class="sess__toolbar">
+    <div class="mb-5">
       <SearchInput
-        class="sess__search"
+        class="relative w-full max-w-44rem"
         placeholder={L.sessions.search}
         x-model="search"
         label={L.sessions.search}
@@ -39,16 +39,16 @@ const L = t();
     </div>
 
     {/* ── Meta row: count ── */}
-    <div class="sess__meta">
-      <span class="sess__count" x-text="countLabel"></span>
+    <div class="flex items-center justify-between gap-3 mb-4">
+      <span class="text-[1.1rem] text-muted uppercase tracking-[0.14em] font-semibold" x-text="countLabel"></span>
     </div>
 
     {/* ── Grid (when there are sessions) ── */}
     <template x-if="filtered.length > 0">
-      <div class="sess__grid">
+      <div class="sess__grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <template x-for="session in filtered" :key="session.id">
           <article
-            class="sess__card"
+            class="sess__card relative flex flex-col gap-3 p-5 bg-[var(--surface-panel)] border border-border rounded-lg cursor-pointer transition-all duration-200 sm:max-[480px]:p-4"
             :class="'sess__card--' + session.status"
             @click="navigateTo(session.id)"
             @keydown.enter="navigateTo(session.id)"
@@ -57,25 +57,29 @@ const L = t();
             role="link"
             :aria-label="labels.seenAriaPrefix + session.name + ' · ' + statusLabel(session.status)"
           >
-            <header class="sess__card-head">
-              <div class="sess__card-title">
-                <span class="sess__card-icon" aria-hidden="true">
+            <header class="flex items-start justify-between gap-2.5 min-w-0">
+              <div class="flex items-center gap-2 min-w-0 flex-1">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--alpha-bg-subtle)] text-muted flex-shrink-0" aria-hidden="true">
                   <Fragment set:html={icons.dumbbellBox()} />
                 </span>
-                <div class="sess__card-name-row">
-                  <span class="sess__card-dot" aria-hidden="true"></span>
-                  <h3 class="sess__card-name" x-text="session.name"></h3>
+                <div class="flex items-center gap-2 min-w-0 flex-1">
                   <span
-                    class="sess__mood-indicator"
+                    class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    aria-hidden="true"
+                    :class="session.status === 'completed' ? 'bg-success' : session.status === 'in-progress' ? 'bg-info' : 'bg-muted'"
+                  ></span>
+                  <h3 class="font-[var(--font-display)] text-xl font-bold leading-tight text-text break-words pr-4 sm:max-[480px]:text-[1.6rem]" x-text="session.name"></h3>
+                  <span
+                    class="inline-flex items-center justify-center flex-shrink-0 w-6.5 h-6.5 rounded-full bg-surface-2 border border-border cursor-help"
                     x-show="session.mood"
                     :title="labels.moodLabel + ' : ' + moodLabel(session.mood)"
                     :aria-label="labels.moodLabel + ' : ' + moodLabel(session.mood)"
                   >
-                    <span class="sess__mood-emoji" x-html="moodEmoji(session.mood)" aria-hidden="true"></span>
+                    <span class="inline-flex items-center justify-center leading-none text-text" x-html="moodEmoji(session.mood)" aria-hidden="true"></span>
                   </span>
                 </div>
               </div>
-              <div class="sess__badge">
+              <div class="inline-flex flex-col items-end gap-1 flex-shrink-0">
                 <div x-show="session.status === 'completed'">
                   <Badge variant="success" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
                 </div>
@@ -89,21 +93,21 @@ const L = t();
             </header>
 
             <div
-              class="sess__card-date"
+              class="text-sm text-muted capitalize leading-snug"
               x-text="formatDate(session.date)"
             ></div>
 
-            <div class="sess__card-meta">
-              <div class="sess__meta-item">
-                <span class="sess__meta-icon" set:html={icons.dumbbell()} />
-                <span class="sess__meta-value" x-text="session.exercises.length"></span>
-                <span class="sess__meta-label" x-text="session.exercises.length > 1 ? labels.exoPlural : labels.exoSingular"></span>
+            <div class="flex flex-wrap gap-[1.4rem_2rem] py-1 px-0 pb-1.5">
+              <div class="inline-flex items-center gap-1.5">
+                <span class="text-muted flex-shrink-0 [&_svg]:w-4 [&_svg]:h-4" set:html={icons.dumbbell()} />
+                <span class="font-[var(--font-display)] text-base font-bold text-text tabular-nums leading-none sm:max-[480px]:text-[1.4rem]" x-text="session.exercises.length"></span>
+                <span class="text-[1.1rem] text-muted uppercase tracking-[0.08em] font-semibold" x-text="session.exercises.length > 1 ? labels.exoPlural : labels.exoSingular"></span>
               </div>
-              <div class="sess__volume-badge">
-                <span class="sess__volume-icon" set:html={icons.volumeBox()} />
+              <div class="sess__volume-badge inline-flex items-center gap-1.25 h-7 px-2.75 bg-[var(--color-stat-volume-bg)] border border-[color-mix(in_srgb,var(--color-stat-volume)_30%,transparent)] rounded-pill text-[var(--color-stat-volume)] font-[var(--font-display)] text-sm font-bold tracking-[0.02em] tabular-nums leading-none">
+                <span class="flex-shrink-0 [&_svg]:w-3.5 [&_svg]:h-3.5" set:html={icons.volumeBox()} />
                 <span x-text="formatVolume(totalVolume(session))"></span>
               </div>
-              <div class="sess__muscle" x-show="primaryMuscle(session)">
+              <div class="inline-flex items-center" x-show="primaryMuscle(session)">
                 <Badge
                   variant="category"
                   size="sm"
@@ -114,7 +118,7 @@ const L = t();
               </div>
             </div>
 
-            <footer class="sess__card-foot">
+            <footer class="relative flex items-center justify-end mt-auto pt-1">
               <IconButton
                 variant="ghost"
                 icon={icons.dots()}
@@ -138,12 +142,12 @@ const L = t();
               <template x-if="menuId === session.id">
                 {/* Enter/Space inside the popover must NOT bubble to the
                     card article's navigate() keydown handlers. */}
-                <div class="sess__menu" @click.stop @keydown.enter.stop @keydown.space.stop>
+                <div class="sess__menu absolute right-0 bottom-[calc(100%+0.6rem)] z-20 min-w-50 p-1.5 bg-surface-3 border border-border rounded-md shadow-[0_12px_32px_rgb(0,0,0/0.35)]" @click.stop @keydown.enter.stop @keydown.space.stop>
                   <Button
                     variant="ghost"
                     size="sm"
                     fullWidth
-                    class="sess__menu-item"
+                    class="flex items-center justify-start w-full min-h-11 px-3 bg-transparent border-none rounded-sm text-text font-body text-sm font-semibold text-left cursor-pointer appearance-none transition-colors duration-140 hover:bg-[var(--alpha-bg-soft)]"
                     x-show="session.status !== 'in-progress'"
                     @click="menuId = ''; setStatus(session.id, 'in-progress')"
                   >
@@ -153,7 +157,7 @@ const L = t();
                     variant="ghost"
                     size="sm"
                     fullWidth
-                    class="sess__menu-item"
+                    class="flex items-center justify-start w-full min-h-11 px-3 bg-transparent border-none rounded-sm text-text font-body text-sm font-semibold text-left cursor-pointer appearance-none transition-colors duration-140 hover:bg-[var(--alpha-bg-soft)]"
                     x-show="session.status !== 'completed'"
                     @click="menuId = ''; setStatus(session.id, 'completed')"
                   >
@@ -163,7 +167,7 @@ const L = t();
                     variant="ghost"
                     size="sm"
                     fullWidth
-                    class="sess__menu-item"
+                    class="flex items-center justify-start w-full min-h-11 px-3 bg-transparent border-none rounded-sm text-text font-body text-sm font-semibold text-left cursor-pointer appearance-none transition-colors duration-140 hover:bg-[var(--alpha-bg-soft)]"
                     @click="menuId = ''; duplicateSession(session.id)"
                   >
                     <span x-text="labels.duplicate"></span>
@@ -172,7 +176,7 @@ const L = t();
                     variant="ghost"
                     size="sm"
                     fullWidth
-                    class="sess__menu-item"
+                    class="flex items-center justify-start w-full min-h-11 px-3 bg-transparent border-none rounded-sm text-text font-body text-sm font-semibold text-left cursor-pointer appearance-none transition-colors duration-140 hover:bg-[var(--alpha-bg-soft)]"
                     @click="menuId = ''; openMove(session.id)"
                   >
                     <span x-text="labels.moveDate"></span>
@@ -201,14 +205,14 @@ const L = t();
     {/* ── Empty state: no results matching search ── */}
     <template x-if="hasSessions && filtered.length === 0">
       <Card>
-        <div class="sess__empty-cta">
-          <h3 class="sess__empty-title" x-text="labels.noResult">{L.sessions.noResult}</h3>
-          <p class="sess__empty-text" x-text="labels.noMatchPrefix + ' « ' + search + ' ».'">
+        <div class="flex flex-col items-center gap-3 py-4 px-2">
+          <h3 class="font-[var(--font-display)] text-[1.5rem] font-bold text-text" x-text="labels.noResult">{L.sessions.noResult}</h3>
+          <p class="text-muted text-[1.3rem] text-center [&_span]:text-text [&_span]:font-semibold" x-text="labels.noMatchPrefix + ' « ' + search + ' ».'">
             {L.sessions.noMatchPrefix} « <span x-text="search"></span> ».
           </p>
           <button
             type="button"
-            class="sess__reset-btn"
+            class="inline-flex items-center min-h-11 px-4 bg-transparent border border-border rounded-md text-muted font-body text-sm font-semibold cursor-pointer transition-all duration-140 hover:bg-surface-2 hover:text-text hover:border-[var(--alpha-border)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:transform-none"
             @click="search = ''"
             x-text="labels.resetSearch"
           >
@@ -220,7 +224,7 @@ const L = t();
 
     {/* ── Backdrop for the quick-actions menu ── */}
     <div
-      class="sess__menu-backdrop"
+      class="fixed inset-0 z-15 bg-transparent"
       x-show="menuId !== ''"
       x-cloak
       @click="menuId = ''"
@@ -228,11 +232,11 @@ const L = t();
 
     {/* ── Move session dialog ── */}
     <Dialog id="sess-move-dialog" title={L.sessions.moveTitle}>
-      <label class="sess__move-field">
-        <span class="sess__move-label">{L.sessions.moveDateLabel}</span>
+      <label class="flex flex-col gap-2">
+        <span class="text-[1.3rem] font-semibold text-muted">{L.sessions.moveDateLabel}</span>
         <input
           type="date"
-          class="sess__move-input"
+          class="w-full h-12 px-3.5 bg-surface-2 border border-border rounded-md text-text font-body text-sm outline-none transition-all duration-140 focus:border-accent focus:shadow-[var(--focus-ring)]"
           x-model="moveDate"
           :max="todayIso"
         />
@@ -474,40 +478,8 @@ const L = t();
 
 <style>
   /* ════════════════════════════════════════════════════
-     CONTAINER
+     SEARCH — :global() overrides for child component
      ════════════════════════════════════════════════════ */
-  .sess {
-    max-width: 96rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     TOOLBAR — search
-     ════════════════════════════════════════════════════ */
-  .sess__toolbar {
-    margin-bottom: 2rem;
-  }
-
-  .sess__search {
-    position: relative;
-    width: 100%;
-    max-width: 44rem;
-  }
-
-  .sess__search-icon {
-    position: absolute;
-    top: 50%;
-    left: 1.4rem;
-    transform: translateY(-50%);
-    width: 1.8rem;
-    height: 1.8rem;
-    color: var(--color-muted);
-    pointer-events: none;
-  }
-
-  /* Search field renders via the Input primitive (child component), so
-     the scoped override must target it with :global(). */
   .sess__search :global(.sess__search-input) {
     width: 100%;
     height: 4.8rem;
@@ -533,64 +505,8 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     META — count label
+     CARD — hover arrow pseudo-element + :has() guard
      ════════════════════════════════════════════════════ */
-  .sess__meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.2rem;
-    margin-bottom: 1.6rem;
-  }
-
-  .sess__count {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 600;
-  }
-
-  /* ════════════════════════════════════════════════════
-     GRID — 1 / 2 / 3 columns
-     ════════════════════════════════════════════════════ */
-  .sess__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.6rem;
-  }
-
-  @media (min-width: 640px) {
-    .sess__grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .sess__grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  /* ════════════════════════════════════════════════════
-     CARD
-     ════════════════════════════════════════════════════ */
-  .sess__card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    padding: 2rem;
-    background-color: var(--surface-panel);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    cursor: pointer;
-    transition: border-color var(--transition-base),
-                box-shadow var(--transition-base),
-                transform var(--transition-base);
-  }
-
-  /* Hover arrow indicator */
   .sess__card::after {
     content: '→';
     position: absolute;
@@ -628,358 +544,10 @@ const L = t();
     transform: translateX(0);
   }
 
-  /* Status signal: inline dot next to the name (no border stripe) */
-  .sess__card--completed .sess__card-dot {
-    background-color: var(--color-success);
-  }
-  .sess__card--in-progress .sess__card-dot {
-    background-color: var(--color-info);
-  }
-  .sess__card--planned .sess__card-dot {
-    background-color: var(--color-muted);
-  }
-
-  /* ── Card head ── */
-  .sess__card-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    min-width: 0;
-  }
-
-  .sess__card-title {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  /* Icon disc — matches the dashboard KPI discs (2.8rem tinted circle) */
-  .sess__card-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    background-color: var(--alpha-bg-subtle);
-    color: var(--color-muted);
-    flex-shrink: 0;
-  }
-
-  .sess__card-icon svg {
-    display: block;
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .sess__card-name-row {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .sess__card-dot {
-    width: 1.0rem;
-    height: 1.0rem;
-    border-radius: 50%;
-    background-color: var(--color-muted);
-    flex-shrink: 0;
-  }
-
-  .sess__card-name {
-    font-family: var(--font-display);
-    font-size: 1.8rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-text);
-    word-break: break-word;
-    /* leave room for the hover arrow on the right */
-    padding-right: 1.6rem;
-  }
-
-  /* ── Mood indicator (next to the session name) ── */
-  .sess__mood-indicator {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 2.6rem;
-    height: 2.6rem;
-    border-radius: 50%;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    cursor: help;
-  }
-
-  .sess__mood-emoji {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    color: var(--color-text);
-  }
-
-  .sess__mood-emoji svg {
-    display: block;
-  }
-
-  .sess__card-date {
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    text-transform: capitalize;
-    line-height: 1.3;
-  }
-
-  /* ── Card meta (icon + value + label rows) ── */
-  .sess__card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.4rem 2rem;
-    padding: 0.4rem 0 0.6rem;
-  }
-
-  .sess__meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .sess__meta-icon {
-    color: var(--color-muted);
-    flex-shrink: 0;
-  }
-  .sess__meta-icon svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .sess__meta-value {
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .sess__meta-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-  }
-
-  /* ── Volume badge (pill) — emerald stat-volume tokens, matches dashboard */
-  .sess__volume-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    height: 2.8rem;
-    padding: 0 1.1rem;
-    background-color: var(--color-stat-volume-bg);
-    border: 1px solid color-mix(in srgb, var(--color-stat-volume) 30%, transparent);
-    border-radius: var(--radius-pill);
-    color: var(--color-stat-volume);
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .sess__volume-icon {
-    flex-shrink: 0;
-  }
-  .sess__volume-icon svg {
-    width: 1.4rem;
-    height: 1.4rem;
-  }
-
-  /* ── Status badge (design-system Badge component) ── */
-  .sess__badge {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.4rem;
-    flex-shrink: 0;
-  }
-
-  .sess__muscle {
-    display: inline-flex;
-    align-items: center;
-  }
-
-  /* ── Card footer / delete button ── */
-  .sess__card-foot {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-top: auto;
-    padding-top: 0.4rem;
-  }
-
-
-
-  /* ════════════════════════════════════════════════════
-     QUICK-ACTIONS MENU
-     ════════════════════════════════════════════════════ */
-  .sess__menu {
-    position: absolute;
-    right: 0;
-    bottom: calc(100% + 0.6rem);
-    z-index: 20;
-    min-width: 20rem;
-    padding: 0.6rem;
-    background-color: var(--color-surface-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: 0 12px 32px rgb(0 0 0 / 0.35);
-  }
-
-  .sess__menu-item {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    min-height: 4.4rem;
-    padding: 0 1.2rem;
-    background-color: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: background-color var(--transition-fast);
-  }
-
-  .sess__menu-item:hover {
-    background-color: var(--alpha-bg-soft);
-  }
-
-  .sess__menu-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 15;
-    background-color: transparent;
-  }
-
-  /* ════════════════════════════════════════════════════
-     MOVE DIALOG
-     ════════════════════════════════════════════════════ */
-  .sess__move-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .sess__move-label {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--color-muted);
-  }
-
-  .sess__move-input {
-    width: 100%;
-    height: 4.8rem;
-    padding: 0 1.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    outline: none;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  }
-
-  .sess__move-input:focus-visible {
-    border-color: var(--color-accent);
-    box-shadow: var(--focus-ring);
-  }
-
-  /* ════════════════════════════════════════════════════
-     EMPTY STATES
-     ════════════════════════════════════════════════════ */
-  .sess__empty-cta {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.2rem;
-    padding: 1.6rem 0 0.8rem;
-  }
-
-  .sess__empty-title {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-  }
-
-  .sess__empty-text {
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    text-align: center;
-  }
-
-  .sess__empty-text span {
-    color: var(--color-text);
-    font-weight: 600;
-  }
-
-  .sess__reset-btn {
-    display: inline-flex;
-    align-items: center;
-    min-height: 4.4rem;
-    padding: 0 1.6rem;
-    background-color: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-muted);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color var(--transition-fast),
-                color var(--transition-fast),
-                border-color var(--transition-fast);
-  }
-
-  .sess__reset-btn:hover {
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    border-color: var(--alpha-border);
-  }
-
-  .sess__reset-btn:active {
-    transform: scale(0.97);
-  }
-
   /* ════════════════════════════════════════════════════
      RESPONSIVE — small screens
      ════════════════════════════════════════════════════ */
   @media (max-width: 480px) {
-    .sess__card {
-      padding: 1.6rem;
-    }
-    .sess__card-name {
-      font-size: 1.6rem;
-    }
-    .sess__meta-value {
-      font-size: 1.4rem;
-    }
     .sess__search :global(.sess__search-input) {
       height: 4.4rem;
       font-size: 1.3rem;
@@ -991,20 +559,17 @@ const L = t();
      ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
     .sess__card,
-    .sess__card::after,
-    .sess__reset-btn,
-    .sess__menu-item {
+    .sess__card::after {
       transition: none;
     }
     .sess__card:hover {
       transform: none;
     }
-    .sess__reset-btn:active,
-    .sess__menu-item:active {
-      transform: none;
-    }
   }
-  /* ── Workout log composition ───────────────────────────── */
+
+  /* ════════════════════════════════════════════════════
+     WORKOUT LOG COMPOSITION — list-style layout override
+     ════════════════════════════════════════════════════ */
   .sess__grid { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--color-border); }
   .sess__card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem 2rem; padding: 2.2rem 0; background: transparent; border: 0; border-bottom: 1px solid var(--color-border); border-radius: 0; box-shadow: none; }
   .sess__card::after { content: '↗'; top: 2.1rem; right: 0; opacity: 0.45; transform: none; color: var(--color-accent); }
@@ -1020,5 +585,4 @@ const L = t();
     .sess__card { grid-template-columns: minmax(0, 1fr) auto; padding: 1.8rem 0; }
     .sess__card-name { font-size: 1.8rem; }
   }
-
 </style>

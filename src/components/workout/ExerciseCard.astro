@@ -18,13 +18,13 @@ const completedCount = sets.filter((set) => set.completed).length;
 const classes = ['workout-exercise', completedCount === sets.length && sets.length > 0 && 'workout-exercise--complete', className].filter(Boolean).join(' ');
 ---
 
-<article class={classes}>
-  <header class="workout-exercise__header">
-    <div class="workout-exercise__identity">
-      <span class="workout-exercise__marker" aria-hidden="true"></span>
+<article class:list={['flex flex-col gap-[1.4rem] py-8 border-b border-[var(--color-border)]', className, { 'workout-exercise--complete': completedCount === sets.length && sets.length > 0 }]}>
+  <header class="flex items-start justify-between gap-[1.2rem]">
+    <div class="flex items-start gap-4 min-w-0">
+      <span class="workout-exercise__marker w-2 h-[3.8rem] shrink-0 bg-[var(--color-border-strong)]" aria-hidden="true"></span>
       <div>
-        <h3 class="workout-exercise__name">{name}</h3>
-        <span class="workout-exercise__muscle">{muscle}</span>
+        <h3 class="m-0 text-[var(--color-text)] text-[1.9rem] tracking-tight">{name}</h3>
+        <span class="block mt-1 text-[var(--color-muted)] text-[1.1rem] font-bold tracking-[0.12em] uppercase">{muscle}</span>
       </div>
     </div>
     <Badge variant={completedCount === sets.length && sets.length > 0 ? 'success' : 'default'} size="sm">
@@ -33,32 +33,23 @@ const classes = ['workout-exercise', completedCount === sets.length && sets.leng
   </header>
 
   {sets.length > 0 && (
-    <div class="workout-exercise__summary" aria-label={`${sets.length} sets`}>
+    <div class="flex gap-[0.8rem] text-[var(--color-muted)] text-[1.2rem]" aria-label={`${sets.length} sets`}>
       <span>{sets.length} {L.common.sets}</span>
-      <span class="workout-exercise__summary-separator" aria-hidden="true">/</span>
+      <span class="text-[var(--color-accent)]" aria-hidden="true">/</span>
       <span>{completedCount} {L.sessions.completed.toLowerCase()}</span>
     </div>
   )}
 
   {expanded && sets.length > 0 && (
-    <div class="workout-exercise__sets" role="list" aria-label={name}>
-      <div class="workout-exercise__set-head" aria-hidden="true"><span>SET</span><span>LOAD</span><span></span><span>REPS</span><span>TYPE</span><span></span></div>
+    <div class="border-t border-[var(--color-border-strong)]" role="list" aria-label={name}>
+      <div class="grid grid-cols-[3.2rem_minmax(6rem,1fr)2rem_minmax(6rem,1fr)auto_2.4rem] gap-[0.8rem] px-4 py-[0.8rem] text-[var(--color-muted)] text-[0.9rem] font-extrabold tracking-[0.14em] max-[480px]:grid-cols-[2.6rem_minmax(5rem,1fr)1.4rem_minmax(5rem,1fr)auto_2rem] max-[480px]:gap-1 max-[480px]:px-[0.4rem]" aria-hidden="true"><span>SET</span><span>LOAD</span><span></span><span>REPS</span><span>TYPE</span><span></span></div>
       {sets.map((set, i) => <SetRow index={i + 1} weight={set.weight} reps={set.reps} completed={set.completed} type={set.type} />)}
     </div>
   )}
 </article>
 
 <style>
-  .workout-exercise { display: flex; flex-direction: column; gap: 1.4rem; padding: 2rem 0; border-bottom: 1px solid var(--color-border); }
-  .workout-exercise__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.2rem; }
-  .workout-exercise__identity { display: flex; align-items: flex-start; gap: 1rem; min-width: 0; }
-  .workout-exercise__marker { width: 0.5rem; height: 3.8rem; flex: 0 0 auto; background: var(--color-border-strong); }
+  .workout-exercise { padding: 2rem 0; }
   .workout-exercise--complete .workout-exercise__marker { background: var(--color-accent); }
-  .workout-exercise__name { margin: 0; color: var(--color-text); font-size: 1.9rem; letter-spacing: -0.03em; }
-  .workout-exercise__muscle { display: block; margin-top: 0.4rem; color: var(--color-muted); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
-  .workout-exercise__summary { display: flex; gap: 0.8rem; color: var(--color-muted); font-size: 1.2rem; }
-  .workout-exercise__summary-separator { color: var(--color-accent); }
-  .workout-exercise__sets { border-top: 1px solid var(--color-border-strong); }
-  .workout-exercise__set-head { display: grid; grid-template-columns: 3.2rem minmax(6rem, 1fr) 2rem minmax(6rem, 1fr) auto 2.4rem; gap: 0.8rem; padding: 0.8rem 1rem; color: var(--color-muted); font-size: 0.9rem; font-weight: 800; letter-spacing: 0.14em; }
-  @media (max-width: 480px) { .workout-exercise { padding: 1.6rem 0; } .workout-exercise__set-head { grid-template-columns: 2.6rem minmax(5rem, 1fr) 1.4rem minmax(5rem, 1fr) auto 2rem; gap: 0.4rem; padding: 0.8rem 0.4rem; } }
+  @media (max-width: 480px) { .workout-exercise { padding: 1.6rem 0; } }
 </style>

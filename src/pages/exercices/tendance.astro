@@ -15,13 +15,13 @@ const L = t();
   />
 
   <div
-    class="trend"
+    class="max-w-[96rem] mx-auto pb-[6rem] flex flex-col gap-5"
     x-data="exerciseTrendApp()"
     x-init="init()"
     x-cloak
   >
     {/* ── Back link ── */}
-    <a href={localizedPath("/exercices")} class="trend__back">
+    <a href={localizedPath("/exercices")} class="trend__back-custom inline-flex items-center gap-[0.6rem] text-muted text-[1.3rem] font-semibold no-underline self-start py-1 pr-[0.6rem] pl-1 -ml-1 rounded-sm">
       <Fragment set:html={icons.arrowLeft()} />
       <span>{L.tendance.back}</span>
     </a>
@@ -29,13 +29,13 @@ const L = t();
     {/* ── Not found state ── */}
     <template x-if="notFound">
       <Card>
-        <div class="trend__error">
-          <div class="trend__error-icon" aria-hidden="true">
+        <div class="flex flex-col items-center text-center gap-3 py-5 max-w-[32rem] mx-auto">
+          <div class="trend__error-icon-bg inline-flex items-center justify-center w-[6rem] h-[6rem] rounded-full text-destructive" aria-hidden="true">
             <Fragment set:html={icons.infoCircle(30, 30)} />
           </div>
-          <h2 class="trend__error-title">{L.tendance.notFound}</h2>
-          <p class="trend__error-text">{L.tendance.notFoundDesc}</p>
-          <a href={localizedPath("/exercices")} class="trend__error-link">
+          <h2 class="font-display text-[2rem] text-text">{L.tendance.notFound}</h2>
+          <p class="text-muted text-[1.3rem] leading-[1.5]">{L.tendance.notFoundDesc}</p>
+          <a href={localizedPath("/exercices")} class="trend__error-link-custom inline-flex items-center h-[4.2rem] px-[1.8rem] bg-accent text-accent-foreground rounded-md font-bold text-[1.3rem] no-underline mt-1 hover:bg-accent-hover">
             {L.tendance.viewExercises}
           </a>
         </div>
@@ -44,19 +44,19 @@ const L = t();
 
     {/* ── Loaded exercise ── */}
     <template x-if="!notFound && exercise">
-      <div class="trend__content">
+      <div class="flex flex-col gap-5">
         {/* ── Controls ── */}
         <Card padding="md">
-          <div class="trend__controls">
+          <div class="flex flex-col gap-[1.4rem] sm:flex-row sm:items-end sm:gap-4 sm:flex-wrap">
             {/* Exercise selector */}
-            <div class="trend__field trend__field--grow">
-              <label class="trend__label" for="trend-exercise">
+            <div class="flex flex-col gap-[0.6rem] min-w-0 flex-[1_1_24rem]">
+              <label class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold" for="trend-exercise">
                 {L.tendance.exercise}
               </label>
-              <div class="trend__select-wrap">
+              <div class="relative min-w-0 w-full sm:min-w-[22rem] sm:w-auto">
                 <select
                   id="trend-exercise"
-                  class="trend__select"
+                  class="trend__select-custom w-full truncate h-[4.4rem] pl-[1.4rem] pr-[4rem] bg-surface-2 border border-border rounded-sm text-text font-body text-[1.4rem] leading-[1.2] outline-none cursor-pointer"
                   :value="selectedId"
                   @change="onExerciseChange($event.target.value)"
                 >
@@ -69,8 +69,8 @@ const L = t();
             </div>
 
             {/* Metric toggle */}
-            <div class="trend__field">
-              <span class="trend__label" id="trend-metric-label">
+            <div class="flex flex-col gap-[0.6rem] min-w-0">
+              <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold" id="trend-metric-label">
                 {L.tendance.metric}
               </span>
               <Segmented
@@ -84,8 +84,8 @@ const L = t();
             </div>
 
             {/* Period toggle */}
-            <div class="trend__field">
-              <span class="trend__label" id="trend-period-label">
+            <div class="flex flex-col gap-[0.6rem] min-w-0">
+              <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold" id="trend-period-label">
                 {L.tendance.period}
               </span>
               <Segmented
@@ -103,26 +103,26 @@ const L = t();
 
         {/* ── Chart ── */}
         <Card padding="lg">
-          <div class="trend__chart-section">
-            <header class="trend__section-head">
-              <h2 class="trend__section-title" x-text="chartTitle"></h2>
-              <span class="trend__section-meta" x-text="chartMeta"></span>
+          <div class="flex flex-col">
+            <header class="flex items-baseline justify-between gap-3 flex-wrap mb-[1.4rem]">
+              <h2 class="font-display text-[1.4rem] font-bold uppercase tracking-[0.14em] text-text m-0 break-words" x-text="chartTitle"></h2>
+              <span class="text-[1.2rem] text-muted font-medium" x-text="chartMeta"></span>
             </header>
 
             {/* Empty state: 0 points, or <2 points (not enough to draw a curve) */}
             <template x-if="points.length < 2">
-              <div class="trend__empty" role="status">
-                <div class="trend__empty-mark" aria-hidden="true">—</div>
-                <h3 class="trend__empty-title">{L.tendance.emptyTitle}</h3>
-                <p class="trend__empty-text" x-text="emptyMessage"></p>
-                <a href={localizedPath("/seances/rapide")} class="trend__empty-link">
+              <div class="flex flex-col items-center gap-2 pt-[2.8rem] px-3 pb-[2.4rem] text-center" role="status">
+                <div class="inline-flex items-center justify-center w-[4.4rem] h-[4.4rem] border border-border rounded-full text-accent font-display text-[2rem] font-bold" aria-hidden="true">—</div>
+                <h3 class="mt-1 text-text font-display text-[1.6rem] font-bold">{L.tendance.emptyTitle}</h3>
+                <p class="max-w-[34rem] m-0 text-muted text-[1.3rem] leading-[1.5]" x-text="emptyMessage"></p>
+                <a href={localizedPath("/seances/rapide")} class="trend__empty-link-custom inline-flex items-center justify-center min-h-[4.2rem] mt-[0.6rem] px-4 rounded-md bg-accent text-accent-foreground text-[1.3rem] font-bold no-underline hover:bg-accent-hover">
                   {L.common.startSession}
                 </a>
               </div>
             </template>
 
             <template x-if="points.length >= 2">
-              <div class="trend__chart-wrap">
+              <div class="flex flex-col gap-2">
                 <svg
                   class="trend__chart"
                   viewBox="0 0 800 300"
@@ -429,241 +429,50 @@ const L = t();
 </script>
 
 <style>
-  /* ════════════════════════════════════════════════════
-     CONTAINER
-     ════════════════════════════════════════════════════ */
-  .trend {
-    max-width: 96rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+  .trend__back-custom {
+    transition: color var(--transition-fast), background-color var(--transition-fast);
   }
-
-  .trend__content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     BACK LINK
-     ════════════════════════════════════════════════════ */
-  .trend__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    font-weight: 600;
-    text-decoration: none;
-    align-self: flex-start;
-    padding: 0.4rem 0.6rem 0.4rem 0.4rem;
-    margin-left: -0.4rem;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-fast),
-                background-color var(--transition-fast);
-  }
-
-  .trend__back:hover {
+  .trend__back-custom:hover {
     color: var(--color-accent);
     background-color: var(--alpha-bg-subtle);
   }
-
-  .trend__back:focus-visible {
+  .trend__back-custom:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
   }
-
-  .trend__back svg {
+  .trend__back-custom svg {
     width: 1.8rem;
     height: 1.8rem;
   }
 
-  /* ════════════════════════════════════════════════════
-     CONTROLS
-     ════════════════════════════════════════════════════ */
-  .trend__controls {
-    display: flex;
-    flex-direction: column;
-    gap: 1.4rem;
-  }
-
-  @media (min-width: 640px) {
-    .trend__controls {
-      flex-direction: row;
-      align-items: flex-end;
-      gap: 1.6rem;
-      flex-wrap: wrap;
-    }
-  }
-
-  .trend__field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    min-width: 0;
-  }
-
-  .trend__field--grow {
-    flex: 1 1 24rem;
-  }
-
-  .trend__label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-  }
-
-  /* ── Select ── */
-  .trend__select-wrap {
-    position: relative;
-    min-width: 22rem;
-  }
-
-  .trend__select {
-    width: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    height: 4.4rem;
-    padding: 0 4rem 0 1.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    line-height: 1.2;
-    outline: none;
-    cursor: pointer;
-    transition: border-color var(--transition-fast),
-                box-shadow var(--transition-fast);
+  .trend__select-custom {
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     -webkit-appearance: none;
     appearance: none;
   }
-
-  .trend__select:focus {
+  .trend__select-custom:focus {
     border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
   }
 
-  .trend__select-icon {
-    position: absolute;
-    top: 50%;
-    right: 1.3rem;
-    transform: translateY(-50%);
-    width: 1.6rem;
-    height: 1.6rem;
-    color: var(--color-muted);
-    pointer-events: none;
-  }
-
-  /* ════════════════════════════════════════════════════
-     CHART
-     ════════════════════════════════════════════════════ */
-  .trend__chart-section {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .trend__section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1.2rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.4rem;
-  }
-
-  .trend__section-title {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--color-text);
-    margin: 0;
-    word-break: break-word;
-  }
-
-  .trend__section-meta {
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    font-weight: 500;
-  }
-
-  .trend__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 2.8rem 1.2rem 2.4rem;
-    text-align: center;
-  }
-
-  .trend__empty-mark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.4rem;
-    height: 4.4rem;
-    border: 1px solid var(--color-border);
-    border-radius: 50%;
-    color: var(--color-accent);
-    font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 700;
-  }
-
-  .trend__empty-title {
-    margin: 0.4rem 0 0;
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-
-  .trend__empty-text {
-    max-width: 34rem;
-    margin: 0;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    line-height: 1.5;
-  }
-
-  .trend__empty-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4.2rem;
-    margin-top: 0.6rem;
-    padding: 0 1.6rem;
-    border-radius: var(--radius-md);
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    font-size: 1.3rem;
-    font-weight: 700;
-    text-decoration: none;
+  .trend__empty-link-custom {
     transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
   }
-
-  .trend__empty-link:hover {
-    background-color: var(--color-accent-hover);
-    color: var(--color-accent-foreground);
-  }
-
-  .trend__empty-link:focus-visible {
+  .trend__empty-link-custom:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
   }
 
-  .trend__chart-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
+  .trend__error-icon-bg {
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+  }
+  .trend__error-icon-bg svg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .trend__error-link-custom {
+    transition: background-color var(--transition-fast);
   }
 
   .trend__chart {
@@ -697,86 +506,11 @@ const L = t();
     font-weight: 700;
   }
 
-  /* ════════════════════════════════════════════════════
-     NOT FOUND STATE
-     ════════════════════════════════════════════════════ */
-  .trend__error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1.2rem;
-    padding: 2rem 0;
-    max-width: 32rem;
-    margin: 0 auto;
-  }
-
-  .trend__error-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 6rem;
-    height: 6rem;
-    border-radius: 50%;
-    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
-    color: var(--color-destructive);
-  }
-
-  .trend__error-icon svg {
-    width: 3rem;
-    height: 3rem;
-  }
-
-  .trend__error-title {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    color: var(--color-text);
-  }
-
-  .trend__error-text {
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    line-height: 1.5;
-  }
-
-  .trend__error-link {
-    display: inline-flex;
-    align-items: center;
-    height: 4.2rem;
-    padding: 0 1.8rem;
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 1.3rem;
-    text-decoration: none;
-    margin-top: 0.4rem;
-    transition: background-color var(--transition-fast);
-  }
-
-  .trend__error-link:hover {
-    background-color: var(--color-accent-hover);
-    color: var(--color-accent-foreground);
-  }
-
-  @media (max-width: 640px) {
-    .trend__select-wrap {
-      min-width: 0;
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 380px) {
-    .trend__field {
-      min-width: 0;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .trend__back,
-    .trend__empty-link,
-    .trend__error-link,
-    .trend__select {
+    .trend__back-custom,
+    .trend__empty-link-custom,
+    .trend__error-link-custom,
+    .trend__select-custom {
       transition: none;
     }
   }

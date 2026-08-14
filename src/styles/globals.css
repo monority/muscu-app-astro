@@ -108,14 +108,6 @@ button {
               transform var(--transition-fast);
 }
 
-button:has(svg) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-}
-button:has(svg) svg { flex-shrink: 0; }
-
 /* ── Harmonized button system (global utilities) ──────────────
  * Canonical mirror of src/components/ui/Button.astro. Use <Button> in
  * components; use these classes for bespoke markup that can't use the

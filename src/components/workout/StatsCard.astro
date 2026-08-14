@@ -41,8 +41,7 @@ const trendArrow = trend ? trendArrowMap[trend] : '';
     <div class="flex items-center gap-2">
       {icon && (
         <span
-          class="text-[var(--color-muted)] inline-flex items-center justify-center"
-          style="width: 1.8rem; height: 1.8rem;"
+          class="text-[var(--color-muted)] inline-flex items-center justify-center w-[1.8rem] h-[1.8rem]"
           aria-hidden="true"
           set:html={icon}
         />
@@ -54,8 +53,7 @@ const trendArrow = trend ? trendArrowMap[trend] : '';
 
     <div class="flex items-baseline">
       <span
-        class="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,2.4rem)]"
-        style="font-variant-numeric: tabular-nums;"
+        class="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,2.4rem)] tabular-nums"
       >
         {value}
       </span>

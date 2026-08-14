@@ -16,7 +16,7 @@ const L = t();
   <Toast />
 
   <div
-    class="detail"
+    class="mx-auto max-w-[72rem] flex flex-col gap-5 pb-[6rem]"
     x-data="sessionDetailApp()"
     x-init="init()"
     x-cloak
@@ -27,15 +27,15 @@ const L = t();
     {/* ── Not found state ── */}
     <template x-if="notFound">
       <Card>
-        <div class="detail__error">
-          <div class="detail__error-icon" aria-hidden="true">
+        <div class="flex flex-col items-center text-center gap-3 py-5 max-w-[32rem] mx-auto">
+          <div class="inline-flex items-center justify-center w-[6rem] h-[6rem] rounded-full bg-[color-mix(in_srgb,var(--color-destructive)_10%,transparent)] text-destructive" aria-hidden="true">
             <Fragment set:html={icons.infoCircle()} />
           </div>
-          <h2 class="detail__error-title" x-text="labels.notFound">{L.detail.notFound}</h2>
-          <p class="detail__error-text" x-text="labels.notFoundDesc">
+          <h2 class="font-display text-[2rem] text-text" x-text="labels.notFound">{L.detail.notFound}</h2>
+          <p class="text-muted text-[1.3rem] leading-[1.5]" x-text="labels.notFoundDesc">
             {L.detail.notFoundDesc}
           </p>
-          <a href={localizedPath("/seances")} class="detail__error-link" x-text="labels.viewAllSessions">
+          <a href={localizedPath("/seances")} class="inline-flex items-center min-h-[4.4rem] px-[1.8rem] bg-accent text-[var(--color-accent-foreground)] rounded-md font-bold text-[1.3rem] no-underline mt-1 hover:bg-accent-hover transition-colors duration-[140ms]" x-text="labels.viewAllSessions">
             {L.detail.viewAllSessions}
           </a>
         </div>
@@ -44,12 +44,12 @@ const L = t();
 
     {/* ── Loaded session ── */}
     <template x-if="!notFound && session">
-      <div class="detail__content">
+      <div class="flex flex-col gap-5">
         {/* Header */}
-        <header class="detail__header">
-          <div class="detail__header-row">
-            <h1 class="detail__title" x-text="session.name"></h1>
-            <div class="detail__badge">
+        <header class="flex flex-col gap-2">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <h1 class="font-display text-[clamp(2.4rem,4.5vw,3.4rem)] font-bold leading-[1.1] text-text tracking-tight break-words" x-text="session.name"></h1>
+            <div class="inline-flex flex-col items-end gap-1 shrink-0">
               <div x-show="session.status === 'completed'">
                 <Badge variant="success" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
               </div>
@@ -62,17 +62,17 @@ const L = t();
             </div>
           </div>
           <div
-            class="detail__date"
+            class="text-muted text-[1.3rem] capitalize"
             x-text="formatDateTime(session.date)"
           ></div>
         </header>
 
-        <div class="detail__status-picker">
-          <label class="detail__status-label" x-text="labels.statusLabel">{L.detail.statusLabel}</label>
-          <div class="detail__status-options" role="radiogroup" aria-label={L.detail.statusAria}>
+        <div class="flex flex-col gap-2">
+          <label class="text-[1.1rem] text-muted uppercase tracking-[0.14em] font-bold leading-none" x-text="labels.statusLabel">{L.detail.statusLabel}</label>
+          <div class="grid grid-cols-1 gap-[0.6rem] min-[480px]:grid-cols-3" role="radiogroup" aria-label={L.detail.statusAria}>
             <button
               type="button"
-              class="detail__status-btn"
+              class="inline-flex items-center justify-center gap-[0.6rem] min-h-[4.4rem] px-3 bg-surface text-muted border border-border rounded-md font-body text-[1.3rem] font-bold tracking-[0.02em] leading-none cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] ease detail__status-btn"
               :class="{ 'is-active': session.status === 'planned' }"
               :aria-pressed="session.status === 'planned'"
               @click="updateStatus('planned')"
@@ -82,7 +82,7 @@ const L = t();
             </button>
             <button
               type="button"
-              class="detail__status-btn"
+              class="inline-flex items-center justify-center gap-[0.6rem] min-h-[4.4rem] px-3 bg-surface text-muted border border-border rounded-md font-body text-[1.3rem] font-bold tracking-[0.02em] leading-none cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] ease detail__status-btn"
               :class="{ 'is-active': session.status === 'in-progress' }"
               :aria-pressed="session.status === 'in-progress'"
               @click="updateStatus('in-progress')"
@@ -92,7 +92,7 @@ const L = t();
             </button>
             <button
               type="button"
-              class="detail__status-btn"
+              class="inline-flex items-center justify-center gap-[0.6rem] min-h-[4.4rem] px-3 bg-surface text-muted border border-border rounded-md font-body text-[1.3rem] font-bold tracking-[0.02em] leading-none cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] ease detail__status-btn"
               :class="{ 'is-active': session.status === 'completed' }"
               :aria-pressed="session.status === 'completed'"
               @click="updateStatus('completed')"
@@ -104,7 +104,7 @@ const L = t();
         </div>
 
         {/* Stats grid */}
-        <div class="detail__stats">
+        <div class="grid grid-cols-1 gap-3 min-[640px]:grid-cols-3">
           <div class="detail__stat">
             <div class="detail__stat-label">
               <span class="detail__stat-icon" set:html={icons.clockStopwatch()} />
@@ -1504,98 +1504,8 @@ const L = t();
 
 <style>
   /* ════════════════════════════════════════════════════
-     CONTAINER
+     STATUS PICKER — Alpine dynamic states
      ════════════════════════════════════════════════════ */
-  .detail {
-    max-width: 72rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .detail__content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     HEADER
-     ════════════════════════════════════════════════════ */
-  .detail__header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .detail__header-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.2rem;
-    flex-wrap: wrap;
-  }
-
-  .detail__title {
-    font-family: var(--font-display);
-    font-size: clamp(2.4rem, 4.5vw, 3.4rem);
-    font-weight: 700;
-    line-height: 1.1;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-    word-break: break-word;
-  }
-
-  .detail__date {
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    text-transform: capitalize;
-  }
-
-  /* ── Status badge (design-system Badge component) ── */
-  .detail__badge {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.4rem;
-    flex-shrink: 0;
-  }
-
-  /* ════════════════════════════════════════════════════
-     STATUS PICKER — manual override (planned / in-progress / completed)
-     Sits right under the header so the user can flip the session
-     between the three states. The active option uses the same colour
-     family as the corresponding badge above.
-     ════════════════════════════════════════════════════ */
-  .detail__status-picker {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .detail__status-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .detail__status-options {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.6rem;
-  }
-
-  @media (min-width: 480px) {
-    .detail__status-options {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
   .detail__status-btn {
     display: inline-flex;
     align-items: center;
@@ -1639,7 +1549,6 @@ const L = t();
     cursor: default;
   }
 
-  /* Active variants — colour match the badge palette. */
   .detail__status-btn:has(.detail__status-dot--planned).is-active {
     background-color: var(--alpha-bg-soft);
     color: var(--color-text);
@@ -1681,20 +1590,8 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     STATS GRID — 3 cards
+     STATS CARDS
      ════════════════════════════════════════════════════ */
-  .detail__stats {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
-  }
-
-  @media (min-width: 640px) {
-    .detail__stats {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
   .detail__stat {
     display: flex;
     flex-direction: column;
@@ -1716,7 +1613,6 @@ const L = t();
     font-weight: 700;
   }
 
-  /* Icon disc — matches the dashboard KPI discs (2.8rem tinted circle) */
   .detail__stat-icon {
     display: inline-flex;
     align-items: center;
@@ -1745,7 +1641,6 @@ const L = t();
     letter-spacing: -0.01em;
   }
 
-  /* Volume stat — emerald accent like the dashboard volume KPI */
   .detail__stat--volume .detail__stat-icon {
     background-color: var(--color-stat-volume-bg);
     color: var(--color-stat-volume);
@@ -1756,7 +1651,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     ACTIONS
+     ACTIONS + SHEET
      ════════════════════════════════════════════════════ */
   .detail__actions {
     display: flex;
@@ -1764,7 +1659,6 @@ const L = t();
     flex-wrap: wrap;
   }
 
-  /* ── Fiche (CSV + print) group ── */
   .detail__sheet {
     display: inline-flex;
     align-items: center;
@@ -1786,7 +1680,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     SECTION
+     SECTION / EXERCISES
      ════════════════════════════════════════════════════ */
   .detail__section-title {
     font-family: var(--font-display);
@@ -1809,67 +1703,6 @@ const L = t();
     color: var(--color-muted);
     font-size: 1.3rem;
     padding: 2rem 0;
-  }
-
-  /* ════════════════════════════════════════════════════
-     NOT FOUND STATE
-     ════════════════════════════════════════════════════ */
-  .detail__error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1.2rem;
-    padding: 2rem 0;
-    max-width: 32rem;
-    margin: 0 auto;
-  }
-
-  .detail__error-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 6rem;
-    height: 6rem;
-    border-radius: 50%;
-    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
-    color: var(--color-destructive);
-  }
-
-  .detail__error-icon svg {
-    width: 3rem;
-    height: 3rem;
-  }
-
-  .detail__error-title {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    color: var(--color-text);
-  }
-
-  .detail__error-text {
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    line-height: 1.5;
-  }
-
-  .detail__error-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 4.4rem;
-    padding: 0 1.8rem;
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 1.3rem;
-    text-decoration: none;
-    margin-top: 0.4rem;
-    transition: background-color var(--transition-fast);
-  }
-
-  .detail__error-link:hover {
-    background-color: var(--color-accent-hover);
   }
 
   /* ════════════════════════════════════════════════════
@@ -1911,11 +1744,7 @@ const L = t();
     line-height: 1.2;
   }
 
-  /* ── Superset group badge + row tint (added 2026-08-09) ──
-     Exercises grouped via Session.supersets share a colour; the whole
-     row is tinted so grouped set rows read as a visual chain. Colours
-     come from the tokenized builder group palette (--color-superset-gN,
-     src/styles/tokens.css). */
+  /* ── Superset group badge + row tint ── */
   .exo-row__superset {
     display: inline-flex;
     align-items: center;
@@ -1948,10 +1777,7 @@ const L = t();
   .exo-row--g4 { background-color: color-mix(in srgb, var(--color-superset-g4) 6%, transparent); }
   .exo-row--g5 { background-color: color-mix(in srgb, var(--color-superset-g5) 6%, transparent); }
 
-  /* ── Per-exercise header actions (added 2026-08-04) ──
-     Hosts the "Démarrer le repos" button next to the muscle
-     badge. On mobile the actions wrap to a new line so both
-     elements stay reachable. */
+  /* ── Per-exercise header actions ── */
   .exo-row__head-actions {
     display: inline-flex;
     align-items: center;
@@ -2100,9 +1926,6 @@ const L = t();
     text-align: right;
   }
 
-  /* ── Set type pill ── */
-  /* ── Set type pill — now uses the global .type-pill system (globals.css) ── */
-
   /* ── Check / dash ── */
   .exo-row__check {
     color: var(--color-success);
@@ -2128,9 +1951,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     RPE-BASED PROGRESSION SUGGESTION (added 2026-08-04)
-     Sits under the notes section, only when the session is
-     completed and at least one RPE value was recorded.
+     SUGGESTION (tone variants via Alpine)
      ════════════════════════════════════════════════════ */
   .detail__suggestion {
     display: flex;
@@ -2247,7 +2068,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     NOTES SECTION (RPE / fatigue / mood / free text)
+     NOTES (RPE tone, fatigue .is-active, mood variants)
      ════════════════════════════════════════════════════ */
   .detail__notes {
     display: flex;
@@ -2416,7 +2237,6 @@ const L = t();
     color: var(--color-text);
   }
 
-  /* Mood colour variants — applied to the entire pill (border + icon). */
   .notes__mood--great {
     background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     border-color: color-mix(in srgb, var(--color-success) 40%, transparent);
@@ -2458,10 +2278,9 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
+     RESPONSIVE
      ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
-    /* Hide the RPE column on small screens to keep the table readable */
     .exo-row__table thead th:nth-child(5),
     .exo-row__table tbody td:nth-child(5) {
       display: none;
@@ -2469,9 +2288,6 @@ const L = t();
   }
 
   @media (max-width: 480px) {
-    .detail__stats {
-      gap: 0.8rem;
-    }
     .detail__stat {
       padding: 1.4rem 1.6rem;
     }
@@ -2498,13 +2314,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     SHARE CARD (hidden DOM reference)
-     The actual PNG export is drawn on a canvas by
-     generateShareCard(); this markup is kept in sync so the
-     design is inspectable and any future "preview before
-     download" can render it directly. `x-show="false"` keeps
-     it out of the layout — these styles only matter when
-     someone toggles visibility for debugging.
+     SHARE CARD (hidden DOM reference — absolute off-screen)
      ════════════════════════════════════════════════════ */
   .share-card {
     position: absolute;
@@ -2630,10 +2440,7 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     REST TIMER WIDGET (added 2026-08-04)
-     Same look & feel as the session-builder widget. Pops up
-     at the bottom of the page when the user triggers a rest
-     from an exercise header.
+     REST TIMER WIDGET (fixed overlay)
      ════════════════════════════════════════════════════ */
   .detail__rest-timer {
     position: fixed;
@@ -2773,9 +2580,8 @@ const L = t();
       transform: none;
     }
   }
-  /* Compact rest feedback on very narrow screens: the icon remains a
-     labelled control for assistive technology while the visual label is
-     removed to protect the exercise table's reading area. */
+
+  /* Compact rest feedback on very narrow screens */
   @media (max-width: 360px) {
     .detail__rest-timer-skip {
       width: 4.4rem;
@@ -2794,4 +2600,4 @@ const L = t();
       border: 0;
     }
   }
-</style>
+</style>

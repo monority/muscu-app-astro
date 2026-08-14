@@ -26,7 +26,7 @@ const L = t();
 ---
 
 <section
-  class="set__section"
+  class="scroll-mt-[calc(var(--topbar-height,6.4rem)+1rem)]"
   id="set-reminder"
   x-data="reminderSettings()"
   x-init="init()"
@@ -34,9 +34,10 @@ const L = t();
 >
   <Card>
     <CardHeader>
-      <div class="set__heading">
-        <span class="set__heading-icon" aria-hidden="true">
+      <div class="flex items-center gap-4 min-w-0">
+        <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] shrink-0 text-[var(--color-accent)] rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] max-[480px]:w-[3.2rem] max-[480px]:h-[3.2rem]" aria-hidden="true">
           <svg
+            class="w-[1.8rem] h-[1.8rem] max-[480px]:w-[1.6rem] max-[480px]:h-[1.6rem]"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
@@ -51,19 +52,19 @@ const L = t();
         </span>
         <CardTitle>{L.settings.reminders}</CardTitle>
       </div>
-      <p class="set__heading-sub">{L.settings.remindersDesc}</p>
+      <p class="text-[1.2rem] text-[var(--color-muted)] m-0 leading-normal">{L.settings.remindersDesc}</p>
     </CardHeader>
 
     <CardContent>
-      <div class="rem__rows" :class="{ 'rem__rows--disabled': !settings.reminders.enabled }">
+      <div class="rem__rows flex flex-col gap-0 mt-[1.2rem]" :class="{ 'rem__rows--disabled': !settings.reminders.enabled }">
         {/* ── Master toggle ── */}
-        <div class="rem__row">
-          <div class="rem__row-label">
-            <span class="rem__row-title">{L.settings.reminderToggleLabel}</span>
-            <span class="rem__row-hint">{L.settings.reminderToggleDesc}</span>
+        <div class="rem__row flex items-center justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
+          <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderToggleLabel}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.reminderToggleDesc}</span>
           </div>
-          <div class="rem__row-value">
-            <label class="rem__toggle-wrap">
+          <div class="rem__row-value shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums">
+            <label class="rem__toggle-wrap inline-flex items-center cursor-pointer min-h-[4.4rem]">
               <input
                 type="checkbox"
                 class="sr-only rem__toggle-input"
@@ -72,25 +73,25 @@ const L = t();
                 :aria-checked="settings.reminders.enabled ? 'true' : 'false'"
                 @change="setEnabled($event.target.checked)"
               />
-              <span class="rem__toggle-track">
-                <span class="rem__toggle-thumb"></span>
+              <span class="rem__toggle-track relative w-[4.4rem] h-[2.4rem] rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-[background-color,border-color] duration-200 ease-in-out shrink-0 inline-block">
+                <span class="rem__toggle-thumb absolute top-[2px] left-[3px] w-[1.8rem] h-[1.8rem] rounded-full bg-white transition-transform duration-200 ease-in-out shadow-[var(--shadow-1)] inline-block"></span>
               </span>
             </label>
           </div>
         </div>
 
         {/* ── Day-of-week pickers ── */}
-        <div class="rem__row rem__row--form">
-          <div class="rem__row-label">
-            <span class="rem__row-title">{L.settings.reminderDaysLabel}</span>
-            <span class="rem__row-hint">{L.settings.reminderDaysDesc}</span>
+        <div class="rem__row rem__row--form flex items-start justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
+          <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderDaysLabel}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.reminderDaysDesc}</span>
           </div>
-          <div class="rem__row-value--days">
-            <div class="rem__days" role="group" :aria-disabled="!settings.reminders.enabled">
+          <div class="rem__row-value--days shrink-0 max-w-[24rem]">
+            <div class="rem__days flex flex-wrap gap-2 justify-end max-[480px]:justify-start" role="group" :aria-disabled="!settings.reminders.enabled">
               <template x-for="d in days" :key="d.v">
                 <button
                   type="button"
-                  class="rem__day"
+                  class="rem__day appearance-none bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-pill)] text-[var(--color-muted)] text-[var(--font-body)] text-[1.1rem] font-bold tracking-[0.02em] h-[4.4rem] min-w-[4.8rem] px-[0.8rem] cursor-pointer transition-[background-color,color,border-color,transform] duration-[var(--transition-fast)]"
                   :class="{ 'rem__day--active': settings.reminders.days.includes(d.v) }"
                   :aria-pressed="settings.reminders.days.includes(d.v)"
                   :disabled="!settings.reminders.enabled"
@@ -103,15 +104,15 @@ const L = t();
         </div>
 
         {/* ── Time input ── */}
-        <div class="rem__row rem__row--form">
-          <div class="rem__row-label">
-            <span class="rem__row-title">{L.settings.reminderTimeLabel}</span>
-            <span class="rem__row-hint">{L.settings.reminderTimeDesc}</span>
+        <div class="rem__row rem__row--form flex items-start justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
+          <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderTimeLabel}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.reminderTimeDesc}</span>
           </div>
-          <div class="rem__row-value">
+          <div class="rem__row-value shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums">
             <input
               type="time"
-              class="rem__time"
+              class="rem__time appearance-none bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] text-[var(--font-display)] text-[1.4rem] font-bold tabular-nums h-[4.4rem] w-[12rem] px-[1.2rem] outline-none transition-[border-color,box-shadow] duration-[var(--transition-fast)]"
               :value="settings.reminders.time"
               :disabled="!settings.reminders.enabled"
               @change="setTime($event.target.value)"
@@ -122,14 +123,14 @@ const L = t();
 
         {/* ── Permission request / status (only when reminders are on) ── */}
         <div
-          class="rem__status"
+          class="rem__status flex flex-col gap-[0.6rem] mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]"
           x-show="settings.reminders.enabled"
           x-cloak
           x-transition.opacity.duration.200ms
         >
           {/* Unsupported browser → graceful info message */}
           <p
-            class="rem__status-text rem__status-text--muted"
+            class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-muted)]"
             x-show="!supported"
             x-cloak
             x-text="labels.unsupported"
@@ -153,7 +154,7 @@ const L = t();
 
           {/* Granted */}
           <p
-            class="rem__status-text rem__status-text--ok"
+            class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-success)] font-semibold"
             x-show="supported && permission === 'granted'"
             x-cloak
             x-text="labels.granted"
@@ -164,10 +165,10 @@ const L = t();
           {/* Denied → explain how to unblock */}
           <template x-if="supported && permission === 'denied'">
             <div>
-              <p class="rem__status-text rem__status-text--warn" x-text="labels.denied">
+              <p class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-warning)] font-semibold" x-text="labels.denied">
                 {L.settings.reminderDenied}
               </p>
-              <p class="rem__status-desc" x-text="labels.deniedDesc">
+              <p class="text-[1.1rem] text-[var(--color-muted)] leading-[1.4] m-0" x-text="labels.deniedDesc">
                 {L.settings.reminderDeniedDesc}
               </p>
             </div>
@@ -354,54 +355,8 @@ const L = t();
 
 <style>
   /* ═════════════════════════════════════════════════════
-     SECTION (kept in sync with the settings page styling)
+     STATE-DEPENDENT SELECTORS (cannot be Tailwind utilities)
      ═════════════════════════════════════════════════════ */
-  .set__section {
-    scroll-margin-top: calc(var(--topbar-height, 5.6rem) + 1rem);
-  }
-
-  .set__heading {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    min-width: 0;
-  }
-
-  .set__heading-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 3.6rem;
-    height: 3.6rem;
-    flex-shrink: 0;
-    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
-    color: var(--color-accent);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
-    border-radius: var(--radius-md);
-  }
-
-  .set__heading-icon svg {
-    width: 1.8rem;
-    height: 1.8rem;
-  }
-
-  .set__heading-sub {
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    margin: 0;
-    line-height: 1.4;
-  }
-
-  /* ═════════════════════════════════════════════════════
-     ROWS (mirror .set__row on the settings page)
-     ═════════════════════════════════════════════════════ */
-  .rem__rows {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 1.2rem;
-  }
-
   .rem__rows--disabled .rem__row-label,
   .rem__rows--disabled .rem__row-title,
   .rem__rows--disabled .rem__row-hint,
@@ -409,96 +364,9 @@ const L = t();
     opacity: 0.55;
   }
 
-  .rem__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.6rem 0;
-    border-bottom: 1px solid var(--alpha-bg-soft);
-  }
-
-  .rem__row:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .rem__row:first-child {
-    padding-top: 0;
-  }
-
-  .rem__row--form {
-    align-items: flex-start;
-  }
-
-  .rem__row-label {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-1);
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  .rem__row-title {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--color-text);
-    line-height: 1.2;
-  }
-
-  .rem__row-hint {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    line-height: 1.3;
-  }
-
-  .rem__row-value {
-    flex-shrink: 0;
-    text-align: right;
-    font-size: 1.3rem;
-    color: var(--color-muted);
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* ═════════════════════════════════════════════════════
-     TOGGLE (mirrors .set__toggle-* on the settings page)
-     ═════════════════════════════════════════════════════ */
-  .rem__toggle-wrap {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    min-height: 4.4rem;
-  }
-
-  .rem__toggle-track {
-    position: relative;
-    width: 4.4rem;
-    height: 2.4rem;
-    border-radius: 999px;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    transition: background-color 200ms ease, border-color 200ms ease;
-    flex-shrink: 0;
-    display: inline-block;
-  }
-
   .rem__toggle-input:checked + .rem__toggle-track {
     background-color: var(--color-accent);
     border-color: var(--color-accent);
-  }
-
-  .rem__toggle-thumb {
-    position: absolute;
-    top: 2px;
-    left: 3px;
-    width: 1.8rem;
-    height: 1.8rem;
-    border-radius: 50%;
-    background: white;
-    transition: transform 200ms ease;
-    box-shadow: var(--shadow-1);
-    display: inline-block;
   }
 
   .rem__toggle-input:checked + .rem__toggle-track .rem__toggle-thumb {
@@ -507,41 +375,6 @@ const L = t();
 
   .rem__toggle-input:focus-visible + .rem__toggle-track {
     box-shadow: var(--focus-ring);
-  }
-
-  /* ═════════════════════════════════════════════════════
-     DAY CHIPS (Lun → Dim)
-     ═════════════════════════════════════════════════════ */
-  .rem__row-value--days {
-    flex-shrink: 0;
-    max-width: 24rem;
-  }
-
-  .rem__days {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: flex-end;
-  }
-
-  .rem__day {
-    appearance: none;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    color: var(--color-muted);
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    height: 4.4rem;
-    min-width: 4.8rem;
-    padding: 0 0.8rem;
-    cursor: pointer;
-    transition: background-color var(--transition-fast),
-                color var(--transition-fast),
-                border-color var(--transition-fast),
-                transform var(--transition-fast);
   }
 
   .rem__day:hover:not(:disabled):not(.rem__day--active) {
@@ -570,27 +403,6 @@ const L = t();
     cursor: not-allowed;
   }
 
-  /* ═════════════════════════════════════════════════════
-     TIME INPUT
-     ═════════════════════════════════════════════════════ */
-  .rem__time {
-    appearance: none;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    height: 4.4rem;
-    width: 12rem;
-    padding: 0 1.2rem;
-    outline: none;
-    transition: border-color var(--transition-fast),
-                box-shadow var(--transition-fast);
-  }
-
   .rem__time:focus:not(:disabled) {
     border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
@@ -604,45 +416,6 @@ const L = t();
   .rem__time::-webkit-calendar-picker-indicator {
     filter: invert(0.6);
     cursor: pointer;
-  }
-
-  /* ═════════════════════════════════════════════════════
-     PERMISSION STATUS
-     ═════════════════════════════════════════════════════ */
-  .rem__status {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    margin-top: 1.6rem;
-    padding-top: 1.4rem;
-    border-top: 1px solid var(--alpha-bg-soft);
-  }
-
-  .rem__status-text {
-    font-size: 1.2rem;
-    line-height: 1.4;
-    margin: 0;
-  }
-
-  .rem__status-text--muted {
-    color: var(--color-muted);
-  }
-
-  .rem__status-text--ok {
-    color: var(--color-success);
-    font-weight: 600;
-  }
-
-  .rem__status-text--warn {
-    color: var(--color-warning);
-    font-weight: 600;
-  }
-
-  .rem__status-desc {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    line-height: 1.4;
-    margin: 0;
   }
 
   /* ═════════════════════════════════════════════════════
@@ -662,17 +435,6 @@ const L = t();
     .rem__row-value--days {
       max-width: 100%;
       width: 100%;
-    }
-    .rem__days {
-      justify-content: flex-start;
-    }
-    .set__heading-icon {
-      width: 3.2rem;
-      height: 3.2rem;
-    }
-    .set__heading-icon svg {
-      width: 1.6rem;
-      height: 1.6rem;
     }
   }
 

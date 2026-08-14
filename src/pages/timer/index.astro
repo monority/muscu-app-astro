@@ -16,13 +16,13 @@ const L = t();
   />
 
   <div
-    class="timer"
+    class="max-w-[96rem] mx-auto flex flex-col gap-6 pb-[6rem]"
     x-data="timerApp()"
     x-init="init()"
     x-cloak
   >
     {/* ── Top bar: pop-out (right) ── */}
-    <div class="timer__topbar">
+    <div class="flex justify-end items-center">
       <Button
         variant="secondary"
         size="sm"
@@ -40,19 +40,19 @@ const L = t();
     {/* ════════════════════════════════════════════════════
         HERO — current mode + big clock + start CTA
         ════════════════════════════════════════════════════ */}
-    <section class="timer__hero">
-      <div class="timer__hero-head">
-        <span class="timer__hero-icon" aria-hidden="true">
+    <section class="flex flex-col items-center gap-[1.4rem] pt-4 pb-6 border-y border-border">
+      <div class="inline-flex items-center gap-2">
+        <span class="timer__hero-icon inline-flex items-center justify-center w-[2.8rem] h-[2.8rem] rounded-full bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent shrink-0" aria-hidden="true">
           <Fragment set:html={icons.countdown(18, 18)} x-show="mode === 'countdown'" />
           <Fragment set:html={icons.stopwatch(18, 18)} x-show="mode === 'stopwatch'" />
         </span>
-        <span class="timer__hero-eyebrow" x-text="mode === 'countdown' ? labels.countdown : labels.stopwatch">{L.timer.countdown}</span>
-        <span class="timer__hero-sep" aria-hidden="true">·</span>
-        <span class="timer__hero-status" x-text="modeStatusLabel"></span>
+        <span class="font-display text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold" x-text="mode === 'countdown' ? labels.countdown : labels.stopwatch">{L.timer.countdown}</span>
+        <span class="text-[var(--alpha-text-faint)]" aria-hidden="true">·</span>
+        <span class="font-display text-[1.1rem] text-accent uppercase tracking-[0.1em] font-bold" x-text="modeStatusLabel"></span>
       </div>
 
-      <div class="timer__hero-stage">
-        <svg class="timer__hero-ring" viewBox="0 0 240 240" aria-hidden="true">
+      <div class="relative flex items-center justify-center w-[min(28rem,80vw)] aspect-square">
+        <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 240 240" aria-hidden="true">
           <circle class="timer__hero-ring-track" cx="120" cy="120" r="108" />
           <circle
             class="timer__hero-ring-progress"
@@ -67,16 +67,16 @@ const L = t();
         </div>
       </div>
 
-      <div class="timer__hero-meta">
+      <div class="inline-flex items-baseline gap-[0.6rem] text-[1.3rem] text-muted font-medium">
         <span x-show="mode === 'countdown'">
           <span x-text="formatShort(totalTime)"></span>
-          <span class="timer__hero-meta-sep" aria-hidden="true">·</span>
+          <span class="text-[var(--alpha-text-faint)]" aria-hidden="true">·</span>
           <span x-text="labels.custom + ' ' + (customTime === totalTime ? formatShort(customTime) : formatShort(customTime))"></span>
         </span>
         <span x-show="mode === 'stopwatch'" x-text="labels.stopwatch + ' · ' + labels.running"></span>
       </div>
 
-      <div class="timer__hero-actions">
+      <div class="flex items-stretch gap-3 w-full max-w-[36rem]">
         <Button
           variant="primary"
           size="lg"
@@ -107,8 +107,8 @@ const L = t();
     {/* ════════════════════════════════════════════════════
         MODE + PRESETS — same row, segmented + 4 quick pills
         ════════════════════════════════════════════════════ */}
-    <section class="timer__quick" aria-label={L.timer.modeAria}>
-      <div class="timer__quick-left">
+    <section class="flex items-center justify-between gap-4 flex-wrap max-[480px]:flex-col max-[480px]:items-stretch" aria-label={L.timer.modeAria}>
+      <div class="flex-none">
         <Segmented
           model="mode"
           items={[
@@ -117,7 +117,7 @@ const L = t();
           ]}
         />
       </div>
-      <div class="timer__quick-right" role="group" aria-label={L.timer.presetsAria} x-show="mode === 'countdown'">
+      <div class="inline-flex items-center gap-[0.6rem] flex-wrap" role="group" aria-label={L.timer.presetsAria} x-show="mode === 'countdown'">
         <template x-for="preset in presets" :key="preset">
           <Button
             variant="secondary"
@@ -135,14 +135,14 @@ const L = t();
     {/* ════════════════════════════════════════════════════
         CUSTOM INPUT + LAPS — two cards side by side (countdown / stopwatch)
         ════════════════════════════════════════════════════ */}
-    <section class="timer__panels">
+    <section class="grid grid-cols-1 gap-3 min-[760px]:grid-cols-2">
       {/* Custom time — countdown only */}
       <Card padding="md" class="timer__panel-card" x-show="mode === 'countdown'">
-        <header class="timer__panel-head">
-          <span class="timer__panel-eyebrow" x-text="labels.custom">{L.timer.custom}</span>
-          <span class="timer__panel-sub" x-text="labels.customSeconds">{L.timer.customSeconds}</span>
+        <header class="flex flex-col items-center gap-1 mb-3">
+          <span class="font-display text-[1.1rem] font-bold text-text uppercase tracking-[0.08em]" x-text="labels.custom">{L.timer.custom}</span>
+          <span class="text-[1.1rem] text-muted uppercase tracking-[0.08em] font-medium" x-text="labels.customSeconds">{L.timer.customSeconds}</span>
         </header>
-        <div class="timer__custom-row">
+        <div class="flex items-center justify-center gap-2">
           <Button variant="secondary" size="md" @click="adjustCustom(-15); setCustom()" aria-label={L.timer.reduce15}>
             −15
           </Button>
@@ -166,17 +166,17 @@ const L = t();
 
       {/* Laps — stopwatch only */}
       <Card padding="none" class="timer__panel-card timer__laps" x-show="mode === 'stopwatch' && sw.laps.length > 0">
-        <div class="timer__laps-head">
+        <div class="grid grid-cols-[6rem_1fr_1fr] px-5 py-[1.4rem] bg-surface-2 text-muted font-display text-[1rem] font-bold uppercase tracking-[0.12em] border-b border-border">
           <span class="timer__laps-col-label" x-text="labels.lap">{L.timer.lap}</span>
           <span class="timer__laps-col-label" x-text="labels.lapTime">{L.timer.lapTime}</span>
-          <span class="timer__laps-col-label timer__laps-col-label--end" x-text="labels.total">{L.timer.total}</span>
+          <span class="timer__laps-col-label text-right" x-text="labels.total">{L.timer.total}</span>
         </div>
-        <div class="timer__laps-body">
+        <div class="max-h-[32rem] overflow-y-auto">
           <template x-for="(lap, revIdx) in swLapsReversed" :key="lap.totalTime + '-' + revIdx">
             <div class="timer__laps-row" :class="{ 'timer__laps-row--latest': revIdx === 0 }">
               <span class="timer__laps-num" x-text="sw.laps.length - revIdx"></span>
-              <span class="timer__laps-time" x-text="formatStopwatch(lap.lapTime)"></span>
-              <span class="timer__laps-total" x-text="formatStopwatch(lap.totalTime)"></span>
+              <span class="font-semibold" x-text="formatStopwatch(lap.lapTime)"></span>
+              <span class="text-right text-accent font-semibold" x-text="formatStopwatch(lap.totalTime)"></span>
             </div>
           </template>
         </div>
@@ -186,13 +186,13 @@ const L = t();
     {/* ════════════════════════════════════════════════════
         SHORTCUTS — kbd hints, subtle row
         ════════════════════════════════════════════════════ */}
-    <div class="timer__shortcuts" aria-hidden="true">
-      <span class="timer__shortcut">
-        <kbd class="timer__kbd" x-text="labels.spaceKey">{L.timer.spaceKey}</kbd>
+    <div class="flex items-center justify-center gap-5 flex-wrap" aria-hidden="true">
+      <span class="inline-flex items-center gap-[0.6rem] text-[1.1rem] text-muted">
+        <kbd class="font-body text-[1.1rem] text-muted bg-surface-2 border border-border rounded-sm px-[0.6rem] py-[0.2rem] leading-[1.2]" x-text="labels.spaceKey">{L.timer.spaceKey}</kbd>
         <span x-text="labels.shortcutsToggle">{L.timer.shortcutsToggle}</span>
       </span>
-      <span class="timer__shortcut">
-        <kbd class="timer__kbd">R</kbd>
+      <span class="inline-flex items-center gap-[0.6rem] text-[1.1rem] text-muted">
+        <kbd class="font-body text-[1.1rem] text-muted bg-surface-2 border border-border rounded-sm px-[0.6rem] py-[0.2rem] leading-[1.2]">R</kbd>
         <span x-text="labels.shortcutsReset">{L.timer.shortcutsReset}</span>
       </span>
     </div>
@@ -200,11 +200,11 @@ const L = t();
     {/* ════════════════════════════════════════════════════
         SOUND TOGGLE — subtle footer
         ════════════════════════════════════════════════════ */}
-    <div class="timer__sound">
+    <div class="flex items-center justify-center">
       <label class="timer__sound-label">
         <input
           type="checkbox"
-          class="timer__sound-input"
+          class="w-[1.8rem] h-[1.8rem] accent-accent cursor-pointer"
           x-model="soundEnabled"
           aria-label={L.timer.soundAlert}
         />
@@ -774,357 +774,118 @@ const L = t();
 </script>
 
 <style>
-  /* Timer page is now a thin shell: the design-system primitives (Button,
-   * Segmented, Card) carry the chrome, so this file only owns layout that
-   * has no primitive equivalent — the hero stage (ring + giant clock)
-   * and the few page-local details (kbd hint, sound toggle, lap chrome). */
+.timer__popout.is-active,
+.timer__popout--open {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
 
-  .timer {
-    max-width: 96rem;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2.4rem;
-    padding-bottom: 6rem;
-  }
+.timer__hero-icon :global(svg) {
+  width: 1.6rem;
+  height: 1.6rem;
+}
 
-  .timer__topbar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
+.timer__hero-ring-track {
+  fill: none;
+  stroke: var(--color-surface-3);
+  stroke-width: 4;
+}
 
-  /* "Pop-out" button while the PiP/fallback is open */
-  .timer__popout.is-active,
-  .timer__popout--open {
-    color: var(--color-accent);
-    border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  }
+.timer__hero-ring-progress {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--transition-fast), stroke var(--transition-base);
+}
 
-  /* ── HERO ────────────────────────────────────────────────── */
-  .timer__hero {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.4rem;
-    padding: 1.6rem 0 2.4rem;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
+.timer__hero-ring-progress--running { stroke: var(--color-accent); }
+.timer__hero-ring-progress--warning { stroke: var(--color-warning); }
+.timer__hero-ring-progress--done    { stroke: var(--color-success); }
+.timer__hero-ring-progress--paused  { stroke: var(--color-muted); opacity: 0.6; }
 
-  .timer__hero-head {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
+.timer__hero-clock {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 14vw, 9.6rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  text-align: center;
+  transition: color var(--transition-base);
+}
 
-  .timer__hero-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-    color: var(--color-accent);
-    flex-shrink: 0;
-  }
+.timer__hero-clock--running { color: var(--color-accent); }
+.timer__hero-clock--warning { color: var(--color-warning); }
+.timer__hero-clock--done    { color: var(--color-success); }
 
-  .timer__hero-icon :global(svg) {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
+.timer__custom-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 4.4rem;
+  padding: 0 1.2rem;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  -moz-appearance: textfield;
+}
 
-  .timer__hero-eyebrow {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-  }
+.timer__custom-input::-webkit-outer-spin-button,
+.timer__custom-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
-  .timer__hero-sep { color: var(--alpha-text-faint); }
+.timer__custom-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring);
+}
 
-  .timer__hero-status {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    color: var(--color-accent);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-  }
+.timer__laps-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr 1fr;
+  align-items: center;
+  padding: 1.3rem 2rem;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
 
-  /* ── HERO STAGE — ring + giant clock ─────────────────────── */
-  .timer__hero-stage {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: min(28rem, 80vw);
-    aspect-ratio: 1 / 1;
-  }
+.timer__laps-row:last-child { border-bottom: 0; }
 
-  .timer__hero-ring {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-  }
+.timer__laps-row--latest {
+  background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent);
+}
 
-  .timer__hero-ring-track {
-    fill: none;
-    stroke: var(--color-surface-3);
-    stroke-width: 4;
-  }
+.timer__laps-num { color: var(--color-muted); font-weight: 600; }
+.timer__laps-row--latest .timer__laps-num { color: var(--color-accent); font-weight: 700; }
 
-  .timer__hero-ring-progress {
-    fill: none;
-    stroke: var(--color-accent);
-    stroke-width: 5;
-    stroke-linecap: round;
-    transition: stroke-dashoffset var(--transition-fast), stroke var(--transition-base);
-  }
+.timer__sound-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--color-muted);
+  font-size: 1.3rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
 
-  .timer__hero-ring-progress--running { stroke: var(--color-accent); }
-  .timer__hero-ring-progress--warning { stroke: var(--color-warning); }
-  .timer__hero-ring-progress--done    { stroke: var(--color-success); }
-  .timer__hero-ring-progress--paused  { stroke: var(--color-muted); opacity: 0.6; }
-
-  .timer__hero-clock {
-    position: relative;
-    z-index: 1;
-    font-family: var(--font-display);
-    font-size: clamp(5rem, 14vw, 9.6rem);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    font-variant-numeric: tabular-nums;
-    color: var(--color-text);
-    text-align: center;
-    transition: color var(--transition-base);
-  }
-
-  .timer__hero-clock--running { color: var(--color-accent); }
-  .timer__hero-clock--warning { color: var(--color-warning); }
-  .timer__hero-clock--done    { color: var(--color-success); }
-
-  .timer__hero-meta {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    font-size: 1.3rem;
-    color: var(--color-muted);
-    font-weight: 500;
-  }
-
-  .timer__hero-meta-sep { color: var(--alpha-text-faint); }
-
-  .timer__hero-actions {
-    display: flex;
-    align-items: stretch;
-    gap: 1.2rem;
-    width: 100%;
-    max-width: 36rem;
-  }
-
-  /* ── QUICK ROW — segmented + preset pills (Button handles look) ── */
-  .timer__quick {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.6rem;
-    flex-wrap: wrap;
-  }
-
-  .timer__quick-left { flex: 0 0 auto; }
-
-  .timer__quick-right {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-  }
-
-  /* ── PANELS — countdown custom + stopwatch laps, side-by-side ── */
-  .timer__panels {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
-  }
-
-  @media (min-width: 760px) {
-    .timer__panels { grid-template-columns: 1fr 1fr; }
-  }
-
-  .timer__panel-head {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .timer__panel-eyebrow {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-text);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .timer__panel-sub {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 500;
-  }
-
-  .timer__custom-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-  }
-
-  .timer__custom-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    height: 4.4rem;
-    padding: 0 1.2rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 600;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-    outline: none;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-    -moz-appearance: textfield;
-  }
-
-  .timer__custom-input::-webkit-outer-spin-button,
-  .timer__custom-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  .timer__custom-input:focus {
-    border-color: var(--color-accent);
-    box-shadow: var(--focus-ring);
-  }
-
-  /* ── LAPS — slim list inside Card ─────────────────────────── */
-  .timer__laps-head {
-    display: grid;
-    grid-template-columns: 6rem 1fr 1fr;
-    padding: 1.4rem 2rem;
-    background-color: var(--color-surface-2);
-    color: var(--color-muted);
-    font-family: var(--font-display);
-    font-size: 1.0rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .timer__laps-col-label--end { text-align: right; }
-
-  .timer__laps-body {
-    max-height: 32rem;
-    overflow-y: auto;
-  }
-
-  .timer__laps-row {
-    display: grid;
-    grid-template-columns: 6rem 1fr 1fr;
-    align-items: center;
-    padding: 1.3rem 2rem;
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-variant-numeric: tabular-nums;
-    border-bottom: 1px solid var(--color-border);
-    transition: background-color var(--transition-base), color var(--transition-base);
-  }
-
-  .timer__laps-row:last-child { border-bottom: 0; }
-
-  .timer__laps-row--latest {
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    color: var(--color-accent);
-  }
-
-  .timer__laps-num { color: var(--color-muted); font-weight: 600; }
-  .timer__laps-row--latest .timer__laps-num { color: var(--color-accent); font-weight: 700; }
-  .timer__laps-time { font-weight: 600; }
-  .timer__laps-total { text-align: right; color: var(--color-accent); font-weight: 600; }
-
-  /* ── SHORTCUTS — kbd hints row ─────────────────────────────── */
-  .timer__shortcuts {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .timer__shortcut {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 1.1rem;
-    color: var(--color-muted);
-  }
-
-  .timer__kbd {
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: 0.2rem 0.6rem;
-    line-height: 1.2;
-  }
-
-  /* ── SOUND — checkbox + label, accent on check ─────────────── */
-  .timer__sound {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .timer__sound-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8rem;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-    transition: color var(--transition-fast);
-  }
-
-  .timer__sound-label:hover { color: var(--color-text); }
-
-  .timer__sound-input {
-    width: 1.8rem;
-    height: 1.8rem;
-    accent-color: var(--color-accent);
-    cursor: pointer;
-  }
-
-  /* ── RESPONSIVE ────────────────────────────────────────────── */
-  @media (max-width: 480px) {
-    .timer__quick { flex-direction: column; align-items: stretch; }
-  }
+.timer__sound-label:hover { color: var(--color-text); }
 </style>

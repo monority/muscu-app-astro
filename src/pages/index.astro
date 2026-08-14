@@ -17,9 +17,9 @@ const L = t();
     actionHref={localizedPath("/seances/creer")}
   />
 
-  <div class="dash" x-data="dashboardApp()" x-init="init()" x-cloak>
+  <div class="max-w-[96rem] mx-auto pb-[6rem]" x-data="dashboardApp()" x-init="init()" x-cloak>
     {/* ── Quick actions — always visible in BOTH states ── */}
-    <div class="dash__actions">
+    <div class="flex flex-wrap gap-[1.2rem] mb-[2.4rem]">
       <Button variant="primary" size="md" href={localizedPath("/seances/creer")}>
         <Fragment set:html={icons.plus(16, 16)} />
         <span>{L.dashboard.newSession}</span>
@@ -32,22 +32,22 @@ const L = t();
 
     {/* ── Main dashboard (once training has started) ── */}
     <div x-show="hasSessions">
-      <div class="dash__overview dash__signal">
+      <div class="overview-grid grid gap-0 mb-[3.2rem] border-t border-border">
       {/* ── Hero: today's volume ── */}
-      <section class="dash__hero" aria-label={L.dashboard.todayVolume}>
-        <div class="dash__hero-icon" aria-hidden="true">
+      <section class="hero-section relative flex flex-col gap-[0.8rem] mb-0 pt-[1.6rem] pb-[2.4rem] bg-transparent border-b border-border" aria-label={L.dashboard.todayVolume}>
+        <div class="inline-flex items-center justify-center w-[2.8rem] h-[2.8rem] rounded-full bg-stat-volume-bg text-stat-volume shrink-0" aria-hidden="true">
           <Fragment set:html={icons.trendingUp(16, 16)} />
         </div>
-        <span class="dash__hero-label">{L.dashboard.todayVolume}</span>
-        <div class="dash__hero-value">
-          <span class="dash__hero-number" x-text="formatVolume(todayVolume)"></span>
-          <span class="dash__hero-unit" x-text="todayVolume > 0 ? labels.kg : ''"></span>
+        <span class="text-[1.1rem] text-muted uppercase tracking-[0.08em] font-bold">{L.dashboard.todayVolume}</span>
+        <div class="flex items-baseline gap-[0.8rem]">
+          <span class="hero-number font-display font-bold leading-none text-text tabular-nums" x-text="formatVolume(todayVolume)"></span>
+          <span class="text-[1.6rem] font-semibold text-muted uppercase tracking-[0.04em]" x-text="todayVolume > 0 ? labels.kg : ''"></span>
         </div>
-        <div class="dash__hero-context" x-show="todaySessions > 0">
+        <div class="flex flex-wrap items-baseline gap-[0.6rem] text-[1.3rem] font-medium text-muted" x-show="todaySessions > 0">
           <span
             x-text="todaySessions === 1 ? labels.sessionCount.replace('{count}', todaySessions) : todaySessions + ' ' + labels.sessionsUnit"
           ></span>
-          <span class="dash__hero-context-sep" aria-hidden="true">·</span>
+          <span class="text-alpha-text-faint" aria-hidden="true">·</span>
           <span
             x-text="todayExercises === 1 ? labels.exerciseCount.replace('{count}', todayExercises) : todayExercises + ' ' + labels.exercisesUnit"
           ></span>
@@ -55,47 +55,47 @@ const L = t();
       </section>
 
       {/* ── Weekly goal card ── */}
-      <section class="dash__goal" aria-label={L.dashboard.goalCardAria}>
-        <div class="dash__goal-ring" aria-hidden="true">
-          <svg viewBox="0 0 44 44" class="dash__goal-ring-svg">
+      <section class="goal-section relative flex items-center gap-[2.2rem] mb-0 p-[2.4rem] rounded-lg overflow-hidden" aria-label={L.dashboard.goalCardAria}>
+        <div class="relative shrink-0 w-[7.2rem] h-[7.2rem]" aria-hidden="true">
+          <svg viewBox="0 0 44 44" class="goal-ring-svg w-full h-full">
             <circle
               cx="22"
               cy="22"
               r="18"
-              class="dash__goal-ring-track"
+              class="goal-ring-track"
             ></circle>
             <circle
               cx="22"
               cy="22"
               r="18"
-              class="dash__goal-ring-fill"
-              :class="{ 'dash__goal-ring-fill--complete': weeklyDone >= settings.weeklyGoal }"
+              class="goal-ring-fill"
+              :class="{ 'goal-ring-fill--complete': weeklyDone >= settings.weeklyGoal }"
               :stroke-dasharray="`${weeklyProgress * 113.1} 113.1`"
             ></circle>
           </svg>
           <span
-            class="dash__goal-ring-pct"
+            class="absolute inset-0 flex items-center justify-center font-display text-[1.6rem] font-bold text-text tabular-nums leading-none"
             x-text="`${Math.round(weeklyProgress * 100)}%`"
           ></span>
         </div>
 
-        <div class="dash__goal-text">
+        <div class="flex flex-col gap-[0.6rem] min-w-0 flex-1">
           <span
-            class="dash__goal-eyebrow"
+            class="text-[1.1rem] text-muted uppercase tracking-[0.08em] font-bold"
             x-text="labels.weeklyGoalEyebrow"
           >{L.dashboard.weeklyGoalEyebrow}</span>
-          <h2 class="dash__goal-title">
-            <span class="dash__goal-done" x-text="weeklyDone"></span>
-            <span class="dash__goal-sep" aria-hidden="true">/</span>
-            <span class="dash__goal-target" x-text="settings.weeklyGoal">3</span>
+          <h2 class="goal-title flex items-baseline flex-wrap gap-[0.4rem] font-display font-bold text-text m-0 leading-[1.1] tabular-nums">
+            <span class="text-accent" x-text="weeklyDone"></span>
+            <span class="text-muted mx-[0.2rem]" aria-hidden="true">/</span>
+            <span class="text-text" x-text="settings.weeklyGoal">3</span>
             <span
-              class="dash__goal-unit"
+              class="goal-unit font-body text-[1.4rem] font-medium text-muted ml-[0.8rem] normal-case tracking-normal"
               x-text="weeklyDone === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
             >{L.dashboard.sessionsUnit}</span>
           </h2>
 
           <div
-            class="dash__goal-bar"
+            class="goal-bar h-[1rem] max-w-[42rem] bg-surface-3 border border-border rounded-[999px] overflow-hidden"
             role="progressbar"
             aria-label={L.dashboard.goalCardAria}
             aria-valuemin="0"
@@ -103,21 +103,21 @@ const L = t();
             :aria-valuemax="settings.weeklyGoal"
           >
             <div
-              class="dash__goal-bar-fill"
-              :class="{ 'dash__goal-bar-fill--complete': weeklyDone >= settings.weeklyGoal }"
+              class="goal-bar-fill h-full bg-accent rounded-[999px]"
+              :class="{ 'goal-bar-fill--complete': weeklyDone >= settings.weeklyGoal }"
               :style="`width: ${Math.min(100, weeklyProgress * 100)}%`"
             ></div>
           </div>
 
           <p
-            class="dash__goal-hint"
+            class="goal-hint mt-[0.8rem] text-[1.2rem] text-success font-semibold"
             x-show="weeklyDone >= settings.weeklyGoal"
             x-transition.opacity
             x-cloak
             x-text="labels.weeklyGoalDone"
           ></p>
           <p
-            class="dash__goal-hint dash__goal-hint--muted"
+            class="goal-hint goal-hint--muted mt-[0.8rem] text-[1.2rem] text-muted font-medium"
             x-show="weeklyDone < settings.weeklyGoal && settings.weeklyGoal > 0"
             x-text="remainingHintText()"
           ></p>
@@ -125,14 +125,14 @@ const L = t();
       </section>
 
       {/* ── Next session: actionable data, not a decorative card ── */}
-      <section class="dash__next" x-show="nextSession" aria-label={L.dashboard.nextSession}>
-        <div class="dash__next-kicker" x-text="labels.nextSession">{L.dashboard.nextSession}</div>
-        <div class="dash__next-main">
-          <div class="dash__next-copy">
-            <h2 class="dash__next-name" x-text="nextSession?.name"></h2>
-            <p class="dash__next-hint" x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.plannedWorkoutHint"></p>
+      <section class="next-section py-[2rem] border-b border-border" x-show="nextSession" aria-label={L.dashboard.nextSession}>
+        <div class="next-kicker mb-[0.8rem] text-accent text-[1rem] font-extrabold tracking-[0.16em] uppercase" x-text="labels.nextSession">{L.dashboard.nextSession}</div>
+        <div class="next-main flex items-center justify-between gap-[2rem]">
+          <div class="next-copy">
+            <h2 class="next-name m-0 letter-spacing-[-0.04em]" x-text="nextSession?.name"></h2>
+            <p class="next-hint mt-[0.6rem] mb-0 text-muted text-[1.3rem]" x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.plannedWorkoutHint"></p>
           </div>
-          <a class="dash__next-action" :href="localizedPath('/seances/rapide?session=' + nextSession?.id)">
+          <a class="next-action inline-flex items-center gap-[1rem] min-h-[4.4rem] px-[1.4rem] border border-accent text-accent text-[1.2rem] font-extrabold no-underline uppercase tracking-[0.08em] whitespace-nowrap" :href="localizedPath('/seances/rapide?session=' + nextSession?.id)">
             <span x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.startWorkout"></span>
             <span aria-hidden="true">↗</span>
           </a>
@@ -141,36 +141,36 @@ const L = t();
       </div>
 
       {/* ── KPI band ── */}
-      <section class="dash__kpis" aria-label={L.dashboard.kpisAria}>
+      <section class="kpi-grid grid grid-cols-1 gap-0 mb-[3.2rem] border-t border-b border-border" aria-label={L.dashboard.kpisAria}>
         {/* Volume */}
-        <div class="dash__kpi dash__kpi--volume">
+        <div class="kpi-card min-w-0 py-[1.6rem] px-[1.2rem] bg-transparent border-0 border-b border-border rounded-none shadow-none transition-colors duration-[200ms]">
           <div class="flex flex-col gap-1">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
+            <div class="kpi-head flex items-center gap-[0.8rem]">
+              <span class="kpi-icon inline-flex items-center justify-center w-[2.8rem] h-[2.8rem] rounded-full shrink-0 bg-stat-volume-bg text-stat-volume" aria-hidden="true">
                 <Fragment set:html={icons.dumbbell(16, 16)} />
               </span>
-              <span class="dash__kpi-label">{L.dashboard.totalVolume}</span>
+              <span class="kpi-label text-[1.0rem] text-muted uppercase tracking-[0.05em] font-semibold">{L.dashboard.totalVolume}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="formatVolume(kpis.totalVolume)"></span>
-              <span class="dash__kpi-unit">{L.common.kg}</span>
+              <span class="kpi-value font-display font-bold text-[clamp(2rem,5vw,2.4rem)] leading-none text-text tabular-nums" x-text="formatVolume(kpis.totalVolume)"></span>
+              <span class="kpi-unit text-[1.1rem] text-muted ml-[0.6rem] font-semibold uppercase tracking-[0.04em]">{L.common.kg}</span>
             </div>
           </div>
         </div>
 
         {/* Séances */}
-        <div class="dash__kpi dash__kpi--sessions">
+        <div class="kpi-card min-w-0 py-[1.6rem] px-[1.2rem] bg-transparent border-0 border-b border-border rounded-none shadow-none transition-colors duration-[200ms]">
           <div class="flex flex-col gap-1">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
+            <div class="kpi-head flex items-center gap-[0.8rem]">
+              <span class="kpi-icon inline-flex items-center justify-center w-[2.8rem] h-[2.8rem] rounded-full shrink-0 bg-stat-sessions-bg text-stat-sessions" aria-hidden="true">
                 <Fragment set:html={icons.calendar(16, 16)} />
               </span>
-              <span class="dash__kpi-label">{L.dashboard.totalSessions}</span>
+              <span class="kpi-label text-[1.0rem] text-muted uppercase tracking-[0.05em] font-semibold">{L.dashboard.totalSessions}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="kpis.totalSessions"></span>
+              <span class="kpi-value font-display font-bold text-[clamp(2rem,5vw,2.4rem)] leading-none text-text tabular-nums" x-text="kpis.totalSessions"></span>
               <span
-                class="dash__kpi-unit"
+                class="kpi-unit text-[1.1rem] text-muted ml-[0.6rem] font-semibold uppercase tracking-[0.04em]"
                 x-text="kpis.totalSessions === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
               >{L.dashboard.sessionsUnit}</span>
             </div>
@@ -178,23 +178,23 @@ const L = t();
         </div>
 
         {/* Meilleurs PRs */}
-        <div class="dash__kpi dash__kpi--pr">
+        <div class="kpi-card min-w-0 py-[1.6rem] px-[1.2rem] bg-transparent border-0 border-b border-border rounded-none shadow-none transition-colors duration-[200ms]">
           <div class="flex flex-col gap-1">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
+            <div class="kpi-head flex items-center gap-[0.8rem]">
+              <span class="kpi-icon inline-flex items-center justify-center w-[2.8rem] h-[2.8rem] rounded-full shrink-0 bg-stat-pr-bg text-stat-pr" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
               </span>
-              <span class="dash__kpi-label">{L.dashboard.bestPRs}</span>
+              <span class="kpi-label text-[1.0rem] text-muted uppercase tracking-[0.05em] font-semibold">{L.dashboard.bestPRs}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="kpis.bestPRs"></span>
+              <span class="kpi-value font-display font-bold text-[clamp(2rem,5vw,2.4rem)] leading-none text-text tabular-nums" x-text="kpis.bestPRs"></span>
               <span
-                class="dash__kpi-unit"
+                class="kpi-unit text-[1.1rem] text-muted ml-[0.6rem] font-semibold uppercase tracking-[0.04em]"
                 x-text="kpis.bestPRs === 1 ? labels.exoSingular.trim() : labels.exercisesUnit"
               >{L.dashboard.exercisesUnit}</span>
             </div>
             <div
-              class="dash__kpi-sub"
+              class="kpi-sub text-[1.1rem] text-muted font-medium mt-[0.2rem]"
               x-show="kpis.top1RM > 0"
               x-text="labels.top1RM + ' ' + formatVolume(kpis.top1RM) + ' ' + labels.kg"
             ></div>
@@ -202,23 +202,23 @@ const L = t();
         </div>
 
         {/* Série en cours */}
-        <div class="dash__kpi dash__kpi--streak">
+        <div class="kpi-card min-w-0 py-[1.6rem] px-[1.2rem] bg-transparent border-0 border-b border-border rounded-none shadow-none transition-colors duration-[200ms]">
           <div class="flex flex-col gap-1">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
+            <div class="kpi-head flex items-center gap-[0.8rem]">
+              <span class="kpi-icon inline-flex items-center justify-center w-[2.8rem] h-[2.8rem] rounded-full shrink-0 bg-stat-streak-bg text-stat-streak" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
               </span>
-              <span class="dash__kpi-label">{L.dashboard.streak}</span>
+              <span class="kpi-label text-[1.0rem] text-muted uppercase tracking-[0.05em] font-semibold">{L.dashboard.streak}</span>
             </div>
             <div class="flex items-baseline">
-              <span class="dash__kpi-value" x-text="kpis.streak"></span>
+              <span class="kpi-value font-display font-bold text-[clamp(2rem,5vw,2.4rem)] leading-none text-text tabular-nums" x-text="kpis.streak"></span>
               <span
-                class="dash__kpi-unit"
+                class="kpi-unit text-[1.1rem] text-muted ml-[0.6rem] font-semibold uppercase tracking-[0.04em]"
                 x-text="kpis.streak === 1 ? labels.daysSingular : labels.daysUnit"
               >{L.dashboard.daysUnit}</span>
             </div>
             <div
-              class="dash__kpi-sub"
+              class="kpi-sub text-[1.1rem] text-muted font-medium mt-[0.2rem]"
               x-show="kpis.streak === 0 && kpis.totalSessions > 0"
               x-text="labels.noRecent"
             ></div>
@@ -227,67 +227,67 @@ const L = t();
       </section>
 
       {/* ── Weekly volume trend ── */}
-      <section class="dash__trend" aria-label={L.dashboard.weeklyVolumeTrend}>
-        <div class="dash__trend-panel">
-          <header class="dash__section-head dash__trend-head">
-            <h2>{L.dashboard.weeklyVolumeTrend}</h2>
+      <section class="mb-[3.2rem]" aria-label={L.dashboard.weeklyVolumeTrend}>
+        <div class="py-[1.8rem] border-t border-b border-border">
+          <header class="trend-head flex items-center justify-between gap-[1.2rem] mb-[1.2rem]">
+            <h2 class="text-[1.2rem]">{L.dashboard.weeklyVolumeTrend}</h2>
           </header>
-          <div class="dash__trend-content">
-            <div class="dash__trend-chart" x-show="weeklyVolumeTotal > 0">
+          <div class="min-h-[7.2rem]">
+            <div class="trend-chart flex gap-[0.8rem] items-stretch" x-show="weeklyVolumeTotal > 0">
               <template x-for="(v, i) in weeklyVolumeByDay" :key="i">
                 <div
-                  class="dash__trend-col"
-                  :class="{ 'dash__trend-col--today': i === todayIdx }"
+                  class="trend-col flex-1 min-w-0 flex flex-col gap-[0.8rem]"
+                  :class="{ 'trend-col--today': i === todayIdx }"
                   role="img"
                   :aria-label="`${dayLabels[i]}: ${formatVolume(v)} ${labels.kg}`"
                 >
-                  <div class="dash__trend-bar-wrap">
+                  <div class="trend-bar-wrap flex items-end h-[6rem]">
                     <div
-                      class="dash__trend-bar"
-                      :class="i === todayIdx ? 'dash__trend-bar--today' : (v > 0 && i < todayIdx ? 'dash__trend-bar--past' : 'dash__trend-bar--empty')"
+                      class="trend-bar w-full rounded-sm"
+                      :class="i === todayIdx ? 'trend-bar--today' : (v > 0 && i < todayIdx ? 'trend-bar--past' : 'trend-bar--empty')"
                       :style="`height: ${v > 0 ? Math.round((v / maxVol) * 100) : 0}%`"
                     ></div>
                   </div>
                   <span
-                    class="dash__trend-day"
+                    class="trend-day text-[1.0rem] text-muted uppercase tracking-[0.05em] font-semibold text-center"
                     x-text="dayLabels[i]"
                     :aria-current="i === todayIdx ? 'date' : undefined"
                   ></span>
                 </div>
               </template>
             </div>
-            <div class="dash__trend-empty" x-show="weeklyVolumeTotal <= 0" x-cloak role="status">
-              <strong x-text="labels.noWeeklyVolume">{L.dashboard.noWeeklyVolume}</strong>
-              <span x-text="labels.noWeeklyVolumeHint">{L.dashboard.noWeeklyVolumeHint}</span>
+            <div class="trend-empty flex flex-col justify-center min-h-[7.2rem] gap-[0.4rem] text-muted" x-show="weeklyVolumeTotal <= 0" x-cloak role="status">
+              <strong class="text-text text-[1.3rem] font-display" x-text="labels.noWeeklyVolume">{L.dashboard.noWeeklyVolume}</strong>
+              <span class="text-[1.2rem]" x-text="labels.noWeeklyVolumeHint">{L.dashboard.noWeeklyVolumeHint}</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── Recent sessions ── */}
-      <section class="dash__recent" aria-label={L.dashboard.recentAria}>
-        <header class="dash__section-head">
-          <h2 x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
+      <section class="recent" aria-label={L.dashboard.recentAria}>
+        <header class="section-head flex items-center justify-between gap-[1.2rem] mb-[1.6rem]">
+          <h2 class="section-head-title font-display text-[1.4rem] font-bold text-muted uppercase tracking-[0.05em] m-0" x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
           <a
             href={localizedPath("/seances")}
-            class="dash__see-all"
+            class="see-all font-body text-[1.2rem] font-semibold text-accent no-underline rounded-sm transition-colors duration-[200ms]"
             x-text="labels.viewAll"
           >{L.dashboard.viewAll} →</a>
         </header>
 
-        <div class="dash__sessions">
+        <div class="sessions flex flex-col">
           <template x-for="s in recentSessions" :key="s.id">
             <a
               :href="localizedPath('/seances/detail?id=' + s.id)"
-              class="dash__session"
-              :class="'dash__session--' + s.status"
+              class="session-item flex flex-col gap-[0.8rem] py-[1.6rem] bg-transparent border-0 border-b border-border rounded-none no-underline text-inherit transition-colors duration-[200ms]"
+              :class="'session-item--' + s.status"
             >
-              <div class="dash__session-head">
-                <div class="dash__session-title">
-                  <span class="dash__session-dot" aria-hidden="true"></span>
-                  <h3 class="dash__session-name" x-text="s.name"></h3>
+              <div class="session-head flex items-start justify-between gap-[1.2rem] min-w-0">
+                <div class="session-title flex items-center gap-[0.8rem] min-w-0 flex-1">
+                  <span class="session-dot w-[1.0rem] h-[1.0rem] rounded-full bg-muted shrink-0" aria-hidden="true"></span>
+                  <h3 class="session-name font-display text-[1.8rem] font-bold leading-[1.2] text-text m-0 break-words" x-text="s.name"></h3>
                 </div>
-                <div class="dash__session-badge">
+                <div class="session-badge inline-flex flex-col items-end gap-[0.4rem] shrink-0">
                   <div x-show="s.status === 'completed'">
                     <Badge variant="success" size="sm"><span x-text="statusLabel(s.status)"></span></Badge>
                   </div>
@@ -300,16 +300,16 @@ const L = t();
                 </div>
               </div>
 
-              <div class="dash__session-meta">
-                <span class="dash__session-date" x-text="formatDate(s.date)"></span>
-                <span class="dash__session-sep" aria-hidden="true">·</span>
+              <div class="session-meta flex items-center flex-wrap gap-[0.6rem] text-[1.2rem] text-muted">
+                <span class="session-date font-medium" x-text="formatDate(s.date)"></span>
+                <span class="text-alpha-text-faint" aria-hidden="true">·</span>
                 <span>
                   <span x-text="sessionExercisesCount(s)"></span>
                   <span x-text="sessionExercisesCount(s) > 1 ? labels.exoPlural : labels.exoSingular"></span>
                 </span>
-                <span class="dash__session-sep" aria-hidden="true">·</span>
-                <span class="dash__session-volume" x-text="formatVolume(sessionVolume(s)) + ' ' + labels.kg"></span>
-                <div class="dash__session-muscle" x-show="sessionPrimaryMuscle(s)">
+                <span class="text-alpha-text-faint" aria-hidden="true">·</span>
+                <span class="session-volume text-text font-semibold tabular-nums" x-text="formatVolume(sessionVolume(s)) + ' ' + labels.kg"></span>
+                <div class="session-muscle inline-flex items-center" x-show="sessionPrimaryMuscle(s)">
                   <Badge variant="default" size="sm"><span x-text="muscleLabel(sessionPrimaryMuscle(s))"></span></Badge>
                 </div>
               </div>
@@ -320,21 +320,21 @@ const L = t();
     </div>
 
     {/* ── Empty (first run: no sessions yet) — decorative, no zeros ── */}
-    <div class="dash__empty" x-show="!hasSessions">
-      <div class="dash__empty-ring" aria-hidden="true">
-        <svg viewBox="0 0 100 100" class="dash__empty-ring-svg">
-          <circle cx="50" cy="50" r="46" class="dash__empty-ring-track"></circle>
-          <circle cx="50" cy="50" r="46" class="dash__empty-ring-fill"></circle>
+    <div class="empty-state max-w-[48rem] mx-auto flex flex-col items-center text-center gap-[2.4rem] py-[4rem] pb-[6rem]" x-show="!hasSessions">
+      <div class="empty-ring relative w-[12rem] h-[12rem] shrink-0" aria-hidden="true">
+        <svg viewBox="0 0 100 100" class="empty-ring-svg w-full h-full">
+          <circle cx="50" cy="50" r="46" class="empty-ring-track"></circle>
+          <circle cx="50" cy="50" r="46" class="empty-ring-fill"></circle>
         </svg>
-        <div class="dash__empty-disc">
+        <div class="empty-disc absolute inset-0 m-auto w-[5rem] h-[5rem] rounded-full bg-surface-2 flex items-center justify-center text-muted">
           <Fragment set:html={icons.dumbbell(32, 32)} />
         </div>
       </div>
 
-      <h1 class="dash__empty-title">{L.dashboard.emptyTitle}</h1>
-      <p class="dash__empty-desc">{L.dashboard.emptyDesc}</p>
+      <h1 class="empty-title font-display text-[clamp(2rem,4vw,2.8rem)] font-bold leading-[1.15] text-text m-0 text-balance">{L.dashboard.emptyTitle}</h1>
+      <p class="empty-desc text-[1.4rem] leading-[1.5] text-muted max-w-[36rem] m-0">{L.dashboard.emptyDesc}</p>
 
-      <div class="dash__empty-actions">
+      <div class="empty-actions flex flex-wrap items-center justify-center gap-[1.2rem]">
         <Button variant="primary" size="md" href={localizedPath("/seances/creer")}>
           <Fragment set:html={icons.plus(16, 16)} />
           <span>{L.dashboard.createFirst}</span>
@@ -343,7 +343,7 @@ const L = t();
           <Fragment set:html={icons.clockStopwatch(16, 16)} />
           <span>{L.dashboard.stopwatch}</span>
         </Button>
-        <a href={localizedPath("/exercices")} class="dash__empty-link">
+        <a href={localizedPath("/exercices")} class="empty-link text-[1.2rem] font-semibold text-muted no-underline rounded-sm px-[0.8rem] py-[0.4rem] inline-flex items-center min-h-[4.4rem] transition-colors duration-[200ms]">
           {L.dashboard.browseExercises}
         </a>
       </div>
@@ -683,201 +683,20 @@ const L = t();
 
 <style>
   /* ════════════════════════════════════════════════════
-     CONTAINER
+     SVG RING STYLES (stroke-dasharray/dashoffset transitions)
      ════════════════════════════════════════════════════ */
-  .dash {
-    max-width: 96rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     QUICK ACTIONS — two pill CTAs (always visible)
-     ════════════════════════════════════════════════════ */
-  .dash__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.2rem;
-    margin-bottom: 2.4rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     OVERVIEW — open metric + one useful grouping
-     ════════════════════════════════════════════════════ */
-  .dash__overview {
-    display: grid;
-    gap: 0;
-    margin-bottom: 3.2rem;
-  }
-
-  .dash__signal { border-top: 1px solid var(--color-border); }
-
-  /* ════════════════════════════════════════════════════
-     HERO — today's volume
-     ════════════════════════════════════════════════════ */
-  .dash__hero {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    margin-bottom: 0;
-    padding: 1.6rem 0 2.4rem;
-    /* The primary metric is an open data anchor, not another card. */
-    background-color: transparent;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .dash__hero-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    background-color: var(--color-stat-volume-bg);
-    color: var(--color-stat-volume);
-    flex-shrink: 0;
-  }
-
-  .dash__hero-icon svg {
-    display: block;
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .dash__hero-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-  }
-
-  .dash__hero-value {
-    display: flex;
-    align-items: baseline;
-    gap: 0.8rem;
-  }
-
-  .dash__hero-number {
-    font-family: var(--font-display);
-    font-size: clamp(3rem, 6vw, 4.2rem);
-    font-weight: 700;
-    line-height: 1;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__hero-unit {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .dash__hero-context {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.6rem;
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: var(--color-muted);
-  }
-
-  .dash__hero-context-sep {
-    color: var(--alpha-text-faint);
-  }
-
-  /* ════════════════════════════════════════════════════
-     WEEKLY GOAL CARD
-     ════════════════════════════════════════════════════ */
-  .dash__goal {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 2.2rem;
-    margin-bottom: 0;
-    padding: 2.4rem;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-
-  .dash__goal-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .dash__goal-eyebrow {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-  }
-
-  .dash__goal-title {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    font-family: var(--font-display);
-    font-size: clamp(2.2rem, 4.5vw, 3rem);
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0;
-    line-height: 1.1;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__goal-done {
-    color: var(--color-accent);
-  }
-
-  .dash__goal-sep {
-    color: var(--color-muted);
-    margin: 0 0.2rem;
-  }
-
-  .dash__goal-target {
-    color: var(--color-text);
-  }
-
-  .dash__goal-unit {
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: var(--color-muted);
-    margin-left: 0.8rem;
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  .dash__goal-ring {
-    position: relative;
-    flex-shrink: 0;
-    width: 7.2rem;
-    height: 7.2rem;
-  }
-
-  .dash__goal-ring-svg {
-    width: 100%;
-    height: 100%;
+  .goal-ring-svg {
     transform: rotate(-90deg);
     overflow: visible;
   }
 
-  .dash__goal-ring-track {
+  .goal-ring-track {
     fill: none;
     stroke: var(--color-surface-3);
     stroke-width: 4;
   }
 
-  .dash__goal-ring-fill {
+  .goal-ring-fill {
     fill: none;
     stroke: var(--color-accent);
     stroke-width: 4;
@@ -887,478 +706,38 @@ const L = t();
       stroke-dasharray var(--transition-base);
   }
 
-  .dash__goal-ring-fill--complete {
+  .goal-ring-fill--complete {
     stroke: var(--color-success);
   }
 
-  .dash__goal-ring-pct {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .dash__goal-bar {
-    height: 1rem;
-    max-width: 42rem;
-    background-color: var(--color-surface-3);
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  .dash__goal-bar-fill {
-    height: 100%;
-    background-color: var(--color-accent);
-    border-radius: 999px;
+  /* ════════════════════════════════════════════════════
+     GOAL BAR FILL transition (width + bg-color)
+     ════════════════════════════════════════════════════ */
+  .goal-bar-fill {
     transition:
       width var(--transition-base),
       background-color var(--transition-base);
   }
 
-  .dash__goal-bar-fill--complete {
+  .goal-bar-fill--complete {
     background-color: var(--color-success);
   }
 
-  .dash__goal-hint {
-    margin: 0.8rem 0 0;
-    font-size: 1.2rem;
-    color: var(--color-success);
-    font-weight: 600;
-  }
-
-  .dash__goal-hint--muted {
-    color: var(--color-muted);
-    font-weight: 500;
-  }
-
   /* ════════════════════════════════════════════════════
-     KPI BAND — open data, not four floating cards
+     EMPTY RING SVG
      ════════════════════════════════════════════════════ */
-  .dash__kpis {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0;
-    margin-bottom: 3.2rem;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  @media (min-width: 480px) {
-    .dash__kpis {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .dash__kpis {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .dash__kpi {
-    min-width: 0;
-    padding: 1.6rem 1.2rem;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-    box-shadow: none;
-    transition: background-color var(--transition-base);
-  }
-
-  .dash__kpi:hover {
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  @media (min-width: 480px) and (max-width: 1023px) {
-    .dash__kpi:nth-last-child(-n + 2) {
-      border-bottom: 0;
-    }
-  }
-
-  .dash__kpi:nth-child(even) {
-    border-left: 1px solid var(--color-border);
-  }
-
-  .dash__kpi--volume .dash__kpi-value,
-  .dash__kpi--sessions .dash__kpi-value,
-  .dash__kpi--pr .dash__kpi-value,
-  .dash__kpi--streak .dash__kpi-value {
-    color: var(--color-text);
-  }
-
-  .dash__kpi-head {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-
-  .dash__kpi-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .dash__kpi-icon svg {
-    display: block;
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .dash__kpi-label {
-    font-size: 1.0rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-  }
-
-  .dash__kpi-value {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(2rem, 5vw, 2.4rem);
-    line-height: 1;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__kpi-unit {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    margin-left: 0.6rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .dash__kpi-sub {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    font-weight: 500;
-    margin-top: 0.2rem;
-  }
-
-  /* One hue per stat category — tinted disc + tinted value */
-  .dash__kpi--volume .dash__kpi-icon {
-    background-color: var(--color-stat-volume-bg);
-    color: var(--color-stat-volume);
-  }
-  .dash__kpi--sessions .dash__kpi-icon {
-    background-color: var(--color-stat-sessions-bg);
-    color: var(--color-stat-sessions);
-  }
-  .dash__kpi--pr .dash__kpi-icon {
-    background-color: var(--color-stat-pr-bg);
-    color: var(--color-stat-pr);
-  }
-  .dash__kpi--streak .dash__kpi-icon {
-    background-color: var(--color-stat-streak-bg);
-    color: var(--color-stat-streak);
-  }
-
-  /* ════════════════════════════════════════════════════
-     SECTION HEAD
-     ════════════════════════════════════════════════════ */
-  .dash__section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.2rem;
-    margin-bottom: 1.6rem;
-  }
-
-  .dash__section-head h2 {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-  }
-
-  .dash__see-all {
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    text-decoration: none;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-base);
-  }
-
-  .dash__see-all:hover {
-    color: var(--color-accent-hover);
-  }
-
-  .dash__see-all:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  /* ════════════════════════════════════════════════════
-     WEEKLY VOLUME TREND
-     ════════════════════════════════════════════════════ */
-  .dash__next { padding: 2rem 0; border-bottom: 1px solid var(--color-border); }
-  .dash__next-kicker { margin-bottom: 0.8rem; color: var(--color-accent); font-size: 1rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
-  .dash__next-main { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
-  .dash__next-name { margin: 0; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.04em; }
-  .dash__next-hint { margin: 0.6rem 0 0; color: var(--color-muted); font-size: 1.3rem; }
-  .dash__next-action { display: inline-flex; align-items: center; gap: 1rem; min-height: 4.4rem; padding: 0 1.4rem; border: 1px solid var(--color-accent); color: var(--color-accent); font-size: 1.2rem; font-weight: 800; text-decoration: none; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
-  .dash__next-action:hover { background: var(--color-accent); color: var(--color-accent-foreground); }
-
-  .dash__trend { margin-bottom: 3.2rem; }
-  .dash__trend-panel { padding: 1.8rem 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
-
-  .dash__trend-head {
-    margin-bottom: 1.2rem;
-  }
-
-  .dash__trend-head h2 {
-    font-size: 1.2rem;
-  }
-
-  .dash__trend-content {
-    min-height: 7.2rem;
-  }
-
-  .dash__trend-chart {
-    display: flex;
-    gap: 0.8rem;
-    align-items: stretch;
-  }
-
-  .dash__trend-empty {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 7.2rem;
-    gap: 0.4rem;
-    color: var(--color-muted);
-  }
-
-  .dash__trend-empty strong {
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-  }
-
-  .dash__trend-empty span {
-    font-size: 1.2rem;
-  }
-
-  .dash__trend-col {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .dash__trend-bar-wrap {
-    display: flex;
-    align-items: flex-end;
-    height: 6rem;
-  }
-
-  .dash__trend-bar {
-    width: 100%;
-    border-radius: var(--radius-sm);
-    transition:
-      height var(--transition-base),
-      background-color var(--transition-base),
-      opacity var(--transition-base);
-  }
-
-  .dash__trend-bar--past {
-    background-color: var(--color-stat-volume);
-    opacity: 0.4;
-  }
-
-  .dash__trend-bar--today {
-    background-color: var(--color-stat-volume);
-  }
-
-  .dash__trend-bar--empty {
-    background-color: var(--color-surface-3);
-    min-height: 6px;
-  }
-
-  .dash__trend-day {
-    font-size: 1.0rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-    text-align: center;
-  }
-
-  .dash__trend-col--today .dash__trend-day {
-    color: var(--color-text);
-  }
-
-  /* ════════════════════════════════════════════════════
-     SESSIONS LIST
-     ════════════════════════════════════════════════════ */
-  .dash__sessions {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Recent sessions are a readable timeline, not a stack of cards. */
-  .dash__session {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    padding: 1.6rem 0;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-    text-decoration: none;
-    color: inherit;
-    transition: background-color var(--transition-base),
-                color var(--transition-base);
-  }
-
-  .dash__session:hover {
-    color: inherit;
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  .dash__session:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  /* Status signaled via badge + inline dot (no border stripe) */
-  .dash__session-title {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .dash__session-dot {
-    width: 1.0rem;
-    height: 1.0rem;
-    border-radius: 50%;
-    background-color: var(--color-muted);
-    flex-shrink: 0;
-  }
-
-  .dash__session--completed .dash__session-dot {
-    background-color: var(--color-success);
-  }
-  .dash__session--in-progress .dash__session-dot {
-    background-color: var(--color-info);
-  }
-  .dash__session--planned .dash__session-dot {
-    background-color: var(--color-muted);
-  }
-
-  .dash__session-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.2rem;
-    min-width: 0;
-  }
-
-  .dash__session-badge {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.4rem;
-    flex-shrink: 0;
-  }
-
-  .dash__session-name {
-    font-family: var(--font-display);
-    font-size: 1.8rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-text);
-    margin: 0;
-    word-break: break-word;
-  }
-
-  .dash__session-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    font-size: 1.2rem;
-    color: var(--color-muted);
-  }
-
-  .dash__session-date {
-    font-weight: 500;
-  }
-
-  .dash__session-sep {
-    color: var(--alpha-text-faint);
-  }
-
-  .dash__session-volume {
-    color: var(--color-text);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__session-muscle {
-    display: inline-flex;
-    align-items: center;
-  }
-
-  /* ════════════════════════════════════════════════════
-     EMPTY STATE — welcome (no zeros anywhere)
-     ════════════════════════════════════════════════════ */
-  .dash__empty {
-    max-width: 48rem;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 2.4rem;
-    padding: 4rem 0 6rem;
-  }
-
-  .dash__empty-ring {
-    position: relative;
-    width: 12rem;
-    height: 12rem;
-    flex-shrink: 0;
-  }
-
-  .dash__empty-ring-svg {
-    width: 100%;
-    height: 100%;
+  .empty-ring-svg {
     transform: rotate(-90deg);
     overflow: visible;
   }
 
-  .dash__empty-ring-track {
+  .empty-ring-track {
     fill: none;
     stroke: var(--color-surface-3);
     stroke-width: 6;
   }
 
-  .dash__empty-ring-fill {
+  .empty-ring-fill {
     fill: none;
     stroke: var(--color-accent);
     stroke-width: 6;
@@ -1367,128 +746,173 @@ const L = t();
     stroke-dasharray: 82 244;
   }
 
-  .dash__empty-disc {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    width: 5rem;
-    height: 5rem;
-    border-radius: 50%;
-    background-color: var(--color-surface-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-muted);
+  /* ════════════════════════════════════════════════════
+     clamp() FLUID TYPOGRAPHY
+     ════════════════════════════════════════════════════ */
+  .hero-number {
+    font-size: clamp(3rem, 6vw, 4.2rem);
   }
 
-  .dash__empty-dumbbell {
-    width: 3.2rem;
-    height: 3.2rem;
+  .goal-title {
+    font-size: clamp(2.2rem, 4.5vw, 3rem);
   }
 
-  .dash__empty-title {
-    font-family: var(--font-display);
+  .next-name {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+
+  .kpi-value {
+    font-size: clamp(2rem, 5vw, 2.4rem);
+  }
+
+  .empty-title {
     font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 700;
-    line-height: 1.15;
-    color: var(--color-text);
-    margin: 0;
-    text-wrap: balance;
   }
 
-  .dash__empty-desc {
-    font-size: 1.4rem;
-    line-height: 1.5;
-    color: var(--color-muted);
-    max-width: 36rem;
-    margin: 0;
+  /* ════════════════════════════════════════════════════
+     TREND BAR transitions (height + bg-color + opacity)
+     ════════════════════════════════════════════════════ */
+  .trend-bar {
+    transition:
+      height var(--transition-base),
+      background-color var(--transition-base),
+      opacity var(--transition-base);
   }
 
-  .dash__empty-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 1.2rem;
+  .trend-bar--past {
+    background-color: var(--color-stat-volume);
+    opacity: 0.4;
   }
 
-  .dash__empty-link {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--color-muted);
-    text-decoration: none;
-    border-radius: var(--radius-sm);
-    padding: 0.4rem 0.8rem;
-    display: inline-flex;
-    align-items: center;
-    min-height: 4.4rem;
-    transition: color var(--transition-base);
+  .trend-bar--today {
+    background-color: var(--color-stat-volume);
   }
 
-  .dash__empty-link:hover {
-    color: var(--color-text);
+  .trend-bar--empty {
+    background-color: var(--color-surface-3);
+    min-height: 6px;
   }
 
-  .dash__empty-link:focus-visible {
+  /* ════════════════════════════════════════════════════
+     ::hover pseudo-elements (complex selectors)
+     ════════════════════════════════════════════════════ */
+  .kpi-card:hover {
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .see-all:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .see-all:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
   }
 
+  .session-item:hover {
+    color: inherit;
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .session-item:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .next-action:hover {
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+
+  .empty-link:hover {
+    color: var(--color-text);
+  }
+
+  .empty-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* ════════════════════════════════════════════════════
+     :nth-child / :nth-last-child selectors
+     ════════════════════════════════════════════════════ */
+  .kpi-card:nth-child(even) {
+    border-left: 1px solid var(--color-border);
+  }
+
+  .session-item--completed .session-dot {
+    background-color: var(--color-success);
+  }
+
+  .session-item--in-progress .session-dot {
+    background-color: var(--color-info);
+  }
+
+  .session-item--planned .session-dot {
+    background-color: var(--color-muted);
+  }
+
+  .trend-col--today .trend-day {
+    color: var(--color-text);
+  }
+
+  /* ════════════════════════════════════════════════════
+     @media — complex responsive patterns
+     ════════════════════════════════════════════════════ */
   @media (min-width: 760px) {
-    .dash__overview {
+    .overview-grid {
       grid-template-columns: minmax(0, 1.25fr) minmax(28rem, 0.75fr);
       align-items: stretch;
     }
-    .dash__next { grid-column: 1 / -1; }
+    .next-section { grid-column: 1 / -1; }
 
-    .dash__hero {
+    .hero-section {
       justify-content: center;
       padding: 2.4rem 3.2rem 2.4rem 0;
       border-bottom: 0;
       border-right: 1px solid var(--color-border);
     }
 
-    .dash__hero-number {
+    .hero-number {
       font-size: clamp(4.8rem, 8vw, 7.2rem);
       letter-spacing: -0.05em;
     }
 
-    .dash__goal {
+    .goal-section {
       min-height: 100%;
     }
   }
 
+  @media (min-width: 480px) {
+    .kpi-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
   @media (min-width: 1024px) {
-    .dash__kpi {
+    .kpi-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .kpi-card {
       border-bottom: 0;
     }
 
-    .dash__kpi:nth-child(3) {
+    .kpi-card:nth-child(3) {
       border-left: 1px solid var(--color-border);
     }
   }
 
-  /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
-  @media (prefers-reduced-motion: reduce) {
-    .dash__session,
-    .dash__see-all,
-    .dash__empty-link,
-    .dash__goal-ring-fill,
-    .dash__goal-bar-fill,
-    .dash__trend-bar {
-      transition: none;
+  @media (min-width: 480px) and (max-width: 1023px) {
+    .kpi-card:nth-last-child(-n + 2) {
+      border-bottom: 0;
     }
   }
 
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
-     ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
-    .dash__next-main { align-items: flex-start; flex-direction: column; }
-    .dash__next-action { width: 100%; justify-content: space-between; }
-    .dash__goal {
+    .next-main { align-items: flex-start; flex-direction: column; }
+    .next-action { width: 100%; justify-content: space-between; }
+    .goal-section {
       flex-direction: column;
       align-items: flex-start;
       gap: 1.4rem;
@@ -1497,26 +921,40 @@ const L = t();
   }
 
   @media (max-width: 480px) {
-    .dash__session {
+    .session-item {
       padding: 1.6rem 0;
     }
 
-    .dash__session-name {
+    .session-name {
       font-size: 1.6rem;
     }
 
-    .dash__goal {
+    .goal-section {
       padding: 1.6rem;
     }
 
-    .dash__goal-title {
+    .goal-title {
       font-size: 2rem;
     }
 
-    .dash__goal-unit {
+    .goal-unit {
       font-size: 1.2rem;
       margin-left: 0;
       flex-basis: 100%;
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     prefers-reduced-motion
+     ════════════════════════════════════════════════════ */
+  @media (prefers-reduced-motion: reduce) {
+    .session-item,
+    .see-all,
+    .empty-link,
+    .goal-ring-fill,
+    .goal-bar-fill,
+    .trend-bar {
+      transition: none;
     }
   }
 </style>

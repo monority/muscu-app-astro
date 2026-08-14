@@ -15,11 +15,20 @@ const {
   class: className = '',
 } = Astro.props;
 
+const padClasses: Record<string, string> = {
+  none: 'p-0',
+  sm: 'p-[1.2rem]',
+  md: 'p-[1.6rem]',
+  lg: 'p-[2.4rem]',
+};
+
+const isInteractive = hover || clickable || variant === 'interactive';
+
 const classes = [
-  'surface',
+  'min-w-0 bg-[var(--surface-panel)] border border-[var(--color-border)] rounded-[var(--radius-md)]',
   `surface--${variant}`,
-  `surface--pad-${padding}`,
-  (hover || clickable || variant === 'interactive') && 'surface--interactive',
+  padClasses[padding],
+  isInteractive && 'surface--interactive',
   className,
 ].filter(Boolean).join(' ');
 ---
@@ -29,22 +38,23 @@ const classes = [
 </div>
 
 <style>
-  .surface {
-    min-width: 0;
-    background: var(--surface-panel);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+  .surface--elevated {
+    background: var(--surface-panel-elevated);
+    border-color: var(--color-border-strong);
   }
-
-  .surface--elevated { background: var(--surface-panel-elevated); border-color: var(--color-border-strong); }
-  .surface--interactive { transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast); }
-  .surface--interactive:hover { background: var(--surface-panel-elevated); border-color: var(--alpha-border); }
-  .surface--interactive:active { transform: translateY(1px); }
-
-  .surface--pad-none { padding: 0; }
-  .surface--pad-sm { padding: 1.2rem; }
-  .surface--pad-md { padding: 1.6rem; }
-  .surface--pad-lg { padding: 2.4rem; }
-
-  @media (prefers-reduced-motion: reduce) { .surface--interactive { transition: none; } }
+  .surface--interactive {
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  }
+  .surface--interactive:hover {
+    background: var(--surface-panel-elevated);
+    border-color: var(--alpha-border);
+  }
+  .surface--interactive:active {
+    transform: translateY(1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .surface--interactive {
+      transition: none;
+    }
+  }
 </style>

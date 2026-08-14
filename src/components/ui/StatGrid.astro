@@ -6,19 +6,6 @@ interface Props {
 const { class: className = '' } = Astro.props;
 ---
 
-<div class:list={['stat-grid', className]}>
+<div class:list={['grid grid-cols-2 gap-[1rem] sm:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]', className]}>
   <slot />
 </div>
-
-<style>
-  .stat-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-  @media (min-width: 640px) {
-    .stat-grid {
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-    }
-  }
-</style>

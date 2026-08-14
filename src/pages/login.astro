@@ -16,29 +16,29 @@ const L = t();
 
 <AppLayout title={L.login.title} groups={[]}>
   <div
-    class="login"
+    class="min-h-screen flex flex-col items-center justify-center p-[2.4rem] px-[1.6rem] pb-[3.2rem] gap-[2.4rem] bg-bg"
     x-data="loginApp()"
     x-init="init()"
     x-cloak
   >
-    <div class="login__card" role="form" aria-labelledby="login-title">
+    <div class="w-full max-w-[40rem] bg-surface border border-border rounded-lg p-[4.0rem] px-[3.2rem] shadow-[var(--shadow-1),0_1px_0_var(--alpha-bg-subtle)_inset]" role="form" aria-labelledby="login-title">
       {/* ── Nav: theme · logo · language ── */}
-      <div class="login__nav">
-        <div class="login__nav-side">
+      <div class="flex items-center justify-between mb-[2.4rem]">
+        <div class="flex-1 min-w-0 flex items-center justify-start">
           <button
             type="button"
-            class="login__theme"
+            class="inline-flex items-center justify-center w-[4.4rem] h-[4.4rem] border border-border rounded-md bg-surface-2 text-muted cursor-pointer appearance-none transition-all duration-[140ms]"
             @click="toggleTheme()"
             :aria-label="isDark() ? switchToLight : switchToDark"
             :title="isDark() ? switchToLight : switchToDark"
           >
-            <span class="login__theme-icon login__theme-icon--sun" aria-hidden="true">
+            <span class="inline-flex items-center justify-center w-[1.8rem] h-[1.8rem] login__theme-icon--sun" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="4"/>
                 <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
               </svg>
             </span>
-            <span class="login__theme-icon login__theme-icon--moon" aria-hidden="true">
+            <span class="inline-flex items-center justify-center w-[1.8rem] h-[1.8rem] login__theme-icon--moon" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
               </svg>
@@ -47,7 +47,7 @@ const L = t();
         </div>
 
         {/* ── Brand icon (dumbbell) ── */}
-        <div class="login__logo" aria-hidden="true">
+        <div class="flex items-center justify-center w-[6.4rem] h-[6.4rem] m-0 shrink-0 rounded-lg bg-surface-2 border border-border text-accent shadow-[var(--shadow-2)]" aria-hidden="true">
           <svg
             viewBox="0 0 24 24"
             width="32"
@@ -70,39 +70,39 @@ const L = t();
           </svg>
         </div>
 
-        <div class="login__nav-side">
+        <div class="flex-1 min-w-0 flex items-center justify-end">
           <button
             type="button"
-            class="login__lang"
+            class="inline-flex items-center justify-center gap-[0.6rem] h-[4.4rem] px-[1.2rem] border border-border rounded-md bg-surface-2 text-text font-display text-[1.1rem] font-bold tracking-[0.1em] leading-none cursor-pointer appearance-none transition-all duration-[140ms]"
             @click="toggleLocale()"
             :aria-label="switchLocaleAria"
             :title="switchLocaleAria"
           >
-            <span class="login__lang-icon" aria-hidden="true">
+            <span class="inline-flex items-center justify-center w-[1.8rem] h-[1.8rem] text-accent shrink-0" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="2" y1="12" x2="22" y2="12"/>
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
               </svg>
             </span>
-            <span class="login__lang-label" x-text="langTarget">EN</span>
+            <span class="leading-none" x-text="langTarget">EN</span>
           </button>
         </div>
       </div>
 
-      <h1 id="login-title" class="login__title">{L.login.title}</h1>
-      <p class="login__subtitle">
+      <h1 id="login-title" class="font-display text-[2.8rem] font-bold text-center text-text leading-[1.1] tracking-[0.01em] m-0 mb-[0.8rem]">{L.login.title}</h1>
+      <p class="text-center text-muted text-[1.3rem] leading-[1.4] m-0 mb-[3.2rem]">
         {L.login.subtitle}
       </p>
 
       {/* ── Form ── */}
-      <form class="login__form" @submit.prevent="submit" novalidate>
-        <div class="login__field">
-          <label for="login-email" class="login__label">{L.login.email}</label>
+      <form class="flex flex-col gap-[1.6rem]" @submit.prevent="submit" novalidate>
+        <div class="flex flex-col gap-[0.6rem]">
+          <label for="login-email" class="font-display text-[1.1rem] font-semibold text-muted uppercase tracking-[0.12em] leading-none">{L.login.email}</label>
           <input
             type="email"
             id="login-email"
-            class="login__input"
+            class="login__input w-full h-[4.8rem] px-[1.4rem] bg-surface-2 border border-border rounded-sm text-text font-body text-[1.4rem] leading-[1.2] outline-none appearance-none transition-all duration-[140ms]"
             placeholder="vous@exemple.com"
             x-model="email"
             @input="error = ''"
@@ -112,13 +112,13 @@ const L = t();
           />
         </div>
 
-        <div class="login__field">
-          <label for="login-password" class="login__label">{L.login.password}</label>
-          <div class="login__password">
+        <div class="flex flex-col gap-[0.6rem]">
+          <label for="login-password" class="font-display text-[1.1rem] font-semibold text-muted uppercase tracking-[0.12em] leading-none">{L.login.password}</label>
+          <div class="relative">
             <input
               :type="showPassword ? 'text' : 'password'"
               id="login-password"
-              class="login__input"
+              class="login__input w-full h-[4.8rem] px-[1.4rem] pr-[5.2rem] bg-surface-2 border border-border rounded-sm text-text font-body text-[1.4rem] leading-[1.2] outline-none appearance-none transition-all duration-[140ms]"
               placeholder="••••••••"
               x-model="password"
               @input="error = ''"
@@ -127,7 +127,7 @@ const L = t();
             />
             <button
               type="button"
-              class="login__toggle"
+              class="absolute top-1/2 right-[0.4rem] -translate-y-1/2 w-[4.4rem] h-[4.4rem] bg-transparent border-none text-muted cursor-pointer rounded-sm inline-flex items-center justify-center transition-all duration-[140ms]"
               @click="showPassword = !showPassword"
               :aria-label="showPassword ? labels.hidePassword : labels.showPassword"
               :aria-pressed="showPassword ? 'true' : 'false'"
@@ -176,7 +176,7 @@ const L = t();
         </div>
 
         <p
-          class="login__error"
+          class="text-[1.2rem] bg-[color-mix(in_srgb,var(--color-destructive)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-destructive)_30%,transparent)] border-[color-mix(in_srgb,var(--color-destructive)_30%,transparent)] rounded-sm p-[1.0rem] px-[1.2rem] m-0 leading-[1.4] login__error"
           x-show="error"
           x-text="error"
           x-cloak
@@ -185,14 +185,14 @@ const L = t();
 
         <button
           type="submit"
-          class="login__submit"
+          class="relative inline-flex items-center justify-center gap-[0.8rem] w-full min-w-0 h-[5.2rem] px-[1.6rem] mt-[0.4rem] bg-accent text-accent-foreground border border-[color-mix(in_srgb,var(--color-accent)_45%,transparent)] rounded-sm font-body text-[1.4rem] font-bold tracking-[0.02em] cursor-pointer appearance-none shadow-[0_6px_18px_color-mix(in_srgb,var(--color-accent)_30%,transparent)] transition-all duration-[140ms]"
           :disabled="loading"
         >
           {/* Always-present label (visible whether Alpine is loaded
               or not, before/after submit). */}
-          <span class="login__submit-label" x-text="labels.submit">{L.login.submit}</span>
+          <span class="inline-block leading-none" x-text="labels.submit">{L.login.submit}</span>
           {/* Loading overlay — only shown while the form is in flight. */}
-          <span class="login__submit-loading" x-show="loading" x-cloak>
+          <span class="absolute inset-0 inline-flex items-center justify-center gap-[0.8rem]" x-show="loading" x-cloak>
             <svg
               class="login__spinner"
               viewBox="0 0 24 24"
@@ -211,31 +211,31 @@ const L = t();
       </form>
 
       {/* ── Divider ── */}
-      <div class="login__divider" aria-hidden="true">
-        <span>ou</span>
+      <div class="login__divider flex items-center gap-[1.2rem] my-[2.4rem] mx-0 mb-[1.6rem]" aria-hidden="true">
+        <span class="font-display text-muted text-[1.1rem] uppercase tracking-[0.18em] font-semibold">ou</span>
       </div>
 
       {/* ── Dev mode (temporary, one-click login) ── */}
-      <section class="login__dev" aria-labelledby="login-dev-title">
-        <div class="login__dev-head">
-          <span class="login__dev-badge" aria-hidden="true">DEV</span>
-          <h2 id="login-dev-title" class="login__dev-title">
+      <section class="flex flex-col gap-[1.0rem] p-[1.6rem] pt-[1.6rem] pb-[1.4rem] mt-[0.4rem] login__dev" aria-labelledby="login-dev-title">
+        <div class="flex items-center gap-[0.8rem]">
+          <span class="inline-flex items-center justify-center h-[2.2rem] px-[0.7rem] rounded-full font-display text-[1.1rem] font-bold tracking-[0.12em] leading-none login__dev-badge" aria-hidden="true">DEV</span>
+          <h2 id="login-dev-title" class="font-display text-[1.2rem] font-bold text-accent uppercase tracking-[0.10em] leading-none m-0">
             {L.login.devMode}
           </h2>
         </div>
-        <p class="login__dev-warning" role="note">
-          <span aria-hidden="true" class="login__dev-warning-icon">
+        <p class="flex items-center gap-[0.6rem] m-0 text-[1.2rem] text-muted leading-[1.4]" role="note">
+          <span aria-hidden="true" class="inline-flex items-center justify-center text-warning shrink-0">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
           </span>
           {L.login.devWarning}
         </p>
         <button
           type="button"
-          class="login__dev-btn"
+          class="inline-flex items-center justify-center gap-[0.8rem] w-full h-[4.6rem] px-[1.6rem] bg-transparent text-text border border-border rounded-sm font-body text-[1.3rem] font-semibold tracking-[0.01em] cursor-pointer appearance-none transition-all duration-[140ms]"
           @click="devLogin()"
         >
           <svg
-            class="login__dev-icon"
+            class="shrink-0 text-accent"
             viewBox="0 0 24 24"
             width="18"
             height="18"
@@ -253,11 +253,11 @@ const L = t();
       </section>
 
       {/* ── Signup link ── */}
-      <p class="login__signup">
+      <p class="text-center text-muted text-[1.3rem] leading-[1.4] m-0">
         {L.login.createAccount}
         <button
           type="button"
-          class="login__signup-link"
+          class="login__signup-link inline-flex items-center min-h-[4.4rem] bg-none border-none px-[0.4rem] ml-[0.4rem] text-accent font-inherit text-inherit font-semibold cursor-pointer appearance-none transition-all duration-[140ms]"
           @click="showSignupMessage = !showSignupMessage"
         >
           {L.login.createAccountLink}
@@ -265,7 +265,7 @@ const L = t();
       </p>
 
       <p
-        class="login__signup-msg"
+        class="m-[1.2rem] mx-0 p-[1.2rem] px-[1.4rem] login__signup-msg text-center text-[1.2rem] leading-[1.5]"
         x-show="showSignupMessage"
         x-cloak
         x-transition.opacity.duration.200ms
@@ -275,7 +275,7 @@ const L = t();
       </p>
     </div>
 
-    <p class="login__brand">muscu.app · TRAINING LOG</p>
+    <p class="font-display text-[1.1rem] text-muted uppercase tracking-[0.18em] font-semibold m-0 opacity-70">muscu.app · TRAINING LOG</p>
   </div>
 </AppLayout>
 
@@ -385,108 +385,7 @@ const L = t();
 </script>
 
 <style>
-  /* Hide Alpine elements until initialized (prevents flash) */
-  [x-cloak] {
-    display: none !important;
-  }
-
-  /* ════════════════════════════════════════════════════
-     PAGE — full-viewport centered stage
-     ════════════════════════════════════════════════════ */
-  .login {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2.4rem 1.6rem 3.2rem;
-    gap: 2.4rem;
-    background-color: var(--color-bg);
-  }
-
-  /* ── Nav: theme · logo · language ───────────────────────
-     A header row inside the card where the dumbbell logo
-     sits centered and the two control buttons flank it,
-     giving the card a navigation-bar feel. */
-  .login__nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2.4rem;
-  }
-
-  /* Equal flexible side columns keep the logo perfectly
-     centered regardless of button widths. */
-  .login__nav-side {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-  }
-
-  .login__nav-side:first-child {
-    justify-content: flex-start;
-  }
-
-  .login__nav-side:last-child {
-    justify-content: flex-end;
-  }
-
-  /* ── Theme button (icon) ── */
-  .login__theme {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.4rem;
-    height: 4.4rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-surface-2);
-    color: var(--color-muted);
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: background-color var(--transition-fast),
-      color var(--transition-fast),
-      border-color var(--transition-fast),
-      transform var(--transition-fast);
-  }
-
-  .login__theme:hover {
-    background-color: var(--color-surface-3);
-    border-color: var(--alpha-border);
-    color: var(--color-text);
-  }
-
-  .login__theme:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .login__theme:active {
-    transform: scale(0.94);
-  }
-
-  .login__theme-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.8rem;
-    height: 1.8rem;
-  }
-
-  .login__theme-icon svg {
-    display: block;
-  }
-
-  /* Sun visible in dark mode (suggests "switch to light"),
-     moon visible in light mode (suggests "switch to dark"). */
-  .login__theme-icon--sun {
-    display: inline-flex;
-  }
-  .login__theme-icon--moon {
-    display: none;
-  }
+  /* ═══ Theme icon visibility (must be :global to pierce Astro scope) ═══ */
   :global([data-theme="light"]) .login__theme-icon--sun {
     display: none;
   }
@@ -494,32 +393,28 @@ const L = t();
     display: inline-flex;
   }
 
-  /* ── Language button (icon + label) ── */
-  .login__lang {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    height: 4.4rem;
-    padding: 0 1.2rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    line-height: 1;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: background-color var(--transition-fast),
-      color var(--transition-fast),
-      border-color var(--transition-fast),
-      transform var(--transition-fast);
+  /* ═══ Input placeholder ═══ */
+  .login__input::placeholder {
+    color: var(--alpha-text-faint);
   }
 
+  /* ═══ Interactive states (hover / focus / active / disabled) ═══ */
+  .login__input:hover {
+    border-color: var(--alpha-border);
+  }
+
+  .login__input:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  /* Theme button */
+  div:has(> button) > button:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* Language button */
   .login__lang:hover {
     background-color: var(--color-surface-3);
     border-color: var(--alpha-border);
@@ -534,246 +429,44 @@ const L = t();
     transform: scale(0.97);
   }
 
-  .login__lang-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.8rem;
-    height: 1.8rem;
-    color: var(--color-accent);
-    flex-shrink: 0;
-  }
-
-  .login__lang-icon svg {
-    display: block;
-  }
-
-  .login__lang-label {
-    line-height: 1;
-  }
-
-  /* ════════════════════════════════════════════════════
-     CARD — 400px wide per spec, premium dark surface
-     ════════════════════════════════════════════════════ */
-  .login__card {
-    width: 100%;
-    max-width: 40rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 4.0rem 3.2rem;
-    box-shadow: var(--shadow-1),
-      0 1px 0 var(--alpha-bg-subtle) inset;
-  }
-
-  /* ── Logo ── */
-  .login__logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 6.4rem;
-    height: 6.4rem;
-    margin: 0;
-    flex-shrink: 0;
-    border-radius: var(--radius-lg);
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    color: var(--color-accent);
-    box-shadow: var(--shadow-2);
-  }
-
-  /* ── Title block ── */
-  .login__title {
-    font-family: var(--font-display);
-    font-size: 2.8rem;
-    font-weight: 700;
-    text-align: center;
-    color: var(--color-text);
-    line-height: 1.1;
-    letter-spacing: 0.01em;
-    margin: 0 0 0.8rem;
-  }
-
-  .login__subtitle {
-    text-align: center;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    line-height: 1.4;
-    margin: 0 0 3.2rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     FORM
-     ════════════════════════════════════════════════════ */
-  .login__form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.6rem;
-  }
-
-  .login__field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .login__label {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    line-height: 1;
-  }
-
-  .login__input {
-    width: 100%;
-    height: 4.8rem;
-    padding: 0 1.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    line-height: 1.2;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: border-color var(--transition-fast),
-      box-shadow var(--transition-fast),
-      background-color var(--transition-fast);
-  }
-
-  .login__input::placeholder {
-    color: var(--alpha-text-faint);
-  }
-
-  .login__input:hover {
-    border-color: var(--alpha-border);
-  }
-
-  .login__input:focus {
-    border-color: var(--color-accent);
-    box-shadow: var(--focus-ring);
-  }
-
-  /* ── Password input + show/hide toggle ── */
-  .login__password {
-    position: relative;
-  }
-
-  .login__password .login__input {
-    padding-right: 5.2rem;
-  }
-
-  .login__toggle {
-    position: absolute;
-    top: 50%;
-    right: 0.4rem;
-    transform: translateY(-50%);
-    width: 4.4rem;
-    height: 4.4rem;
-    background: transparent;
-    border: none;
-    color: var(--color-muted);
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: color var(--transition-fast),
-      background-color var(--transition-fast);
-  }
-
-  .login__toggle:hover {
+  /* Toggle (show/hide password) */
+  div.relative > button:hover {
     color: var(--color-text);
     background-color: var(--alpha-bg-soft);
   }
 
-  .login__toggle:focus-visible {
+  div.relative > button:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
   }
 
-  /* ── Error banner ── */
+  /* Error banner — color-mix cannot be expressed as Tailwind utilities */
   .login__error {
     color: color-mix(in srgb, var(--color-destructive) 75%, var(--color-text));
-    font-size: 1.2rem;
-    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-destructive) 30%, transparent);
-    border-radius: var(--radius-sm);
-    padding: 1.0rem 1.2rem;
-    margin: 0;
-    line-height: 1.4;
   }
 
-  /* ── Submit button (primary, full-width) ── */
-  .login__submit {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    width: 100%;
-    min-width: 0;
-    height: 5.2rem;
-    padding: 0 1.6rem;
-    margin-top: 0.4rem;
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    box-shadow: 0 6px 18px color-mix(in srgb, var(--color-accent) 30%, transparent);
-    transition: filter var(--transition-fast),
-      transform var(--transition-fast),
-      box-shadow var(--transition-fast);
-  }
-
-  .login__submit-label {
-    display: inline-block;
-    line-height: 1;
-  }
-
-  /* Loading overlay sits on top of the static label so the button
-     keeps its size and shape while in flight. */
-  .login__submit-loading {
-    position: absolute;
-    inset: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-  }
-
-  .login__submit:hover:not(:disabled) {
+  /* Submit button */
+  button[type="submit"]:hover:not(:disabled) {
     filter: brightness(1.08);
     box-shadow: 0 8px 22px color-mix(in srgb, var(--color-accent) 42%, transparent);
   }
 
-  .login__submit:active:not(:disabled) {
+  button[type="submit"]:active:not(:disabled) {
     transform: scale(0.985);
   }
 
-  .login__submit:disabled {
+  button[type="submit"]:disabled {
     opacity: 0.7;
     cursor: progress;
   }
 
-  .login__submit:focus-visible {
+  button[type="submit"]:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring),
       0 6px 18px color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
+  /* Spinner animation */
   .login__spinner {
     animation: login-spin 0.7s linear infinite;
   }
@@ -784,16 +477,7 @@ const L = t();
     }
   }
 
-  /* ════════════════════════════════════════════════════
-     DIVIDER + SIGNUP
-     ════════════════════════════════════════════════════ */
-  .login__divider {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    margin: 2.4rem 0 1.6rem;
-  }
-
+  /* ═══ Divider ::before/::after lines ═══ */
   .login__divider::before,
   .login__divider::after {
     content: "";
@@ -802,157 +486,35 @@ const L = t();
     background-color: var(--color-border);
   }
 
-  .login__divider span {
-    font-family: var(--font-display);
-    color: var(--color-muted);
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-weight: 600;
-  }
-
-  /* ════════════════════════════════════════════════════
-     DEV MODE — clearly marked, secondary visual treatment
-     ════════════════════════════════════════════════════ */
+  /* ═══ Dev section — color-mix for background/border tint ═══ */
   .login__dev {
-    display: flex;
-    flex-direction: column;
-    gap: 1.0rem;
-    padding: 1.6rem 1.6rem 1.4rem;
-    margin-top: 0.4rem;
     background-color: color-mix(in srgb, var(--color-accent) 4%, transparent);
     border: 1px dashed color-mix(in srgb, var(--color-accent) 35%, transparent);
-    border-radius: var(--radius-sm);
-  }
-
-  .login__dev-head {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
   }
 
   .login__dev-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 2.2rem;
-    padding: 0 0.7rem;
-    border-radius: var(--radius-pill);
     background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
     color: var(--color-accent);
     border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    line-height: 1;
   }
 
-  .login__dev-title {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--color-accent);
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    line-height: 1;
-    margin: 0;
-  }
-
-  .login__dev-warning {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin: 0;
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    line-height: 1.4;
-  }
-
-  .login__dev-warning-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-warning);
-    flex-shrink: 0;
-  }
-
-  .login__dev-warning-icon svg {
-    display: block;
-  }
-
-  /* Secondary/outline button — visually distinct from the primary
-     submit so it's obvious this is a different action. */
-  .login__dev-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    width: 100%;
-    height: 4.6rem;
-    padding: 0 1.6rem;
-    background-color: transparent;
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: background-color var(--transition-fast),
-      border-color var(--transition-fast),
-      color var(--transition-fast);
-  }
-
-  .login__dev-btn:hover {
+  /* Dev button interactive states */
+  section:last-of-type > button:hover {
     background-color: var(--alpha-bg-soft);
     border-color: var(--alpha-border);
     color: var(--color-text);
   }
 
-  .login__dev-btn:active {
+  section:last-of-type > button:active {
     transform: scale(0.985);
   }
 
-  .login__dev-btn:focus-visible {
+  section:last-of-type > button:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
   }
 
-  .login__dev-icon {
-    flex-shrink: 0;
-    color: var(--color-accent);
-  }
-
-  .login__signup {
-    text-align: center;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    line-height: 1.4;
-    margin: 0;
-  }
-
-  .login__signup-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 4.4rem;
-    background: none;
-    border: none;
-    padding: 0 0.4rem;
-    margin-left: 0.4rem;
-    color: var(--color-accent);
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: color var(--transition-fast);
-  }
-
+  /* Signup link interactive states */
   .login__signup-link:hover {
     color: var(--color-accent-hover);
     text-decoration: underline;
@@ -965,60 +527,22 @@ const L = t();
     border-radius: 2px;
   }
 
+  /* Signup message — color-mix for info tint */
   .login__signup-msg {
-    margin: 1.2rem 0 0;
-    padding: 1.2rem 1.4rem;
     background-color: color-mix(in srgb, var(--color-info) 8%, transparent);
     border: 1px solid color-mix(in srgb, var(--color-info) 25%, transparent);
     border-radius: var(--radius-sm);
     color: color-mix(in srgb, var(--color-info) 78%, var(--color-text));
-    font-size: 1.2rem;
-    text-align: center;
-    line-height: 1.5;
   }
 
-  /* ════════════════════════════════════════════════════
-     BRAND FOOTER (below the card)
-     ════════════════════════════════════════════════════ */
-  .login__brand {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-weight: 600;
-    margin: 0;
-    opacity: 0.7;
-  }
-
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE
-     ════════════════════════════════════════════════════ */
+  /* ═══ Responsive (max-width: 480px) ═══ */
   @media (max-width: 480px) {
-    .login__card {
+    :global(.login__card-wrap) {
       padding: 3.2rem 2.0rem;
     }
-    .login__title {
-      font-size: 2.4rem;
-    }
-    .login__logo {
-      width: 5.6rem;
-      height: 5.6rem;
-    }
   }
 
-  /* ════════════════════════════════════════════════════
-     LIGHT THEME — soften hardcoded dark shadows/colors
-     ════════════════════════════════════════════════════ */
-  :global([data-theme="light"]) .login__card {
-    box-shadow: var(--shadow-1),
-      0 1px 0 var(--alpha-bg-subtle) inset;
-  }
-
-  :global([data-theme="light"]) .login__logo {
-    box-shadow: var(--shadow-2);
-  }
-
+  /* ═══ Light theme overrides — color-mix + :global ═══ */
   :global([data-theme="light"]) .login__error {
     color: color-mix(in srgb, var(--color-destructive) 45%, var(--color-text));
     background-color: color-mix(in srgb, var(--color-destructive) 8%, transparent);
@@ -1031,28 +555,10 @@ const L = t();
     border-color: color-mix(in srgb, var(--color-info) 20%, transparent);
   }
 
-  /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
+  /* ═══ Reduced motion ═══ */
   @media (prefers-reduced-motion: reduce) {
-    .login__input,
-    .login__toggle,
-    .login__toggle:hover,
-    .login__submit,
-    .login__submit:hover:not(:disabled),
-    .login__submit:active:not(:disabled),
-    .login__signup-link,
-    .login__dev-btn,
     .login__spinner {
-      transition: none;
       animation: none;
-    }
-    .login__theme,
-    .login__lang,
-    .login__theme:active,
-    .login__lang:active {
-      transition: none;
-      transform: none;
     }
   }
 </style>

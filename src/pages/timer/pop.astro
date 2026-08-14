@@ -33,23 +33,9 @@ const lang = Astro.currentLocale ?? defaultLocale;
         } catch (e) {}
       })();
     </script>
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        /* Token-driven — matches the widget .tw root. The plain fallback
-           for --color-bg comes from globals.css' own body rule. */
-        background: var(--color-bg);
-      }
-      #tw-mount {
-        width: 100%;
-        min-height: 100vh;
-      }
-    </style>
   </head>
   <body>
-    <div id="tw-mount"></div>
+    <div id="tw-mount" class="w-full min-h-screen"></div>
 
     <script>
       import { mountTimerWidget, widgetLabelsFrom } from '../../lib/timer-widget';

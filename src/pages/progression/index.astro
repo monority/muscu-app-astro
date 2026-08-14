@@ -17,41 +17,41 @@ const L = t();
   />
 
   <div
-    class="prog"
+    class="max-w-[96rem] mx-auto pb-[6rem] flex flex-col gap-6"
     x-data="progressionApp()"
     x-init="init()"
     x-cloak
   >
     {/* ── Toolbar: summary + sort ── */}
-    <div class="prog__toolbar" x-show="exerciseStats.length > 0">
-      <div class="prog__summary">
-        <div class="prog__summary-item">
+    <div class="mb-1" x-show="exerciseStats.length > 0">
+      <div class="prog__summary flex flex-wrap gap-y-3 gap-x-6 py-4 border-t border-b border-border">
+        <div class="inline-flex items-baseline gap-[0.6rem]">
           <Fragment set:html={icons.dumbbellBox()} />
-          <span class="prog__summary-value" x-text="exerciseStats.length"></span>
-          <span class="prog__summary-label">{L.progression.exerciseSingular}<span x-show="exerciseStats.length > 1">s</span></span>
+          <span class="prog__summary-value font-display text-[2rem] font-bold text-text tabular-nums leading-none" x-text="exerciseStats.length"></span>
+          <span class="text-[1.1rem] text-muted uppercase tracking-[0.08em] font-semibold">{L.progression.exerciseSingular}<span x-show="exerciseStats.length > 1">s</span></span>
         </div>
-        <div class="prog__summary-item">
+        <div class="inline-flex items-baseline gap-[0.6rem]">
           <Fragment set:html={icons.trendingUp()} />
-          <span class="prog__summary-value" x-text="formatNumber(max1RM)"></span>
-          <span class="prog__summary-label">{L.progression.kg} {L.progression.max1RM}</span>
+          <span class="prog__summary-value font-display text-[2rem] font-bold text-text tabular-nums leading-none" x-text="formatNumber(max1RM)"></span>
+          <span class="text-[1.1rem] text-muted uppercase tracking-[0.08em] font-semibold">{L.progression.kg} {L.progression.max1RM}</span>
         </div>
-        <div class="prog__summary-item">
+        <div class="inline-flex items-baseline gap-[0.6rem]">
           <Fragment set:html={icons.list()} />
-          <span class="prog__summary-value" x-text="totalSessions"></span>
-          <span class="prog__summary-label">{L.records.sessionSingular}<span x-show="totalSessions > 1">s</span></span>
+          <span class="prog__summary-value font-display text-[2rem] font-bold text-text tabular-nums leading-none" x-text="totalSessions"></span>
+          <span class="text-[1.1rem] text-muted uppercase tracking-[0.08em] font-semibold">{L.records.sessionSingular}<span x-show="totalSessions > 1">s</span></span>
         </div>
       </div>
     </div>
 
     {/* ── Grid of exercise progression cards ── */}
     <template x-if="exerciseStats.length > 0">
-      <div class="prog__grid">
+      <div class="prog__grid grid grid-cols-1 gap-8">
         <template x-for="stat in exerciseStats" :key="stat.exerciseId">
-          <article class="prog__item">
-              <header class="prog__item-head">
-                <div class="prog__item-title">
+          <article class="prog__item items-center gap-6 min-w-0 py-6 border-b border-border transition-colors duration-normal hover:bg-[var(--alpha-bg-subtle)]">
+              <header class="flex items-center justify-between gap-4 min-w-0">
+                <div class="flex items-center gap-2 min-w-0 flex-1">
                   <Fragment set:html={icons.dumbbellBox()} />
-                  <h3 class="prog__item-name" x-text="trExercise(stat.name)"></h3>
+                  <h3 class="font-display text-[1.7rem] font-bold leading-tight text-text break-words" x-text="trExercise(stat.name)"></h3>
                 </div>
                 <Badge
                   variant="category"
@@ -61,51 +61,51 @@ const L = t();
                 ></Badge>
               </header>
 
-              <div class="prog__item-stats">
-                <div class="prog__stat prog__stat--hero">
-                  <span class="prog__stat-label">{L.progression.best1RM}</span>
-                  <div class="prog__stat-value-row">
-                    <span class="prog__stat-value" x-text="formatNumber(stat.estimated1RM)"></span>
-                    <span class="prog__stat-unit">{L.progression.kg}</span>
+              <div class="prog__item-stats grid grid-cols-2 gap-4">
+                <div class="prog__stat--hero flex flex-col gap-[0.3rem] py-[1.1rem] bg-transparent border-0 border-b border-border">
+                  <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.progression.best1RM}</span>
+                  <div class="flex items-baseline gap-1">
+                    <span class="prog__stat-value font-display text-[2.8rem] font-bold text-accent tabular-nums leading-[1.1]" x-text="formatNumber(stat.estimated1RM)"></span>
+                    <span class="font-body text-[1.2rem] text-muted font-semibold">{L.progression.kg}</span>
                   </div>
                 </div>
-                <div class="prog__stat">
-                  <span class="prog__stat-label">{L.progression.bestWeight}</span>
-                  <div class="prog__stat-value-row">
-                    <span class="prog__stat-value" x-text="formatNumber(stat.bestWeight)"></span>
-                    <span class="prog__stat-unit">{L.progression.kg}</span>
+                <div class="prog__stat flex flex-col gap-[0.3rem] py-[1.1rem] bg-transparent border-0 border-b border-border">
+                  <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.progression.bestWeight}</span>
+                  <div class="flex items-baseline gap-1">
+                    <span class="prog__stat-value font-display text-[2.2rem] font-bold text-text tabular-nums leading-[1.1]" x-text="formatNumber(stat.bestWeight)"></span>
+                    <span class="font-body text-[1.2rem] text-muted font-semibold">{L.progression.kg}</span>
                   </div>
                 </div>
-                <div class="prog__stat">
-                  <span class="prog__stat-label">{L.progression.maxReps}</span>
-                  <div class="prog__stat-value-row">
-                    <span class="prog__stat-value" x-text="stat.bestReps"></span>
-                    <span class="prog__stat-unit">{L.progression.repsSuffix}</span>
+                <div class="prog__stat flex flex-col gap-[0.3rem] py-[1.1rem] bg-transparent border-0 border-b border-border">
+                  <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.progression.maxReps}</span>
+                  <div class="flex items-baseline gap-1">
+                    <span class="prog__stat-value font-display text-[2.2rem] font-bold text-text tabular-nums leading-[1.1]" x-text="stat.bestReps"></span>
+                    <span class="font-body text-[1.2rem] text-muted font-semibold">{L.progression.repsSuffix}</span>
                   </div>
                 </div>
-                <div class="prog__stat">
-                  <span class="prog__stat-label">{L.progression.date}</span>
-                  <div class="prog__stat-value-row">
-                    <span class="prog__stat-value prog__stat-value--sm" x-text="formatDate(stat.date)"></span>
+                <div class="prog__stat flex flex-col gap-[0.3rem] py-[1.1rem] bg-transparent border-0 border-b border-border">
+                  <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.progression.date}</span>
+                  <div class="flex items-baseline gap-1">
+                    <span class="prog__stat-value--sm font-display text-[1.4rem] font-bold text-text tabular-nums leading-[1.1]" x-text="formatDate(stat.date)"></span>
                   </div>
                 </div>
               </div>
 
-              <footer class="prog__item-foot">
-              <div class="prog__meta">
+              <footer class="flex flex-col gap-4 min-w-0 pt-1">
+              <div class="inline-flex items-center flex-wrap gap-[0.6rem] text-muted text-[1.2rem]">
                 <Fragment set:html={icons.calendar()} />
                   <span x-text="stat.sessionCount"></span>
-                  <span class="prog__meta-label">{L.records.sessionSingular}<span x-show="stat.sessionCount > 1">s</span></span>
-                  <span class="prog__meta-separator" aria-hidden="true">·</span>
-                  <span class="prog__meta-date-label">{L.records.lastSession}</span>
-                  <span class="prog__meta-date" x-text="formatDate(stat.lastSessionDate)"></span>
+                  <span class="uppercase tracking-[0.06em] text-[1.1rem] font-semibold">{L.records.sessionSingular}<span x-show="stat.sessionCount > 1">s</span></span>
+                  <span class="text-border-strong" aria-hidden="true">·</span>
+                  <span class="uppercase tracking-[0.06em] text-[1.1rem] font-semibold text-muted">{L.records.lastSession}</span>
+                  <span class="text-text tabular-nums" x-text="formatDate(stat.lastSessionDate)"></span>
                 </div>
-                <div class="prog__history" x-show="stat.history.length > 1">
-                  <span class="prog__history-label">{L.historique.titleShort}</span>
-                  <div class="prog__history-bar" :title="historyTooltip(stat.history)">
+                <div class="flex flex-col gap-[0.6rem]" x-show="stat.history.length > 1">
+                  <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.titleShort}</span>
+                  <div class="prog__history-bar flex items-end gap-[0.3rem] h-[4.8rem] p-1 bg-surface-2 border border-border rounded-sm" :title="historyTooltip(stat.history)">
                     <template x-for="(record, idx) in stat.history" :key="idx">
                       <span
-                        class="prog__history-tick"
+                        class="prog__history-tick flex-1 min-w-[0.4rem] rounded-[2px] transition-colors duration-base"
                         :style="{ height: historyBarHeight(stat.history, record.estimated1RM) + '%' }"
                         :title="formatNumber(record.estimated1RM) + ' kg · ' + formatDate(record.date)"
                       ></span>
@@ -284,151 +284,17 @@ const L = t();
 </script>
 
 <style>
-  /* ════════════════════════════════════════════════════
-     CONTAINER
-     ════════════════════════════════════════════════════ */
-  .prog {
-    max-width: 96rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.6rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     TOOLBAR — summary stats
-     ════════════════════════════════════════════════════ */
-  .prog__toolbar {
-    margin-bottom: 0.4rem;
-  }
-
-  .prog__summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.2rem 2.4rem;
-    padding: 1.6rem 0;
-    background-color: transparent;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .prog__summary-item {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.6rem;
-  }
-
-  .prog__summary-icon {
-    width: 1.6rem;
-    height: 1.6rem;
-    color: var(--color-accent);
-    flex-shrink: 0;
-    align-self: center;
-  }
-
-  .prog__summary-value {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .prog__summary-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-  }
-
-  /* ════════════════════════════════════════════════════
-     GRID — 1 / 2 / 3 columns
-     ════════════════════════════════════════════════════ */
   .prog__grid {
-    display: grid;
     grid-template-columns: 1fr;
-    column-gap: 3.2rem;
   }
 
-  @media (min-width: 640px) {
-    .prog__grid {
-      grid-template-columns: 1fr;
-    }
-
-    .prog__stat:nth-child(4) {
-      border-left: 1px solid var(--color-border);
-      padding-left: 1.6rem;
-    }
-  }
-
-  /* ════════════════════════════════════════════════════
-     ITEM — open exercise record
-     ════════════════════════════════════════════════════ */
   .prog__item {
     display: grid;
     grid-template-columns: minmax(20rem, 0.8fr) minmax(0, 1.45fr) minmax(14rem, 0.55fr);
-    align-items: center;
-    gap: 2.4rem;
-    min-width: 0;
-    padding: 2.4rem 0;
-    border-bottom: 1px solid var(--color-border);
-    transition: background-color var(--transition-normal);
   }
 
-  .prog__item:hover {
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  .prog__item-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    min-width: 0;
-  }
-
-  .prog__item-title {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  .prog__item-icon {
-    width: 1.8rem;
-    height: 1.8rem;
-    color: var(--color-accent);
-    flex-shrink: 0;
-  }
-
-  .prog__item-name {
-    font-family: var(--font-display);
-    font-size: 1.7rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-text);
-    word-break: break-word;
-  }
-
-  /* ── Stats grid ── */
   .prog__item-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .prog__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    padding: 1.1rem 0;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
+    grid-column: 1 / -1;
   }
 
   .prog__stat--hero {
@@ -438,121 +304,8 @@ const L = t();
     border-bottom-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
   }
 
-  .prog__stat-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-  }
-
-  .prog__stat-value-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4rem;
-  }
-
-  .prog__stat-value {
-    font-family: var(--font-display);
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-  }
-
-  .prog__stat--hero .prog__stat-value {
-    font-size: 2.8rem;
-    color: var(--color-accent);
-  }
-
-  .prog__stat-value--sm {
-    font-size: 1.4rem;
-  }
-
-  .prog__stat-unit {
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    font-weight: 600;
-  }
-
-  /* ── Footer: sessions + history bar ── */
-  .prog__item-foot {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    min-width: 0;
-    padding-top: 0.4rem;
-  }
-
-  .prog__meta {
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    color: var(--color-muted);
-    font-size: 1.2rem;
-  }
-
-  .prog__meta-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .prog__meta-label,
-  .prog__meta-date-label {
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-
-  .prog__meta-separator {
-    color: var(--color-border-strong);
-  }
-
-  .prog__meta-date-label {
-    color: var(--color-muted);
-  }
-
-  .prog__meta-date {
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .prog__history {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .prog__history-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-  }
-
-  .prog__history-bar {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.3rem;
-    height: 4.8rem;
-    padding: 0.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-  }
-
   .prog__history-tick {
-    flex: 1 1 auto;
-    min-width: 0.4rem;
     background-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-    border-radius: 2px;
-    transition: background-color 200ms ease;
   }
 
   .prog__history-tick:first-child {
@@ -567,43 +320,28 @@ const L = t();
     background-color: color-mix(in srgb, var(--color-accent) 95%, transparent);
   }
 
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
-     ════════════════════════════════════════════════════ */
+  @media (min-width: 640px) {
+    .prog__stat:nth-child(4) {
+      border-left: 1px solid var(--color-border);
+      padding-left: 1.6rem;
+    }
+  }
+
   @media (max-width: 900px) {
     .prog__item { grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr); }
-    .prog__item-foot { grid-column: 1 / -1; }
+    .prog__item footer { grid-column: 1 / -1; }
   }
 
   @media (max-width: 480px) {
     .prog__item { display: flex; flex-direction: column; align-items: stretch; gap: 1.4rem; }
-    .prog__summary {
-      padding: 1.2rem 0;
-      gap: 1rem 1.6rem;
-    }
-    .prog__summary-value {
-      font-size: 1.6rem;
-    }
-    .prog__item-stats {
-      grid-template-columns: 1fr;
-    }
-
-    .prog__stat:nth-child(4) {
-      border-left: 0;
-      padding-left: 0;
-    }
-
-    .prog__stat-value {
-      font-size: 1.8rem;
-    }
-    .prog__stat--hero .prog__stat-value {
-      font-size: 2.4rem;
-    }
+    .prog__summary { padding: 1.2rem 0; gap: 1rem 1.6rem; }
+    .prog__summary-value { font-size: 1.6rem; }
+    .prog__item-stats { grid-template-columns: 1fr; }
+    .prog__stat:nth-child(4) { border-left: 0; padding-left: 0; }
+    .prog__stat-value { font-size: 1.8rem; }
+    .prog__stat--hero .prog__stat-value { font-size: 2.4rem; }
   }
 
-  /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
     .prog__history-tick,
     .prog__item {

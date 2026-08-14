@@ -22,42 +22,29 @@ const visibleExercises = exercises.slice(0, 4);
 const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
 ---
 
-<article class:list={['workout-record', `workout-record--${status}`, className]}>
-  <div class="workout-record__status" aria-hidden="true"><span></span></div>
-  <div class="workout-record__main">
-    <div class="workout-record__heading">
-      <h3 class="workout-record__name">{name}</h3>
+<article class:list={['workout-record grid grid-cols-[0.5rem_minmax(0,1fr)auto] gap-4 items-start py-8 border-b border-[var(--color-border)]', `workout-record--${status}`, className]}>
+  <div class="workout-record__status w-[0.5rem] h-full min-h-[8rem] bg-[var(--color-border-strong)]" aria-hidden="true"><span></span></div>
+  <div class="min-w-0">
+    <div class="flex items-center justify-between gap-[1.2rem] max-[480px]:items-start max-[480px]:flex-col">
+      <h3 class="m-0 text-[2rem] tracking-tight">{name}</h3>
       <Badge variant={config.variant} size="sm">{config.label}</Badge>
     </div>
-    <dl class="workout-record__metrics">
-      <div><dt>{L.common.date}</dt><dd>{formattedDate}</dd></div>
-      <div><dt>{L.common.exercises}</dt><dd>{exerciseCount}</dd></div>
-      {duration && <div><dt>{L.common.duration}</dt><dd>{duration}</dd></div>}
-      {totalVolume && <div><dt>{L.sessions.volume}</dt><dd>{totalVolume}</dd></div>}
+    <dl class="flex flex-wrap gap-[1.2rem_2.4rem] mt-4 max-[480px]:gap-[1rem_1.4rem]">
+      <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.common.date}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{formattedDate}</dd></div>
+      <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.common.exercises}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{exerciseCount}</dd></div>
+      {duration && <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.common.duration}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{duration}</dd></div>}
+      {totalVolume && <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.sessions.volume}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{totalVolume}</dd></div>}
     </dl>
-    {visibleExercises.length > 0 && <div class="workout-record__exercises">
-      {visibleExercises.map((ex) => <span>{trExercise(ex.name)} <small>{trMuscle(ex.muscle)} · {ex.setCount}</small></span>)}
-      {hiddenCount > 0 && <span class="workout-record__more">+{hiddenCount} {L.common.exercises}</span>}
+    {visibleExercises.length > 0 && <div class="flex flex-wrap gap-[0.6rem_1.2rem] mt-[1.2rem] text-[var(--color-muted)] text-[1.2rem]">
+      {visibleExercises.map((ex) => <span class="inline-flex gap-1 items-baseline">{trExercise(ex.name)} <small class="text-[var(--color-accent)] text-[1rem]">{trMuscle(ex.muscle)} · {ex.setCount}</small></span>)}
+      {hiddenCount > 0 && <span class="text-[var(--color-muted)] !important">+{hiddenCount} {L.common.exercises}</span>}
     </div>}
   </div>
-  <span class="workout-record__arrow" aria-hidden="true">↗</span>
+  <span class="text-[var(--color-accent)] text-[1.8rem]" aria-hidden="true">↗</span>
 </article>
 
 <style>
-  .workout-record { display: grid; grid-template-columns: 0.5rem minmax(0, 1fr) auto; gap: 1.6rem; align-items: start; padding: 2rem 0; border-bottom: 1px solid var(--color-border); }
-  .workout-record__status { width: 0.5rem; height: 100%; min-height: 8rem; background: var(--color-border-strong); }
   .workout-record--completed .workout-record__status { background: var(--color-accent); }
   .workout-record--in-progress .workout-record__status { background: var(--color-info); }
-  .workout-record__heading { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; }
-  .workout-record__name { margin: 0; font-size: 2rem; letter-spacing: -0.04em; }
-  .workout-record__metrics { display: flex; flex-wrap: wrap; gap: 1.2rem 2.4rem; margin: 1rem 0 0; }
-  .workout-record__metrics div { display: flex; flex-direction: column; gap: 0.2rem; }
-  .workout-record__metrics dt { color: var(--color-muted); font-size: 0.95rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-  .workout-record__metrics dd { color: var(--color-text); font-size: 1.3rem; font-weight: 650; font-variant-numeric: tabular-nums; }
-  .workout-record__exercises { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; margin-top: 1.2rem; color: var(--color-muted); font-size: 1.2rem; }
-  .workout-record__exercises span { display: inline-flex; gap: 0.4rem; align-items: baseline; }
-  .workout-record__exercises small { color: var(--color-accent); font-size: 1rem; }
-  .workout-record__more { color: var(--color-muted) !important; }
-  .workout-record__arrow { color: var(--color-accent); font-size: 1.8rem; }
-  @media (max-width: 480px) { .workout-record { gap: 1rem; padding: 1.6rem 0; } .workout-record__heading { align-items: flex-start; flex-direction: column; } .workout-record__metrics { gap: 1rem 1.4rem; } }
+  @media (max-width: 480px) { .workout-record { gap: 1rem; padding: 1.6rem 0; } }
 </style>

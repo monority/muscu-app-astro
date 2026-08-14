@@ -18,34 +18,11 @@ const {
 } = Astro.props;
 ---
 
-<div class:list={['form-field', className]}>
-  <label for={forId} class="form-field__label">
+<div class:list={['flex flex-col gap-[0.6rem]', className]}>
+  <label for={forId} class="text-[1.3rem] font-medium text-[var(--color-muted)] leading-[1.3]">
     {label}
-    {required && <span class="form-field__req" aria-hidden="true">*</span>}
+    {required && <span class="text-[var(--color-destructive)] ml-[0.2rem]" aria-hidden="true">*</span>}
   </label>
   <slot />
-  {hint && <p class="form-field__hint">{hint}</p>}
+  {hint && <p class="text-[1.1rem] text-[var(--color-muted)] leading-[1.4]">{hint}</p>}
 </div>
-
-<style>
-  .form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-  .form-field__label {
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: var(--color-muted);
-    line-height: 1.3;
-  }
-  .form-field__req {
-    color: var(--color-destructive);
-    margin-left: 0.2rem;
-  }
-  .form-field__hint {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    line-height: 1.4;
-  }
-</style>

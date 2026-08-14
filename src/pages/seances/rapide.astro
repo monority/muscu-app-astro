@@ -1,4 +1,4 @@
----
+﻿---
 
 import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
@@ -8,37 +8,31 @@ const L = t();
 ---
 
 <AppLayout title={L.rapide.title}>
-  {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-      QUICK SESSION MODE â€” full-screen, distraction-free gym UI.
-      The `.qs` root uses position: fixed to overlay the
-      sidebar + topbar so the user gets an unbroken dark canvas
-      with nothing competing for their attention while lifting.
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
   <div
     class="qs"
     x-data="quickSessionApp()"
     x-init="init()"
     x-cloak
   >
-    {/* â”€â”€ Top bar (always visible in working + resting) â”€â”€ */}
+    {/* ─── Top bar (working + resting) ─── */}
     <template x-if="state === 'working' || state === 'resting'">
-      <header class="qs__topbar">
+      <header class="shrink-0 grid grid-cols-[6rem_1fr_6rem] items-center gap-3 py-3 px-4 border-b border-[var(--alpha-bg-soft)] max-[480px]:grid-cols-[5.2rem_1fr_5.2rem] max-[480px]:p-[1rem] max-[360px]:grid-cols-[4.8rem_minmax(0,1fr)_4.8rem] max-[360px]:gap-1.5">
         <button
           type="button"
-          class="qs__icon-btn"
+          class="inline-flex items-center justify-center w-[5.6rem] h-[5.6rem] bg-surface-2 text-text border border-border rounded-md cursor-pointer appearance-none transition duration-140 hover:bg-surface-3 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-96 motion-reduce:transition-none max-[480px]:w-[5.2rem] max-[480px]:h-[5.2rem] max-[360px]:w-[4.8rem] max-[360px]:h-[4.8rem]"
           @click="stopSession()"
           aria-label={L.rapide.quitAria}
         >
           <Fragment set:html={icons.arrowLeft(24, 24)} />
         </button>
 
-        <div class="qs__progress">
-          <span class="qs__progress-text" aria-live="polite" aria-atomic="true">
-            {L.rapide.setProgress} <strong x-text="currentSetIndex + 1"></strong>/<span x-text="currentExercise?.sets?.length || 0"></span>
-            <span class="qs__progress-sep">Â·</span>
-            {L.rapide.exerciseProgress} <strong x-text="currentExerciseIndex + 1"></strong>/<span x-text="totalExercises"></span>
+        <div class="flex flex-col items-center gap-1.5 min-w-0">
+          <span class="text-[1.4rem] text-muted font-semibold text-center leading-[1.2] tracking-[0.01em] max-[480px]:text-[1.2rem] max-[360px]:text-[1.1rem]" aria-live="polite" aria-atomic="true">
+            {L.rapide.setProgress} <strong class="text-text font-bold" x-text="currentSetIndex + 1"></strong>/<span x-text="currentExercise?.sets?.length || 0"></span>
+            <span class="mx-1 opacity-40">·</span>
+            {L.rapide.exerciseProgress} <strong class="text-text font-bold" x-text="currentExerciseIndex + 1"></strong>/<span x-text="totalExercises"></span>
           </span>
-          <div class="qs__progress-bar" aria-hidden="true">
+          <div class="w-full max-w-[28rem] h-1.5 bg-surface-2 rounded-pill overflow-hidden" aria-hidden="true">
             <div
               class="qs__progress-fill"
               :style="`width: ${progressPercent}%`"
@@ -48,7 +42,7 @@ const L = t();
 
         <button
           type="button"
-          class="qs__icon-btn"
+          class="inline-flex items-center justify-center w-[5.6rem] h-[5.6rem] bg-surface-2 text-text border border-border rounded-md cursor-pointer appearance-none transition duration-140 hover:bg-surface-3 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-96 motion-reduce:transition-none max-[480px]:w-[5.2rem] max-[480px]:h-[5.2rem] max-[360px]:w-[4.8rem] max-[360px]:h-[4.8rem]"
           @click="confirmStop()"
           aria-label={L.rapide.finish}
           title={L.rapide.finish}
@@ -58,38 +52,36 @@ const L = t();
       </header>
     </template>
 
-    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-        STATE 1 â€” Selecting a session
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+    {/* ─── STATE 1 — Selecting ─── */}
     <template x-if="state === 'selecting'">
-      <section class="qs__selecting">
-        <div class="qs__selecting-inner">
-          <div class="qs__selecting-icon" aria-hidden="true">
+      <section class="flex-1 flex items-center justify-center p-6 overflow-y-auto max-[480px]:items-start max-[480px]:p-[2rem_1rem]">
+        <div class="w-full max-w-[52rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3">
+          <div class="w-[9.6rem] h-[9.6rem] rounded-full bg-surface-2 border border-border text-accent inline-flex items-center justify-center max-[480px]:w-[7.2rem] max-[480px]:h-[7.2rem]" aria-hidden="true">
             <Fragment set:html={icons.zap(64, 64)} />
           </div>
-          <h1 class="qs__selecting-title">{L.rapide.title}</h1>
-          <p class="qs__selecting-text">
+          <h1 class="font-display text-[clamp(3.2rem,6vw,4.8rem)] font-bold leading-none m-0 text-text tracking-[-0.01em] max-[480px]:text-[clamp(2.6rem,11vw,3.8rem)]">{L.rapide.title}</h1>
+          <p class="text-[1.5rem] text-muted leading-[1.4] m-0 max-w-[38rem]">
             {L.rapide.introText}
           </p>
 
-          <div class="qs__field">
-            <label class="qs__field-label" for="qs-session">{L.rapide.session}</label>
+          <div class="w-full max-w-[44rem] flex flex-col gap-2 mt-2 text-left">
+            <label class="font-display text-[1.2rem] text-muted uppercase tracking-[0.14em] font-bold" for="qs-session">{L.rapide.session}</label>
             <select
               id="qs-session"
-              class="qs__select"
+              class="w-full h-15 px-4 bg-surface-2 border border-border rounded-md text-text font-body text-[1.6rem] font-semibold cursor-pointer appearance-none transition duration-140 hover:bg-surface-3 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
               x-model="selectedSessionId"
             >
               <option value="">{L.rapide.selectSession}</option>
               <template x-for="s in availableSessions" :key="s.id">
                 <option
                   :value="s.id"
-                  x-text="`${s.label} (${s.totalSets} ${setsShortLabel} Â· ${formatWeight(s.totalVolume)})`"
+                  x-text="`${s.label} (${s.totalSets} ${setsShortLabel} · ${formatWeight(s.totalVolume)})`"
                 ></option>
               </template>
             </select>
           </div>
 
-          <div class="qs__selecting-actions">
+          <div class="flex gap-3 w-full max-w-[44rem] mt-1 max-[480px]:flex-col max-[480px]:gap-2">
             <Button variant="ghost" href={localizedPath("/seances")}>{L.common.back}</Button>
             <Button
               variant="primary"
@@ -101,52 +93,50 @@ const L = t();
           </div>
 
           <template x-if="availableSessions.length === 0">
-            <p class="qs__empty">
+            <p class="mt-2 text-muted text-[1.4rem] leading-[1.5]">
               {L.rapide.emptyDesc}
-              <a href={localizedPath("/seances/creer")}>{L.rapide.restart}</a>.
+              <a class="text-accent underline" href={localizedPath("/seances/creer")}>{L.rapide.restart}</a>.
             </p>
           </template>
         </div>
       </section>
     </template>
 
-    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-        STATE 2 â€” Working (one set at a time)
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+    {/* ─── STATE 2 — Working ─── */}
     <template x-if="state === 'working' && currentSet">
       <section
-        class="qs__working"
+        class="flex-1 flex items-center justify-center p-4 overflow-hidden max-[480px]:items-start max-[480px]:p-[1rem] max-[480px]:overflow-y-auto"
         @touchstart="onTouchStart($event)"
         @touchend="onTouchEnd($event)"
       >
-        <div class="qs__working-inner">
-          <div class="qs__exercise-name" x-text="trExercise(currentExercise?.name)" aria-live="polite" aria-atomic="true"></div>
-          <div class="qs__exercise-muscle" x-text="trMuscle(currentExercise?.muscle)"></div>
+        <div class="w-full max-w-[60rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3">
+          <div class="font-display text-[clamp(2.4rem,5.5vw,4rem)] font-bold leading-[1.05] text-text tracking-[-0.01em] break-words max-[360px]:text-[2.2rem]" x-text="trExercise(currentExercise?.name)" aria-live="polite" aria-atomic="true"></div>
+          <div class="text-[1.4rem] text-muted uppercase tracking-[0.14em] font-semibold" x-text="trMuscle(currentExercise?.muscle)"></div>
 
-          <div class="qs__set-number" aria-live="polite" aria-atomic="true">
+          <div class="text-[1.6rem] text-muted font-semibold inline-flex items-center gap-2.5 mt-1" aria-live="polite" aria-atomic="true">
             {L.rapide.setProgress} <span x-text="currentSet.setNumber"></span>
             <span
-              class="qs__set-type"
+              class="qs__set-type inline-flex items-center h-[2.6rem] px-2.5 rounded-pill text-[1.1rem] font-bold uppercase tracking-[0.04em] bg-surface-2 border border-border"
               :class="'qs__set-type--' + currentSet.type"
               x-text="typeLabel(currentSet.type)"
             ></span>
           </div>
 
-          <div class="qs__load">
-            <div class="qs__weight">
-              <span class="qs__num" x-text="formatWeight(currentSet.weight)"></span>
-              <span class="qs__unit" x-text="weightUnit()"></span>
+          <div class="flex items-center justify-center gap-[clamp(2rem,5vw,4rem)] my-2 max-[480px]:gap-[clamp(1.2rem,8vw,2.4rem)]">
+            <div class="flex flex-col items-center leading-none">
+              <span class="font-display text-[clamp(5.2rem,14vw,9.6rem)] font-bold text-text leading-none tracking-[-0.02em] max-[360px]:text-[clamp(4.6rem,18vw,7rem)]" x-text="formatWeight(currentSet.weight)"></span>
+              <span class="font-body text-[1.6rem] text-muted font-semibold uppercase tracking-[0.12em] mt-1" x-text="weightUnit()"></span>
             </div>
-            <div class="qs__times" aria-hidden="true">Ã—</div>
-            <div class="qs__reps">
-              <span class="qs__num" x-text="currentSet.reps"></span>
-              <span class="qs__unit">{L.rapide.repsUnit}</span>
+            <div class="font-display text-[clamp(3.2rem,7vw,5.6rem)] text-muted font-light leading-none" aria-hidden="true">×</div>
+            <div class="flex flex-col items-center leading-none">
+              <span class="font-display text-[clamp(5.2rem,14vw,9.6rem)] font-bold text-text leading-none tracking-[-0.02em] max-[360px]:text-[clamp(4.6rem,18vw,7rem)]" x-text="currentSet.reps"></span>
+              <span class="font-body text-[1.6rem] text-muted font-semibold uppercase tracking-[0.12em] mt-1">{L.rapide.repsUnit}</span>
             </div>
           </div>
 
           <button
             type="button"
-            class="qs__done"
+            class="w-full max-w-[60rem] min-h-[8rem] px-6 bg-success text-success-foreground border-none rounded-lg font-body text-[2.2rem] font-extrabold tracking-[0.02em] cursor-pointer appearance-none inline-flex items-center justify-center gap-3 shadow-[0_8px_24px_color-mix(in_srgb,var(--color-success)_30%,transparent)] transition duration-140 hover:bg-[color-mix(in_srgb,var(--color-success)_90%,white)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-[0.985] motion-reduce:transition-none"
             @click="completeSet()"
             aria-label={L.rapide.completeSetAria}
           >
@@ -164,10 +154,10 @@ const L = t();
             <span>{L.rapide.undoLast}</span>
           </Button>
 
-          <div class="qs__nav">
+          <div class="grid grid-cols-2 gap-3 w-full max-w-[60rem]">
             <button
               type="button"
-              class="qs__nav-btn"
+              class="inline-flex items-center justify-center gap-1.5 min-h-[5.6rem] px-4 bg-surface-2 border border-border rounded-md text-text font-body text-[1.4rem] font-semibold cursor-pointer appearance-none transition duration-140 hover:bg-surface-3 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-98 motion-reduce:transition-none disabled:opacity-30 disabled:cursor-not-allowed"
               :disabled="!canGoPrev()"
               @click="prevSet()"
               aria-label={L.rapide.prevSetAria}
@@ -177,7 +167,7 @@ const L = t();
             </button>
             <button
               type="button"
-              class="qs__nav-btn"
+              class="inline-flex items-center justify-center gap-1.5 min-h-[5.6rem] px-4 bg-surface-2 border border-border rounded-md text-text font-body text-[1.4rem] font-semibold cursor-pointer appearance-none transition duration-140 hover:bg-surface-3 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-98 motion-reduce:transition-none disabled:opacity-30 disabled:cursor-not-allowed"
               :disabled="!canGoNext()"
               @click="nextSet()"
               aria-label={L.rapide.nextSetAria}
@@ -190,16 +180,14 @@ const L = t();
       </section>
     </template>
 
-    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-        STATE 3 â€” Resting (big countdown)
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+    {/* ─── STATE 3 — Resting ─── */}
     <template x-if="state === 'resting'">
-      <section class="qs__resting">
-        <div class="qs__resting-inner">
-          <div class="qs__resting-confirmation" role="status" aria-live="polite">
+      <section class="flex-1 flex items-center justify-center p-6 max-[480px]:items-start max-[480px]:p-[2rem_1rem] max-[480px]:overflow-y-auto">
+        <div class="w-full max-w-[60rem] flex flex-col items-center gap-6 text-center max-[480px]:gap-3">
+          <div class="text-success font-display text-[1.3rem] font-bold tracking-[0.08em] uppercase" role="status" aria-live="polite">
             {L.rapide.setRecorded}
           </div>
-          <div class="qs__resting-label">{L.rapide.resting}</div>
+          <div class="font-display text-[2rem] text-muted uppercase tracking-[0.16em] font-bold">{L.rapide.resting}</div>
           <div
             class="qs__resting-timer"
             role="timer"
@@ -207,9 +195,9 @@ const L = t();
             :class="{ 'qs__resting-timer--low': restRemaining <= 10 && restRemaining > 0 }"
             x-text="formatRestTime()"
           ></div>
-          <div class="qs__resting-next" x-text="restNextLabel()" aria-live="polite" aria-atomic="true"></div>
+          <div class="text-[1.6rem] text-muted leading-[1.4]" x-text="restNextLabel()" aria-live="polite" aria-atomic="true"></div>
 
-          <div class="qs__resting-actions">
+          <div class="grid grid-cols-[1fr_1.6fr_1fr] gap-3 w-full max-w-[50rem] max-[480px]:grid-cols-1 max-[480px]:gap-2">
             <Button
               variant="ghost"
               @click="addRestTime(-15)"
@@ -245,43 +233,41 @@ const L = t();
       </section>
     </template>
 
-    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-        STATE 4 â€” Completed (summary)
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+    {/* ─── STATE 4 — Completed ─── */}
     <template x-if="state === 'completed'">
-      <section class="qs__done-screen">
-        <div class="qs__done-inner">
+      <section class="flex-1 flex items-center justify-center p-6 overflow-y-auto max-[480px]:items-start max-[480px]:p-[2rem_1rem]">
+        <div class="w-full max-w-[56rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3">
           <div
-            class="qs__done-icon"
+            class="qs__done-icon w-[12rem] h-[12rem] rounded-full bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-success inline-flex items-center justify-center mb-1 max-[480px]:w-[8rem] max-[480px]:h-[8rem]"
             :class="{ 'qs__done-icon--partial': recordedSets < totalSets }"
             aria-hidden="true"
           >
             <Fragment set:html={icons.checkCircle(80, 80)} />
           </div>
-          <h1 class="qs__done-title" x-text="completionTitle"></h1>
-          <p class="qs__done-name" x-text="session?.name"></p>
-          <p class="qs__done-message" x-text="completionMessage" role="status"></p>
+          <h1 class="qs__done-title font-display text-[clamp(3.2rem,7vw,4.8rem)] font-bold leading-none m-0 text-text tracking-[-0.01em]" x-text="completionTitle"></h1>
+          <p class="qs__done-name text-[1.6rem] text-muted m-0" x-text="session?.name"></p>
+          <p class="qs__done-message text-[1.4rem] text-success -mt-1" x-text="completionMessage" role="status"></p>
 
-          <div class="qs__done-stats">
-            <div class="qs__done-stat">
-              <div class="qs__done-stat-value" x-text="`${recordedSets} / ${totalSets}`"></div>
-              <div class="qs__done-stat-label">{L.rapide.setsDone}</div>
+          <div class="w-full grid grid-cols-2 gap-3 mt-4 mb-1 max-[480px]:gap-2 min-[540px]:grid-cols-4">
+            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
+              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="`${recordedSets} / ${totalSets}`"></div>
+              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.setsDone}</div>
             </div>
-            <div class="qs__done-stat">
-              <div class="qs__done-stat-value" x-text="`${completedExercises} / ${totalExercises}`"></div>
-              <div class="qs__done-stat-label">{L.rapide.exercises}</div>
+            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
+              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="`${completedExercises} / ${totalExercises}`"></div>
+              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.exercises}</div>
             </div>
-            <div class="qs__done-stat">
-              <div class="qs__done-stat-value" x-text="formatDuration(sessionDuration)"></div>
-              <div class="qs__done-stat-label">{L.rapide.duration}</div>
+            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
+              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="formatDuration(sessionDuration)"></div>
+              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.duration}</div>
             </div>
-            <div class="qs__done-stat">
-              <div class="qs__done-stat-value" x-text="formatWeight(sessionTotalVolume)"></div>
-              <div class="qs__done-stat-label">{L.rapide.volume}</div>
+            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
+              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="formatWeight(sessionTotalVolume)"></div>
+              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.volume}</div>
             </div>
           </div>
 
-          <div class="qs__done-actions">
+          <div class="flex flex-col gap-3 w-full mt-2 min-[540px]:flex-row">
             <Button
               variant="primary"
               :href="detailHref(session?.id)"
@@ -321,7 +307,7 @@ const L = t();
 
   const LABELS = t();
 
-  // â”€â”€ Pure helpers (module scope) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Pure helpers (module scope) ───────────────────────
   function typeLabelFn(t: SetType): string {
     switch (t) {
       case 'warmup': return LABELS.rapide.typeWarmup;
@@ -335,9 +321,8 @@ const L = t();
 
   function formatWeightFn(w: number): string {
     if (!Number.isFinite(w) || w <= 0) return '0';
-    // Show as integer when possible, otherwise with 1 decimal.
     const rounded = Math.round(w * 10) / 10;
-    return Number.isInteger(rounded)
+    return Number.isFinite(rounded) && Number.isInteger(rounded)
       ? String(rounded)
       : rounded.toFixed(1).replace(/\.0$/, '');
   }
@@ -357,8 +342,6 @@ const L = t();
     return `${s}${LABELS.rapide.sShort}`;
   }
 
-  // Standard rest period between work sets (seconds). Mirrors the
-  // default setting of 90s in storage.ts.
   const DEFAULT_REST = 90;
 
   document.addEventListener('alpine:init', () => {
@@ -366,11 +349,8 @@ const L = t();
     const Alpine = (window as any).Alpine;
 
     Alpine.data('quickSessionApp', () => ({
-      // â”€â”€ State machine â”€â”€
-      // 'selecting' | 'working' | 'resting' | 'completed'
       state: 'selecting' as 'selecting' | 'working' | 'resting' | 'completed',
 
-      // â”€â”€ Data â”€â”€
       availableSessions: [] as Array<{
         id: string;
         label: string;
@@ -380,29 +360,23 @@ const L = t();
       selectedSessionId: '',
       session: null as Session | null,
 
-      // â”€â”€ Workout progress â”€â”€
       currentExerciseIndex: 0,
       currentSetIndex: 0,
       completedSets: 0,
       startTime: 0,
       endTime: 0,
 
-      // â”€â”€ Rest timer â”€â”€
       restRemaining: 0,
       restInterval: null as number | null,
       restPaused: false,
 
-      // â”€â”€ Wake Lock â”€â”€
       wakeLock: null as any,
 
-      // â”€â”€ Touch swipe â”€â”€
       _touchStartX: 0,
       _touchStartY: 0,
 
-      // â”€â”€ Keyboard â”€â”€
       _keyHandler: null as ((e: KeyboardEvent) => void) | null,
 
-      // â”€â”€ Init â”€â”€
       init() {
         this.loadSessions();
         const requestedSessionId = new URLSearchParams(window.location.search).get('session');
@@ -410,12 +384,7 @@ const L = t();
           this.selectedSessionId = requestedSessionId;
         }
         this._installKeyboard();
-        // Try to acquire the screen wake lock so the phone doesn't
-        // dim during a set. Best-effort: silently no-op on browsers
-        // that don't support it (or require HTTPS).
         this._requestWakeLock();
-        // Re-acquire the wake lock if the tab becomes visible again
-        // (browsers release it on visibility change).
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible' && this.state === 'working') {
             this._requestWakeLock();
@@ -435,11 +404,9 @@ const L = t();
         this._releaseWakeLock();
       },
 
-      // â”€â”€ Sessions list â”€â”€
       loadSessions() {
         const all = getSessions();
         this.availableSessions = all
-          // Hide sessions that have no sets at all â€” nothing to do.
           .filter((s) => s.exercises.some((e) => e.sets.length > 0))
           .map((s) => {
             const totalSets = s.exercises.reduce(
@@ -462,12 +429,9 @@ const L = t();
               totalVolume,
             };
           })
-          // Newest first â€” the user is more likely to want the
-          // latest planned session than an old one.
           .sort((a, b) => (a.label < b.label ? 1 : -1));
       },
 
-      // â”€â”€ Start the workout â”€â”€
       startSession() {
         if (!this.selectedSessionId) return;
         const found = getSessions().find(
@@ -480,9 +444,6 @@ const L = t();
         this.completedSets = 0;
         this.startTime = Date.now();
         this.endTime = 0;
-        // A planned date is the scheduling date. Once the workout starts,
-        // persist today's actual training date so progression, Records and
-        // calendar all point to the session that was really performed.
         const actualDate = todayISO();
         this.session.date = actualDate;
         this.session.status = 'in-progress';
@@ -493,7 +454,6 @@ const L = t();
         this.state = 'working';
       },
 
-      // â”€â”€ Computed â”€â”€
       get currentExercise() {
         return this.session?.exercises[this.currentExerciseIndex] ?? null;
       },
@@ -527,8 +487,6 @@ const L = t();
       get progressPercent(): number {
         const total = this.totalSets;
         if (total === 0) return 0;
-        // Count completed sets across every exercise, not just
-        // the current one â€” the bar represents the whole session.
         let done = 0;
         if (this.session) {
           for (let i = 0; i < this.session.exercises.length; i++) {
@@ -584,10 +542,7 @@ const L = t();
         return `${LABELS.rapide.completionPartial} · ${this.recordedSets}/${this.totalSets} ${LABELS.rapide.setsShort}`;
       },
 
-      // â”€â”€ Navigation â”€â”€
       canGoPrev(): boolean {
-        // True when there is at least one set before the current
-        // cursor in the global flat ordering.
         if (!this.session) return false;
         return this.currentExerciseIndex > 0 || this.currentSetIndex > 0;
       },
@@ -608,7 +563,6 @@ const L = t();
           this.currentSetIndex -= 1;
           return;
         }
-        // Jump to the last set of the previous exercise.
         if (this.currentExerciseIndex > 0) {
           this.currentExerciseIndex -= 1;
           const ex = this.currentExercise;
@@ -624,14 +578,12 @@ const L = t();
           this.currentSetIndex += 1;
           return;
         }
-        // Move to the first set of the next exercise.
         if (this.currentExerciseIndex < this.session!.exercises.length - 1) {
           this.currentExerciseIndex += 1;
           this.currentSetIndex = 0;
         }
       },
 
-      // â”€â”€ Set completion â”€â”€
       completeSet() {
         if (!this.session || !this.currentSet) return;
         const ex = this.currentExercise;
@@ -640,10 +592,8 @@ const L = t();
         if (!set) return;
         set.completed = true;
         this.completedSets += 1;
-        // Persist the updated set + session.
         updateSession(this.session.id, { exercises: this.session.exercises });
 
-        // Determine what comes next: rest, or end.
         const isLastExercise =
           this.currentExerciseIndex === this.session.exercises.length - 1;
         const isLastSet =
@@ -651,13 +601,11 @@ const L = t();
         if (isLastExercise && isLastSet) {
           this._finishSession();
         } else {
-          // Move to the next set before starting the timer.
           this.nextSet();
           this._startRest();
         }
       },
 
-      // â”€â”€ Undo â”€â”€
       get canUndo(): boolean {
         return this.completedSets > 0;
       },
@@ -674,10 +622,8 @@ const L = t();
         }
         this.restRemaining = 0;
         this.state = 'working';
-        // Park the user on the set that was just un-completed.
         this.currentExerciseIndex = res.exerciseIndex;
         this.currentSetIndex = res.setIndex;
-        // Re-open the session when the undo lands on a finished one.
         if (this.session.status === 'completed') {
           this.session.status = 'in-progress';
           updateSession(this.session.id, {
@@ -690,7 +636,6 @@ const L = t();
         this._requestWakeLock();
       },
 
-      // â”€â”€ Rest timer â”€â”€
       _startRest() {
         this.restRemaining = DEFAULT_REST;
         this.restPaused = false;
@@ -728,10 +673,7 @@ const L = t();
         this.restRemaining = Math.max(0, this.restRemaining + delta);
       },
 
-      // â”€â”€ Stop / finish â”€â”€
       stopSession() {
-        // Soft exit: keep the session in 'in-progress' state so the
-        // user can come back later. Releases the wake lock + timer.
         if (this.restInterval) {
           window.clearInterval(this.restInterval);
           this.restInterval = null;
@@ -741,8 +683,6 @@ const L = t();
       },
 
       confirmStop() {
-        // Mark the session as completed even if the user quits
-        // mid-workout. This is the fast path through the app.
         this._finishSession();
       },
 
@@ -765,7 +705,6 @@ const L = t();
       },
 
       reset() {
-        // Back to the selector state, ready for a new session.
         if (this.restInterval) {
           window.clearInterval(this.restInterval);
           this.restInterval = null;
@@ -783,7 +722,6 @@ const L = t();
         this.state = 'selecting';
       },
 
-      // â”€â”€ Touch gestures (swipe left = next, swipe right = prev) â”€â”€
       onTouchStart(e: TouchEvent) {
         const t = e.touches[0];
         if (!t) return;
@@ -796,8 +734,6 @@ const L = t();
         if (!t) return;
         const dx = t.clientX - this._touchStartX;
         const dy = t.clientY - this._touchStartY;
-        // Only treat as a swipe if horizontal motion is dominant
-        // and exceeds the threshold (50px).
         if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
         if (dx < 0) {
           this.nextSet();
@@ -806,10 +742,8 @@ const L = t();
         }
       },
 
-      // â”€â”€ Keyboard shortcuts â”€â”€
       _installKeyboard() {
         this._keyHandler = (e: KeyboardEvent) => {
-          // Don't hijack typing in form fields.
           const target = e.target as HTMLElement | null;
           if (
             target &&
@@ -845,7 +779,6 @@ const L = t();
         window.addEventListener('keydown', this._keyHandler);
       },
 
-      // â”€â”€ Wake Lock API (best effort) â”€â”€
       async _requestWakeLock(): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const nav = navigator as any;
@@ -855,8 +788,7 @@ const L = t();
         try {
           this.wakeLock = await nav.wakeLock.request('screen');
         } catch {
-          // Permission denied, no user activation, or insecure
-          // context. We just keep going without it.
+          // Permission denied, no user activation, or insecure context.
         }
       },
 
@@ -871,7 +803,6 @@ const L = t();
         this.wakeLock = null;
       },
 
-      // â”€â”€ Formatters (re-export the pure helpers) â”€â”€
       setsShortLabel: LABELS.rapide.setsShort,
       typeLabel(t: SetType): string {
         return typeLabelFn(t);
@@ -886,9 +817,6 @@ const L = t();
         return localizedPath('/seances/detail?id=' + encodeURIComponent(id || ''));
       },
       weightUnit(): string {
-        // Quick mode is short-lived; default to kg. Settings
-        // lookup would be overkill for the gym context where
-        // you want the screen to show the number, not the unit.
         return 'kg';
       },
       formatRestTime(): string {
@@ -903,7 +831,7 @@ const L = t();
         if (!set) return '';
         const weight = this.formatWeight(set.weight);
         const unit = this.weightUnit();
-        return `${LABELS.rapide.nextUp} ${weight} ${unit} Ã— ${set.reps}`;
+        return `${LABELS.rapide.nextUp} ${weight} ${unit} × ${set.reps}`;
       },
     }));
   });
@@ -911,501 +839,27 @@ const L = t();
 
 
 <style>
-
-
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     ROOT â€” full-viewport dark overlay
-     Sits above the sidebar + topbar so the workout UI owns
-     the entire screen. Background is solid so the chrome
-     underneath is invisible while the user is lifting.
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ── Root overlay (position: fixed) ────────────────────── */
   .qs {
     position: fixed;
     inset: 0;
     z-index: 100;
-background-color: var(--color-bg);
+    background-color: var(--color-bg);
     color: var(--color-text);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* Lock to portrait when possible (Android/Chrome supports
-       this on installed PWAs; ignored elsewhere). */
     font-family: var(--font-body);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     TOP BAR
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-  .qs__topbar {
-    flex-shrink: 0;
-    display: grid;
-    grid-template-columns: 6rem 1fr 6rem;
-    align-items: center;
-    gap: 1.2rem;
-    padding: 1.2rem 1.6rem;
-    border-bottom: 1px solid var(--alpha-bg-soft);
-  }
-
-  .qs__icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 5.6rem;
-    height: 5.6rem;
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition:
-      background-color var(--transition-fast),
-      color var(--transition-fast),
-      transform var(--transition-fast);
-  }
-
-  .qs__icon-btn:hover {
-    background-color: var(--color-surface-3);
-  }
-
-  .qs__icon-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .qs__icon-btn:active {
-    transform: scale(0.96);
-  }
-
-  .qs__progress {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    min-width: 0;
-  }
-
-  .qs__progress-text {
-    font-size: 1.4rem;
-    color: var(--color-muted);
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
-    letter-spacing: 0.01em;
-  }
-
-  .qs__progress-text strong {
-    color: var(--color-text);
-    font-weight: 700;
-  }
-
-  .qs__progress-sep {
-    margin: 0 0.4rem;
-    opacity: 0.4;
-  }
-
-  .qs__progress-bar {
-    width: min(100%, 28rem);
-    height: 0.6rem;
-    background-color: var(--color-surface-2);
-    border-radius: var(--radius-pill);
-    overflow: hidden;
-  }
-
+  /* ── Progress fill gradient ────────────────────────────── */
   .qs__progress-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 65%, white));
     transition: width 280ms ease;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     STATE 1 â€” SELECTING
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-  .qs__selecting {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2.4rem;
-    overflow-y: auto;
-  }
-
-  .qs__selecting-inner {
-    width: 100%;
-    max-width: 52rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.6rem;
-    text-align: center;
-  }
-
-  .qs__selecting-icon {
-    width: 9.6rem;
-    height: 9.6rem;
-    border-radius: 50%;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    color: var(--color-accent);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .qs__selecting-title {
-    font-family: var(--font-display);
-    font-size: clamp(3.2rem, 6vw, 4.8rem);
-    font-weight: 700;
-    line-height: 1;
-    margin: 0;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-  }
-
-  .qs__selecting-text {
-    font-size: 1.5rem;
-    color: var(--color-muted);
-    line-height: 1.4;
-    margin: 0;
-    max-width: 38rem;
-  }
-
-  .qs__field {
-    width: 100%;
-    max-width: 44rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    margin-top: 0.8rem;
-    text-align: left;
-  }
-
-  .qs__field-label {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 700;
-  }
-
-  .qs__select {
-    width: 100%;
-    height: 6rem;
-    padding: 0 1.6rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.6rem;
-    font-weight: 600;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition:
-      background-color var(--transition-fast),
-      border-color var(--transition-fast);
-  }
-
-  .qs__select:hover {
-    background-color: var(--color-surface-3);
-  }
-
-  .qs__select:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .qs__selecting-actions {
-    display: flex;
-    gap: 1.2rem;
-    width: 100%;
-    max-width: 44rem;
-    margin-top: 0.4rem;
-  }
-
-  .qs__selecting-actions .button {
-    flex: 1;
-  }
-
-  .qs__empty {
-    margin-top: 0.8rem;
-    color: var(--color-muted);
-    font-size: 1.4rem;
-    line-height: 1.5;
-  }
-
-  .qs__empty a {
-    color: var(--color-accent);
-    text-decoration: underline;
-  }
-
-  /* ── STATE 2 ─ WORKING ──────────────────────────────────── */
-  .qs__working {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.6rem;
-    overflow: hidden;
-  }
-
-  .qs__working-inner {
-    width: 100%;
-    max-width: 60rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.6rem;
-    text-align: center;
-  }
-
-  .qs__exercise-name {
-    font-family: var(--font-display);
-    font-size: clamp(2.4rem, 5.5vw, 4.0rem);
-    font-weight: 700;
-    line-height: 1.05;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-    word-break: break-word;
-  }
-
-  .qs__exercise-muscle {
-    font-size: 1.4rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 600;
-  }
-
-  .qs__set-number {
-    font-size: 1.6rem;
-    color: var(--color-muted);
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 1.0rem;
-    margin-top: 0.4rem;
-  }
-
-  .qs__set-type {
-    display: inline-flex;
-    align-items: center;
-    height: 2.6rem;
-    padding: 0 1.0rem;
-    border-radius: var(--radius-pill);
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-  }
-
-  .qs__set-type--work {
-    background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
-    color: var(--color-accent);
-    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
-  }
-
-  .qs__set-type--warmup {
-    background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
-    color: var(--color-warning);
-    border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
-  }
-
-  .qs__set-type--top {
-    background-color: color-mix(in srgb, var(--color-cat-core) 12%, transparent);
-    color: var(--color-cat-core);
-    border-color: color-mix(in srgb, var(--color-cat-core) 30%, transparent);
-  }
-
-  .qs__set-type--drop {
-    background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
-    color: var(--color-info);
-    border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
-  }
-
-  .qs__set-type--failure {
-    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
-    color: var(--color-destructive);
-    border-color: color-mix(in srgb, var(--color-destructive) 30%, transparent);
-  }
-
-  .qs__load {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(2rem, 5vw, 4rem);
-    margin: 0.8rem 0;
-  }
-
-  .qs__weight,
-  .qs__reps {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1;
-  }
-
-  .qs__num {
-    font-family: var(--font-display);
-    font-size: clamp(5.2rem, 14vw, 9.6rem);
-    font-weight: 700;
-    color: var(--color-text);
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-
-  .qs__unit {
-    font-family: var(--font-body);
-    font-size: 1.6rem;
-    color: var(--color-muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-top: 0.4rem;
-  }
-
-  .qs__times {
-    font-family: var(--font-display);
-    font-size: clamp(3.2rem, 7vw, 5.6rem);
-    color: var(--color-muted);
-    font-weight: 300;
-    line-height: 1;
-  }
-
-  /* â”€â”€ TerminÃ© (main action) â”€â”€ */
-  .qs__done {
-    width: 100%;
-    max-width: 60rem;
-    min-height: 8rem;
-    padding: 0 2.4rem;
-    background-color: var(--color-success);
-    color: var(--color-success-foreground);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-family: var(--font-body);
-    font-size: 2.2rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1.2rem;
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-success) 30%, transparent);
-    transition:
-      background-color var(--transition-fast),
-      transform var(--transition-fast),
-      box-shadow var(--transition-fast);
-  }
-
-  .qs__done:hover {
-    background-color: color-mix(in srgb, var(--color-success) 90%, white);
-  }
-
-  .qs__done:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .qs__done:active {
-    transform: scale(0.985);
-  }
-
-  .qs__nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.2rem;
-    width: 100%;
-    max-width: 60rem;
-  }
-
-  .qs__nav-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    min-height: 5.6rem;
-    padding: 0 1.6rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 600;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    transition:
-      background-color var(--transition-fast),
-      color var(--transition-fast),
-      transform var(--transition-fast);
-  }
-
-  .qs__nav-btn:hover:not(:disabled) {
-    background-color: var(--color-surface-3);
-  }
-
-  .qs__nav-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .qs__nav-btn:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-
-  .qs__nav-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     STATE 3 â€” RESTING
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-  .qs__resting {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2.4rem;
-  }
-
-  .qs__resting-inner {
-    width: 100%;
-    max-width: 60rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2.4rem;
-    text-align: center;
-  }
-
-  .qs__resting-confirmation {
-    color: var(--color-success);
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .qs__resting-label {
-    font-family: var(--font-display);
-    font-size: 2.0rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-weight: 700;
-  }
-
+  /* ── Resting timer (clamp + pulse animation) ──────────── */
   .qs__resting-timer {
     font-family: var(--font-display);
     font-size: clamp(12rem, 30vw, 24rem);
@@ -1416,302 +870,79 @@ background-color: var(--color-bg);
     font-variant-numeric: tabular-nums;
     transition: color 200ms ease;
   }
-
   .qs__resting-timer--low {
     color: var(--color-warning);
     animation: qs-pulse 1s ease-in-out infinite;
   }
-
   @keyframes qs-pulse {
     0%, 100% { transform: scale(1); }
     50%      { transform: scale(1.04); }
   }
 
-  .qs__resting-next {
-    font-size: 1.6rem;
-    color: var(--color-muted);
-    line-height: 1.4;
+  /* ── Set-type badge modifiers (Alpine dynamic :class) ─── */
+  .qs__set-type--work {
+    background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+  .qs__set-type--warmup {
+    background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
+    color: var(--color-warning);
+    border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
+  }
+  .qs__set-type--top {
+    background-color: color-mix(in srgb, var(--color-cat-core) 12%, transparent);
+    color: var(--color-cat-core);
+    border-color: color-mix(in srgb, var(--color-cat-core) 30%, transparent);
+  }
+  .qs__set-type--drop {
+    background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
+    color: var(--color-info);
+    border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
+  }
+  .qs__set-type--failure {
+    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
+    color: var(--color-destructive);
+    border-color: color-mix(in srgb, var(--color-destructive) 30%, transparent);
   }
 
-  .qs__resting-actions {
-    display: grid;
-    grid-template-columns: 1fr 1.6fr 1fr;
-    gap: 1.2rem;
-    width: 100%;
-    max-width: 50rem;
+  /* ── Done icon modifier (Alpine dynamic :class) ───────── */
+  .qs__done-icon--partial {
+    background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
+    color: var(--color-warning);
+  }
+  .qs__done-icon--partial ~ .qs__done-title + .qs__done-name + .qs__done-message {
+    color: var(--color-warning);
   }
 
-  .qs__resting-actions :global(.button) {
-    min-height: 6.4rem;
-    font-size: 1.6rem;
-  }
-
-  .qs__resting-actions .qs__undo {
+  /* ── Child component overrides ────────────────────────── */
+  .qs__selecting-actions :global(.button) { flex: 1; }
+  .qs__resting-actions :global(.button) { min-height: 6.4rem; font-size: 1.6rem; }
+  .qs__resting-actions :global(.qs__undo) {
     grid-column: 1 / -1;
     min-height: 4.8rem;
     font-size: 1.4rem;
   }
-
   .qs__undo-working {
     min-height: 4.8rem;
     font-size: 1.4rem;
     color: var(--color-muted);
   }
+  .qs__undo-working:disabled { opacity: 0.35; }
+  .qs__done-actions :global(.button) { flex: 1; }
 
-  .qs__undo-working:disabled {
-    opacity: 0.35;
-  }
-
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     STATE 4 â€” COMPLETED
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-  .qs__done-screen {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2.4rem;
-    overflow-y: auto;
-  }
-
-  .qs__done-inner {
-    width: 100%;
-    max-width: 56rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.6rem;
-    text-align: center;
-  }
-
-  .qs__done-icon {
-    width: 12rem;
-    height: 12rem;
-    border-radius: 50%;
-    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
-    color: var(--color-success);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.4rem;
-  }
-
-  .qs__done-title {
-    font-family: var(--font-display);
-    font-size: clamp(3.2rem, 7vw, 4.8rem);
-    font-weight: 700;
-    line-height: 1;
-    margin: 0;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-  }
-
-  .qs__done-name {
-    font-size: 1.6rem;
-    color: var(--color-muted);
-    margin: 0;
-  }
-
-  .qs__done-message {
-    font-size: 1.4rem;
-    color: var(--color-success);
-    margin: -0.4rem 0 0;
-  }
-
-  .qs__done-icon--partial {
-    background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
-    color: var(--color-warning);
-  }
-
-  .qs__done-icon--partial + .qs__done-title + .qs__done-name + .qs__done-message {
-    color: var(--color-warning);
-  }
-
-  .qs__done-stats {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.2rem;
-    margin: 1.6rem 0 0.4rem;
-  }
-
-  @media (min-width: 540px) {
-    .qs__done-stats {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .qs__done-stat {
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.6rem 1.2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .qs__done-stat-value {
-    font-family: var(--font-display);
-    font-size: clamp(2.4rem, 4vw, 3.2rem);
-    font-weight: 700;
-    color: var(--color-accent);
-    line-height: 1;
-  }
-
-  .qs__done-stat-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    font-weight: 700;
-  }
-
-  .qs__done-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    width: 100%;
-    margin-top: 0.8rem;
-  }
-
-  @media (min-width: 540px) {
-    .qs__done-actions {
-      flex-direction: row;
-    }
-    .qs__done-actions :global(.button) {
-      flex: 1;
-    }
-  }
-
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     RESPONSIVE â€” keep touch targets huge on small phones
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ── Responsive: child component overrides ────────────── */
   @media (max-width: 480px) {
-    .qs__topbar {
-      grid-template-columns: 5.2rem 1fr 5.2rem;
-      padding: 1.0rem 1.0rem;
-    }
-    .qs__icon-btn {
-      width: 5.2rem;
-      height: 5.2rem;
-    }
-    .qs__progress-text {
-      font-size: 1.2rem;
-    }
-    .qs__working {
-      padding: 1.0rem;
-    }
-    .qs__done {
-      min-height: 7.6rem;
-      font-size: 1.9rem;
-    }
-    .qs__resting-actions {
-      grid-template-columns: 1fr;
-    }
+    .qs__resting-timer { font-size: clamp(8rem, 32vw, 12rem); }
+    .qs__resting-actions :global(.qs__undo) { grid-column: auto; order: 3; }
+    .qs__selecting-actions :global(.button) { width: 100%; }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     REDUCED MOTION
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ── Reduced motion ───────────────────────────────────── */
   @media (prefers-reduced-motion: reduce) {
-    .qs__resting-timer--low,
-    .qs__done,
-    .qs__nav-btn,
-    .qs__icon-btn {
+    .qs__resting-timer--low {
       animation: none;
       transition: none;
-    }
-  }
-  /* On small phones, keep each workout state focused and scrollable.
-     The active workout must never hide its primary control below the fold. */
-  @media (max-width: 480px) {
-    .qs__selecting {
-      align-items: flex-start;
-      padding: 2rem 1rem;
-    }
-    .qs__selecting-inner,
-    .qs__working-inner,
-    .qs__resting-inner,
-    .qs__done-inner {
-      gap: 1.2rem;
-    }
-    .qs__selecting-icon {
-      width: 7.2rem;
-      height: 7.2rem;
-    }
-    .qs__selecting-title {
-      font-size: clamp(2.6rem, 11vw, 3.8rem);
-    }
-    .qs__selecting-actions {
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    .qs__selecting-actions :global(.button) {
-      width: 100%;
-    }
-    .qs__working {
-      align-items: flex-start;
-      padding: 1.6rem 1rem;
-      overflow-y: auto;
-    }
-    .qs__load {
-      gap: clamp(1.2rem, 8vw, 2.4rem);
-    }
-    .qs__resting {
-      align-items: flex-start;
-      padding: 2rem 1rem;
-      overflow-y: auto;
-    }
-    .qs__resting-timer {
-      font-size: clamp(8rem, 32vw, 12rem);
-    }
-    .qs__resting-actions {
-      grid-template-columns: 1fr;
-      gap: 0.8rem;
-    }
-    .qs__resting-actions .qs__undo {
-      grid-column: auto;
-      order: 3;
-    }
-    .qs__done-screen {
-      align-items: flex-start;
-      padding: 2rem 1rem;
-    }
-    .qs__done-icon {
-      width: 8rem;
-      height: 8rem;
-    }
-    .qs__done-stats {
-      gap: 0.8rem;
-    }
-    .qs__done-stat {
-      padding: 1.2rem 0.6rem;
-    }
-    .qs__done-stat-label {
-      font-size: 0.9rem;
-      letter-spacing: 0.06em;
-    }
-  }
-
-  @media (max-width: 360px) {
-    .qs__topbar {
-      grid-template-columns: 4.8rem minmax(0, 1fr) 4.8rem;
-      gap: 0.6rem;
-    }
-    .qs__icon-btn {
-      width: 4.8rem;
-      height: 4.8rem;
-    }
-    .qs__progress-text {
-      font-size: 1.1rem;
-    }
-    .qs__exercise-name {
-      font-size: 2.2rem;
-    }
-    .qs__num {
-      font-size: clamp(4.6rem, 18vw, 7rem);
     }
   }
 </style>

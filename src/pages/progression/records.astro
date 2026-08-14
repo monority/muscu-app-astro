@@ -16,63 +16,63 @@ const L = t();
   />
 
   <div
-    class="rec"
+    class="rec max-w-[88rem] mx-auto pb-24 flex flex-col gap-4"
     x-data="recordsApp()"
     x-init="init()"
     x-cloak
   >
     {/* ── Stats bar ── */}
     <template x-if="totalPRs > 0 || hasData">
-      <div class="rec__stats">
-        <div class="rec__stat rec__stat--hero">
-          <span class="rec__stat-label">{L.records.best1RMGlobal}</span>
-          <div class="rec__stat-value-row">
-            <span class="rec__stat-value" x-text="formatNumber(bestOverall1RM)"></span>
-            <span class="rec__stat-unit">{L.common.kg}</span>
+      <div class="rec__stats grid grid-cols-1 gap-3">
+        <div class="rec__stat rec__stat--hero flex flex-col gap-1.5 min-w-0 px-4 py-[1.6rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none">
+          <span class="rec__stat-label text-sm uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.records.best1RMGlobal}</span>
+          <div class="rec__stat-value-row flex items-baseline gap-1">
+            <span class="rec__stat-value font-[var(--font-display)] text-[2.6rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(bestOverall1RM)"></span>
+            <span class="rec__stat-unit font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.common.kg}</span>
           </div>
-          <span class="rec__stat-foot" x-text="bestOverallExercise ? labels.on + bestOverallExercise : '—'"></span>
+          <span class="rec__stat-foot text-[1.1rem] text-[var(--color-muted)] capitalize" x-text="bestOverallExercise ? labels.on + bestOverallExercise : '—'"></span>
         </div>
 
-        <div class="rec__stat">
-          <span class="rec__stat-label">{L.records.totalPRs}</span>
-          <div class="rec__stat-value-row">
-            <span class="rec__stat-value" x-text="totalPRs"></span>
-            <span class="rec__stat-unit">PR</span>
+        <div class="rec__stat flex flex-col gap-1.5 min-w-0 px-4 py-[1.6rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none">
+          <span class="rec__stat-label text-sm uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.records.totalPRs}</span>
+          <div class="rec__stat-value-row flex items-baseline gap-1">
+            <span class="rec__stat-value font-[var(--font-display)] text-[2.6rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="totalPRs"></span>
+            <span class="rec__stat-unit font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">PR</span>
           </div>
-          <span class="rec__stat-foot" x-text="totalPRs > 1 ? labels.exercisesTracked : labels.exerciseTracked"></span>
+          <span class="rec__stat-foot text-[1.1rem] text-[var(--color-muted)] capitalize" x-text="totalPRs > 1 ? labels.exercisesTracked : labels.exerciseTracked"></span>
         </div>
 
-        <div class="rec__stat">
-          <span class="rec__stat-label">{L.records.recentPRs}</span>
-          <div class="rec__stat-value-row">
-            <span class="rec__stat-value" x-text="recentPRs"></span>
-            <span class="rec__stat-unit">PR</span>
+        <div class="rec__stat flex flex-col gap-1.5 min-w-0 px-4 py-[1.6rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none">
+          <span class="rec__stat-label text-sm uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.records.recentPRs}</span>
+          <div class="rec__stat-value-row flex items-baseline gap-1">
+            <span class="rec__stat-value font-[var(--font-display)] text-[2.6rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="recentPRs"></span>
+            <span class="rec__stat-unit font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">PR</span>
           </div>
-          <span class="rec__stat-foot">{L.records.since30Days}</span>
+          <span class="rec__stat-foot text-[1.1rem] text-[var(--color-muted)] capitalize">{L.records.since30Days}</span>
         </div>
       </div>
     </template>
 
     {/* ── Toolbar: search + sort ── */}
     <template x-if="allRecords.length > 0">
-      <div class="rec__toolbar">
-        <label class="rec__search">
+      <div class="rec__toolbar flex flex-col gap-3 py-3.5 bg-transparent border-b border-[var(--color-border)]">
+        <label class="rec__search inline-flex items-center gap-1.5 flex-1 min-w-0 h-11 px-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[var(--transition-fast)]">
           <Fragment set:html={icons.searchLine(20, 20)} />
           <input
             type="search"
-            class="rec__search-input"
+            class="rec__search-input flex-1 min-w-full h-full bg-transparent border-0 outline-0 text-[var(--color-text)] font-[var(--font-body)] text-[1.4rem]"
             placeholder={L.records.searchPlaceholder}
             x-model="search"
             aria-label={L.records.searchAria}
           />
         </label>
 
-        <div class="rec__sort">
-          <span class="rec__sort-label">{L.records.sortLabel}</span>
-          <div class="rec__sort-group" role="radiogroup" aria-label={L.records.sortAria}>
+        <div class="rec__sort inline-flex items-center gap-2.5 shrink-0">
+          <span class="rec__sort-label text-[1.1rem] uppercase tracking-[0.10em] font-bold text-[var(--color-muted)]">{L.records.sortLabel}</span>
+          <div class="rec__sort-group inline-flex p-[0.3rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] gap-0.5" role="radiogroup" aria-label={L.records.sortAria}>
             <button
               type="button"
-              class="rec__sort-btn"
+              class="rec__sort-btn h-11 px-3 bg-transparent border-0 rounded-[var(--radius-sm)] text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold cursor-pointer transition-[background-color,color] duration-[var(--transition-fast)]"
               :class="{ 'rec__sort-btn--active': sortBy === 'rm' }"
               @click="sortBy = 'rm'"
               role="radio"
@@ -82,7 +82,7 @@ const L = t();
             </button>
             <button
               type="button"
-              class="rec__sort-btn"
+              class="rec__sort-btn h-11 px-3 bg-transparent border-0 rounded-[var(--radius-sm)] text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold cursor-pointer transition-[background-color,color] duration-[var(--transition-fast)]"
               :class="{ 'rec__sort-btn--active': sortBy === 'name' }"
               @click="sortBy = 'name'"
               role="radio"
@@ -92,7 +92,7 @@ const L = t();
             </button>
             <button
               type="button"
-              class="rec__sort-btn"
+              class="rec__sort-btn h-11 px-3 bg-transparent border-0 rounded-[var(--radius-sm)] text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold cursor-pointer transition-[background-color,color] duration-[var(--transition-fast)]"
               :class="{ 'rec__sort-btn--active': sortBy === 'recent' }"
               @click="sortBy = 'recent'"
               role="radio"
@@ -107,20 +107,20 @@ const L = t();
 
     {/* ── Records list ── */}
     <template x-if="filteredRecords.length > 0">
-      <div class="rec__list">
+      <div class="rec__list flex flex-col">
         <template x-for="rec in filteredRecords" :key="rec.exerciseId">
           <a
-            class="rec__card"
+            class="rec__card grid grid-cols-[auto_1fr_auto] items-center gap-3.5 py-5 bg-transparent border-0 border-b border-[var(--color-border)] rounded-none no-underline text-inherit transition-[background-color,color] duration-[var(--transition-normal)]"
             :href="historyHref(rec.exerciseId)"
             :aria-label="labels.viewHistoryAriaPrefix + rec.name"
           >
-            <div class="rec__card-icon" aria-hidden="true">
+            <div class="rec__card-icon inline-flex items-center justify-center w-8 h-8 bg-transparent text-[var(--color-accent)] border-r border-[var(--color-border)] pr-2.5 shrink-0" aria-hidden="true">
               <Fragment set:html={icons.dumbbellBox(24, 24)} />
             </div>
 
-            <div class="rec__card-main">
-              <div class="rec__card-head">
-                <h3 class="rec__card-name" x-text="trExercise(rec.name)"></h3>
+            <div class="rec__card-main flex flex-col gap-2 min-w-0">
+              <div class="rec__card-head flex items-center gap-2.5 flex-wrap">
+                <h3 class="rec__card-name font-[var(--font-display)] text-[1.7rem] font-bold leading-[1.2] text-[var(--color-text)] m-0 break-words" x-text="trExercise(rec.name)"></h3>
                 <Badge
                   variant="category"
                   size="sm"
@@ -129,31 +129,31 @@ const L = t();
                 ></Badge>
               </div>
 
-              <div class="rec__card-stats">
-                <div class="rec__card-stat rec__card-stat--hero">
-                  <span class="rec__card-stat-label">{L.records.sortRM}</span>
-                  <span class="rec__card-stat-value" x-text="formatNumber(rec.estimated1RM) + ' ' + labels.kg"></span>
+              <div class="rec__card-stats grid grid-cols-2 gap-1.5 gap-x-3">
+                <div class="rec__card-stat rec__card-stat--hero flex flex-col gap-0.5 min-w-[5.2rem]">
+                  <span class="rec__card-stat-label text-sm uppercase tracking-[0.10em] text-[var(--color-muted)] font-bold">{L.records.sortRM}</span>
+                  <span class="rec__card-stat-value font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(rec.estimated1RM) + ' ' + labels.kg"></span>
                 </div>
-                <div class="rec__card-stat">
-                  <span class="rec__card-stat-label">{L.records.bestWeight}</span>
-                  <span class="rec__card-stat-value" x-text="formatNumber(rec.bestWeight) + ' ' + labels.kg"></span>
+                <div class="rec__card-stat flex flex-col gap-0.5 min-w-[5.2rem]">
+                  <span class="rec__card-stat-label text-sm uppercase tracking-[0.10em] text-[var(--color-muted)] font-bold">{L.records.bestWeight}</span>
+                  <span class="rec__card-stat-value font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(rec.bestWeight) + ' ' + labels.kg"></span>
                 </div>
-                <div class="rec__card-stat">
-                  <span class="rec__card-stat-label">{L.records.bestReps}</span>
-                  <span class="rec__card-stat-value" x-text="rec.bestReps"></span>
+                <div class="rec__card-stat flex flex-col gap-0.5 min-w-[5.2rem]">
+                  <span class="rec__card-stat-label text-sm uppercase tracking-[0.10em] text-[var(--color-muted)] font-bold">{L.records.bestReps}</span>
+                  <span class="rec__card-stat-value font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="rec.bestReps"></span>
                 </div>
-                <div class="rec__card-stat">
-                  <span class="rec__card-stat-label">{L.records.sessions}</span>
-                  <span class="rec__card-stat-value" x-text="rec.sessionCount"></span>
+                <div class="rec__card-stat flex flex-col gap-0.5 min-w-[5.2rem]">
+                  <span class="rec__card-stat-label text-sm uppercase tracking-[0.10em] text-[var(--color-muted)] font-bold">{L.records.sessions}</span>
+                  <span class="rec__card-stat-value font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="rec.sessionCount"></span>
                 </div>
               </div>
             </div>
 
-            <div class="rec__card-side">
-              <span class="rec__card-date-label">{L.records.lastSession}</span>
-              <span class="rec__card-date" x-text="formatDate(rec.lastSessionDate)"></span>
-              <span class="rec__card-date rec__card-date--pr">{L.records.prDate} <span x-text="formatDate(rec.date)"></span></span>
-              <span class="rec__card-cta" aria-hidden="true">
+            <div class="rec__card-side flex flex-col items-end gap-1.5 shrink-0">
+              <span class="rec__card-date-label text-[var(--color-muted)] text-sm font-bold tracking-[0.08em] uppercase">{L.records.lastSession}</span>
+              <span class="rec__card-date text-[1.2rem] text-[var(--color-text)] font-bold text-right whitespace-nowrap" x-text="formatDate(rec.lastSessionDate)"></span>
+              <span class="rec__card-date rec__card-date--pr text-[var(--color-muted)] text-sm font-medium">{L.records.prDate} <span x-text="formatDate(rec.date)"></span></span>
+              <span class="rec__card-cta inline-flex items-center justify-center w-[2.6rem] h-[2.6rem] text-[var(--color-muted)] transition-[color,transform] duration-[var(--transition-fast)]" aria-hidden="true">
                 <Fragment set:html={icons.chevronRight(16, 16)} />
               </span>
             </div>
@@ -164,7 +164,7 @@ const L = t();
 
     {/* ── Empty: no data at all ── */}
     <template x-if="allRecords.length === 0 && !hasData">
-      <div class="rec__empty">
+      <div class="rec__empty py-6 border-t border-[var(--color-border)] border-b border-[var(--color-border)]">
         <EmptyState
           iconName="chart"
           title={L.records.noRecords}
@@ -177,7 +177,7 @@ const L = t();
 
     {/* ── Empty: search returned nothing ── */}
     <template x-if="allRecords.length > 0 && filteredRecords.length === 0">
-      <div class="rec__empty">
+      <div class="rec__empty py-6 border-t border-[var(--color-border)] border-b border-[var(--color-border)]">
         <EmptyState
           iconName="chart"
           title={L.records.noResult}
@@ -410,54 +410,18 @@ const L = t();
   });
 </script>
 
-<style>
+<style is:global>
   /* ════════════════════════════════════════════════════
-     CONTAINER
+     STATS — responsive grid override
      ════════════════════════════════════════════════════ */
-  .rec {
-    max-width: 88rem;
-    margin: 0 auto;
-    padding-bottom: 6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.6rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     STATS BAR
-     ════════════════════════════════════════════════════ */
-  .rec__stats {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
-  }
-
   @media (min-width: 640px) {
     .rec__stats {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1.4fr 0.8fr 0.8fr;
+      gap: 0;
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
     }
-  }
 
-  .rec__stats {
-    grid-template-columns: 1.4fr 0.8fr 0.8fr;
-    gap: 0;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .rec__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    min-width: 0;
-    padding: 1.6rem 1.8rem;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-  }
-
-  @media (min-width: 640px) {
     .rec__stat {
       border-bottom: 0;
     }
@@ -467,158 +431,25 @@ const L = t();
     }
   }
 
-  .rec__stat--hero {
-    background-color: transparent;
-  }
-
-  .rec__stat-label {
-    font-size: 1.0rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--color-muted);
-    font-weight: 700;
-  }
-
-  .rec__stat-value-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4rem;
-  }
-
-  .rec__stat-value {
-    font-family: var(--font-display);
-    font-size: 2.6rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-  }
-
-  .rec__stat--hero .rec__stat-value {
-    font-size: 3rem;
-    color: var(--color-accent);
-  }
-
-  .rec__stat-unit {
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    color: var(--color-muted);
-    font-weight: 600;
-  }
-
-  .rec__stat-foot {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: capitalize;
-  }
-
   /* ════════════════════════════════════════════════════
-     TOOLBAR — search + sort
+     SEARCH — focus-within, placeholder, clear button
      ════════════════════════════════════════════════════ */
-  .rec__toolbar {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    padding: 1.4rem 0;
-    background-color: transparent;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  @media (min-width: 640px) {
-    .rec__toolbar {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.6rem;
-    }
-  }
-
-  .rec__search {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex: 1 1 auto;
-    min-width: 0;
-    height: 4.4rem;
-    padding: 0 1.2rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  }
-
   .rec__search:focus-within {
     border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
-  }
-
-  .rec__search-icon {
-    width: 1.6rem;
-    height: 1.6rem;
-    color: var(--color-muted);
-    flex-shrink: 0;
-  }
-
-  .rec__search-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    height: 100%;
-    background: transparent;
-    border: 0;
-    outline: 0;
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
   }
 
   .rec__search-input::placeholder {
     color: var(--color-muted);
   }
 
-  /* Strip the native search clear button to keep visual control. */
   .rec__search-input::-webkit-search-cancel-button {
     appearance: none;
   }
 
-  .rec__sort {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    flex-shrink: 0;
-  }
-
-  .rec__sort-label {
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    font-weight: 700;
-    color: var(--color-muted);
-  }
-
-  .rec__sort-group {
-    display: inline-flex;
-    padding: 0.3rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    gap: 0.2rem;
-  }
-
-  .rec__sort-btn {
-    height: 4.4rem;
-    padding: 0 1.2rem;
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-sm);
-    color: var(--color-muted);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color var(--transition-fast),
-                color var(--transition-fast);
-  }
-
+  /* ════════════════════════════════════════════════════
+     SORT — hover / focus-visible / active states
+     ════════════════════════════════════════════════════ */
   .rec__sort-btn:hover {
     color: var(--color-text);
     background-color: var(--alpha-bg-subtle);
@@ -640,32 +471,8 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     LIST
+     CARD — hover / focus-visible / child hover states
      ════════════════════════════════════════════════════ */
-  .rec__list {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ════════════════════════════════════════════════════
-     RECORD — open performance row
-     ════════════════════════════════════════════════════ */
-  .rec__card {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 1.4rem;
-    padding: 2rem 0;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-    text-decoration: none;
-    color: inherit;
-    transition: background-color var(--transition-normal),
-                color var(--transition-normal);
-  }
-
   .rec__card:hover {
     background-color: var(--alpha-bg-subtle);
     color: inherit;
@@ -676,153 +483,27 @@ const L = t();
     box-shadow: var(--focus-ring);
   }
 
-  .rec__card-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 3.2rem;
-    height: 3.2rem;
-    background-color: transparent;
+  .rec__card:hover .rec__card-cta {
     color: var(--color-accent);
-    border-right: 1px solid var(--color-border);
-    padding-right: 1rem;
-    flex-shrink: 0;
+    transform: translateX(2px);
   }
 
-  .rec__card-icon svg {
-    width: 2.2rem;
-    height: 2.2rem;
-  }
-
-  .rec__card-main {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    min-width: 0;
-  }
-
-  .rec__card-head {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .rec__card-name {
-    font-family: var(--font-display);
-    font-size: 1.7rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-text);
-    margin: 0;
-    word-break: break-word;
-  }
-
-  .rec__card-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem 1.2rem;
-  }
-
-  @media (min-width: 540px) {
-    .rec__card-stats {
-      grid-template-columns: repeat(4, auto);
-    }
-  }
-
-  .rec__card-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 5.2rem;
-  }
-
-  .rec__card-stat-label {
-    font-size: 1.0rem;
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    color: var(--color-muted);
-    font-weight: 700;
-  }
-
-  .rec__card-stat-value {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
+  /* ════════════════════════════════════════════════════
+     HERO stat — accent color override
+     ════════════════════════════════════════════════════ */
+  .rec__stat--hero .rec__stat-value {
+    font-size: 3rem;
+    color: var(--color-accent);
   }
 
   .rec__card-stat--hero .rec__card-stat-value {
     color: var(--color-accent);
   }
 
-  .rec__card-side {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.6rem;
-    flex-shrink: 0;
-  }
-
-  .rec__card-date-label {
-    color: var(--color-muted);
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .rec__card-date {
-    font-size: 1.2rem;
-    color: var(--color-text);
-    font-weight: 700;
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  .rec__card-date--pr {
-    color: var(--color-muted);
-    font-size: 1rem;
-    font-weight: 500;
-  }
-
-  .rec__card-cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.6rem;
-    height: 2.6rem;
-    color: var(--color-muted);
-    transition: color var(--transition-fast),
-                transform var(--transition-fast);
-  }
-
-  .rec__card:hover .rec__card-cta {
-    color: var(--color-accent);
-    transform: translateX(2px);
-  }
-
-  .rec__card-cta svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
   /* ════════════════════════════════════════════════════
-     EMPTY
-     ════════════════════════════════════════════════════ */
-  .rec__empty {
-    padding: 2.4rem 0;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE
+     RESPONSIVE — grid-template-areas (mobile)
      ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
-    .rec__stats { grid-template-columns: 1fr; }
     .rec__card {
       grid-template-columns: auto 1fr;
       grid-template-areas:

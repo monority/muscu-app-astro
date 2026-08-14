@@ -9,48 +9,19 @@ interface Props {
 const { icon, title, description, class: className = '' } = Astro.props;
 ---
 
-<div class:list={['section-heading', className]}>
+<div class:list={['flex items-center gap-[1rem]', className]}>
   {icon && (
-    <span class="section-heading__icon" aria-hidden="true">
+    <span class="flex items-center justify-center w-[3.2rem] h-[3.2rem] rounded-[var(--radius-sm)] bg-[var(--alpha-bg-soft)] text-[var(--color-accent)] shrink-0" aria-hidden="true">
       <Fragment set:html={icon} />
     </span>
   )}
-  <h2 class="section-heading__title">{title}</h2>
+  <h2 class="font-[var(--font-display)] text-[1.6rem] font-bold text-[var(--color-text)]">{title}</h2>
 </div>
-{description && <p class="section-heading__sub">{description}</p>}
+{description && <p class="text-[1.3rem] text-[var(--color-muted)] mt-[0.4rem] mb-[1.6rem] leading-[1.5]">{description}</p>}
 
 <style>
-  .section-heading {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .section-heading__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 3.2rem;
-    height: 3.2rem;
-    border-radius: var(--radius-sm);
-    background: var(--alpha-bg-soft);
-    color: var(--color-accent);
-    flex-shrink: 0;
-  }
-  .section-heading__icon :global(svg) {
+  span :global(svg) {
     width: 1.8rem;
     height: 1.8rem;
-  }
-  .section-heading__title {
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--color-text);
-  }
-  .section-heading__sub {
-    font-size: 1.3rem;
-    color: var(--color-muted);
-    margin-top: 0.4rem;
-    margin-bottom: 1.6rem;
-    line-height: 1.5;
   }
 </style>
