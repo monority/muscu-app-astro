@@ -9,6 +9,7 @@ import Dialog from '../../components/ui/Dialog.astro';
 import SearchInput from '../../components/ui/SearchInput.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
+import Button from '../../components/ui/Button.astro';
 import { icons } from '../../lib/icons';
 
 const L = t();
@@ -100,7 +101,7 @@ const categories = [
         @click="openAdd()"
         aria-label={L.exercices.add}
       >
-        <Fragment set:html={icons.plus()} />
+        <span class="exo__add-icon" set:html={icons.plus()} />
         <span>{L.exercices.add}</span>
       </button>
     </div>
@@ -112,7 +113,7 @@ const categories = [
               <article class="exo__card">
                 <header class="exo__card-head">
                   <div class="exo__card-title">
-                    <Fragment set:html={icons.dumbbellBox()} />
+                    <span class="exo__card-icon" set:html={icons.dumbbellBox()} />
                     <h3 class="exo__card-name" x-text="trExercise(ex.name)"></h3>
                     <IconButton variant="ghost" icon={icons.infoCircle()} label={L.exercices.tipLabel} :aria-label="labels.showTipAria + ' ' + ex.name" title={L.exercices.tipLabel} @click="toggleTip(ex.id)" :aria-expanded="isTipOpen(ex.id).toString()" x-show="hasTip(ex.name)" x-cloak />
                   </div>
@@ -283,7 +284,7 @@ const categories = [
                 aria-label={L.exercices.delete}
                 title={L.exercices.delete}
               >
-                <Fragment set:html={icons.trash()} />
+                <span class="exo__icon" set:html={icons.trash()} />
               </button>
             </footer>
           </article>
@@ -471,18 +472,19 @@ const categories = [
         <div class="exo__form-error" x-show="formError" x-text="formError" x-cloak x-transition.opacity.duration.200ms></div>
 
         <div class="exo__form-actions">
-          <button
-            type="button"
-            class="exo__btn exo__btn--secondary"
+          <Button
+            variant="secondary"
+            size="md"
             @click="closeForm()"
           >
             {L.common.cancel}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
             type="submit"
-            class="exo__btn exo__btn--primary"
             x-text="editingId ? labels.save : labels.add"
-          ></button>
+          ></Button>
         </div>
       </form>
     </Dialog>
@@ -499,20 +501,20 @@ const categories = [
       </p>
 
       <div slot="footer">
-        <button
-          type="button"
-          class="exo__btn exo__btn--secondary"
+        <Button
+          variant="secondary"
+          size="md"
           data-dialog-close
         >
           {L.common.cancel}
-        </button>
-        <button
-          type="button"
-          class="exo__btn exo__btn--destructive"
+        </Button>
+        <Button
+          variant="destructive"
+          size="md"
           @click="confirmDelete()"
         >
           {L.common.delete}
-        </button>
+        </Button>
       </div>
     </Dialog>
 
@@ -722,22 +724,22 @@ const categories = [
       </div>
 
       <div slot="footer" class="exo__add-actions">
-        <button
-          type="button"
-          class="exo__btn exo__btn--secondary"
+        <Button
+          variant="secondary"
+          size="md"
           data-dialog-close
           @click="closeAddToSession()"
         >
           {L.common.cancel}
-        </button>
-        <button
-          type="button"
-          class="exo__btn exo__btn--primary"
+        </Button>
+        <Button
+          variant="primary"
+          size="md"
           @click="submitAddToSession()"
           :disabled="!addToSessionId"
         >
           {L.exercices.addToSession}
-        </button>
+        </Button>
       </div>
     </Dialog>
 
@@ -752,7 +754,7 @@ const categories = [
       role="status"
       aria-live="polite"
     >
-      <Fragment set:html={icons.check()} />
+      <span class="exo__toast-icon" set:html={icons.check()} />
       <span x-text="toast.message"></span>
     </div>
   </div>
@@ -1318,6 +1320,9 @@ const categories = [
   }
 
   .exo__add-icon {
+    display: inline-flex;
+  }
+  .exo__add-icon svg {
     width: 1.6rem;
     height: 1.6rem;
   }
@@ -1387,10 +1392,12 @@ const categories = [
   }
 
   .exo__card-icon {
-    width: 1.8rem;
-    height: 1.8rem;
     color: var(--color-accent);
     flex-shrink: 0;
+  }
+  .exo__card-icon svg {
+    width: 1.8rem;
+    height: 1.8rem;
   }
 
   .exo__set-badge {
@@ -1598,9 +1605,11 @@ const categories = [
   }
 
   .exo__icon {
+    flex-shrink: 0;
+  }
+  .exo__icon svg {
     width: 1.6rem;
     height: 1.6rem;
-    flex-shrink: 0;
   }
 
   /* ════════════════════════════════════════════════════
@@ -1731,68 +1740,6 @@ const categories = [
     justify-content: flex-end;
     gap: 0.8rem;
     margin-top: 0.6rem;
-  }
-
-  /* ── Buttons (form) ── */
-  .exo__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    height: 4.4rem;
-    padding: 0 2rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid transparent;
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    min-width: 8rem;
-    transition: background-color var(--transition-fast),
-                border-color var(--transition-fast),
-                color var(--transition-fast),
-                box-shadow var(--transition-fast),
-                transform var(--transition-fast);
-  }
-
-  .exo__btn:active {
-    transform: scale(0.97);
-  }
-
-  .exo__btn--primary {
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border-color: var(--color-accent);
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent) 25%, transparent);
-  }
-
-  .exo__btn--primary:hover {
-    background-color: var(--color-accent-hover);
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 40%, transparent);
-  }
-
-  .exo__btn--secondary {
-    background-color: transparent;
-    color: var(--color-muted);
-    border-color: var(--color-border);
-  }
-
-  .exo__btn--secondary:hover {
-    background-color: var(--alpha-bg-soft);
-    border-color: var(--alpha-border);
-    color: var(--color-text);
-  }
-
-  .exo__btn--destructive {
-    background-color: var(--color-destructive);
-    color: var(--color-accent-foreground);
-    border-color: var(--color-destructive);
-  }
-
-  .exo__btn--destructive:hover {
-    background-color: var(--color-destructive);
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-destructive) 35%, transparent);
   }
 
   /* ════════════════════════════════════════════════════
@@ -2179,10 +2126,12 @@ const categories = [
   }
 
   .exo__toast-icon {
-    width: 1.8rem;
-    height: 1.8rem;
     color: var(--color-success);
     flex-shrink: 0;
+  }
+  .exo__toast-icon svg {
+    width: 1.8rem;
+    height: 1.8rem;
   }
 
   /* ════════════════════════════════════════════════════

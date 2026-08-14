@@ -1,7 +1,10 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import { t } from '../../i18n';
+import Button from '../../components/ui/Button.astro';
+import Segmented from '../../components/ui/Segmented.astro';
+import Card from '../../components/ui/Card.astro';
+import { t, localizedPath } from '../../i18n';
 import { icons } from '../../lib/icons';
 const L = t();
 ---
@@ -18,132 +21,131 @@ const L = t();
     x-init="init()"
     x-cloak
   >
-    {/* ── Pop-out window ── */}
-    <button
-      type="button"
-      class="timer__popout"
-      :class="{ 'is-open': popupOpen }"
-      @click="openPopup()"
-      :aria-label="labels.popoutAria"
-      :title="labels.popout"
-    >
-      <Fragment set:html={icons.popout(18, 18)} />
-      <span class="timer__popout-label" x-text="popupOpen ? labels.popoutOpen : labels.popout"></span>
-    </button>
-
-    {/* ── Mode toggle (Countdown / Stopwatch) ── */}
-    <div class="timer__mode" role="tablist" aria-label={L.timer.modeAria}>
-      <button
-        type="button"
-        role="tab"
-        class="timer__mode-btn"
-        :class="{ 'is-active': mode === 'countdown' }"
-        :aria-selected="mode === 'countdown'"
-        @click="setMode('countdown')"
+    {/* ── Top bar: pop-out (right) ── */}
+    <div class="timer__topbar">
+      <Button
+        variant="secondary"
+        size="sm"
+        class="timer__popout"
+        :class="{ 'timer__popout--open': popupOpen }"
+        @click="openPopup()"
+        :aria-label="labels.popoutAria"
+        :title="labels.popout"
       >
-        <span class="timer__mode-icon"><Fragment set:html={icons.countdown(20, 20)} /></span>
-        <span>{L.timer.countdown}</span>
-      </button>
-      <button
-        type="button"
-        role="tab"
-        class="timer__mode-btn"
-        :class="{ 'is-active': mode === 'stopwatch' }"
-        :aria-selected="mode === 'stopwatch'"
-        @click="setMode('stopwatch')"
-      >
-        <span class="timer__mode-icon"><Fragment set:html={icons.stopwatch(20, 20)} /></span>
-        <span>{L.timer.stopwatch}</span>
-      </button>
-    </div>
-
-    {/* ── Keyboard shortcut hints ── */}
-    <div class="timer__shortcuts" aria-hidden="true">
-      <span class="timer__shortcut">
-        <kbd class="timer__kbd" x-text="labels.spaceKey">{L.timer.spaceKey}</kbd>
-        <span x-text="labels.shortcutsToggle"></span>
-      </span>
-      <span class="timer__shortcut">
-        <kbd class="timer__kbd">R</kbd>
-        <span x-text="labels.shortcutsReset"></span>
-      </span>
+        <Fragment set:html={icons.popout(16, 16)} />
+        <span x-text="popupOpen ? labels.popoutOpen : labels.popout">{L.timer.popout}</span>
+      </Button>
     </div>
 
     {/* ════════════════════════════════════════════════════
-        COUNTDOWN MODE
+        HERO — current mode + big clock + start CTA
         ════════════════════════════════════════════════════ */}
-    <div class="timer__panel" x-show="mode === 'countdown'" x-transition.opacity.duration.200ms>
-      {/* ── Preset buttons ── */}
-      <div class="timer__presets" role="group" aria-label={L.timer.presetsAria}>
-        <template x-for="preset in presets" :key="preset">
-          <button
-            type="button"
-            class="timer__preset"
-            :class="{ 'is-active': totalTime === preset && !running && remaining === totalTime }"
-            @click="setPreset(preset)"
-          >
-            <span x-text="formatShort(preset)"></span>
-          </button>
-        </template>
+    <section class="timer__hero">
+      <div class="timer__hero-head">
+        <span class="timer__hero-icon" aria-hidden="true">
+          <Fragment set:html={icons.countdown(18, 18)} x-show="mode === 'countdown'" />
+          <Fragment set:html={icons.stopwatch(18, 18)} x-show="mode === 'stopwatch'" />
+        </span>
+        <span class="timer__hero-eyebrow" x-text="mode === 'countdown' ? labels.countdown : labels.stopwatch">{L.timer.countdown}</span>
+        <span class="timer__hero-sep" aria-hidden="true">·</span>
+        <span class="timer__hero-status" x-text="modeStatusLabel"></span>
       </div>
 
-      {/* ── Timer display with SVG progress ring ── */}
-      <div class="timer__stage">
-        <svg
-          class="timer__ring"
-          viewBox="0 0 320 320"
-          aria-hidden="true"
-        >
-          {/* Background track */}
+      <div class="timer__hero-stage">
+        <svg class="timer__hero-ring" viewBox="0 0 240 240" aria-hidden="true">
+          <circle class="timer__hero-ring-track" cx="120" cy="120" r="108" />
           <circle
-            class="timer__ring-track"
-            cx="160"
-            cy="160"
-            r="140"
-            fill="none"
-          />
-          {/* Progress arc */}
-          <circle
-            class="timer__ring-progress"
-            :class="{ 'is-warning': remaining <= 10 && remaining > 0, 'is-done': remaining === 0 }"
-            cx="160"
-            cy="160"
-            r="140"
-            fill="none"
-            :stroke-dasharray="circumference"
-            :stroke-dashoffset="dashOffset"
-            stroke-linecap="round"
+            class="timer__hero-ring-progress"
+            :class="ringClasses"
+            cx="120" cy="120" r="108"
+            :stroke-dasharray="ringCircumference"
+            :stroke-dashoffset="ringOffset"
           />
         </svg>
-
-        <div class="timer__readout">
-          <div
-            class="timer__time"
-            :class="{ 'is-running': running && remaining > 10, 'is-warning': remaining <= 10 && remaining > 0, 'is-done': remaining === 0 }"
-            x-text="formatTime(display)"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            00:00
-          </div>
-          <div class="timer__status" x-text="statusLabel"></div>
+        <div class="timer__hero-clock" :class="clockClasses" x-text="clockText" aria-live="polite" aria-atomic="true">
+          00:00
         </div>
       </div>
 
-      {/* ── Custom time input ── */}
-      <div class="timer__custom">
-        <label for="custom-seconds" class="timer__custom-label" x-text="labels.custom">
-          {L.timer.custom}
-        </label>
-        <div class="timer__custom-row">
-          <button
-            type="button"
-            class="timer__step"
-            @click="adjustCustom(-15); setCustom()"
-            aria-label={L.timer.reduce15}
+      <div class="timer__hero-meta">
+        <span x-show="mode === 'countdown'">
+          <span x-text="formatShort(totalTime)"></span>
+          <span class="timer__hero-meta-sep" aria-hidden="true">·</span>
+          <span x-text="labels.custom + ' ' + (customTime === totalTime ? formatShort(customTime) : formatShort(customTime))"></span>
+        </span>
+        <span x-show="mode === 'stopwatch'" x-text="labels.stopwatch + ' · ' + labels.running"></span>
+      </div>
+
+      <div class="timer__hero-actions">
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          @click="toggle()"
+        >
+          <span x-text="toggleLabel">{L.timer.start}</span>
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          @click="resetCurrent()"
+        >
+          <span x-text="labels.reset">{L.timer.reset}</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="lg"
+          x-show="mode === 'stopwatch'"
+          @click="swRecordLap()"
+          :disabled="!sw.running"
+        >
+          <span x-text="labels.lap">{L.timer.lap}</span>
+        </Button>
+      </div>
+    </section>
+
+    {/* ════════════════════════════════════════════════════
+        MODE + PRESETS — same row, segmented + 4 quick pills
+        ════════════════════════════════════════════════════ */}
+    <section class="timer__quick" aria-label={L.timer.modeAria}>
+      <div class="timer__quick-left">
+        <Segmented
+          model="mode"
+          items={[
+            { value: 'countdown', label: L.timer.countdown },
+            { value: 'stopwatch', label: L.timer.stopwatch },
+          ]}
+        />
+      </div>
+      <div class="timer__quick-right" role="group" aria-label={L.timer.presetsAria} x-show="mode === 'countdown'">
+        <template x-for="preset in presets" :key="preset">
+          <Button
+            variant="secondary"
+            size="md"
+            pill
+            :active="totalTime === preset && !running && remaining === totalTime"
+            @click="setPreset(preset)"
           >
+            <span x-text="formatShort(preset)"></span>
+          </Button>
+        </template>
+      </div>
+    </section>
+
+    {/* ════════════════════════════════════════════════════
+        CUSTOM INPUT + LAPS — two cards side by side (countdown / stopwatch)
+        ════════════════════════════════════════════════════ */}
+    <section class="timer__panels">
+      {/* Custom time — countdown only */}
+      <Card padding="md" class="timer__panel-card" x-show="mode === 'countdown'">
+        <header class="timer__panel-head">
+          <span class="timer__panel-eyebrow" x-text="labels.custom">{L.timer.custom}</span>
+          <span class="timer__panel-sub" x-text="labels.customSeconds">{L.timer.customSeconds}</span>
+        </header>
+        <div class="timer__custom-row">
+          <Button variant="secondary" size="md" @click="adjustCustom(-15); setCustom()" aria-label={L.timer.reduce15}>
             −15
-          </button>
+          </Button>
           <input
             id="custom-seconds"
             type="number"
@@ -156,117 +158,58 @@ const L = t();
             @blur="setCustom()"
             aria-label={L.timer.customSeconds}
           />
-          <button
-            type="button"
-            class="timer__step"
-            @click="adjustCustom(15); setCustom()"
-            aria-label={L.timer.increase15}
-          >
+          <Button variant="secondary" size="md" @click="adjustCustom(15); setCustom()" aria-label={L.timer.increase15}>
             +15
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
-      {/* ── Controls ── */}
-      <div class="timer__controls">
-        <button
-          type="button"
-          class="timer__btn timer__btn--primary"
-          @click="toggle()"
-          x-text="toggleLabel"
-        >
-          {L.timer.start}
-        </button>
-        <button
-          type="button"
-          class="timer__btn timer__btn--ghost"
-          @click="reset()"
-          x-text="labels.reset"
-        >
-          {L.timer.reset}
-        </button>
-      </div>
-
-    {/* ── Sound toggle ── */}
-    <div class="timer__sound">
-      <label class="timer__sound-label">
-        <input
-          type="checkbox"
-          x-model="soundEnabled"
-          class="timer__sound-input"
-        />
-        <span class="timer__sound-icon" :class="{ 'is-on': soundEnabled }"><Fragment set:html={icons.bell(20, 20)} /></span>
-        <span x-text="labels.soundAlert">{L.timer.soundAlert}</span>
-      </label>
-    </div>
-    </div>
-
-    {/* ════════════════════════════════════════════════════
-        STOPWATCH MODE
-        ════════════════════════════════════════════════════ */}
-    <div class="timer__panel" x-show="mode === 'stopwatch'" x-transition.opacity.duration.200ms>
-      {/* ── Stopwatch display (no ring) ── */}
-      <div class="timer__stage timer__stage--sw">
-        <div class="timer__readout">
-          <div
-            class="timer__time timer__time--sw"
-            :class="{ 'is-running': sw.running }"
-            x-text="formatStopwatch(sw.elapsed)"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            00:00.00
-          </div>
-          <div class="timer__status" x-text="swStatusLabel"></div>
-        </div>
-      </div>
-
-      {/* ── Controls: Start/Pause / Tour / Reset ── */}
-      <div class="timer__controls">
-        <button
-          type="button"
-          class="timer__btn timer__btn--primary"
-          @click="toggle()"
-          x-text="toggleLabel"
-        >
-          {L.timer.start}
-        </button>
-        <button
-          type="button"
-          class="timer__btn timer__btn--accent-ghost"
-          @click="swRecordLap()"
-          :disabled="!sw.running"
-          x-text="labels.lap"
-        >
-          {L.timer.lap}
-        </button>
-        <button
-          type="button"
-          class="timer__btn timer__btn--ghost"
-          @click="swReset()"
-          x-text="labels.reset"
-        >
-          {L.timer.reset}
-        </button>
-      </div>
-
-      {/* ── Lap list ── */}
-      <div class="timer__laps" x-show="sw.laps.length > 0" x-transition.opacity.duration.200ms>
-        <div class="timer__laps-header">
-          <span class="timer__laps-col-label" x-text="labels.lap">Tour</span>
-          <span class="timer__laps-col-label" x-text="labels.lapTime">Temps du tour</span>
-          <span class="timer__laps-col-label timer__laps-col-label--end" x-text="labels.total">Total</span>
+      {/* Laps — stopwatch only */}
+      <Card padding="none" class="timer__panel-card timer__laps" x-show="mode === 'stopwatch' && sw.laps.length > 0">
+        <div class="timer__laps-head">
+          <span class="timer__laps-col-label" x-text="labels.lap">{L.timer.lap}</span>
+          <span class="timer__laps-col-label" x-text="labels.lapTime">{L.timer.lapTime}</span>
+          <span class="timer__laps-col-label timer__laps-col-label--end" x-text="labels.total">{L.timer.total}</span>
         </div>
         <div class="timer__laps-body">
           <template x-for="(lap, revIdx) in swLapsReversed" :key="lap.totalTime + '-' + revIdx">
-            <div class="timer__laps-row" :class="{ 'is-latest': revIdx === 0 }">
+            <div class="timer__laps-row" :class="{ 'timer__laps-row--latest': revIdx === 0 }">
               <span class="timer__laps-num" x-text="sw.laps.length - revIdx"></span>
               <span class="timer__laps-time" x-text="formatStopwatch(lap.lapTime)"></span>
               <span class="timer__laps-total" x-text="formatStopwatch(lap.totalTime)"></span>
             </div>
           </template>
         </div>
-      </div>
+      </Card>
+    </section>
+
+    {/* ════════════════════════════════════════════════════
+        SHORTCUTS — kbd hints, subtle row
+        ════════════════════════════════════════════════════ */}
+    <div class="timer__shortcuts" aria-hidden="true">
+      <span class="timer__shortcut">
+        <kbd class="timer__kbd" x-text="labels.spaceKey">{L.timer.spaceKey}</kbd>
+        <span x-text="labels.shortcutsToggle">{L.timer.shortcutsToggle}</span>
+      </span>
+      <span class="timer__shortcut">
+        <kbd class="timer__kbd">R</kbd>
+        <span x-text="labels.shortcutsReset">{L.timer.shortcutsReset}</span>
+      </span>
+    </div>
+
+    {/* ════════════════════════════════════════════════════
+        SOUND TOGGLE — subtle footer
+        ════════════════════════════════════════════════════ */}
+    <div class="timer__sound">
+      <label class="timer__sound-label">
+        <input
+          type="checkbox"
+          class="timer__sound-input"
+          x-model="soundEnabled"
+          aria-label={L.timer.soundAlert}
+        />
+        <span class="timer__sound-text" x-text="labels.soundAlert">{L.timer.soundAlert}</span>
+      </label>
     </div>
   </div>
 </AppLayout>
@@ -283,6 +226,9 @@ const L = t();
 
   const LABELS = t();
   type TimerMode = 'countdown' | 'stopwatch';
+
+  const RING_RADIUS = 108;
+  const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
   // Pop-out bridge kept OUTSIDE the reactive Alpine store: Alpine proxies
   // its state, which breaks exotic objects like BroadcastChannel. Only the
@@ -328,10 +274,12 @@ const L = t();
       running: false,
       customTime: 90,
       soundEnabled: true,
-      circumference: 2 * Math.PI * 140,
       intervalId: null as number | null,
       endTime: 0,
       lastTick: 0,
+
+      // ── Ring (used by both countdown and stopwatch) ──
+      ringCircumference: RING_CIRCUMFERENCE,
 
       // ── Translations ──
       labels: {
@@ -363,20 +311,13 @@ const L = t();
       // ── Keyboard ──
       _keyHandler: null as ((e: KeyboardEvent) => void) | null,
 
-      // ── Pop-out bridge plumbing ──
       init() {
         this.display = this.totalTime;
         this._installKeyboard();
-        // init() can run twice (Alpine auto-calls it AND x-init does). Guard
-        // so a second run doesn't leave two live BroadcastChannels — every
-        // message would then be handled twice (duplicate laps/commands).
         if (!timerBridge.channel) {
           timerBridge.channel = new BroadcastChannel(TIMER_CHANNEL);
           timerBridge.channel.onmessage = (ev: MessageEvent) => this.handleRemote(ev.data);
         }
-        // Pause everything when tab is hidden (avoid background drift) —
-        // UNLESS a pop-out window is open: then the timer keeps running so
-        // the popup can carry it across screens/tabs.
         document.addEventListener('visibilitychange', () => {
           if (document.hidden && !this.popupOpen) {
             if (this.running) this.pause();
@@ -385,9 +326,9 @@ const L = t();
         });
       },
 
-      // ════════════════════════════════════════════════
+      // ═══════════════════════════════════════════════════════
       // POP-OUT WINDOW (Picture-in-Picture + fallback)
-      // ════════════════════════════════════════════════
+      // ═══════════════════════════════════════════════════════
       snapshot(): TimerSnapshot {
         return {
           mode: this.mode,
@@ -404,13 +345,11 @@ const L = t();
         };
       },
 
-      // Push state to the popup (only when one is open).
       broadcast() {
         if (!this.popupOpen && !timerBridge.remoteConnected) return;
         this.pushState();
       },
 
-      // Push state unconditionally (used to answer a handshake).
       pushState() {
         timerBridge.channel?.postMessage({
           type: 'state',
@@ -423,10 +362,6 @@ const L = t();
         if (!msg || typeof msg !== 'object') return;
         if (msg.type === 'hello') {
           if (msg.target && msg.target !== '*' && msg.target !== timerBridge.instanceId) return;
-          // Any widget saying hello is a live remote view — broadcast events to
-          // it even when it was opened standalone (popupOpen stays false).
-          // The popup repeats hello every 2.5s; if it stops (window closed) the
-          // watchdog flips the flag back so we don't push into the void.
           timerBridge.remoteConnected = true;
           if (timerBridge.connWatchdog) clearTimeout(timerBridge.connWatchdog);
           timerBridge.connWatchdog = window.setTimeout(() => {
@@ -448,8 +383,7 @@ const L = t();
             else this.pause();
             break;
           case 'reset':
-            if (this.mode === 'stopwatch') this.swReset();
-            else this.reset();
+            this.resetCurrent();
             break;
           case 'lap':
             this.swRecordLap();
@@ -461,9 +395,6 @@ const L = t();
             this.setPreset(Math.max(5, Math.min(600, Number(msg.value) || 90)));
             break;
         }
-        // Echo the resulting state straight back so the remote view updates
-        // immediately (it also works when the popup was opened standalone —
-        // no popupOpen needed on this end).
         this.pushState();
       },
 
@@ -473,8 +404,6 @@ const L = t();
           return;
         }
         if (!('documentPictureInPicture' in window)) {
-          // No PiP support (Firefox/Safari…) — plain popup, opened synchronously
-          // while the user activation is still intact (await would consume it).
           this.openFallback();
           return;
         }
@@ -485,7 +414,6 @@ const L = t();
           });
           this.attachPip(pip);
         } catch (e) {
-          // PiP denied/unsupported at runtime — best-effort popup fallback.
           this.openFallback();
         }
       },
@@ -506,7 +434,6 @@ const L = t();
             this.popupOpen = false;
           }
         }, 500);
-        // Let the popup mount its widget before pushing state.
         setTimeout(() => this.broadcast(), 350);
       },
 
@@ -519,10 +446,6 @@ const L = t();
           'data-theme',
           document.documentElement.getAttribute('data-theme') || 'dark',
         );
-        // PiP body pre-mount paint — resolve the real --color-bg token so the
-        // window opens theme-correct (pop.astro does the same for <meta
-        // theme-color>). #0d0d0d is a legit fallback: the fresh PiP document has
-        // no stylesheet parsed yet, so the token may not resolve.
         const bodyBg =
           getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() ||
           '#0d0d0d';
@@ -540,20 +463,17 @@ const L = t();
         });
       },
 
-      // ════════════════════════════════════════════════
+      // ═══════════════════════════════════════════════════════
       // MODE
-      // ════════════════════════════════════════════════
+      // ═══════════════════════════════════════════════════════
       setMode(m: TimerMode) {
         if (m === this.mode) return;
-        // Pause whichever is currently running before switching
         this.pause();
         this.swPause();
         this.mode = m;
         this.broadcast();
       },
 
-      // Single start/pause/resume toggle (avoids the two-button swap that
-      // reflowed the layout and made the reset button jump while fading).
       toggle() {
         if (this.mode === 'stopwatch') {
           if (this.sw.running) this.swPause();
@@ -575,25 +495,79 @@ const L = t();
         return this.labels.start;
       },
 
-      // ════════════════════════════════════════════════
-      // COUNTDOWN
-      // ════════════════════════════════════════════════
-      get progress() {
-        if (this.totalTime <= 0) return 0;
-        return Math.max(0, Math.min(1, this.remaining / this.totalTime));
+      // ═══════════════════════════════════════════════════════
+      // HERO DISPLAY — clock text + state classes
+      // ═══════════════════════════════════════════════════════
+      get clockText(): string {
+        if (this.mode === 'stopwatch') return this.formatStopwatch(this._currentSwDisplay());
+        return this.formatTime(this._currentCountdownDisplay());
       },
 
-      get dashOffset() {
-        return this.circumference * (1 - this.progress);
+      get clockClasses(): string {
+        const base = 'timer__hero-clock';
+        if (this.mode === 'countdown') {
+          if (this.remaining === 0) return `${base} timer__hero-clock--done`;
+          if (this.running && this.remaining <= 10) return `${base} timer__hero-clock--warning`;
+          if (this.running) return `${base} timer__hero-clock--running`;
+          return base;
+        }
+        return this.sw.running ? `${base} timer__hero-clock--running` : base;
       },
 
-      get statusLabel() {
-        if (this.running) return this.labels.running;
-        if (this.remaining === 0) return this.labels.done;
-        if (this.remaining < this.totalTime) return this.labels.paused;
+      get modeStatusLabel(): string {
+        if (this.mode === 'countdown') {
+          if (this.running) return this.labels.running;
+          if (this.remaining === 0) return this.labels.done;
+          if (this.remaining < this.totalTime) return this.labels.paused;
+          return this.labels.ready;
+        }
+        if (this.sw.running) return this.labels.running;
+        if (this.sw.elapsed > 0) return this.labels.paused;
         return this.labels.ready;
       },
 
+      // Internal helpers — used by clockText getter to avoid recomputing
+      // the "live" tick twice. Kept private-ish (underscore prefix).
+      _currentCountdownDisplay(): number {
+        if (!this.running) return this.remaining;
+        return Math.max(0, Math.ceil((this.endTime - Date.now()) / 1000));
+      },
+
+      _currentSwDisplay(): number {
+        if (!this.sw.running) return this.sw.elapsed;
+        return Date.now() - this.sw.startTimestamp;
+      },
+
+      // ═══════════════════════════════════════════════════════
+      // RING — countdown progress / stopwatch always full
+      // ═══════════════════════════════════════════════════════
+      get ringOffset(): number {
+        if (this.mode === 'countdown') {
+          const rem = this._currentCountdownDisplay();
+          const progress = this.totalTime > 0
+            ? Math.max(0, Math.min(1, rem / this.totalTime))
+            : 0;
+          return RING_CIRCUMFERENCE * (1 - progress);
+        }
+        return 0; // stopwatch: ring is full (offset 0 = fully drawn)
+      },
+
+      get ringClasses(): string {
+        const base = 'timer__hero-ring-progress';
+        if (this.mode === 'countdown') {
+          if (this.remaining === 0) return `${base} timer__hero-ring-progress--done`;
+          if (this.running && this.remaining <= 10) return `${base} timer__hero-ring-progress--warning`;
+          if (this.running) return `${base} timer__hero-ring-progress--running`;
+          return base;
+        }
+        return this.sw.running
+          ? `${base} timer__hero-ring-progress--running`
+          : `${base} timer__hero-ring-progress--paused`;
+      },
+
+      // ═══════════════════════════════════════════════════════
+      // COUNTDOWN
+      // ═══════════════════════════════════════════════════════
       setPreset(seconds: number) {
         this.pause();
         this.totalTime = seconds;
@@ -664,22 +638,13 @@ const L = t();
           this.pause();
           this.display = 0;
           this.remaining = 0;
-          // When a pop-out window is open, the popup plays the beep (the main
-          // page may be hidden); otherwise beep here.
           if (this.soundEnabled && !this.popupOpen) this.beep();
         }
       },
 
-      // ════════════════════════════════════════════════
+      // ═══════════════════════════════════════════════════════
       // STOPWATCH
-      // ════════════════════════════════════════════════
-      get swStatusLabel() {
-        if (this.sw.running) return this.labels.running;
-        if (this.sw.elapsed > 0) return this.labels.paused;
-        return this.labels.ready;
-      },
-
-      // Display laps in reverse order (latest on top) without mutating source
+      // ═══════════════════════════════════════════════════════
       get swLapsReversed() {
         return this.sw.laps.slice().reverse();
       },
@@ -687,7 +652,6 @@ const L = t();
       swStart() {
         if (this.sw.running) return;
         this.sw.running = true;
-        // Resume: anchor the start to (now - already-elapsed)
         this.sw.startTimestamp = Date.now() - this.sw.elapsed;
         this.sw.intervalId = setInterval(() => this.swTick(), 10);
         this.broadcast();
@@ -700,7 +664,6 @@ const L = t();
           clearInterval(this.sw.intervalId);
           this.sw.intervalId = null;
         }
-        // Commit the latest elapsed so resume picks up where we left off
         this.sw.elapsed = Date.now() - this.sw.startTimestamp;
         this.broadcast();
       },
@@ -713,7 +676,6 @@ const L = t();
       },
 
       swRecordLap() {
-        // Only record while running
         if (!this.sw.running) return;
         const total = Date.now() - this.sw.startTimestamp;
         const prevTotal = this.sw.laps.length > 0
@@ -730,9 +692,17 @@ const L = t();
         this.sw.elapsed = Date.now() - this.sw.startTimestamp;
       },
 
-      // ════════════════════════════════════════════════
+      // ═══════════════════════════════════════════════════════
+      // MODE-AWARE RESET — called by both buttons and remote
+      // ═══════════════════════════════════════════════════════
+      resetCurrent() {
+        if (this.mode === 'stopwatch') this.swReset();
+        else this.reset();
+      },
+
+      // ═══════════════════════════════════════════════════════
       // FORMATTING
-      // ════════════════════════════════════════════════
+      // ═══════════════════════════════════════════════════════
       formatTime(seconds: number) {
         const s = Math.max(0, Math.floor(seconds));
         const mm = Math.floor(s / 60).toString().padStart(2, '0');
@@ -748,11 +718,10 @@ const L = t();
         return mm + ':' + ss.toString().padStart(2, '0');
       },
 
-      // Stopwatch formatter: ms → "MM:SS.cc" (< 1h) or "HH:MM:SS" (≥ 1h)
       formatStopwatch(ms: number) {
         const totalMs = Math.max(0, Math.floor(ms));
         const hours = Math.floor(totalMs / 3600000);
-        const minutes = Math.floor((totalMs % 3600000) / 60000);
+        const minutes = Math.floor((totalMs % 600000) / 60000);
         const seconds = Math.floor((totalMs % 60000) / 1000);
         const centis = Math.floor((totalMs % 1000) / 10);
         const pad = (n: number, w: number) => n.toString().padStart(w, '0');
@@ -771,7 +740,6 @@ const L = t();
       _installKeyboard() {
         if (this._keyHandler) return;
         this._keyHandler = (e: KeyboardEvent) => {
-          // Don't hijack typing in form fields (e.g. the custom time input).
           const target = e.target as HTMLElement | null;
           if (
             target &&
@@ -782,14 +750,12 @@ const L = t();
           ) {
             return;
           }
-          // Leave browser/app shortcuts alone.
           if (e.ctrlKey || e.metaKey || e.altKey) return;
           if (e.key === ' ') {
             e.preventDefault();
             this.toggle();
           } else if (e.key.toLowerCase() === 'r') {
-            if (this.mode === 'stopwatch') this.swReset();
-            else this.reset();
+            this.resetCurrent();
           }
         };
         window.addEventListener('keydown', this._keyHandler);
@@ -808,199 +774,99 @@ const L = t();
 </script>
 
 <style>
-  /* ════════════════════════════════════════════════════
-     CONTAINER
-     ════════════════════════════════════════════════════ */
+  /* Timer page is now a thin shell: the design-system primitives (Button,
+   * Segmented, Card) carry the chrome, so this file only owns layout that
+   * has no primitive equivalent — the hero stage (ring + giant clock)
+   * and the few page-local details (kbd hint, sound toggle, lap chrome). */
+
   .timer {
-    position: relative;
-    max-width: 48rem;
+    max-width: 96rem;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    gap: 2.4rem;
+    padding-bottom: 6rem;
+  }
+
+  .timer__topbar {
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
-    gap: 3.6rem;
-    padding: 3.2rem 0 6rem;
   }
 
-  /* ════════════════════════════════════════════════════
-     POP-OUT BUTTON — top-right corner, icon + label
-     ════════════════════════════════════════════════════ */
-  .timer__popout {
-    position: absolute;
-    top: 0;
-    right: 1.2rem;
-    z-index: 5;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    height: 4.4rem;
-    padding: 0 1.2rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    color: var(--color-muted);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 200ms ease,
-                background-color 200ms ease,
-                border-color 200ms ease;
-  }
-
-  .timer__popout:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface-3);
-    border-color: var(--alpha-border);
-  }
-
-  .timer__popout.is-open {
+  /* "Pop-out" button while the PiP/fallback is open */
+  .timer__popout.is-active,
+  .timer__popout--open {
     color: var(--color-accent);
     border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
   }
 
-  .timer__popout svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  /* ════════════════════════════════════════════════════
-     MODE TOGGLE — segmented pill, recessed feel
-     ════════════════════════════════════════════════════ */
-  .timer__mode {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.5rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    box-shadow:
-      var(--shadow-1),
-      inset 0 -1px 0 var(--alpha-bg-subtle);
-  }
-
-  .timer__mode-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    min-width: 14rem;
-    height: 4.4rem;
-    padding: 0 2.4rem;
-    background-color: transparent;
-    border: none;
-    border-radius: var(--radius-pill);
-    color: var(--color-muted);
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: color 300ms cubic-bezier(0.4, 0, 0.2, 1),
-                background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1),
-                transform 160ms ease;
-  }
-
-  .timer__mode-icon {
-    width: 1.4rem;
-    height: 1.4rem;
-    flex-shrink: 0;
-    color: currentColor;
-  }
-
-  .timer__mode-btn:hover:not(.is-active) {
-    color: var(--color-text);
-  }
-
-  .timer__mode-btn:active {
-    transform: scale(0.97);
-  }
-
-  .timer__mode-btn.is-active {
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border: 1px solid var(--color-accent);
-  }
-
-  /* ════════════════════════════════════════════════════
-     PANEL WRAPPER
-     ════════════════════════════════════════════════════ */
-  .timer__panel {
+  /* ── HERO ────────────────────────────────────────────────── */
+  .timer__hero {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3.6rem;
-    width: 100%;
+    gap: 1.4rem;
+    padding: 1.6rem 0 2.4rem;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
 
-  /* ════════════════════════════════════════════════════
-     PRESETS — 4-column grid, pill buttons
-     ════════════════════════════════════════════════════ */
-  .timer__presets {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+  .timer__hero-head {
+    display: inline-flex;
+    align-items: center;
     gap: 0.8rem;
-    width: 100%;
-    max-width: 40rem;
   }
 
-  .timer__preset {
-    height: 4.8rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    color: var(--color-muted);
+  .timer__hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .timer__hero-icon :global(svg) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .timer__hero-eyebrow {
     font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: color 300ms ease,
-                background-color 300ms ease,
-                border-color 300ms ease,
-                box-shadow 300ms ease,
-                transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
   }
 
-  .timer__preset:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface-3);
-    border-color: var(--alpha-border);
-    transform: translateY(-2px);
+  .timer__hero-sep { color: var(--alpha-text-faint); }
+
+  .timer__hero-status {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
   }
 
-  .timer__preset:active {
-    transform: translateY(0) scale(0.97);
-  }
-
-  .timer__preset.is-active {
-    color: var(--color-accent-foreground);
-    border-color: var(--color-accent);
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  }
-
-  /* ════════════════════════════════════════════════════
-     STAGE — SVG ring + readout (centered hero)
-     ════════════════════════════════════════════════════ */
-  .timer__stage {
+  /* ── HERO STAGE — ring + giant clock ─────────────────────── */
+  .timer__hero-stage {
     position: relative;
-    width: 280px;
-    height: 280px;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: min(28rem, 80vw);
+    aspect-ratio: 1 / 1;
   }
 
-  /* Stopwatch: no ring, wider for centiseconds */
-  .timer__stage--sw {
-    width: auto;
-    height: auto;
-    padding: 2.4rem 0 0.8rem;
-  }
-
-  .timer__ring {
+  .timer__hero-ring {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -1008,96 +874,114 @@ const L = t();
     transform: rotate(-90deg);
   }
 
-  .timer__ring-track {
+  .timer__hero-ring-track {
+    fill: none;
     stroke: var(--color-surface-3);
-    stroke-width: 6;
+    stroke-width: 4;
   }
 
-  .timer__ring-progress {
+  .timer__hero-ring-progress {
+    fill: none;
     stroke: var(--color-accent);
-    stroke-width: 8;
+    stroke-width: 5;
     stroke-linecap: round;
-    transition: stroke-dashoffset 100ms linear,
-                stroke 300ms ease,
-                filter 300ms ease;
+    transition: stroke-dashoffset var(--transition-fast), stroke var(--transition-base);
   }
 
-  .timer__ring-progress.is-warning {
-    stroke: var(--color-warning);
-  }
+  .timer__hero-ring-progress--running { stroke: var(--color-accent); }
+  .timer__hero-ring-progress--warning { stroke: var(--color-warning); }
+  .timer__hero-ring-progress--done    { stroke: var(--color-success); }
+  .timer__hero-ring-progress--paused  { stroke: var(--color-muted); opacity: 0.6; }
 
-  .timer__ring-progress.is-done {
-    stroke: var(--color-success);
-  }
-
-  /* ════════════════════════════════════════════════════
-     READOUT — time + status
-     ════════════════════════════════════════════════════ */
-  .timer__readout {
+  .timer__hero-clock {
     position: relative;
     z-index: 1;
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 14vw, 9.6rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+    text-align: center;
+    transition: color var(--transition-base);
+  }
+
+  .timer__hero-clock--running { color: var(--color-accent); }
+  .timer__hero-clock--warning { color: var(--color-warning); }
+  .timer__hero-clock--done    { color: var(--color-success); }
+
+  .timer__hero-meta {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 1.3rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
+  .timer__hero-meta-sep { color: var(--alpha-text-faint); }
+
+  .timer__hero-actions {
+    display: flex;
+    align-items: stretch;
+    gap: 1.2rem;
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  /* ── QUICK ROW — segmented + preset pills (Button handles look) ── */
+  .timer__quick {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .timer__quick-left { flex: 0 0 auto; }
+
+  .timer__quick-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  /* ── PANELS — countdown custom + stopwatch laps, side-by-side ── */
+  .timer__panels {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  @media (min-width: 760px) {
+    .timer__panels { grid-template-columns: 1fr 1fr; }
+  }
+
+  .timer__panel-head {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    user-select: none;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
   }
 
-  .timer__time {
+  .timer__panel-eyebrow {
     font-family: var(--font-display);
-    font-size: clamp(5rem, 12vw, 9rem);
+    font-size: 1.1rem;
     font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
     color: var(--color-text);
-    transition: color 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .timer__time.is-running {
-    color: var(--color-accent);
-  }
-
-  .timer__time.is-warning {
-    color: var(--color-warning);
-  }
-
-  .timer__time.is-done {
-    color: var(--color-success);
-  }
-
-  /* Stopwatch: slightly smaller to fit MM:SS.cc comfortably */
-  .timer__time--sw {
-    font-size: clamp(4.2rem, 10vw, 7.6rem);
-  }
-
-  .timer__status {
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-muted);
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.08em;
   }
 
-  /* ════════════════════════════════════════════════════
-     CUSTOM TIME INPUT — minus | number | plus
-     ════════════════════════════════════════════════════ */
-  .timer__custom {
-    width: 100%;
-    max-width: 36rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .timer__custom-label {
+  .timer__panel-sub {
     font-size: 1.1rem;
     color: var(--color-muted);
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 600;
-    text-align: center;
+    letter-spacing: 0.08em;
+    font-weight: 500;
   }
 
   .timer__custom-row {
@@ -1107,43 +991,14 @@ const L = t();
     gap: 0.8rem;
   }
 
-  .timer__step {
-    flex: 0 0 auto;
-    width: 4.8rem;
-    height: 4.8rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: background-color 200ms ease,
-                border-color 200ms ease,
-                color 200ms ease,
-                transform 160ms ease;
-  }
-
-  .timer__step:hover {
-    background-color: var(--color-surface-3);
-    border-color: var(--alpha-border);
-    color: var(--color-text);
-  }
-
-  .timer__step:active {
-    transform: scale(0.92);
-  }
-
   .timer__custom-input {
     flex: 1 1 auto;
     min-width: 0;
-    height: 4.8rem;
+    height: 4.4rem;
     padding: 0 1.2rem;
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-sm);
     color: var(--color-text);
     font-family: var(--font-display);
     font-size: 1.6rem;
@@ -1151,8 +1006,7 @@ const L = t();
     text-align: center;
     font-variant-numeric: tabular-nums;
     outline: none;
-    transition: border-color 200ms ease,
-                box-shadow 200ms ease;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     -moz-appearance: textfield;
   }
 
@@ -1167,14 +1021,58 @@ const L = t();
     box-shadow: var(--focus-ring);
   }
 
-  /* ════════════════════════════════════════════════════
-     KEYBOARD SHORTCUT HINTS
-     ════════════════════════════════════════════════════ */
+  /* ── LAPS — slim list inside Card ─────────────────────────── */
+  .timer__laps-head {
+    display: grid;
+    grid-template-columns: 6rem 1fr 1fr;
+    padding: 1.4rem 2rem;
+    background-color: var(--color-surface-2);
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-size: 1.0rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .timer__laps-col-label--end { text-align: right; }
+
+  .timer__laps-body {
+    max-height: 32rem;
+    overflow-y: auto;
+  }
+
+  .timer__laps-row {
+    display: grid;
+    grid-template-columns: 6rem 1fr 1fr;
+    align-items: center;
+    padding: 1.3rem 2rem;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color var(--transition-base), color var(--transition-base);
+  }
+
+  .timer__laps-row:last-child { border-bottom: 0; }
+
+  .timer__laps-row--latest {
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    color: var(--color-accent);
+  }
+
+  .timer__laps-num { color: var(--color-muted); font-weight: 600; }
+  .timer__laps-row--latest .timer__laps-num { color: var(--color-accent); font-weight: 700; }
+  .timer__laps-time { font-weight: 600; }
+  .timer__laps-total { text-align: right; color: var(--color-accent); font-weight: 600; }
+
+  /* ── SHORTCUTS — kbd hints row ─────────────────────────────── */
   .timer__shortcuts {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1.6rem;
+    gap: 2rem;
     flex-wrap: wrap;
   }
 
@@ -1192,194 +1090,12 @@ const L = t();
     color: var(--color-muted);
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
-    border-radius: 0.4rem;
-    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-sm);
+    padding: 0.2rem 0.6rem;
     line-height: 1.2;
   }
 
-  /* ════════════════════════════════════════════════════
-     CONTROLS — large tactile buttons
-     ════════════════════════════════════════════════════ */
-  .timer__controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1.2rem;
-    flex-wrap: wrap;
-  }
-
-  .timer__btn {
-    height: 5.2rem;
-    min-width: 13rem;
-    padding: 0 2.4rem;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: 1px solid var(--color-border);
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    transition: background-color 200ms ease,
-                border-color 200ms ease,
-                color 200ms ease,
-                transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .timer__btn:hover {
-    background-color: var(--color-surface-3);
-    border-color: var(--alpha-border);
-  }
-
-  .timer__btn:active {
-    transform: scale(0.97);
-  }
-
-  /* Primary (Start / Pause / Resume) — accent lives on the border */
-  .timer__btn--primary {
-    background-color: transparent;
-    color: var(--color-accent);
-    border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 15%, transparent);
-  }
-
-  .timer__btn--primary:hover {
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    border-color: var(--color-accent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 30%, transparent);
-  }
-
-  .timer__btn--primary:active {
-    background-color: color-mix(in srgb, var(--color-accent) 16%, transparent);
-    transform: scale(0.97);
-  }
-
-  /* Ghost (Reset) — transparent, muted */
-  .timer__btn--ghost {
-    background-color: transparent;
-    color: var(--color-muted);
-    border-color: transparent;
-  }
-
-  .timer__btn--ghost:hover {
-    color: var(--color-text);
-    background-color: var(--alpha-bg-subtle);
-    border-color: var(--alpha-bg-soft);
-  }
-
-  .timer__btn--ghost:active {
-    transform: scale(0.97);
-  }
-
-  /* Accent ghost (Tour) — accent tint, no solid fill */
-  .timer__btn--accent-ghost {
-    background-color: transparent;
-    color: var(--color-accent);
-    border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-  }
-
-  .timer__btn--accent-ghost:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    border-color: var(--color-accent);
-  }
-
-  .timer__btn--accent-ghost:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-
-  .timer__btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  /* ════════════════════════════════════════════════════
-     LAP LIST — clean table, alternating rows
-     ════════════════════════════════════════════════════ */
-  .timer__laps {
-    width: 100%;
-    max-width: 44rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-1);
-  }
-
-  .timer__laps-header {
-    display: grid;
-    grid-template-columns: 6rem 1fr 1fr;
-    padding: 1.4rem 2rem;
-    background-color: var(--color-surface-3);
-    color: var(--color-muted);
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .timer__laps-col-label--end {
-    text-align: right;
-  }
-
-  .timer__laps-body {
-    max-height: 32rem;
-    overflow-y: auto;
-  }
-
-  .timer__laps-row {
-    display: grid;
-    grid-template-columns: 6rem 1fr 1fr;
-    align-items: center;
-    padding: 1.3rem 2rem;
-    background-color: var(--color-surface);
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-variant-numeric: tabular-nums;
-    border-bottom: 1px solid var(--color-border);
-    transition: background-color 300ms ease, color 300ms ease;
-  }
-
-  .timer__laps-row:nth-child(even) {
-    background-color: var(--color-surface-2);
-  }
-
-  .timer__laps-row:last-child {
-    border-bottom: none;
-  }
-
-  /* Newest lap on top — highlighted with accent tint */
-  .timer__laps-row.is-latest {
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    color: var(--color-accent);
-  }
-
-  .timer__laps-num {
-    color: var(--color-muted);
-    font-weight: 600;
-  }
-
-  .timer__laps-row.is-latest .timer__laps-num {
-    color: var(--color-accent);
-    font-weight: 700;
-  }
-
-  .timer__laps-time {
-    font-weight: 600;
-  }
-
-  .timer__laps-total {
-    text-align: right;
-    color: var(--color-accent);
-    font-weight: 600;
-  }
-
-  /* ════════════════════════════════════════════════════
-     SOUND TOGGLE — small, unobtrusive
-     ════════════════════════════════════════════════════ */
+  /* ── SOUND — checkbox + label, accent on check ─────────────── */
   .timer__sound {
     display: flex;
     align-items: center;
@@ -1391,127 +1107,24 @@ const L = t();
     align-items: center;
     gap: 0.8rem;
     color: var(--color-muted);
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 500;
     cursor: pointer;
     user-select: none;
-    transition: color 200ms ease;
+    transition: color var(--transition-fast);
   }
 
-  .timer__sound-label:hover {
-    color: var(--color-text);
-  }
+  .timer__sound-label:hover { color: var(--color-text); }
 
   .timer__sound-input {
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 1.8rem;
+    height: 1.8rem;
     accent-color: var(--color-accent);
     cursor: pointer;
   }
 
-  .timer__sound-icon {
-    width: 1.6rem;
-    height: 1.6rem;
-    color: var(--color-muted);
-    flex-shrink: 0;
-    transition: color 200ms ease;
-  }
-
-  .timer__sound-icon.is-on {
-    color: var(--color-accent);
-  }
-
-  /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
-  @media (prefers-reduced-motion: reduce) {
-    .timer__ring-progress {
-      transition: stroke 0.01ms;
-    }
-    .timer__time {
-      transition: none;
-    }
-    .timer__btn:active,
-    .timer__mode-btn:active,
-    .timer__preset:active,
-    .timer__step:active {
-      transform: none;
-    }
-  }
-
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
-     ════════════════════════════════════════════════════ */
+  /* ── RESPONSIVE ────────────────────────────────────────────── */
   @media (max-width: 480px) {
-    .timer {
-      gap: 3.2rem;
-      padding: 2.4rem 0 4rem;
-    }
-    .timer__mode-btn {
-      min-width: 11rem;
-      height: 4.4rem;
-      font-size: 1.2rem;
-      padding: 0 1.6rem;
-    }
-    .timer__presets {
-      gap: 0.6rem;
-    }
-    .timer__preset {
-      font-size: 1.4rem;
-      height: 4.4rem;
-    }
-    .timer__btn {
-      min-width: 11rem;
-      height: 5rem;
-      font-size: 1.3rem;
-      padding: 0 1.8rem;
-    }
-    .timer__laps-row,
-    .timer__laps-header {
-      padding-inline: 1.4rem;
-      font-size: 1.2rem;
-    }
-    .timer__laps-header {
-      font-size: 1.0rem;
-    }
-    .timer__popout-label {
-      display: none;
-    }
-    .timer__popout {
-      width: 4.4rem;
-      justify-content: center;
-      padding: 0;
-    }
-  }
-  @media (max-width: 360px) {
-    .timer {
-      gap: 2.6rem;
-      padding-inline: 0.4rem;
-    }
-    .timer__mode-btn {
-      min-width: 9.6rem;
-      padding-inline: 1rem;
-      font-size: 1.1rem;
-    }
-    .timer__stage {
-      width: 24rem;
-      height: 24rem;
-    }
-    .timer__presets {
-      gap: 0.4rem;
-    }
-    .timer__preset {
-      font-size: 1.2rem;
-      padding-inline: 0.4rem;
-    }
-    .timer__controls {
-      width: 100%;
-      gap: 0.8rem;
-    }
-    .timer__btn {
-      min-width: 0;
-      flex: 1 1 12rem;
-      padding-inline: 1rem;
-    }
+    .timer__quick { flex-direction: column; align-items: stretch; }
   }
 </style>

@@ -8,6 +8,7 @@ import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
+import Button from '../../components/ui/Button.astro';
 const L = t();
 ---
 
@@ -116,16 +117,17 @@ const L = t();
           <p class="poids__success" x-show="success" x-text="success" x-cloak x-transition.opacity.duration.180ms role="status" aria-live="polite"></p>
 
           <div class="poids__actions">
-            <button
+            <Button
               type="button"
-              class="poids__btn poids__btn--secondary"
+              variant="secondary"
+              size="md"
               @click="resetForm()"
             >
               {L.common.reset}
-            </button>
-            <button type="submit" class="poids__btn poids__btn--primary">
+            </Button>
+            <Button type="submit" variant="primary" size="md">
               {L.poids.save}
-            </button>
+            </Button>
           </div>
         </form>
       </CardContent>
@@ -758,53 +760,6 @@ const L = t();
     flex-wrap: wrap;
   }
 
-  .poids__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 4.4rem;
-    padding: 0 1.8rem;
-    border-radius: var(--radius-md);
-    border: 1px solid transparent;
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    min-width: 8rem;
-    transition: background-color var(--transition-fast),
-                border-color var(--transition-fast),
-                color var(--transition-fast),
-                transform var(--transition-fast);
-  }
-
-  .poids__btn:active {
-    transform: scale(0.97);
-  }
-
-  .poids__btn--primary {
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border-color: var(--color-accent);
-  }
-
-  .poids__btn--primary:hover {
-    background-color: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
-  }
-
-  .poids__btn--secondary {
-    background-color: transparent;
-    color: var(--color-muted);
-    border-color: var(--color-border);
-  }
-
-  .poids__btn--secondary:hover {
-    background-color: var(--alpha-bg-subtle);
-    color: var(--color-text);
-    border-color: var(--alpha-border);
-  }
-
   /* ═══ Stats grid ═══ */
   .poids__stats {
     display: grid;
@@ -1041,7 +996,7 @@ const L = t();
       align-items: stretch;
     }
 
-    .poids__btn {
+    .poids__actions :global(.button) {
       width: 100%;
     }
   }
@@ -1049,7 +1004,6 @@ const L = t();
   /* ═══ Reduced motion ═══ */
   @media (prefers-reduced-motion: reduce) {
     .poids__input,
-    .poids__btn,
     .poids__icon-btn {
       transition: none;
       transform: none;

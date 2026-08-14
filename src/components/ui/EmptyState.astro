@@ -13,7 +13,7 @@
  * scale, …).
  */
 interface Props {
-  iconName?: 'calendar' | 'scale' | 'dumbbell' | 'chart' | 'clock';
+  iconName?: "calendar" | "scale" | "dumbbell" | "chart" | "clock";
   title: string;
   description?: string;
   actionLabel?: string;
@@ -21,7 +21,7 @@ interface Props {
   class?: string;
 }
 
-const ICON_PATHS: Record<NonNullable<Props['iconName']>, string> = {
+const ICON_PATHS: Record<NonNullable<Props["iconName"]>, string> = {
   calendar:
     '<path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path>',
   scale:
@@ -40,61 +40,69 @@ const {
   description,
   actionLabel,
   actionHref,
-  class: className = '',
+  class: className = "",
 } = Astro.props;
 
 const hasAction = Boolean(actionLabel && actionHref);
 
 const wrapperClasses = [
-  'flex flex-col items-center justify-center',
-  'py-12 px-6',
-  'max-w-sm mx-auto',
-  'text-center',
+  "flex flex-col items-center justify-center",
+  "py-12 px-6",
+  "max-w-sm mx-auto",
+  "text-center",
   className,
 ]
   .filter(Boolean)
-  .join(' ');
+  .join(" ");
 ---
 
 <div class={wrapperClasses} role="status">
-  {iconName && (
-    <div
-      class="flex items-center justify-center w-12 h-12 rounded-full text-[var(--color-muted)]"
-      style="background-color: var(--alpha-bg-soft)"
-      aria-hidden="true"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.6"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="w-6 h-6"
-        set:html={ICON_PATHS[iconName]}
-      ></svg>
-    </div>
-  )}
+  {
+    iconName && (
+      <div
+        class="flex items-center justify-center w-12 h-12 rounded-full text-[var(--color-muted)]"
+        style="background-color: var(--alpha-bg-soft)"
+        aria-hidden="true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="w-6 h-6"
+          set:html={ICON_PATHS[iconName]}
+        />
+      </div>
+    )
+  }
 
-  <h3 class="font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] mt-4 text-center">
+  <h3
+    class="font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] mt-4 text-center"
+  >
     {title}
   </h3>
 
-  {description && (
-    <p class="text-[1.2rem] text-[var(--color-muted)] mt-2 text-center">
-      {description}
-    </p>
-  )}
+  {
+    description && (
+      <p class="text-[1.2rem] text-[var(--color-muted)] mt-2 text-center">
+        {description}
+      </p>
+    )
+  }
 
-  {hasAction && (
-    <a
-      href={actionHref}
-      class="inline-flex items-center justify-center min-h-[4.4rem] bg-[var(--color-accent)] text-white rounded-[var(--radius-md)] px-4 py-2 text-[1.2rem] font-semibold mt-4 transition-all duration-[160ms] hover:brightness-110 active:scale-[0.97] focus-visible:outline-none"
-    >
-      {actionLabel}
-    </a>
-  )}
+  {
+    hasAction && (
+      <a
+        href={actionHref}
+        class="inline-flex items-center justify-center min-h-[4.4rem] bg-[var(--color-accent)] text-[var(--color-accent-foreground)] rounded-[var(--radius-md)] px-4 py-2 text-[1.2rem] font-semibold mt-4 transition-all duration-[160ms] hover:brightness-110 active:scale-[0.97] focus-visible:outline-none"
+      >
+        {actionLabel}
+      </a>
+    )
+  }
 </div>
 
 <style>

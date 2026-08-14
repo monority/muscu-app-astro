@@ -129,207 +129,390 @@ function beep(): void {
  * `fallback` is the pre-existing widget palette default (dark) and is used
  * ONLY when the app token (and its alternate) is absent.
  */
-const TW_TOKEN_MAP: {
-  tw: string;
-  app: string;
-  /** Alternate app token tried when `app` is empty. */
-  alt?: string;
-  /** Pre-existing widget default — no-token fallback only. */
-  fallback: string;
-}[] = [
-  { tw: '--tw-bg', app: '--color-bg', fallback: '#0d0d0d' },
-  { tw: '--tw-surface', app: '--color-surface', fallback: '#171717' },
-  { tw: '--tw-surface-2', app: '--color-surface-2', fallback: '#202020' },
-  { tw: '--tw-border', app: '--color-border', fallback: 'rgba(255, 255, 255, 0.09)' },
-  { tw: '--tw-text', app: '--color-text', fallback: '#f2f2f2' },
-  { tw: '--tw-muted', app: '--color-muted', fallback: '#8f8f8f' },
-  { tw: '--tw-accent', app: '--color-accent', fallback: 'hsl(32, 95%, 50%)' },
-  // Text/icon color on the accent fill (active tab). Pure white, as before.
-  { tw: '--tw-accent-fg', app: '--color-accent-foreground', fallback: '#fff' },
-  { tw: '--tw-ok', app: '--color-success', fallback: '#22c35d' },
-  // --color-warning is the real app token; --color-stat-streak covers token
-  // sets where the amber only existed on the streak stat.
-  { tw: '--tw-warn', app: '--color-warning', alt: '--color-stat-streak', fallback: '#f0b429' },
-  { tw: '--tw-danger', app: '--color-destructive', fallback: '#ef4444' },
-];
-
-/**
- * Resolve the mapped app tokens and write them as inline --tw-* vars on the
- * widget root, so WIDGET_CSS needs no hardcoded color of its own. Runs at
- * mount time, after the host theme is applied (data-theme is set pre-paint
- * on /timer/pop and in attachPip() before mountTimerWidget() is called).
- */
-function resolveTwTokens(host: HTMLElement): void {
-  const doc = host.ownerDocument;
-  const cs = doc.defaultView
-    ? doc.defaultView.getComputedStyle(doc.documentElement)
-    : getComputedStyle(doc.documentElement);
-  for (const { tw, app, alt, fallback } of TW_TOKEN_MAP) {
-    const value = cs.getPropertyValue(app).trim() || (alt ? cs.getPropertyValue(alt).trim() : '');
-    host.style.setProperty(tw, value || fallback);
-  }
-}
+const RING_RADIUS = 88;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 const WIDGET_CSS = `
-/* Palette: every --tw-* var is resolved at mount time by resolveTwTokens()
-   from the host document's app tokens (see TW_TOKEN_MAP). No hardcoded
-   color lives here; the widget inherits the host theme — including the
-   [data-theme="light"] token overrides — because the computed token values
-   are read after the theme has been applied. */
+/* Widget inherits the host theme: globals.css is imported by pop.astro and
+   copied into Picture-in-Picture windows alongside the opener stylesheets,
+   so every --color-* / --alpha-* / --shadow-* / --radius-* / --font-*
+   resolves to the active [data-theme] palette. No hardcoded colors live
+   here on purpose. */
 .tw {
   box-sizing: border-box;
   width: 100%;
   min-height: 100vh;
   margin: 0;
-  padding: 1.5rem 1.5rem 1.8rem;
-  background: var(--tw-bg);
-  color: var(--tw-text);
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 1.6rem;
+  padding: 2rem 1.6rem 2.4rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1.4rem;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.4rem;
   user-select: none;
 }
 .tw *,
 .tw *::before,
 .tw *::after { box-sizing: border-box; }
 .tw button { font-family: inherit; }
-.tw__head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; }
-.tw__title {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--tw-muted);
+
+/* ── Head — kicker title + connection status ── */
+.tw__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-border);
 }
-.tw__conn { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; color: var(--tw-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.tw__dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--tw-danger); box-shadow: 0 0 8px var(--tw-danger); flex: 0 0 auto; }
-.tw.is-connected .tw__dot { background: var(--tw-ok); box-shadow: 0 0 8px var(--tw-ok); }
+.tw__title {
+  font-family: var(--font-display);
+  font-size: 1.0rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.tw__conn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.tw__dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--color-destructive);
+  flex: 0 0 auto;
+  transition: background-color var(--transition-fast);
+}
+.tw.is-connected .tw__dot { background: var(--color-success); }
+
+/* ── Tabs — segmented pill, accent fill on the active one ── */
 .tw__tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.4rem;
-  padding: 0.35rem;
-  background: var(--tw-surface-2);
-  border: 1px solid var(--tw-border);
-  border-radius: 999px;
+  padding: 0.4rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-1), inset 0 -1px 0 var(--alpha-bg-subtle);
 }
 .tw__tab {
-  border: none;
+  border: 0;
   background: transparent;
-  color: var(--tw-muted);
-  padding: 0.7rem 0.4rem;
-  border-radius: 999px;
+  color: var(--color-muted);
+  padding: 0.75rem 0.6rem;
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.tw__tab:hover { color: var(--tw-text); }
-.tw__tab.is-active { background: var(--tw-accent); color: var(--tw-accent-fg); }
-.tw__clock-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; padding: 0.9rem 0 0.4rem; }
-.tw__clock {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: clamp(3.4rem, 15vw, 5.2rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  color: var(--tw-text);
-}
-.tw__clock.is-running { color: var(--tw-accent); }
-.tw__clock.is-warning { color: var(--tw-warn); }
-.tw__clock.is-done { color: var(--tw-ok); }
-.tw__status { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--tw-muted); }
-.tw__presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; }
-.tw__presets[hidden],
-.tw__custom[hidden] { display: none !important; }
-.tw__preset {
-  border: 1px solid var(--tw-border);
-  background: var(--tw-surface);
-  color: var(--tw-text);
-  border-radius: 0.6rem;
-  padding: 0.6rem 0;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
-}
-.tw__preset:hover { border-color: var(--tw-accent); }
-.tw__preset.is-active { color: var(--tw-accent); border-color: var(--tw-accent); background: color-mix(in srgb, var(--tw-accent) 14%, transparent); }
-.tw__custom { display: flex; gap: 0.45rem; }
-.tw__custom-input {
-  flex: 1;
-  min-width: 0;
-  border: 1px solid var(--tw-border);
-  background: var(--tw-surface);
-  color: var(--tw-text);
-  border-radius: 0.6rem;
-  padding: 0.55rem 0.7rem;
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  outline: none;
-}
-.tw__custom-input:focus { border-color: var(--tw-accent); }
-.tw__custom-ok { border: 1px solid var(--tw-accent); background: transparent; color: var(--tw-accent); border-radius: 0.6rem; padding: 0 1.1rem; cursor: pointer; font-weight: 700; }
-.tw__controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.55rem; }
-.tw__btn {
-  border: 1px solid var(--tw-border);
-  border-radius: 0.7rem;
-  padding: 0.95rem 0.4rem;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.92rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: var(--tw-surface);
-  color: var(--tw-text);
-  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
-}
-.tw__btn:hover { border-color: var(--tw-accent); }
-.tw__btn:active { transform: scale(0.97); }
-.tw__btn--primary {
-  background: transparent;
-  color: var(--tw-accent);
-  border-color: color-mix(in srgb, var(--tw-accent) 55%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tw-accent) 15%, transparent);
-}
-.tw__btn--primary:hover { background: color-mix(in srgb, var(--tw-accent) 10%, transparent); border-color: var(--tw-accent); }
-.tw__btn--ghost { background: var(--tw-surface-2); }
-.tw__btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.tw__laps { margin-top: 0.2rem; border: 1px solid var(--tw-border); border-radius: 0.7rem; overflow: hidden; }
-.tw__laps-head {
-  display: grid;
-  grid-template-columns: 3.4rem 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  background: var(--tw-surface-2);
-  color: var(--tw-muted);
-  font-size: 0.68rem;
+  font-family: var(--font-display);
+  font-size: 1.0rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+.tw__tab:hover:not(.is-active) { color: var(--color-text); }
+.tw__tab:active { transform: scale(0.97); }
+.tw__tab.is-active {
+  background: var(--color-accent);
+  color: var(--color-accent-foreground);
+  box-shadow: var(--shadow-1), inset 0 1px 0 var(--alpha-highlight);
+}
+
+/* ── Stage — centered hero: ring + clock + status ── */
+.tw__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 26rem;
+  margin: 0.6rem auto 0.4rem;
+}
+.tw__stage--no-ring {
+  aspect-ratio: auto;
+  padding: 0.4rem 0 0.6rem;
+}
+.tw__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.tw__ring-track {
+  fill: none;
+  stroke: var(--color-surface-3);
+  stroke-width: 4;
+}
+.tw__ring-progress {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition:
+    stroke-dashoffset var(--transition-fast),
+    stroke var(--transition-base);
+}
+.tw__ring-progress.is-warning { stroke: var(--color-warning); }
+.tw__ring-progress.is-done { stroke: var(--color-success); }
+.tw__readout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+}
+.tw__clock {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 14vw, 6.4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  transition: color var(--transition-base);
+}
+.tw__clock.is-running { color: var(--color-accent); }
+.tw__clock.is-warning { color: var(--color-warning); }
+.tw__clock.is-done { color: var(--color-success); }
+.tw__status {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* ── Presets — 4-column pill row ── */
+.tw__presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+}
+.tw__presets[hidden],
+.tw__custom[hidden],
+.tw__laps[hidden],
+.tw__ring[hidden] { display: none !important; }
+.tw__preset {
+  height: 4rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+.tw__preset:hover {
+  background: var(--color-surface-3);
+  border-color: var(--alpha-border);
+  transform: translateY(-1px);
+}
+.tw__preset:active { transform: translateY(0) scale(0.97); }
+.tw__preset.is-active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+/* ── Custom input — slim pill row ── */
+.tw__custom {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.tw__custom-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 4rem;
+  padding: 0 1.2rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  -moz-appearance: textfield;
+}
+.tw__custom-input::-webkit-outer-spin-button,
+.tw__custom-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.tw__custom-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring);
+}
+.tw__custom-ok {
+  height: 4rem;
+  padding: 0 1.4rem;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.tw__custom-ok:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border-color: var(--color-accent);
+}
+
+/* ── Controls — primary + secondary + ghost (mirrors .btn system) ── */
+.tw__controls {
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+  margin-top: 0.2rem;
+}
+.tw__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 4.6rem;
+  padding: 0 1.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+.tw__btn:active { transform: translateY(1px); }
+.tw__btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.tw__btn--primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-foreground);
+  box-shadow: var(--shadow-1), inset 0 1px 0 var(--alpha-highlight);
+}
+.tw__btn--primary:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: var(--color-accent-foreground);
+}
+.tw__btn--primary:active {
+  box-shadow: inset 0 1px 2px hsl(30 90% 20% / 0.35);
+}
+.tw__btn--secondary {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+.tw__btn--secondary:hover {
+  background: var(--color-surface-3);
+  border-color: var(--alpha-border);
+  color: var(--color-text);
+}
+.tw__btn--ghost {
+  background: transparent;
+  color: var(--color-muted);
+  border-color: transparent;
+}
+.tw__btn--ghost:hover {
+  background: var(--alpha-bg-subtle);
+  color: var(--color-text);
+}
+
+/* ── Laps — compact list, accent highlight on latest ── */
+.tw__laps {
+  margin-top: 0.4rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+}
+.tw__laps-head {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr 1fr;
+  gap: 0.8rem;
+  padding: 1rem 1.4rem;
+  background: var(--color-surface-3);
+  color: var(--color-muted);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-bottom: 1px solid var(--color-border);
 }
 .tw__laps-head span:last-child { text-align: right; }
-.tw__laps-body { max-height: 13rem; overflow-y: auto; }
+.tw__laps-body { max-height: 16rem; overflow-y: auto; }
 .tw__laps-row {
   display: grid;
-  grid-template-columns: 3.4rem 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  border-top: 1px solid var(--tw-border);
-  font-size: 0.85rem;
+  grid-template-columns: 4.2rem 1fr 1fr;
+  gap: 0.8rem;
+  padding: 0.9rem 1.4rem;
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
   font-variant-numeric: tabular-nums;
 }
-.tw__laps-row:first-child { border-top: none; }
-.tw__laps-row.is-latest { color: var(--tw-accent); background: color-mix(in srgb, var(--tw-accent) 10%, transparent); }
-.tw__laps-row span:first-child { color: var(--tw-muted); }
-.tw__laps-row span:last-child { text-align: right; color: var(--tw-accent); }
+.tw__laps-row:first-child { border-top: 0; }
+.tw__laps-row.is-latest {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent);
+}
+.tw__laps-num { color: var(--color-muted); font-weight: 600; }
+.tw__laps-row.is-latest .tw__laps-num { color: var(--color-accent); font-weight: 700; }
+.tw__laps-total { text-align: right; color: var(--color-accent); font-weight: 600; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .tw__ring-progress { transition: stroke 0.01ms; }
+  .tw__clock { transition: none; }
+  .tw__btn:active,
+  .tw__tab:active,
+  .tw__preset:active { transform: none; }
+}
 `;
 
 type RemoteMsg = { type: string; [k: string]: unknown };
@@ -340,29 +523,42 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
   host.innerHTML = `
     <header class="tw__head">
       <span class="tw__title">${labels.title}</span>
-      <span class="tw__conn"><i class="tw__dot"></i><span data-ref="conn">${labels.disconnected}</span></span>
+      <span class="tw__conn"><i class="tw__dot" aria-hidden="true"></i><span data-ref="conn">${labels.disconnected}</span></span>
     </header>
+
     <div class="tw__tabs" role="tablist" aria-label="${labels.title}">
-      <button type="button" class="tw__tab is-active" data-tab="countdown" role="tab">${labels.countdown}</button>
-      <button type="button" class="tw__tab" data-tab="stopwatch" role="tab">${labels.stopwatch}</button>
+      <button type="button" class="tw__tab is-active" data-tab="countdown" role="tab" aria-selected="true">${labels.countdown}</button>
+      <button type="button" class="tw__tab" data-tab="stopwatch" role="tab" aria-selected="false">${labels.stopwatch}</button>
     </div>
-    <div class="tw__clock-wrap">
-      <div class="tw__clock" data-ref="clock" aria-live="polite">--:--</div>
-      <div class="tw__status" data-ref="status"></div>
+
+    <div class="tw__stage" data-ref="stage">
+      <svg class="tw__ring" data-ref="ring" viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="tw__ring-track" cx="100" cy="100" r="${RING_RADIUS}" />
+        <circle class="tw__ring-progress" data-ref="ringProgress" cx="100" cy="100" r="${RING_RADIUS}"
+          stroke-dasharray="${RING_CIRCUMFERENCE}" stroke-dashoffset="0" />
+      </svg>
+      <div class="tw__readout">
+        <div class="tw__clock" data-ref="clock" aria-live="polite">--:--</div>
+        <div class="tw__status" data-ref="status"></div>
+      </div>
     </div>
-    <div class="tw__presets" hidden>
+
+    <div class="tw__presets" data-ref="presets" role="group" aria-label="${labels.custom}">
       ${PRESETS.map((p) => `<button type="button" class="tw__preset" data-preset="${p}">${fmtShort(p)}</button>`).join('')}
     </div>
-    <div class="tw__custom" hidden>
-      <input class="tw__custom-input" data-ref="custom" type="number" min="5" max="600" step="5" inputmode="numeric"
+
+    <div class="tw__custom" data-ref="custom">
+      <input class="tw__custom-input" data-ref="customInput" type="number" min="5" max="600" step="5" inputmode="numeric"
         aria-label="${labels.custom}">
       <button type="button" class="tw__custom-ok" data-ref="customOk">OK</button>
     </div>
+
     <div class="tw__controls">
       <button type="button" class="tw__btn tw__btn--primary" data-ref="toggle">${labels.start}</button>
-      <button type="button" class="tw__btn tw__btn--ghost" data-ref="reset">${labels.reset}</button>
+      <button type="button" class="tw__btn tw__btn--secondary" data-ref="reset">${labels.reset}</button>
       <button type="button" class="tw__btn tw__btn--ghost" data-ref="lap" hidden>${labels.lap}</button>
     </div>
+
     <div class="tw__laps" data-ref="laps" hidden>
       <div class="tw__laps-head">
         <span>${labels.lap}</span><span>${labels.lapTime}</span><span>${labels.total}</span>
@@ -375,9 +571,11 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
   style.textContent = WIDGET_CSS;
   root.appendChild(style);
   root.appendChild(host);
-  resolveTwTokens(host);
 
-  const $ = <T extends HTMLElement>(sel: string): T => host.querySelector(sel) as T;
+  const $ = <T extends Element>(sel: string): T => host.querySelector(sel) as T;
+  const stage = $<HTMLDivElement>('[data-ref="stage"]');
+  const ring = $<SVGSVGElement>('[data-ref="ring"]');
+  const ringProgress = $<SVGCircleElement>('[data-ref="ringProgress"]');
   const clock = $<HTMLDivElement>('[data-ref="clock"]');
   const status = $<HTMLDivElement>('[data-ref="status"]');
   const conn = $<HTMLDivElement>('[data-ref="conn"]');
@@ -386,10 +584,10 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
   const lapBtn = $<HTMLButtonElement>('[data-ref="lap"]');
   const lapsWrap = $<HTMLDivElement>('[data-ref="laps"]');
   const lapsBody = $<HTMLDivElement>('[data-ref="lapsBody"]');
-  const customInput = $<HTMLInputElement>('[data-ref="custom"]');
+  const customInput = $<HTMLInputElement>('[data-ref="customInput"]');
   const customOk = $<HTMLButtonElement>('[data-ref="customOk"]');
-  const presetsWrap = $<HTMLDivElement>('.tw__presets');
-  const customWrap = $<HTMLDivElement>('.tw__custom');
+  const presetsWrap = $<HTMLDivElement>('[data-ref="presets"]');
+  const customWrap = $<HTMLDivElement>('[data-ref="custom"]');
   const tabs = Array.from(host.querySelectorAll<HTMLButtonElement>('.tw__tab'));
   const presets = Array.from(host.querySelectorAll<HTMLButtonElement>('.tw__preset'));
 
@@ -431,6 +629,7 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
       clock.textContent = '--:--';
       clock.className = 'tw__clock';
       status.textContent = '';
+      ring.setAttribute('hidden', '');
       return;
     }
     const s = state;
@@ -438,11 +637,18 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
     const isCountdown = s.mode === 'countdown';
 
     // Tabs
-    tabs.forEach((tb) => tb.classList.toggle('is-active', tb.dataset.tab === s.mode));
+    tabs.forEach((tb) => {
+      const active = tb.dataset.tab === s.mode;
+      tb.classList.toggle('is-active', active);
+      tb.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
     // Presets + custom input are countdown-only controls — hide them in
     // stopwatch mode (the main page keeps them inside the countdown panel).
-    presetsWrap.hidden = isCountdown ? false : true;
-    customWrap.hidden = isCountdown ? false : true;
+    presetsWrap.hidden = !isCountdown;
+    customWrap.hidden = !isCountdown;
+    if (isCountdown) ring.removeAttribute('hidden');
+    else ring.setAttribute('hidden', '');
+    stage.classList.toggle('tw__stage--no-ring', !isCountdown);
     // Presets
     presets.forEach((p) => p.classList.toggle('is-active', Number(p.dataset.preset) === s.totalTime));
     lapBtn.hidden = isCountdown;
@@ -451,9 +657,10 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
     let text: string;
     let cls = 'tw__clock';
     let statusText: string;
+    let rem = s.remaining;
 
     if (isCountdown) {
-      const rem = s.running ? Math.max(0, Math.ceil((s.endAt - now) / 1000)) : s.remaining;
+      rem = s.running ? Math.max(0, Math.ceil((s.endAt - now) / 1000)) : s.remaining;
       text = fmtTime(rem);
       if (rem === 0) cls += ' is-done';
       else if (s.running && rem <= 10) cls += ' is-warning';
@@ -469,6 +676,11 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
         beeped = true;
         beep();
       }
+      // Ring fill: empty when reset (rem === totalTime), full at done.
+      const progress = s.totalTime > 0 ? Math.max(0, Math.min(1, rem / s.totalTime)) : 0;
+      ringProgress.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - progress));
+      ringProgress.classList.toggle('is-warning', s.running && rem <= 10 && rem > 0);
+      ringProgress.classList.toggle('is-done', rem === 0);
     } else {
       const elapsed = s.swRunning ? now - s.swStartAt : s.swElapsed;
       text = fmtMs(elapsed);
@@ -498,7 +710,9 @@ export function mountTimerWidget(root: HTMLElement, labels: TimerWidgetLabels): 
         .reverse()
         .map(
           (lap, i) => `<div class="tw__laps-row${i === 0 ? ' is-latest' : ''}">
-            <span>${s.laps.length - i}</span><span>${fmtMs(lap.lapTime)}</span><span>${fmtMs(lap.totalTime)}</span>
+            <span class="tw__laps-num">${s.laps.length - i}</span>
+            <span>${fmtMs(lap.lapTime)}</span>
+            <span class="tw__laps-total">${fmtMs(lap.totalTime)}</span>
           </div>`,
         )
         .join('');

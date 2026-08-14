@@ -95,12 +95,12 @@ const L = t();
 
             <div class="sess__card-meta">
               <div class="sess__meta-item">
-                <Fragment set:html={icons.dumbbell()} />
+                <span class="sess__meta-icon" set:html={icons.dumbbell()} />
                 <span class="sess__meta-value" x-text="session.exercises.length"></span>
                 <span class="sess__meta-label" x-text="session.exercises.length > 1 ? labels.exoPlural : labels.exoSingular"></span>
               </div>
               <div class="sess__volume-badge">
-                <Fragment set:html={icons.volumeBox()} />
+                <span class="sess__volume-icon" set:html={icons.volumeBox()} />
                 <span x-text="formatVolume(totalVolume(session))"></span>
               </div>
               <div class="sess__muscle" x-show="primaryMuscle(session)">
@@ -750,10 +750,12 @@ const L = t();
   }
 
   .sess__meta-icon {
-    width: 1.6rem;
-    height: 1.6rem;
     color: var(--color-muted);
     flex-shrink: 0;
+  }
+  .sess__meta-icon svg {
+    width: 1.6rem;
+    height: 1.6rem;
   }
 
   .sess__meta-value {
@@ -793,9 +795,11 @@ const L = t();
   }
 
   .sess__volume-icon {
+    flex-shrink: 0;
+  }
+  .sess__volume-icon svg {
     width: 1.4rem;
     height: 1.4rem;
-    flex-shrink: 0;
   }
 
   /* ── Status badge (design-system Badge component) ── */

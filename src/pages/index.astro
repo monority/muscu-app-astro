@@ -2,6 +2,7 @@
 import AppLayout from '../layouts/AppLayout.astro';
 import PageHeader from '../components/layout/PageHeader.astro';
 import Badge from '../components/ui/Badge.astro';
+import Button from '../components/ui/Button.astro';
 import { t, localizedPath } from '../i18n';
 import { icons } from '../lib/icons';
 
@@ -19,14 +20,14 @@ const L = t();
   <div class="dash" x-data="dashboardApp()" x-init="init()" x-cloak>
     {/* ── Quick actions — always visible in BOTH states ── */}
     <div class="dash__actions">
-      <a href={localizedPath("/seances/creer")} class="dash__action dash__action--primary">
+      <Button variant="primary" size="md" href={localizedPath("/seances/creer")}>
         <Fragment set:html={icons.plus(16, 16)} />
         <span>{L.dashboard.newSession}</span>
-      </a>
-      <a href={localizedPath("/timer")} class="dash__action dash__action--secondary">
+      </Button>
+      <Button variant="secondary" size="md" href={localizedPath("/timer")}>
         <Fragment set:html={icons.clockStopwatch(16, 16)} />
         <span>{L.dashboard.stopwatch}</span>
-      </a>
+      </Button>
     </div>
 
     {/* ── Main dashboard (once training has started) ── */}
@@ -334,14 +335,14 @@ const L = t();
       <p class="dash__empty-desc">{L.dashboard.emptyDesc}</p>
 
       <div class="dash__empty-actions">
-        <a href={localizedPath("/seances/creer")} class="dash__action dash__action--primary">
+        <Button variant="primary" size="md" href={localizedPath("/seances/creer")}>
           <Fragment set:html={icons.plus(16, 16)} />
           <span>{L.dashboard.createFirst}</span>
-        </a>
-        <a href={localizedPath("/timer")} class="dash__action dash__action--secondary">
+        </Button>
+        <Button variant="secondary" size="md" href={localizedPath("/timer")}>
           <Fragment set:html={icons.clockStopwatch(16, 16)} />
           <span>{L.dashboard.stopwatch}</span>
-        </a>
+        </Button>
         <a href={localizedPath("/exercices")} class="dash__empty-link">
           {L.dashboard.browseExercises}
         </a>
@@ -698,77 +699,6 @@ const L = t();
     flex-wrap: wrap;
     gap: 1.2rem;
     margin-bottom: 2.4rem;
-  }
-
-  .dash__action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    height: 4.4rem;
-    padding: 0 1.8rem;
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: -0.005em;
-    text-decoration: none;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    transition:
-      background-color var(--transition-fast),
-      color var(--transition-fast),
-      border-color var(--transition-fast),
-      box-shadow var(--transition-fast),
-      transform var(--transition-fast);
-  }
-
-  .dash__action:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .dash__action--primary {
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border-color: var(--color-accent);
-    box-shadow: var(--shadow-1), inset 0 1px 0 var(--alpha-highlight);
-  }
-
-  .dash__action--primary:hover {
-    background-color: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
-    color: var(--color-accent-foreground);
-  }
-
-  .dash__action--primary:active {
-    transform: translateY(1px);
-    box-shadow: inset 0 1px 2px hsl(30 90% 20% / 0.35);
-  }
-
-  .dash__action--secondary {
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    border-color: var(--color-border-strong);
-    font-weight: 600;
-  }
-
-  .dash__action--secondary:hover {
-    background-color: var(--color-surface-3);
-    color: var(--color-text);
-    border-color: var(--alpha-border);
-  }
-
-  .dash__action--secondary:active {
-    transform: translateY(1px);
-  }
-
-  .dash__action-icon {
-    width: 1.6rem;
-    height: 1.6rem;
-    flex-shrink: 0;
   }
 
   /* ════════════════════════════════════════════════════
@@ -1542,7 +1472,6 @@ const L = t();
      REDUCED MOTION
      ════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
-    .dash__action,
     .dash__session,
     .dash__see-all,
     .dash__empty-link,
@@ -1550,12 +1479,6 @@ const L = t();
     .dash__goal-bar-fill,
     .dash__trend-bar {
       transition: none;
-    }
-    .dash__action:hover {
-      transform: none;
-    }
-    .dash__action:active {
-      transform: none;
     }
   }
 
@@ -1574,13 +1497,6 @@ const L = t();
   }
 
   @media (max-width: 480px) {
-    .dash__action {
-      font-size: 1.2rem;
-      padding: 0 1.6rem;
-      width: 100%;
-      justify-content: center;
-    }
-
     .dash__session {
       padding: 1.6rem 0;
     }

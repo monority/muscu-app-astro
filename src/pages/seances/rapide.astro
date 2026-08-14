@@ -2,6 +2,7 @@
 
 import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
+import Button from '../../components/ui/Button.astro';
 import { icons } from '../../lib/icons';
 const L = t();
 ---
@@ -89,15 +90,14 @@ const L = t();
           </div>
 
           <div class="qs__selecting-actions">
-            <a href={localizedPath("/seances")} class="qs__btn qs__btn--ghost">{L.common.back}</a>
-            <button
-              type="button"
-              class="qs__btn qs__btn--primary"
+            <Button variant="ghost" href={localizedPath("/seances")}>{L.common.back}</Button>
+            <Button
+              variant="primary"
               :disabled="!selectedSessionId"
               @click="startSession()"
             >
               {L.rapide.start}
-            </button>
+            </Button>
           </div>
 
           <template x-if="availableSessions.length === 0">
@@ -154,15 +154,15 @@ const L = t();
             <span>{L.rapide.done}</span>
           </button>
 
-          <button
-            type="button"
-            class="qs__btn qs__btn--ghost qs__undo-working"
+          <Button
+            variant="ghost"
+            class="qs__undo-working"
             :disabled="!canUndo"
             @click="undoLastSet()"
           >
             <Fragment set:html={icons.undo(18, 18)} />
             <span>{L.rapide.undoLast}</span>
-          </button>
+          </Button>
 
           <div class="qs__nav">
             <button
@@ -210,38 +210,36 @@ const L = t();
           <div class="qs__resting-next" x-text="restNextLabel()" aria-live="polite" aria-atomic="true"></div>
 
           <div class="qs__resting-actions">
-            <button
-              type="button"
-              class="qs__btn qs__btn--ghost"
+            <Button
+              variant="ghost"
               @click="addRestTime(-15)"
               aria-label={L.rapide.restMinusAria}
             >
-              âˆ’15s
-            </button>
-            <button
-              type="button"
-              class="qs__btn qs__btn--accent"
+              −15s
+            </Button>
+            <Button
+              variant="ghost"
+              active={true}
               @click="skipRest()"
               aria-label={L.rapide.skipRest}
             >
               {L.common.skip}
-            </button>
-            <button
-              type="button"
-              class="qs__btn qs__btn--ghost"
+            </Button>
+            <Button
+              variant="ghost"
               @click="addRestTime(15)"
               aria-label={L.rapide.restPlusAria}
             >
               +15s
-            </button>
-            <button
-              type="button"
-              class="qs__btn qs__btn--ghost qs__undo"
+            </Button>
+            <Button
+              variant="ghost"
+              class="qs__undo"
               :disabled="!canUndo"
               @click="undoLastSet()"
             >
               {L.rapide.undoLast}
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -284,27 +282,25 @@ const L = t();
           </div>
 
           <div class="qs__done-actions">
-            <a
-              class="qs__btn qs__btn--primary"
+            <Button
+              variant="primary"
               :href="detailHref(session?.id)"
             >
               {L.rapide.viewSession}
-            </a>
-            <button
-              type="button"
-              class="qs__btn qs__btn--ghost"
+            </Button>
+            <Button
+              variant="ghost"
               :disabled="!canUndo"
               @click="undoLastSet()"
             >
               {L.rapide.undoLast}
-            </button>
-            <button
-              type="button"
-              class="qs__btn qs__btn--ghost"
+            </Button>
+            <Button
+              variant="ghost"
               @click="reset()"
             >
               {L.rapide.chooseAnother}
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -1130,7 +1126,7 @@ background-color: var(--color-bg);
     margin-top: 0.4rem;
   }
 
-  .qs__selecting-actions .qs__btn {
+  .qs__selecting-actions .button {
     flex: 1;
   }
 
@@ -1146,81 +1142,7 @@ background-color: var(--color-bg);
     text-decoration: underline;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     BUTTONS
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-  .qs__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    min-height: 6rem;
-    padding: 0 2.4rem;
-    font-family: var(--font-body);
-    font-size: 1.6rem;
-    font-weight: 700;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    cursor: pointer;
-    text-decoration: none;
-    -webkit-appearance: none;
-    appearance: none;
-    transition:
-      background-color var(--transition-fast),
-      color var(--transition-fast),
-      border-color var(--transition-fast),
-      transform var(--transition-fast);
-  }
-
-  .qs__btn:hover:not(:disabled) {
-    background-color: var(--color-surface-3);
-  }
-
-  .qs__btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .qs__btn:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-
-  .qs__btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .qs__btn--primary {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-  }
-
-  .qs__btn--primary:hover:not(:disabled) {
-    background-color: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
-  }
-
-  .qs__btn--ghost {
-    background-color: transparent;
-  }
-
-  .qs__btn--accent {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-  }
-
-  .qs__btn--accent:hover:not(:disabled) {
-    background-color: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
-  }
-
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     STATE 2 â€” WORKING
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ── STATE 2 ─ WORKING ──────────────────────────────────── */
   .qs__working {
     flex: 1;
     display: flex;
@@ -1519,7 +1441,7 @@ background-color: var(--color-bg);
     max-width: 50rem;
   }
 
-  .qs__resting-actions .qs__btn {
+  .qs__resting-actions :global(.button) {
     min-height: 6.4rem;
     font-size: 1.6rem;
   }
@@ -1658,7 +1580,7 @@ background-color: var(--color-bg);
     .qs__done-actions {
       flex-direction: row;
     }
-    .qs__done-actions .qs__btn {
+    .qs__done-actions :global(.button) {
       flex: 1;
     }
   }
@@ -1697,8 +1619,7 @@ background-color: var(--color-bg);
     .qs__resting-timer--low,
     .qs__done,
     .qs__nav-btn,
-    .qs__icon-btn,
-    .qs__btn {
+    .qs__icon-btn {
       animation: none;
       transition: none;
     }
@@ -1727,7 +1648,7 @@ background-color: var(--color-bg);
       flex-direction: column;
       gap: 0.8rem;
     }
-    .qs__selecting-actions .qs__btn {
+    .qs__selecting-actions :global(.button) {
       width: 100%;
     }
     .qs__working {

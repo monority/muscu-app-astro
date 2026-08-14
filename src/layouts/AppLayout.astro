@@ -137,11 +137,9 @@ const groupsWithActive = groups.map((g) => ({
         static fallback; the theme bootstrap script overwrites it with the
         real --color-accent value (pop.astro precedent). */}
     <meta name="theme-color" content="#F59A3D" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="muscu.app" />
-
-    <script is:inline defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
     {/* ── Locale bootstrap ──
         Exposes the server-rendered locale so client-side Alpine
@@ -324,6 +322,44 @@ const groupsWithActive = groups.map((g) => ({
         }
       });
       observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+
+    {/* Alpine — imported from a self-hosted ESM build via an inline
+        module script (NOT the jsdelivr CDN, and NOT bundled by Astro).
+
+        Why not the CDN cdn.min.js build here: it auto-starts via
+        queueMicrotask the instant it executes. Astro hoists this
+        layout's scripts ahead of the page's deferred alpine:init
+        listener modules (which land after </html>), so Alpine.start()
+        fired before loginApp/commandMenu/etc. were registered
+        ("loginApp is not defined"). The ESM build does NOT auto-start.
+
+        Why not `import Alpine from 'alpinejs'` in a processed
+        <script>: Astro/rolldown native-crashes bundling it on this
+        machine, and 3.14.1 ships no .d.ts. The self-hosted ESM file
+        is self-contained (inlines @vue/reactivity) and exports
+        default Alpine.
+
+        We call Alpine.start() on DOMContentLoaded — which only fires
+        after every deferred page/module alpine:init listener has
+        attached, so Alpine.data() registrations run before the
+        component graph is walked. */}
+    <script is:inline type="module">
+      import Alpine from '/vendor/alpinejs-3.14.1.esm.js';
+      window.Alpine = Alpine;
+      // Astro hoists child-page alpine:init listener modules AFTER
+      // this layout's scripts (after </html>), but ALL deferred
+      // module scripts still run before DOMContentLoaded. So booting
+      // on DCL — never inline — guarantees those listeners attach
+      // before Alpine walks the graph. (Do NOT use the
+      // readyState==='loading' / else boot() pattern: at module
+      // execution time readyState is already 'interactive', so the
+      // else branch would boot before the post-</html> listeners.)
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => Alpine.start(),
+        { once: true },
+      );
     </script>
   </body>
 </html>
