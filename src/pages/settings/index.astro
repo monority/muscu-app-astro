@@ -9,6 +9,7 @@ import Input from '../../components/ui/Input.astro';
 import Select from '../../components/ui/Select.astro';
 import Button from '../../components/ui/Button.astro';
 import Dialog from '../../components/ui/Dialog.astro';
+import SettingsSection from '../../components/ui/SettingsSection.astro';
 import SettingsBottomBar from '../../components/layout/SettingsBottomBar.astro';
 import ReminderSettings from '../../components/params/ReminderSettings.astro';
 import Toast from '../../components/ui/Toast.astro';
@@ -55,7 +56,7 @@ const SETTINGS_SECTIONS = [
   <Toast />
 
   <div
-    class="max-w-[88rem] mx-auto pb-[calc(var(--bottom-nav-height,5.6rem)+2rem)] flex flex-col gap-[2rem] max-sm:gap-[1.4rem]"
+    class="pb-[calc(var(--bottom-nav-height,5.6rem)+2rem)] flex flex-col gap-[2rem] max-sm:gap-[1.4rem]"
     x-data="settingsApp()"
     x-init="init()"
     x-cloak
@@ -63,325 +64,269 @@ const SETTINGS_SECTIONS = [
     {/* ═════════════════════════════════════════════════════
         1. PROFIL
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section" id="set-profile">
-      <Card>
-        <CardHeader>
-          <div class="flex items-center gap-4 min-w-0">
-            <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-              <Fragment set:html={icons.user(24, 24)} />
-            </span>
-            <CardTitle>{L.settings.profile}</CardTitle>
+    <SettingsSection icon="user" title={L.settings.profile} description={L.settings.profileDesc} id="set-profile">
+      {/* Display mode */}
+      <div class="flex flex-col gap-0 mt-[1.2rem]" x-show="!editingProfile" x-cloak x-transition.opacity.duration.200ms>
+        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.pseudo}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.pseudoDesc}</span>
           </div>
-          <p class="text-[1.2rem] text-muted m-0 leading-[1.4]">{L.settings.profileDesc}</p>
-        </CardHeader>
-
-        <CardContent>
-          {/* Display mode */}
-          <div class="flex flex-col gap-0 mt-[1.2rem]" x-show="!editingProfile" x-cloak x-transition.opacity.duration.200ms>
-            <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-              <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.pseudo}</span>
-                <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.pseudoDesc}</span>
-              </div>
-              <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums max-w-[24rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal" x-text="display.pseudo || labels.notSet"></div>
-            </div>
-            <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-              <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.email}</span>
-                <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.emailDesc}</span>
-              </div>
-              <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums max-w-[24rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal" x-text="display.email || labels.notSet"></div>
-            </div>
-            <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
-              <Button type="button" variant="secondary" @click="startEditProfile()">
-                {L.common.edit}
-              </Button>
-            </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums max-w-[24rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal" x-text="display.pseudo || labels.notSet"></div>
+        </div>
+        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.email}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.emailDesc}</span>
           </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums max-w-[24rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal" x-text="display.email || labels.notSet"></div>
+        </div>
+        <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
+          <Button type="button" variant="secondary" @click="startEditProfile()">
+            {L.common.edit}
+          </Button>
+        </div>
+      </div>
 
-          {/* Edit mode */}
-          <form
-            class="flex flex-col gap-[1.4rem] mt-[1.2rem]"
-            x-show="editingProfile"
-            @submit.prevent="saveProfile()"
-            x-cloak
-            x-transition.opacity.duration.200ms
-          >
-            <div class="flex flex-col">
-              <Input
-                label={L.settings.pseudo}
-                id="set-pseudo"
-                type="text"
-                placeholder={L.settings.pseudoPlaceholder}
-                x-model="form.pseudo"
-                maxlength={40}
-                autocomplete="nickname"
-              />
-            </div>
-            <div class="flex flex-col">
-              <Input
-                label={L.settings.email}
-                id="set-email"
-                type="email"
-                placeholder={L.settings.emailPlaceholder}
-                x-model="form.email"
-                autocomplete="email"
-              />
-            </div>
-            <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
-              <Button type="button" variant="ghost" @click="cancelEditProfile()">
-                {L.common.cancel}
-              </Button>
-              <Button type="submit" variant="primary">
-                {L.common.save}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </section>
+      {/* Edit mode */}
+      <form
+        class="flex flex-col gap-[1.4rem] mt-[1.2rem]"
+        x-show="editingProfile"
+        @submit.prevent="saveProfile()"
+        x-cloak
+        x-transition.opacity.duration.200ms
+      >
+        <div class="flex flex-col">
+          <Input
+            label={L.settings.pseudo}
+            id="set-pseudo"
+            type="text"
+            placeholder={L.settings.pseudoPlaceholder}
+            x-model="form.pseudo"
+            maxlength={40}
+            autocomplete="nickname"
+          />
+        </div>
+        <div class="flex flex-col">
+          <Input
+            label={L.settings.email}
+            id="set-email"
+            type="email"
+            placeholder={L.settings.emailPlaceholder}
+            x-model="form.email"
+            autocomplete="email"
+          />
+        </div>
+        <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
+          <Button type="button" variant="ghost" @click="cancelEditProfile()">
+            {L.common.cancel}
+          </Button>
+          <Button type="submit" variant="primary">
+            {L.common.save}
+          </Button>
+        </div>
+      </form>
+    </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
         2. OBJECTIFS
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section" id="set-goals">
-      <Card>
-        <CardHeader>
-          <div class="flex items-center gap-4 min-w-0">
-            <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-              <Fragment set:html={icons.target(24, 24)} />
+    <SettingsSection icon="target" title={L.settings.goals} description={L.settings.goalsDesc} id="set-goals">
+      <div class="flex flex-col gap-0 mt-[1.2rem]">
+        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyGoalCount}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyGoalTrackedDesc}</span>
+          </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+            <div class="set__goal-input-wrap inline-flex items-stretch h-[4.4rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden transition-[border-color,box-shadow] duration-[140ms] max-sm:self-start">
+              <button
+                type="button"
+                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
+                aria-label={L.settings.weeklyGoalDecrease}
+                @click="setWeeklyGoal(display.weeklyGoal - 1)"
+              >
+                <Fragment set:html={icons.minus(24, 24)} />
+              </button>
+              <input
+                id="set-weekly-goal"
+                type="number"
+                min="1"
+                max="7"
+                step="1"
+                inputmode="numeric"
+                class="no-spinner appearance-textfield w-[5.2rem] shrink-0 border-0 border-l border-r border-[var(--color-border)] bg-transparent text-[var(--color-text)] font-[var(--font-display)] text-[1.6rem] font-bold text-center tabular-nums outline-none p-0 leading-none"
+                :value="display.weeklyGoal"
+                @change="setWeeklyGoal(parseInt($event.target.value, 10))"
+                aria-label={L.settings.weeklyGoalCount}
+              />
+              <button
+                type="button"
+                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
+                aria-label={L.settings.weeklyGoalIncrease}
+                @click="setWeeklyGoal(display.weeklyGoal + 1)"
+              >
+                <Fragment set:html={icons.plus(24, 24)} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyProgress}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyProgressDesc}</span>
+          </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+            <span class="inline-flex items-baseline gap-[0.3rem] font-[var(--font-body)] tabular-nums">
+              <span class="font-[var(--font-display)] text-[1.8rem] font-bold text-[var(--color-accent)] leading-none" x-text="weeklyDone"></span>
+              <span class="text-[var(--color-muted)] text-[1.4rem] font-medium mx-[0.1rem]" aria-hidden="true">/</span>
+              <span class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] leading-none" x-text="display.weeklyGoal"></span>
+              <span class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]" x-text="labels.seanceSingular">{L.settings.seanceSingular}</span>
+              <span
+                class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]"
+                x-text="display.weeklyGoal > 1 ? 's' : ''"
+              ></span>
             </span>
-            <CardTitle>{L.settings.goals}</CardTitle>
           </div>
-          <p class="text-[1.2rem] text-muted m-0 leading-[1.4]">{L.settings.goalsDesc}</p>
-        </CardHeader>
-
-        <CardContent>
-          <div class="flex flex-col gap-0 mt-[1.2rem]">
-            <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-              <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.weeklyGoalCount}</span>
-                <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.weeklyGoalTrackedDesc}</span>
-              </div>
-              <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-                <div class="set__goal-input-wrap inline-flex items-stretch h-[4.4rem] bg-surface-2 border border-border rounded-[var(--radius-sm)] overflow-hidden transition-[border-color,box-shadow] duration-[140ms] max-sm:self-start">
-                  <button
-                    type="button"
-                    class="set__goal-step appearance-none bg-transparent border-0 text-muted w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
-                    aria-label={L.settings.weeklyGoalDecrease}
-                    @click="setWeeklyGoal(display.weeklyGoal - 1)"
-                  >
-                    <Fragment set:html={icons.minus(24, 24)} />
-                  </button>
-                  <input
-                    id="set-weekly-goal"
-                    type="number"
-                    min="1"
-                    max="7"
-                    step="1"
-                    inputmode="numeric"
-                    class="no-spinner appearance-textfield w-[5.2rem] shrink-0 border-0 border-l border-r border-border bg-transparent text-text font-display text-[1.6rem] font-bold text-center tabular-nums outline-none p-0 leading-none"
-                    :value="display.weeklyGoal"
-                    @change="setWeeklyGoal(parseInt($event.target.value, 10))"
-                    aria-label={L.settings.weeklyGoalCount}
-                  />
-                  <button
-                    type="button"
-                    class="set__goal-step appearance-none bg-transparent border-0 text-muted w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
-                    aria-label={L.settings.weeklyGoalIncrease}
-                    @click="setWeeklyGoal(display.weeklyGoal + 1)"
-                  >
-                    <Fragment set:html={icons.plus(24, 24)} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-              <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.weeklyProgress}</span>
-                <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.weeklyProgressDesc}</span>
-              </div>
-              <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-                <span class="inline-flex items-baseline gap-[0.3rem] font-body tabular-nums">
-                  <span class="font-display text-[1.8rem] font-bold text-accent leading-none" x-text="weeklyDone"></span>
-                  <span class="text-muted text-[1.4rem] font-medium mx-[0.1rem]" aria-hidden="true">/</span>
-                  <span class="font-display text-[1.4rem] font-bold text-text leading-none" x-text="display.weeklyGoal"></span>
-                  <span class="text-[1.1rem] text-muted font-medium ml-[0.3rem]" x-text="labels.seanceSingular">{L.settings.seanceSingular}</span>
-                  <span
-                    class="text-[1.1rem] text-muted font-medium ml-[0.3rem]"
-                    x-text="display.weeklyGoal > 1 ? 's' : ''"
-                  ></span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+      </div>
+    </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
         3. UNITÉS
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section" id="set-units">
-      <Card>
-        <CardHeader>
-          <div class="flex items-center gap-4 min-w-0">
-            <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-              <Fragment set:html={icons.ruler(24, 24)} />
-            </span>
-            <CardTitle>{L.settings.units}</CardTitle>
+    <SettingsSection icon="ruler" title={L.settings.units} description={L.settings.unitsDesc} id="set-units">
+      <div class="flex flex-col gap-0 mt-[1.2rem]">
+        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weightUnit}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weightUnitDesc}</span>
           </div>
-          <p class="text-[1.2rem] text-muted m-0 leading-[1.4]">{L.settings.unitsDesc}</p>
-        </CardHeader>
-
-        <CardContent>
-          <div class="flex flex-col gap-0 mt-[1.2rem]">
-            <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-              <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.weightUnit}</span>
-                <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.weightUnitDesc}</span>
-              </div>
-              <div class="inline-flex p-[0.3rem] bg-surface-2 border border-border rounded-full max-sm:self-start" role="group" aria-label={L.settings.weightUnit}>
-                <button
-                  type="button"
-                  class="set__seg-btn appearance-none bg-transparent border border-transparent text-muted font-body text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
-                  :class="{ 'is-active': display.unit === 'kg' }"
-                  :aria-pressed="display.unit === 'kg'"
-                  @click="setUnit('kg')"
-                >
-                  kg
-                </button>
-                <button
-                  type="button"
-                  class="set__seg-btn appearance-none bg-transparent border border-transparent text-muted font-body text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
-                  :class="{ 'is-active': display.unit === 'lbs' }"
-                  :aria-pressed="display.unit === 'lbs'"
-                  @click="setUnit('lbs')"
-                >
-                  lbs
-                </button>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-              <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.repsFormat}</span>
-                <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.repsDesc}</span>
-              </div>
-              <div class="inline-flex p-[0.3rem] bg-surface-2 border border-border rounded-full max-sm:self-start" role="group" aria-label={L.settings.repsFormat}>
-                <button
-                  type="button"
-                  class="set__seg-btn appearance-none bg-transparent border border-transparent text-muted font-body text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
-                  :class="{ 'is-active': display.repsFormat === 'simple' }"
-                  :aria-pressed="display.repsFormat === 'simple'"
-                  @click="setRepsFormat('simple')"
-                >
-                  {L.settings.simple}
-                </button>
-                <button
-                  type="button"
-                  class="set__seg-btn appearance-none bg-transparent border border-transparent text-muted font-body text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
-                  :class="{ 'is-active': display.repsFormat === 'range' }"
-                  :aria-pressed="display.repsFormat === 'range'"
-                  @click="setRepsFormat('range')"
-                >
-                  {L.settings.range}
-                </button>
-              </div>
-            </div>
+          <div class="inline-flex p-[0.3rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full max-sm:self-start" role="group" aria-label={L.settings.weightUnit}>
+            <button
+              type="button"
+              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              :class="{ 'is-active': display.unit === 'kg' }"
+              :aria-pressed="display.unit === 'kg'"
+              @click="setUnit('kg')"
+            >
+              kg
+            </button>
+            <button
+              type="button"
+              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              :class="{ 'is-active': display.unit === 'lbs' }"
+              :aria-pressed="display.unit === 'lbs'"
+              @click="setUnit('lbs')"
+            >
+              lbs
+            </button>
           </div>
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+
+        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.repsFormat}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.repsDesc}</span>
+          </div>
+          <div class="inline-flex p-[0.3rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full max-sm:self-start" role="group" aria-label={L.settings.repsFormat}>
+            <button
+              type="button"
+              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              :class="{ 'is-active': display.repsFormat === 'simple' }"
+              :aria-pressed="display.repsFormat === 'simple'"
+              @click="setRepsFormat('simple')"
+            >
+              {L.settings.simple}
+            </button>
+            <button
+              type="button"
+              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              :class="{ 'is-active': display.repsFormat === 'range' }"
+              :aria-pressed="display.repsFormat === 'range'"
+              @click="setRepsFormat('range')"
+            >
+              {L.settings.range}
+            </button>
+          </div>
+        </div>
+      </div>
+    </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
         4. TIMER
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section" id="set-timer">
-      <Card>
-        <CardHeader>
-          <div class="flex items-center gap-4 min-w-0">
-            <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-              <Fragment set:html={icons.clockStopwatch(24, 24)} />
-            </span>
-            <CardTitle>{L.settings.timerSettings}</CardTitle>
+    <SettingsSection icon="clockStopwatch" title={L.settings.timerSettings} description={L.settings.timerDesc} id="set-timer">
+      <form class="flex flex-col gap-[1.4rem] mt-[1.2rem]" @submit.prevent="saveTimer()">
+        <div class="flex flex-col gap-0 mt-[1.2rem]">
+          <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+            <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+              <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.defaultRestTime}</span>
+              <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.defaultRestTimeDesc}</span>
+            </div>
+            <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+              <Select
+                id="set-rest-time"
+                name="restTime"
+                options={restOptions}
+                x-model="form.defaultRestTime"
+              />
+            </div>
           </div>
-          <p class="text-[1.2rem] text-muted m-0 leading-[1.4]">{L.settings.timerDesc}</p>
-        </CardHeader>
 
-        <CardContent>
-          <form class="flex flex-col gap-[1.4rem] mt-[1.2rem]" @submit.prevent="saveTimer()">
-            <div class="flex flex-col gap-0 mt-[1.2rem]">
-              <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-                <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                  <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.defaultRestTime}</span>
-                  <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.defaultRestTimeDesc}</span>
-                </div>
-                <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-                  <Select
-                    id="set-rest-time"
-                    name="restTime"
-                    options={restOptions}
-                    x-model="form.defaultRestTime"
-                  />
-                </div>
-              </div>
-
-              <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-                <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                  <span class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]">{L.settings.soundAlerts}</span>
-                  <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.soundAlertsDesc}</span>
-                </div>
-                <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-                  <label class="inline-flex items-center cursor-pointer min-h-[4.4rem]">
-                    <input
-                      type="checkbox"
-                      class="sr-only set__toggle-input"
-                      role="switch"
-                      :checked="form.soundAlerts"
-                      :aria-checked="form.soundAlerts ? 'true' : 'false'"
-                      @change="form.soundAlerts = $event.target.checked"
-                    />
-                    <span class="set__toggle-track relative w-[4.4rem] h-[2.4rem] rounded-full bg-surface-2 border border-border transition-[background-color,border-color] duration-[200ms] shrink-0 inline-block">
-                      <span class="set__toggle-thumb absolute top-[2px] left-[3px] w-[1.8rem] h-[1.8rem] rounded-full bg-white transition-transform duration-[200ms] shadow-[var(--shadow-1)] inline-block"></span>
-                    </span>
-                  </label>
-                </div>
-              </div>
+          <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+            <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+              <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.soundAlerts}</span>
+              <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.soundAlertsDesc}</span>
             </div>
-
-            <p
-              class="text-[1.1rem] text-warning m-0 leading-[1.3]"
-              x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
-              x-cloak
-              x-text="labels.unsavedChanges"
-            >
-              {L.settings.unsavedChanges}
-            </p>
-
-            <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
-              <Button
-                type="button"
-                variant="ghost"
-                @click="resetTimerForm()"
-                x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
-                x-cloak
-              >
-                {L.common.cancel}
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                x-bind:disabled="form.defaultRestTime === String(display.defaultRestTime) && form.soundAlerts === display.soundAlerts"
-              >
-                {L.common.save}
-              </Button>
+            <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+              <label class="inline-flex items-center cursor-pointer min-h-[4.4rem]">
+                <input
+                  type="checkbox"
+                  class="sr-only set__toggle-input"
+                  role="switch"
+                  :checked="form.soundAlerts"
+                  :aria-checked="form.soundAlerts ? 'true' : 'false'"
+                  @change="form.soundAlerts = $event.target.checked"
+                />
+                <span class="set__toggle-track relative w-[4.4rem] h-[2.4rem] rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-[background-color,border-color] duration-[200ms] shrink-0 inline-block">
+                  <span class="set__toggle-thumb absolute top-[2px] left-[3px] w-[1.8rem] h-[1.8rem] rounded-full bg-white transition-transform duration-[200ms] shadow-[var(--shadow-1)] inline-block"></span>
+                </span>
+              </label>
             </div>
-          </form>
-        </CardContent>
-      </Card>
-    </section>
+          </div>
+        </div>
+
+        <p
+          class="text-[1.1rem] text-[var(--color-warning)] m-0 leading-[1.3]"
+          x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
+          x-cloak
+          x-text="labels.unsavedChanges"
+        >
+          {L.settings.unsavedChanges}
+        </p>
+
+        <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
+          <Button
+            type="button"
+            variant="ghost"
+            @click="resetTimerForm()"
+            x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
+            x-cloak
+          >
+            {L.common.cancel}
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            x-bind:disabled="form.defaultRestTime === String(display.defaultRestTime) && form.soundAlerts === display.soundAlerts"
+          >
+            {L.common.save}
+          </Button>
+        </div>
+      </form>
+    </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
         5. RAPPEL D'ENTRAÎNEMENT
@@ -391,97 +336,85 @@ const SETTINGS_SECTIONS = [
     {/* ═════════════════════════════════════════════════════
         6. DONNÉES
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section" id="set-data">
-      <Card>
-        <CardHeader>
-          <div class="flex items-center gap-4 min-w-0">
-            <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-              <Fragment set:html={icons.database(24, 24)} />
-            </span>
-            <CardTitle>{L.settings.data}</CardTitle>
-          </div>
-          <p class="text-[1.2rem] text-muted m-0 leading-[1.4]">{L.settings.dataDesc}</p>
-        </CardHeader>
-
-        <CardContent>
-          <div class="grid grid-cols-1 gap-[1.2rem] mt-[1.2rem] sm:grid-cols-2 lg:grid-cols-3">
-            <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-surface-2 border border-border rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
-              <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
-                <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-                  <Fragment set:html={icons.download(24, 24)} />
-                </div>
-                <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-                  <h4 class="font-display text-[1.4rem] font-bold text-text m-0">{L.settings.exportJSON}</h4>
-                  <p class="text-[1.15rem] text-muted m-0 leading-[1.4]">
-                    {L.settings.exportJSONDesc}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
-                @click="exportData()"
-                :disabled="exporting"
-              >
-                <span x-show="!exporting" x-cloak x-text="labels.download">{L.settings.download}</span>
-                <span x-show="exporting" x-cloak x-text="labels.preparing">{L.settings.preparing}</span>
-              </button>
+    <SettingsSection icon="database" title={L.settings.data} description={L.settings.dataDesc} id="set-data">
+      <div class="grid grid-cols-1 gap-[1.2rem] mt-[1.2rem] sm:grid-cols-2 lg:grid-cols-3">
+        <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
+          <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
+            <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+              <Fragment set:html={icons.download(24, 24)} />
             </div>
-
-            <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-surface-2 border border-border rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
-              <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
-                <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-                  <Fragment set:html={icons.table(24, 24)} />
-                </div>
-                <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-                  <h4 class="font-display text-[1.4rem] font-bold text-text m-0">{L.settings.exportCSV}</h4>
-                  <p class="text-[1.15rem] text-muted m-0 leading-[1.4]">
-                    {L.settings.exportCSVDesc}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
-                @click="exportCSV()"
-                :disabled="exportingCsv"
-              >
-                <span x-show="!exportingCsv" x-cloak x-text="labels.download">{L.settings.download}</span>
-                <span x-show="exportingCsv" x-cloak x-text="labels.preparing">{L.settings.preparing}</span>
-              </button>
-            </div>
-
-            <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-surface-2 border border-border rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
-              <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
-                <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-                  <Fragment set:html={icons.upload(24, 24)} />
-                </div>
-                <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-                  <h4 class="font-display text-[1.4rem] font-bold text-text m-0">{L.settings.import}</h4>
-                  <p class="text-[1.15rem] text-muted m-0 leading-[1.4]">
-                    {L.settings.importDesc}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
-                @click="triggerImport()"
-                :disabled="importing"
-              >
-                <span x-show="!importing" x-cloak>{L.settings.chooseFile}</span>
-                <span x-show="importing" x-cloak x-text="labels.importing">{L.settings.importing}</span>
-              </button>
-              <input
-                type="file"
-                accept="application/json,.json"
-                class="sr-only set__file-input"
-                @change="handleImportFile($event)"
-                aria-hidden="true"
-                tabindex="-1"
-              />
+            <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
+              <h4 class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportJSON}</h4>
+              <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
+                {L.settings.exportJSONDesc}
+              </p>
             </div>
           </div>
+          <button
+            type="button"
+            class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="exportData()"
+            :disabled="exporting"
+          >
+            <span x-show="!exporting" x-cloak x-text="labels.download">{L.settings.download}</span>
+            <span x-show="exporting" x-cloak x-text="labels.preparing">{L.settings.preparing}</span>
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
+          <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
+            <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+              <Fragment set:html={icons.table(24, 24)} />
+            </div>
+            <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
+              <h4 class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportCSV}</h4>
+              <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
+                {L.settings.exportCSVDesc}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="exportCSV()"
+            :disabled="exportingCsv"
+          >
+            <span x-show="!exportingCsv" x-cloak x-text="labels.download">{L.settings.download}</span>
+            <span x-show="exportingCsv" x-cloak x-text="labels.preparing">{L.settings.preparing}</span>
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
+          <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
+            <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+              <Fragment set:html={icons.upload(24, 24)} />
+            </div>
+            <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
+              <h4 class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.import}</h4>
+              <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
+                {L.settings.importDesc}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="triggerImport()"
+            :disabled="importing"
+          >
+            <span x-show="!importing" x-cloak>{L.settings.chooseFile}</span>
+            <span x-show="importing" x-cloak x-text="labels.importing">{L.settings.importing}</span>
+          </button>
+          <input
+            type="file"
+            accept="application/json,.json"
+            class="sr-only set__file-input"
+            @change="handleImportFile($event)"
+            aria-hidden="true"
+            tabindex="-1"
+          />
+        </div>
+      </div>
 
           {/* Danger zone */}
           <div class="mt-[2.4rem] p-5 bg-[color-mix(in_srgb,var(--color-destructive)_4%,transparent)] border border-[color-mix(in_srgb,var(--color-destructive)_28%,transparent)] rounded-[var(--radius-md)] max-[480px]:p-[1.6rem]">
@@ -500,9 +433,7 @@ const SETTINGS_SECTIONS = [
               {L.settings.resetAction}
             </button>
           </div>
-        </CardContent>
-      </Card>
-    </section>
+    </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
         7. SYNCHRONISATION WEBDAV
@@ -646,54 +577,40 @@ const SETTINGS_SECTIONS = [
     {/* ═════════════════════════════════════════════════════
         8. À PROPOS
         ═════════════════════════════════════════════════════ */}
-    <section class="set__section" id="set-about">
-      <Card>
-        <CardHeader>
-          <div class="flex items-center gap-4 min-w-0">
-            <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-              <Fragment set:html={icons.infoCircle(24, 24)} />
-            </span>
-            <CardTitle>{L.settings.about}</CardTitle>
-          </div>
-          <p class="text-[1.2rem] text-muted m-0 leading-[1.4]">{L.settings.aboutDesc}</p>
-        </CardHeader>
+    <SettingsSection icon="infoCircle" title={L.settings.about} description={L.settings.aboutDesc} id="set-about">
+      <dl class="grid grid-cols-1 gap-0 mt-[1.2rem] sm:grid-cols-2 sm:gap-x-6">
+        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
+          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.version}</dt>
+          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">
+            <span class="set__about-pill inline-flex items-center h-6 px-4 bg-[color-mix(in_srgb,var(--color-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--color-accent)_30%,transparent)] rounded-full text-[var(--color-accent)] text-[1.1rem] font-bold tracking-[0.04em] tabular-nums">v{APP_VERSION}</span>
+          </dd>
+        </div>
+        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
+          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.storage}</dt>
+          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">{L.settings.storageValue}</dd>
+        </div>
+        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
+          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.mode}</dt>
+          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">{L.settings.modeValue}</dd>
+        </div>
+        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
+          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.fonts}</dt>
+          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">Inter</dd>
+        </div>
+        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
+          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.icons}</dt>
+          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">Lucide</dd>
+        </div>
+        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
+          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.framework}</dt>
+          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">Astro 7</dd>
+        </div>
+      </dl>
 
-        <CardContent>
-          <dl class="grid grid-cols-1 gap-0 mt-[1.2rem] sm:grid-cols-2 sm:gap-x-6">
-            <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-              <dt class="text-[1.2rem] text-muted font-medium m-0">{L.settings.version}</dt>
-              <dd class="font-body text-[1.3rem] text-text font-semibold m-0 text-right">
-                <span class="set__about-pill inline-flex items-center h-6 px-4 bg-[color-mix(in_srgb,var(--color-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--color-accent)_30%,transparent)] rounded-full text-accent text-[1.1rem] font-bold tracking-[0.04em] tabular-nums">v{APP_VERSION}</span>
-              </dd>
-            </div>
-            <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-              <dt class="text-[1.2rem] text-muted font-medium m-0">{L.settings.storage}</dt>
-              <dd class="font-body text-[1.3rem] text-text font-semibold m-0 text-right">{L.settings.storageValue}</dd>
-            </div>
-            <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-              <dt class="text-[1.2rem] text-muted font-medium m-0">{L.settings.mode}</dt>
-              <dd class="font-body text-[1.3rem] text-text font-semibold m-0 text-right">{L.settings.modeValue}</dd>
-            </div>
-            <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-              <dt class="text-[1.2rem] text-muted font-medium m-0">{L.settings.fonts}</dt>
-              <dd class="font-body text-[1.3rem] text-text font-semibold m-0 text-right">Inter</dd>
-            </div>
-            <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-              <dt class="text-[1.2rem] text-muted font-medium m-0">{L.settings.icons}</dt>
-              <dd class="font-body text-[1.3rem] text-text font-semibold m-0 text-right">Lucide</dd>
-            </div>
-            <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-              <dt class="text-[1.2rem] text-muted font-medium m-0">{L.settings.framework}</dt>
-              <dd class="font-body text-[1.3rem] text-text font-semibold m-0 text-right">Astro 7</dd>
-            </div>
-          </dl>
-
-          <p class="mt-4 pt-4 border-t border-[var(--alpha-bg-soft)] text-[1.2rem] text-muted leading-[1.6] italic">
-            {L.settings.credits}
-          </p>
-        </CardContent>
-      </Card>
-    </section>
+      <p class="mt-4 pt-4 border-t border-[var(--alpha-bg-soft)] text-[1.2rem] text-[var(--color-muted)] leading-[1.6] italic">
+        {L.settings.credits}
+      </p>
+    </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
         RESET CONFIRMATION DIALOG

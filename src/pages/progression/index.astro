@@ -17,7 +17,7 @@ const L = t();
   />
 
   <div
-    class="max-w-[96rem] mx-auto pb-[6rem] flex flex-col gap-6"
+    class="pb-24 flex flex-col gap-6"
     x-data="progressionApp()"
     x-init="init()"
     x-cloak
@@ -126,7 +126,7 @@ const L = t();
           title={L.progression.noData}
           description={L.progression.empty}
           actionLabel={L.common.startSession}
-          actionHref={localizedPath("/seances/creer")}
+          actionHref={localizedPath("/sessions/create")}
         />
       </Card>
     </template>

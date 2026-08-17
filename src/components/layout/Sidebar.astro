@@ -8,7 +8,7 @@
  *
  * Structure:
  *   [logo + brand]
- *   [search field → exercises search (/exercices)]
+ *   [search field → exercises search (/exercises)]
  *   [nav groups → items (with optional sub-items)]
  *   [footer]
  */
@@ -42,7 +42,7 @@ const { groups, class: className = "" } = Astro.props;
 const L = t();
 
 // Stable slug used as the accordion group id + element id for items that
-// carry children (e.g. "/progression" → "progression", "/en/seances" → "seances").
+// carry children (e.g. "/progression" → "progression", "/en/sessions" → "seances").
 const navId = (href: string): string =>
   href
     .replace(/^\/(en)?\//, "")

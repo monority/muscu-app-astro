@@ -19,11 +19,11 @@ const L = t();
     title={L.sessions.title}
     description={L.sessions.description}
     actionLabel={L.dashboard.newSession}
-    actionHref={localizedPath("/seances/creer")}
+    actionHref={localizedPath("/sessions/create")}
   />
 
   <div
-    class="max-w-96rem mx-auto pb-16"
+    class="pb-24"
     x-data="sessionsApp()"
     x-init="init()"
     x-cloak
@@ -197,7 +197,7 @@ const L = t();
           title={L.sessions.emptyTitle}
           description={L.sessions.emptyDesc}
           actionLabel={L.sessions.createAction}
-          actionHref={localizedPath("/seances/creer")}
+          actionHref={localizedPath("/sessions/create")}
         />
       </Card>
     </template>
@@ -419,7 +419,7 @@ const L = t();
 
       // ── Actions ──
       navigateTo(id: string) {
-        window.location.href = localizedPath('/seances/detail?id=' + encodeURIComponent(id));
+        window.location.href = localizedPath('/sessions/detail?id=' + encodeURIComponent(id));
       },
 
       deleteSession(id: string) {

@@ -8,6 +8,7 @@ import { icons } from '../../lib/icons';
 import { t, localizedPath } from '../../i18n';
 import BackLink from '../../components/ui/BackLink.astro';
 import Button from '../../components/ui/Button.astro';
+import NotFoundState from '../../components/ui/NotFoundState.astro';
 
 const L = t();
 ---
@@ -16,30 +17,21 @@ const L = t();
   <Toast />
 
   <div
-    class="mx-auto max-w-[72rem] flex flex-col gap-5 pb-[6rem]"
+    class="flex flex-col gap-5 pb-24"
     x-data="sessionDetailApp()"
     x-init="init()"
     x-cloak
   >
     {/* ── Back link ── */}
-    <BackLink href={localizedPath("/seances")} label={L.detail.backToSessions} />
+    <BackLink href={localizedPath("/sessions")} label={L.detail.backToSessions} />
 
-    {/* ── Not found state ── */}
     <template x-if="notFound">
-      <Card>
-        <div class="flex flex-col items-center text-center gap-3 py-5 max-w-[32rem] mx-auto">
-          <div class="inline-flex items-center justify-center w-[6rem] h-[6rem] rounded-full bg-[color-mix(in_srgb,var(--color-destructive)_10%,transparent)] text-destructive" aria-hidden="true">
-            <Fragment set:html={icons.infoCircle()} />
-          </div>
-          <h2 class="font-display text-[2rem] text-text" x-text="labels.notFound">{L.detail.notFound}</h2>
-          <p class="text-muted text-[1.3rem] leading-[1.5]" x-text="labels.notFoundDesc">
-            {L.detail.notFoundDesc}
-          </p>
-          <a href={localizedPath("/seances")} class="inline-flex items-center min-h-[4.4rem] px-[1.8rem] bg-accent text-[var(--color-accent-foreground)] rounded-md font-bold text-[1.3rem] no-underline mt-1 hover:bg-accent-hover transition-colors duration-[140ms]" x-text="labels.viewAllSessions">
-            {L.detail.viewAllSessions}
-          </a>
-        </div>
-      </Card>
+      <NotFoundState
+        title={L.detail.notFound}
+        description={L.detail.notFoundDesc}
+        actionLabel={L.detail.viewAllSessions}
+        actionHref={localizedPath("/sessions")}
+      />
     </template>
 
     {/* ── Loaded session ── */}
@@ -835,7 +827,7 @@ const L = t();
       // ── State ──
       labels: {
         ...LABELS.detail,
-        printHref: localizedPath('/seances/print'),
+        printHref: localizedPath('/sessions/print'),
       },
       session: null as Session | null,
       sessionId: '',
@@ -1034,7 +1026,7 @@ const L = t();
       },
 
       compareHref(): string {
-        return localizedPath('/seances/comparer?id1=' + encodeURIComponent(this.session?.id || ''));
+        return localizedPath('/sessions/compare?id1=' + encodeURIComponent(this.session?.id || ''));
       },
 
       formatDuration(seconds?: number): string {
@@ -1100,8 +1092,8 @@ const L = t();
 
       // ── Actions ──
       quickSessionHref(): string {
-        if (!this.session) return localizedPath('/seances/rapide');
-        return `${localizedPath('/seances/rapide')}?session=${encodeURIComponent(this.session.id)}`;
+        if (!this.session) return localizedPath('/sessions/quick');
+        return `${localizedPath('/sessions/quick')}?session=${encodeURIComponent(this.session.id)}`;
       },
 
       updateStatus(status: SessionStatus) {
@@ -1210,7 +1202,7 @@ const L = t();
           | ((i: string) => void)
           | undefined;
         if (fn) fn('delete-session-dialog');
-        window.location.href = localizedPath('/seances');
+        window.location.href = localizedPath('/sessions');
       },
 
       // ── Fiche de séance (PDF/CSV, added 2026-08-09) ──

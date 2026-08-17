@@ -40,14 +40,14 @@ const defaultGroups: NavTree = [
       { label: L.nav.dashboard, href: localizedPath("/"), icon: "dashboard" },
       {
         label: L.nav.seances,
-        href: localizedPath("/seances"),
+        href: localizedPath("/sessions"),
         icon: "clipboard",
         children: [
-          { label: L.nav.historique, href: localizedPath("/seances") },
-          { label: L.nav.creer, href: localizedPath("/seances/creer") },
+          { label: L.nav.historique, href: localizedPath("/sessions") },
+          { label: L.nav.creer, href: localizedPath("/sessions/create") },
         ],
       },
-      { label: L.nav.rapide, href: localizedPath("/seances/rapide"), icon: "zap" },
+      { label: L.nav.rapide, href: localizedPath("/sessions/quick"), icon: "zap" },
       {
         label: L.nav.progression,
         href: localizedPath("/progression"),
@@ -64,10 +64,10 @@ const defaultGroups: NavTree = [
   {
     label: L.nav.groups.secondary,
     items: [
-      { label: L.nav.exercices, href: localizedPath("/exercices"), icon: "dumbbell" },
-      { label: L.nav.calendrier, href: localizedPath("/calendrier"), icon: "calendar" },
+      { label: L.nav.exercices, href: localizedPath("/exercises"), icon: "dumbbell" },
+      { label: L.nav.calendrier, href: localizedPath("/calendar"), icon: "calendar" },
       { label: L.nav.timer, href: localizedPath("/timer"), icon: "timer" },
-      { label: L.nav.calculateur, href: localizedPath("/calculateur"), icon: "calculator" },
+      { label: L.nav.calculateur, href: localizedPath("/calculator"), icon: "calculator" },
     ],
   },
   {

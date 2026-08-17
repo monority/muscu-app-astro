@@ -6,7 +6,7 @@
  *   - Pages (static list, localized nav labels)
  *   - Exercises (from localStorage via getExercises(); display names +
  *     muscles translated on the EN locale via trExercise/trMuscle)
- *   - Sessions (from getSessions(), by name → /seances/detail?id=…)
+ *   - Sessions (from getSessions(), by name → /sessions/detail?id=…)
  *
  * Pages always win, then exercises, then sessions, each under a small
  * group header. Clicking a row (or pressing ↵ on the highlighted one)
@@ -427,16 +427,16 @@ const L = t();
       // Static page catalogue (labels localized at init).
       const pages: QItem[] = [
         { index: 0, key: "page:/", kind: "page", label: L.nav.dashboard, href: base("/") },
-        { index: 0, key: "page:/seances/rapide", kind: "page", label: L.nav.rapide, href: base("/seances/rapide") },
-        { index: 0, key: "page:/seances/creer", kind: "page", label: L.nav.creer, href: base("/seances/creer") },
-        { index: 0, key: "page:/exercices", kind: "page", label: L.nav.exercices, href: base("/exercices") },
+        { index: 0, key: "page:/sessions/quick", kind: "page", label: L.nav.rapide, href: base("/sessions/quick") },
+        { index: 0, key: "page:/sessions/create", kind: "page", label: L.nav.creer, href: base("/sessions/create") },
+        { index: 0, key: "page:/exercises", kind: "page", label: L.nav.exercices, href: base("/exercises") },
         { index: 0, key: "page:/progression", kind: "page", label: L.nav.progression, href: base("/progression") },
         { index: 0, key: "page:/progression/poids", kind: "page", label: L.nav.poidsMesures, href: base("/progression/poids") },
         { index: 0, key: "page:/progression/records", kind: "page", label: L.nav.records, href: base("/progression/records") },
         { index: 0, key: "page:/progression/stats", kind: "page", label: L.nav.statistiques, href: base("/progression/stats") },
-        { index: 0, key: "page:/calculateur", kind: "page", label: L.nav.calculateur, href: base("/calculateur") },
-        { index: 0, key: "page:/calendrier", kind: "page", label: L.nav.calendrier, href: base("/calendrier") },
-        { index: 0, key: "page:/seances", kind: "page", label: L.nav.seances, href: base("/seances") },
+        { index: 0, key: "page:/calculator", kind: "page", label: L.nav.calculateur, href: base("/calculator") },
+        { index: 0, key: "page:/calendar", kind: "page", label: L.nav.calendrier, href: base("/calendar") },
+        { index: 0, key: "page:/sessions", kind: "page", label: L.nav.seances, href: base("/sessions") },
         { index: 0, key: "page:/timer", kind: "page", label: L.nav.timer, href: base("/timer") },
         { index: 0, key: "page:/settings", kind: "page", label: L.nav.settings, href: base("/settings") },
       ];
@@ -530,7 +530,7 @@ const L = t();
                 kind: "exercise" as const,
                 label: tr,
                 sub: trMuscle(e.muscle),
-                href: base("/exercices"),
+                href: base("/exercises"),
               }));
             if (exo.length) {
               result.push({
@@ -560,7 +560,7 @@ const L = t();
                 kind: "session" as const,
                 label: s.name,
                 sub: formatDate(s.date),
-                href: base(`/seances/detail?id=${encodeURIComponent(s.id)}`),
+                href: base(`/sessions/detail?id=${encodeURIComponent(s.id)}`),
               }));
             if (sess.length) {
               result.push({ id: "sessions", title: L.command.sessions, items: sess });

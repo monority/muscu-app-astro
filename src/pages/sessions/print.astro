@@ -8,7 +8,7 @@
  * session data lives in localStorage, so the sheet is rendered client-side by
  * the same Alpine pattern used everywhere else in the app.
  *
- * Route: /seances/print?id=<sessionId>  (localized under /en when needed)
+ * Route: /sessions/print?id=<sessionId>  (localized under /en when needed)
  */
 import { t, setLocale, getLocale } from '../../i18n';
 
@@ -286,7 +286,7 @@ const title = `${L.detail.title} — muscu.app`;
             notFoundTitle: LABELS.detail.printNotFoundTitle,
             notFoundDesc: LABELS.detail.printNotFoundDesc,
             notFoundBack: LABELS.detail.printNotFoundBack,
-            backHref: localizedPath('/seances'),
+            backHref: localizedPath('/sessions'),
           },
 
           session: null as Session | null,

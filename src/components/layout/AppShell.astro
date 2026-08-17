@@ -478,6 +478,8 @@ const navId = (href: string): string =>
     flex: 1;
     padding: var(--page-padding-desktop);
     width: 100%;
+    max-width: var(--page-max-w);
+    margin-inline: auto;
     /* Allow the flex child to shrink below its content height so any
        visual overflow propagates to the scroll container instead of
        being clipped or pushing the body. */

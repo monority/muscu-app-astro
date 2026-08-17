@@ -140,9 +140,9 @@ export default {
 
   microPatternsDesc: 'Small recurring patterns: status dots, set type pills and a segmented control.',
   dots: 'Status dots',
-  dotsDesc: 'Discrete status indicators (session state, metadata) — same language as /calendrier.',
+  dotsDesc: 'Discrete status indicators (session state, metadata) — same language as /calendar.',
   setTypePills: 'Set type pills',
-  setTypePillsDesc: 'Warm-up / work / top / drop / failure labels — copied from /seances/comparer, to be centralized.',
+  setTypePillsDesc: 'Warm-up / work / top / drop / failure labels — copied from /sessions/compare, to be centralized.',
   segmented: 'Segmented control',
   segmentedDesc: 'Week / month toggle — copied from /progression/stats, to be centralized.',
 };

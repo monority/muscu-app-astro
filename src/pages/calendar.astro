@@ -18,7 +18,7 @@ const L = t();
     description={L.calendrier.description}
   />
 
-  <div class="cal max-w-[88rem] mx-auto pb-24 flex flex-col gap-8" x-data="calendarApp()" x-init="init()" x-cloak>
+  <div class="cal pb-24 flex flex-col gap-8" x-data="calendarApp()" x-init="init()" x-cloak>
     {/* ═══ Month controls ═══ */}
     <div class="cal__controls flex items-center justify-between gap-2 flex-wrap border-b border-border pb-4">
       <button
@@ -132,7 +132,7 @@ const L = t();
             <div class="flex flex-col gap-2">
               <template x-for="s in selectedSessions" :key="s.id">
                 <a
-                  :href="localizedPath('/seances/detail?id=' + encodeURIComponent(s.id))"
+                  :href="localizedPath('/sessions/detail?id=' + encodeURIComponent(s.id))"
                   class="cal__session-item flex items-center justify-between gap-4 py-6 px-6 bg-surface-2 border border-border rounded-md no-underline text-text min-h-[4.4rem] transition-colors"
                 >
                   <div class="flex flex-col gap-[0.2rem] min-w-0">

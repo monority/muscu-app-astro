@@ -1,6 +1,6 @@
 /**
  * Per-exercise coaching tips surfaced in the exercise pickers
- * (`/seances/creer` and `/exercices`).
+ * (`/sessions/create` and `/exercises`).
  *
  * The key is the exact exercise `name` as stored on `Exercise.name`
  * (see `DEFAULT_EXERCISES` in `src/lib/storage.ts`). Lookups fall

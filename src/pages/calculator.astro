@@ -7,6 +7,8 @@ import Card from '../components/ui/Card.astro';
 import CardHeader from '../components/ui/CardHeader.astro';
 import CardTitle from '../components/ui/CardTitle.astro';
 import CardContent from '../components/ui/CardContent.astro';
+import Input from '../components/ui/Input.astro';
+import Select from '../components/ui/Select.astro';
 import { icons } from '../lib/icons';
 const L = t();
 ---
@@ -18,7 +20,7 @@ const L = t();
   />
 
   <div
-    class="max-w-[72rem] mx-auto pb-24 flex flex-col gap-5"
+    class="pb-24 flex flex-col gap-5"
     x-data="plateCalculator()"
     x-init="init()"
     x-cloak
@@ -54,37 +56,35 @@ const L = t();
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 gap-[1.4rem] sm:grid-cols-2">
-          <div class="flex flex-col gap-[0.6rem]">
-            <label for="calc-target" class="text-[1.2rem] font-medium text-muted leading-tight">
-              {L.calculateur.totalWeight}
-              <span class="text-destructive ml-[0.2rem]" aria-hidden="true">*</span>
-            </label>
-            <input
-              id="calc-target"
-              type="number"
-              class="w-full h-[4.6rem] px-[1.4rem] bg-surface-2 border border-border rounded-sm text-text font-display font-bold text-[1.7rem] outline-none transition-all duration-[140ms] appearance-none focus:border-accent focus:shadow-[var(--focus-ring)]"
-              step="0.5"
-              min="0"
-              inputmode="decimal"
-              x-model.number="target"
-              placeholder={L.calculateur.targetPlaceholder}
+          <Input
+            label={L.calculateur.totalWeight}
+            id="calc-target"
+            type="number"
+            required
+            step="0.5"
+            min="0"
+            inputmode="decimal"
+            x-model.number="target"
+            placeholder={L.calculateur.targetPlaceholder}
+          />
+          <div x-show="mode === 'bar'">
+            <Select
+              label={L.calculateur.barWeight}
+              id="calc-bar"
+              options={[
+                { value: '20', label: L.calculateur.barOlympic },
+                { value: '15', label: L.calculateur.barWomen },
+                { value: '10', label: L.calculateur.barTechnique },
+                { value: '7', label: L.calculateur.barShort },
+              ]}
+              x-model.number="barWeight"
             />
           </div>
-          <div class="flex flex-col gap-[0.6rem]" x-show="mode === 'bar'">
-            <label for="calc-bar" class="text-[1.2rem] font-medium text-muted leading-tight">{L.calculateur.barWeight}</label>
-            <select id="calc-bar" class="w-full h-[4.6rem] px-[1.4rem] bg-surface-2 border border-border rounded-sm text-text font-body text-[1.5rem] outline-none transition-all duration-[140ms] appearance-none focus:border-accent focus:shadow-[var(--focus-ring)]" x-model.number="barWeight">
-              <option value="20">{L.calculateur.barOlympic}</option>
-              <option value="15">{L.calculateur.barWomen}</option>
-              <option value="10">{L.calculateur.barTechnique}</option>
-              <option value="7">{L.calculateur.barShort}</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-[0.6rem]" x-show="mode === 'dumbbell'">
-            <label for="calc-dumbbar" class="text-[1.2rem] font-medium text-muted leading-tight">{L.calculateur.dumbbellBar}</label>
-            <input
+          <div x-show="mode === 'dumbbell'">
+            <Input
+              label={L.calculateur.dumbbellBar}
               id="calc-dumbbar"
               type="number"
-              class="w-full h-[4.6rem] px-[1.4rem] bg-surface-2 border border-border rounded-sm text-text font-display font-bold text-[1.7rem] outline-none transition-all duration-[140ms] appearance-none focus:border-accent focus:shadow-[var(--focus-ring)]"
               step="0.5"
               min="0"
               inputmode="decimal"

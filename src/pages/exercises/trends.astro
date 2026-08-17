@@ -4,6 +4,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
 import Card from '../../components/ui/Card.astro';
 import Segmented from '../../components/ui/Segmented.astro';
+import BackLink from '../../components/ui/BackLink.astro';
+import NotFoundState from '../../components/ui/NotFoundState.astro';
 import { icons } from '../../lib/icons';
 const L = t();
 ---
@@ -15,31 +17,20 @@ const L = t();
   />
 
   <div
-    class="max-w-[96rem] mx-auto pb-[6rem] flex flex-col gap-5"
+    class="pb-24 flex flex-col gap-5"
     x-data="exerciseTrendApp()"
     x-init="init()"
     x-cloak
   >
-    {/* ── Back link ── */}
-    <a href={localizedPath("/exercices")} class="trend__back-custom inline-flex items-center gap-[0.6rem] text-muted text-[1.3rem] font-semibold no-underline self-start py-1 pr-[0.6rem] pl-1 -ml-1 rounded-sm">
-      <Fragment set:html={icons.arrowLeft()} />
-      <span>{L.tendance.back}</span>
-    </a>
+    <BackLink href={localizedPath("/exercises")} label={L.tendance.back} />
 
-    {/* ── Not found state ── */}
     <template x-if="notFound">
-      <Card>
-        <div class="flex flex-col items-center text-center gap-3 py-5 max-w-[32rem] mx-auto">
-          <div class="trend__error-icon-bg inline-flex items-center justify-center w-[6rem] h-[6rem] rounded-full text-destructive" aria-hidden="true">
-            <Fragment set:html={icons.infoCircle(30, 30)} />
-          </div>
-          <h2 class="font-display text-[2rem] text-text">{L.tendance.notFound}</h2>
-          <p class="text-muted text-[1.3rem] leading-[1.5]">{L.tendance.notFoundDesc}</p>
-          <a href={localizedPath("/exercices")} class="trend__error-link-custom inline-flex items-center h-[4.2rem] px-[1.8rem] bg-accent text-accent-foreground rounded-md font-bold text-[1.3rem] no-underline mt-1 hover:bg-accent-hover">
-            {L.tendance.viewExercises}
-          </a>
-        </div>
-      </Card>
+      <NotFoundState
+        title={L.tendance.notFound}
+        description={L.tendance.notFoundDesc}
+        actionLabel={L.tendance.viewExercises}
+        actionHref={localizedPath("/exercises")}
+      />
     </template>
 
     {/* ── Loaded exercise ── */}
@@ -115,7 +106,7 @@ const L = t();
                 <div class="inline-flex items-center justify-center w-[4.4rem] h-[4.4rem] border border-border rounded-full text-accent font-display text-[2rem] font-bold" aria-hidden="true">—</div>
                 <h3 class="mt-1 text-text font-display text-[1.6rem] font-bold">{L.tendance.emptyTitle}</h3>
                 <p class="max-w-[34rem] m-0 text-muted text-[1.3rem] leading-[1.5]" x-text="emptyMessage"></p>
-                <a href={localizedPath("/seances/rapide")} class="trend__empty-link-custom inline-flex items-center justify-center min-h-[4.2rem] mt-[0.6rem] px-4 rounded-md bg-accent text-accent-foreground text-[1.3rem] font-bold no-underline hover:bg-accent-hover">
+                <a href={localizedPath("/sessions/quick")} class="trend__empty-link-custom inline-flex items-center justify-center min-h-[4.2rem] mt-[0.6rem] px-4 rounded-md bg-accent text-accent-foreground text-[1.3rem] font-bold no-underline hover:bg-accent-hover">
                   {L.common.startSession}
                 </a>
               </div>
@@ -214,7 +205,7 @@ const L = t();
   type Metric = 'volume' | 'rm';
   type Period = 'all' | '3m' | '1y';
 
-  // Chart geometry — same convention as /exercices/historique.
+  // Chart geometry — same convention as /exercises/history.
   const CHART_W = 800;
   const CHART_H = 300;
 
@@ -296,7 +287,7 @@ const L = t();
 
       // ── Data aggregation ──
       // Per date: Volume = Σ (weight × reps) / 1RM = max Epley estimate,
-      // over completed sets only (same convention as /exercices/historique).
+      // over completed sets only (same convention as /exercises/history).
       get points(): TrendPoint[] {
         if (!this.exercise) return [];
         const sessions: Session[] = getSessions();

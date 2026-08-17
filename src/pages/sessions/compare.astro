@@ -15,7 +15,7 @@ const L = t();
 
 <AppLayout title={L.comparer.title}>
   <div
-    class="max-w-[140rem] mx-auto pb-[6rem] flex flex-col gap-[var(--spacing-5)]"
+    class="flex flex-col gap-[var(--spacing-5)] pb-24"
     x-data="comparisonApp()"
     x-init="init()"
     x-cloak
@@ -25,7 +25,7 @@ const L = t();
       description={L.comparer.description}
     />
 
-    <BackLink href={localizedPath("/seances")} label={L.comparer.back} />
+    <BackLink href={localizedPath("/sessions")} label={L.comparer.back} />
 
     {/* ═══════════════════════════════════════════════════
         SESSION PICKERS
@@ -99,7 +99,7 @@ const L = t();
           </div>
           <p>
             {L.comparer.needTwo}
-            <a href={localizedPath("/seances/creer")} class="text-[var(--color-accent)] font-bold ml-[0.4rem] focus-visible:outline-none focus-visible:box-shadow-[var(--focus-ring)] focus-visible:rounded-[var(--radius-sm)]">{L.comparer.createSession}</a>
+            <a href={localizedPath("/sessions/create")} class="text-[var(--color-accent)] font-bold ml-[0.4rem] focus-visible:outline-none focus-visible:box-shadow-[var(--focus-ring)] focus-visible:rounded-[var(--radius-sm)]">{L.comparer.createSession}</a>
           </p>
         </div>
       </Card>
@@ -569,7 +569,7 @@ const L = t();
     }
     return {
       direction: 'down',
-      label: downLabel + ' (âˆ'' + formatter(a - b) + ')',
+      label: downLabel + ' (\u2212' + formatter(a - b) + ')',
       diff: a - b,
     };
   }
@@ -1021,6 +1021,11 @@ const L = t();
     .comp__exo-row > :last-child {
       display: none;
     }
+  }
+
+  /* ── Wider page for side-by-side comparison ── */
+  :global(.page-content) {
+    max-width: 140rem;
   }
 
   /* ── Reduced motion ── */

@@ -47,10 +47,19 @@ export const icons = {
   minus:       (w?: number, h?: number) => svgCustom('<line x1="5" y1="12" x2="19" y2="12"/>', 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'),
   check:       (w?: number, h?: number) => svg('<polyline points="20 6 9 17 4 12"/>', w, h),
   checkCircle: (w?: number, h?: number) => svg('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', w, h),
+  edit:        (w?: number, h?: number) => svgCustom('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'),
+  plusCircle:  (w?: number, h?: number) => svg('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>', w, h),
   trash:       (w?: number, h?: number) => svg('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>', w, h),
   dots:        (w?: number, h?: number) => svg('<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>', w, h),
   undo:        (w?: number, h?: number) => svg('<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>', w, h),
   save:        (w?: number, h?: number) => svgCustom('<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>', 'viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'),
+
+  // ── Media ─────────────────────────────────────────────────
+  play:         (w?: number, h?: number) => svg('<polygon points="6 4 20 12 6 20 6 4"/>', w, h),
+
+  // ── Star / Rating ──────────────────────────────────────────
+  star:        (w?: number, h?: number) => svg('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>', w, h),
+  starFilled:  (w?: number, h?: number) => svgCustom('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor"/>', 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'),
 
   // ── Close / Dismiss ──────────────────────────────────────────
   closeX:      (w?: number, h?: number) => svg('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>', w, h),
@@ -78,6 +87,7 @@ export const icons = {
   clockStopwatch: (w?: number, h?: number) => svg('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/>', w, h),
   stopwatch:   (w?: number, h?: number) => svg('<line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="12" y2="10"/><circle cx="12" cy="14" r="8"/>', w, h),
   countdown:   (w?: number, h?: number) => svg('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>', w, h),
+  clock:       (w?: number, h?: number) => svg('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>', w, h),
   bell:        (w?: number, h?: number) => svg('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>', w, h),
   popout:      (w?: number, h?: number) => svg('<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>', w, h),
 
@@ -89,6 +99,8 @@ export const icons = {
   // ── Trend variants ───────────────────────────────────────────
   trendingUpLine: (w?: number, h?: number) => svg('<path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/>', w, h),
   chartBar:       (w?: number, h?: number) => svgCustom('<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>', 'viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'),
+  chart:          (w?: number, h?: number) => svg('<path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path>', w, h),
+  scale:          (w?: number, h?: number) => svg('<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path>', w, h),
 
   // ── Volume / Box ─────────────────────────────────────────────
   volumeBox:   (w?: number, h?: number) => svg('<path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9v6"/><path d="M21 9v6"/><path d="M6.5 6.5 3 9v6l3.5 2.5h11L21 15V9l-3.5-2.5Z"/>', w, h),

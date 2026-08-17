@@ -1,0 +1,2072 @@
+---
+import { t } from "../../i18n";
+import AppLayout from "../../layouts/AppLayout.astro";
+import PageHeader from "../../components/layout/PageHeader.astro";
+import Badge from "../../components/ui/Badge.astro";
+import Card from "../../components/ui/Card.astro";
+import CardFooter from "../../components/ui/CardFooter.astro";
+import Dialog from "../../components/ui/Dialog.astro";
+import SearchInput from "../../components/ui/SearchInput.astro";
+import IconButton from "../../components/ui/IconButton.astro";
+import EmptyState from "../../components/ui/EmptyState.astro";
+import Button from "../../components/ui/Button.astro";
+import Icon from "../../components/ui/Icon.astro";
+import { icons } from "../../lib/icons";
+
+const L = t();
+
+/**
+ * Static list of categories offered in the form. Kept on the
+ * frontmatter so the markup stays declarative. Values are the
+ * storage keys (kept stable for data compat); labels are
+ * localized.
+ */
+const categories = [
+  { value: "Barre", label: L.exercices.categories.barre },
+  { value: "Halt\u00e8re", label: L.exercices.categories.haltere },
+  { value: "Machine", label: L.exercices.categories.machine },
+  { value: "Poids du corps", label: L.exercices.categories.poidsCorps },
+  { value: "C\u00e2ble", label: L.exercices.categories.cable },
+  { value: "Autre", label: L.exercices.categories.autre },
+] as const;
+---
+
+<AppLayout title={L.exercices.title}>
+  <PageHeader title={L.exercices.title} description={L.exercices.description} />
+
+  <div class="exo" x-data="exercisesApp()" x-init="init()" x-cloak>
+    {/* ── Toolbar: search + filter ── */}
+    <div class="exo__toolbar">
+      <SearchInput
+        class="exo__search"
+        placeholder={L.exercices.searchPlaceholder}
+        x-model="search"
+        label={L.exercices.search}
+      />
+
+      <div
+        class="exo__filters"
+        role="group"
+        aria-label={L.exercices.filterAria}
+      >
+        <button
+          type="button"
+          class="exo__filter"
+          :class="{ 'is-active': muscleFilter === '' }"
+          :aria-pressed="muscleFilter === ''"
+          @click="muscleFilter = ''"
+        >
+          {L.common.all}
+        </button>
+        <button
+          type="button"
+          class="exo__filter"
+          :class="{ 'is-active': favFilter }"
+          :aria-pressed="favFilter"
+          @click="favFilter = !favFilter"
+        >
+          <Icon name="star" size={14} />
+          {L.exercices.favorites}
+        </button>
+        <template x-for="m in muscleGroups" :key="m">
+          <button
+            type="button"
+            class="exo__filter"
+            :class="{ 'is-active': muscleFilter === m }"
+            :aria-pressed="muscleFilter === m"
+            @click="muscleFilter = m"
+            x-text="m"></button>
+        </template>
+      </div>
+    </div>
+
+    {/* ── Meta row: count + add button ── */}
+    <div class="exo__meta">
+      <span class="exo__count" x-text="countLabel"></span>
+      <button
+        type="button"
+        class="exo__add-btn"
+        @click="openAdd()"
+        aria-label={L.exercices.add}
+      >
+        <span class="exo__add-icon" set:html={icons.plus()} />
+        <span>{L.exercices.add}</span>
+      </button>
+    </div>
+
+    {/* ── Grid ── */}
+    <template x-if="filtered.length > 0">
+      <div class="exo__grid">
+        <template x-for="ex in filtered" :key="ex.id">
+          <Card
+            variant="interactive"
+            hover
+            clickable
+            class="flex flex-col gap-[1.2rem]"
+          >
+            <span class="exo__card-head">
+              <span class="exo__card-icon" set:html={icons.dumbbellBox()} />
+              <h3 class="exo__card-name" x-text="trExercise(ex.name)"></h3>
+              <span
+                class="exo__set-badge"
+                x-show="getSetCount(ex.id) > 0"
+                x-cloak
+                x-transition.opacity.duration.200ms
+                :title="getSetCount(ex.id) + ' ' + labels.sets"
+                x-text="getSetCount(ex.id)"
+              ></span>
+              <div class="exo__card-actions">
+                <IconButton
+                  variant="ghost"
+                  icon={icons.infoCircle()}
+                  label={L.exercices.tipLabel}
+                  :aria-label="labels.showTipAria + ' ' + ex.name"
+                  title={L.exercices.tipLabel}
+                  @click="toggleTip(ex.id)"
+                  :aria-expanded="isTipOpen(ex.id).toString()"
+                  x-show="hasTip(ex.name)"
+                  x-cloak
+                />
+              </div>
+
+              <button
+                type="button"
+                class="exo__icon-btn exo__fav-btn"
+                :class="{ 'is-fav': ex.favorite }"
+                @click.stop="toggleFav(ex)"
+                :aria-label="(ex.favorite ? labels.unfavoriteAria : labels.favoriteAria) + ' ' + ex.name"
+                :title="ex.favorite ? labels.unfavorite : labels.favorite"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  class="exo__icon"
+                  :fill="ex.favorite ? 'currentColor' : 'none'"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  height="20"
+                  width="20"
+                >
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  ></polygon>
+                </svg>
+              </button>
+            </span>
+
+            <p
+              class="exo__tip"
+              x-show="isTipOpen(ex.id) && hasTip(ex.name)"
+              x-cloak
+              x-transition.opacity.duration.180ms
+            >
+              <span x-text="getTip(ex.name)"></span>
+              <a
+                class="exo__tip-video"
+                :href="getVideoUrl(ex.name)"
+                target="_blank"
+                rel="noopener noreferrer"
+                :aria-label="labels.videoAria + ' ' + ex.name + ' ' + labels.onYoutube"
+                title={L.exercices.seeTechnique}
+              >
+                <Icon name="play" size={16} />
+                <span>{L.exercices.seeTechnique}</span>
+              </a>
+            </p>
+
+            <div class="exo__card-badges">
+              <Badge
+                variant="category"
+                size="sm"
+                :class="'badge--cat-' + muscleHue(ex.muscle)"
+                x-text="trMuscle(ex.muscle)"
+              />
+              <Badge
+                variant="default"
+                size="sm"
+                x-text="trCategory(ex.category)"
+              />
+            </div>
+
+            <CardFooter class="exo__card-foot">
+              <IconButton
+                variant="ghost"
+                icon={icons.edit()}
+                label={L.exercices.edit}
+                title={L.exercices.edit}
+                @click="edit(ex)"
+              />
+              <IconButton
+                variant="accent"
+                icon={icons.plusCircle()}
+                label={L.exercices.addToSession}
+                title={L.exercices.addToSession}
+                @click="openAddToSession(ex)"
+              />
+              <a
+                class="exo__icon-btn exo__icon-btn--trend"
+                :href="trendUrl(ex)"
+                :aria-label="labels.trendAria + ' ' + ex.name"
+                :title="labels.trendTitle"
+              >
+                <Icon name="trendingUpLine" size={20} class="exo__icon" />
+              </a>
+              <IconButton
+                variant="danger"
+                icon={icons.trash()}
+                label={L.exercices.delete}
+                title={L.exercices.delete}
+                @click="askDelete(ex)"
+              />
+            </CardFooter>
+          </Card>
+        </template>
+      </div>
+    </template>
+
+    {/* ── Empty state: library has no exercises at all ── */}
+    <template x-if="exercises.length === 0">
+      <Card>
+        <EmptyState iconName="dumbbell" title={L.exercices.emptyLibrary} />
+        <div class="exo__empty-cta">
+          <button
+            type="button"
+            class="exo__add-btn exo__add-btn--centered"
+            @click="openAdd()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="exo__add-icon"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>{L.exercices.add}</span>
+          </button>
+        </div>
+      </Card>
+    </template>
+
+    {/* ── Empty state: search/filters match nothing ── */}
+    <template x-if="exercises.length > 0 && filtered.length === 0">
+      <Card>
+        <EmptyState
+          iconName="chart"
+          title={L.common.noResult}
+          description={L.exercices.noResults}
+        />
+        <div class="exo__empty-cta">
+          <button
+            type="button"
+            class="exo__add-btn exo__add-btn--centered"
+            @click="openAdd()"
+          >
+            <Icon name="plus" size={18} class="exo__add-icon" />
+            <span>{L.exercices.add}</span>
+          </button>
+        </div>
+        <button
+            type="button"
+            class="exo__reset-btn"
+            @click="search = ''; muscleFilter = ''; favFilter = false"
+            x-show="hasFilters"
+          >
+            {L.common.reset}
+          </button>
+      </Card>
+    </template>
+
+    {
+      /* ════════════════════════════════════════════════════
+        ADD / EDIT DIALOG
+        ════════════════════════════════════════════════════ */
+    }
+    <Dialog
+      id="exo-form-dialog"
+      :title="editingId ? labels.editTitle : labels.addTitle"
+    >
+      <form class="exo__form" @submit.prevent="save()">
+        <div class="exo__field">
+          <label for="exo-name" class="exo__label">
+            {L.exercices.nameLabel}
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="exo-name"
+            type="text"
+            class="exo__input"
+            placeholder={L.exercices.namePlaceholder}
+            x-model="form.name"
+            required
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="exo__field">
+          <label for="exo-muscle" class="exo__label">
+            {L.exercices.muscleLabel}
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <div class="exo__select-wrap">
+            <select
+              id="exo-muscle"
+              class="exo__select"
+              x-model="form.muscle"
+              required
+            >
+              <option value="" disabled>{L.common.select}</option>
+              <template x-for="opt in muscleOptionsForSelect" :key="opt.value">
+                <option :value="opt.value" x-text="opt.label"></option>
+              </template>
+            </select>
+            <Icon name="chevronDown" size={16} class="exo__select-icon" />
+          </div>
+        </div>
+
+        <div
+          class="exo__field"
+          x-show="form.muscle === '__custom__'"
+          x-cloak
+          x-transition.opacity.duration.200ms
+        >
+          <label for="exo-muscle-custom" class="exo__label">
+            {L.exercices.customMuscleLabel}
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="exo-muscle-custom"
+            type="text"
+            class="exo__input"
+            placeholder="Ex. Mollets"
+            x-model="form.customMuscle"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="exo__field">
+          <label for="exo-category" class="exo__label">
+            {L.exercices.categoryLabel}
+            <span class="exo__label-req" aria-hidden="true">*</span>
+          </label>
+          <div class="exo__select-wrap">
+            <select
+              id="exo-category"
+              class="exo__select"
+              x-model="form.category"
+              required
+            >
+              <option value="" disabled>{L.common.select}</option>
+              {
+                categories.map((c) => (
+                  <option value={c.value}>{c.label}</option>
+                ))
+              }
+            </select>
+            <svg
+              class="exo__select-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div
+          class="exo__form-error"
+          x-show="formError"
+          x-text="formError"
+          x-cloak
+          x-transition.opacity.duration.200ms
+        >
+        </div>
+
+        <div class="exo__form-actions">
+          <Button variant="secondary" size="md" @click="closeForm()">
+            {L.common.cancel}
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
+            type="submit"
+            x-text="editingId ? labels.save : labels.add"
+          />
+        </div>
+      </form>
+    </Dialog>
+
+    {
+      /* ════════════════════════════════════════════════════
+        DELETE CONFIRMATION DIALOG
+        ════════════════════════════════════════════════════ */
+    }
+    <Dialog id="exo-delete-dialog" title={L.exercices.deleteTitle}>
+      <p class="exo__confirm-text">
+        <strong x-text="deletingName || 'cet exercice'"></strong>
+      </p>
+      <p class="exo__confirm-text">
+        {L.exercices.deleteDesc}
+      </p>
+
+      <div slot="footer">
+        <Button variant="secondary" size="md" data-dialog-close>
+          {L.common.cancel}
+        </Button>
+        <Button variant="destructive" size="md" @click="confirmDelete()">
+          {L.common.delete}
+        </Button>
+      </div>
+    </Dialog>
+
+    {
+      /* ════════════════════════════════════════════════════
+        ADD TO SESSION DIALOG
+        ════════════════════════════════════════════════════ */
+    }
+    <Dialog id="exo-add-to-session-dialog" class="exo__add-dialog-host">
+      <div class="exo__add-dialog">
+        <header class="exo__add-header">
+          <div class="exo__add-header-text">
+            <h2
+              class="exo__add-title"
+              x-text="trExercise(addingExercise?.name)"
+            >
+            </h2>
+            <Badge
+              variant="category"
+              size="sm"
+              :class="'badge--cat-' + muscleHue(addingExercise?.muscle)"
+              x-text="trMuscle(addingExercise?.muscle)"
+            />
+          </div>
+          <button
+            type="button"
+            class="exo__add-close"
+            data-dialog-close
+            aria-label={L.common.close}
+            @click="closeAddToSession()"
+          >
+            <Fragment set:html={icons.closeX()} />
+          </button>
+        </header>
+
+        {/* ── Session picker ── */}
+        <div class="exo__add-field">
+          <label for="exo-add-session" class="exo__label"
+            >{L.sessions.seanceSingular}</label
+          >
+          <div class="exo__select-wrap">
+            <select
+              id="exo-add-session"
+              class="exo__select"
+              x-model="addToSessionId"
+            >
+              <option value="">{L.rapide.selectSession}</option>
+              <option value="new">+ {L.exercices.newSession}</option>
+              <template x-for="s in sessions" :key="s.id">
+                <option :value="s.id" x-text="s.name + ' (' + s.date + ')'"
+                ></option>
+              </template>
+            </select>
+            <Icon name="chevronDown" size={16} class="exo__select-icon" />
+          </div>
+        </div>
+
+        {/* ── New session name (conditional) ── */}
+        <div
+          class="exo__add-field"
+          x-show="addToSessionId === 'new'"
+          x-cloak
+          x-transition.opacity.duration.180ms
+        >
+          <label for="exo-add-session-name" class="exo__label">
+            {L.builder.name}
+          </label>
+          <input
+            id="exo-add-session-name"
+            type="text"
+            class="exo__input"
+            x-model="newSessionName"
+            placeholder="Ex. Push day"
+            autocomplete="off"
+          />
+        </div>
+
+        {/* ── Sets table ── */}
+        <div class="exo__add-sets">
+          <div class="exo__add-sets-header" aria-hidden="true">
+            <span>#</span>
+            <span>{L.builder.type}</span>
+            <span>{L.builder.weight} (kg)</span>
+            <span>{L.common.reps}</span>
+            <span></span>
+          </div>
+          <template x-for="(set, i) in addSets" :key="i">
+            <div class="exo__add-sets-row">
+              <span class="exo__add-sets-num" x-text="i + 1"></span>
+              <div class="exo__add-sets-type">
+                <span class="exo__add-sets-label">{L.builder.type}</span>
+                <div class="exo__select-wrap">
+                  <select
+                    class="exo__select exo__select--compact"
+                    x-model="set.type"
+                  >
+                    <option value="warmup">{L.builder.types.warmup}</option>
+                    <option value="work">{L.builder.types.work}</option>
+                    <option value="top">{L.builder.types.top}</option>
+                    <option value="drop">{L.builder.types.drop}</option>
+                    <option value="failure">{L.builder.types.failure}</option>
+                  </select>
+                  <Icon name="chevronDown" size={16} class="exo__select-icon" />
+                </div>
+              </div>
+              <div class="exo__add-sets-weight">
+                <span class="exo__add-sets-label">{L.builder.weight} (kg)</span>
+                <input
+                  type="number"
+                  class="exo__input exo__input--compact"
+                  x-model.number="set.weight"
+                  min="0"
+                  step="0.5"
+                  inputmode="decimal"
+                />
+              </div>
+              <div class="exo__add-sets-reps">
+                <span class="exo__add-sets-label">{L.common.reps}</span>
+                <input
+                  type="number"
+                  class="exo__input exo__input--compact"
+                  x-model.number="set.reps"
+                  min="0"
+                  inputmode="numeric"
+                />
+              </div>
+              <button
+                type="button"
+                class="exo__add-sets-remove"
+                @click="removeSetFromConfig(i)"
+                :disabled="addSets.length <= 1"
+                :aria-label="labels.deleteSet + ' ' + (i + 1)"
+                title={L.builder.deleteSet}
+              >
+                <Icon name="closeX" size={16} />
+              </button>
+            </div>
+          </template>
+          <div class="exo__add-sets-actions">
+            <button
+              type="button"
+              class="exo__add-sets-warmup"
+              @click="generateWarmup()"
+              :disabled="!hasWorkingWeight()"
+              :title="hasWorkingWeight() ? labels.warmupTitle : labels.warmupHint"
+            >
+            <Icon name="plus" size={20} class="exo__add-icon" />
+              <span>{L.builder.warmupBtn}</span>
+            </button>
+            <button
+              type="button"
+              class="exo__add-sets-add"
+              @click="addSetToConfig()"
+            >
+              <Icon name="plus" size={18} />
+              <span>{L.builder.addSet}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div slot="footer" class="exo__add-actions">
+        <Button
+          variant="secondary"
+          size="md"
+          data-dialog-close
+          @click="closeAddToSession()"
+        >
+          {L.common.cancel}
+        </Button>
+        <Button
+          variant="primary"
+          size="md"
+          @click="submitAddToSession()"
+          :disabled="!addToSessionId"
+        >
+          {L.exercices.addToSession}
+        </Button>
+      </div>
+    </Dialog>
+
+    {
+      /* ════════════════════════════════════════════════════
+        SUCCESS TOAST
+        ════════════════════════════════════════════════════ */
+    }
+    <div
+      class="exo__toast"
+      x-show="toast.visible"
+      x-cloak
+      x-transition.opacity.duration.200ms
+      role="status"
+      aria-live="polite"
+    >
+      <span class="exo__toast-icon" set:html={icons.check()} />
+      <span x-text="toast.message"></span>
+    </div>
+  </div>
+
+  <script>
+    import { t, getLocale, localizedPath } from "../../i18n";
+    import {
+      getExercises,
+      saveExercise,
+      updateExercise,
+      deleteExercise,
+      toggleExerciseFavorite,
+      getSessions,
+      saveSession,
+      updateSession,
+      type Exercise,
+      type Session,
+      type SessionExercise,
+      type SessionSet,
+      type SetType,
+    } from "../../lib/storage";
+    import { getExerciseTip } from "../../lib/exercise-tips";
+
+    const LABELS = t();
+
+    // Default muscle groups always surfaced in the filter bar
+    // (mirrors the seed list in src/lib/storage.ts).
+    const EXO_DEFAULT_MUSCLES = [
+      "Pectoraux",
+      "Dos",
+      "Épaules",
+      "Biceps",
+      "Triceps",
+      "Quadriceps",
+      "Ischio-jambiers",
+      "Fessiers",
+      "Abdominaux",
+      "Mollets",
+      "Avant-bras",
+    ];
+
+    // Sentinel value used by the muscle <select> to reveal the
+    // "custom muscle" input.
+    const CUSTOM_MUSCLE = "__custom__";
+
+    interface AlpineFormState {
+      name: string;
+      muscle: string;
+      customMuscle: string;
+      category: string;
+    }
+
+    interface AddSetRow {
+      type: SetType;
+      weight: number;
+      reps: number;
+    }
+
+    function resolveForm(
+      form: AlpineFormState,
+    ): { name: string; muscle: string; category: string } | null {
+      const name = form.name.trim();
+      const muscle =
+        form.muscle === CUSTOM_MUSCLE
+          ? form.customMuscle.trim()
+          : form.muscle.trim();
+      const category = form.category.trim();
+      if (!name || !muscle || !category) return null;
+      return { name, muscle, category };
+    }
+
+    document.addEventListener("alpine:init", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const Alpine = (window as any).Alpine;
+
+      Alpine.data("exercisesApp", () => ({
+        // ── State ──
+        exercises: [] as Exercise[],
+        sessions: [] as Session[],
+        setCounts: {} as Record<string, number>,
+        search: "",
+        muscleFilter: "",
+        favFilter: false,
+        form: {
+          name: "",
+          muscle: "",
+          customMuscle: "",
+          category: "",
+        } as AlpineFormState,
+        formError: "",
+        editingId: "" as string,
+        deletingExercise: null as Exercise | null,
+        deletingName: "",
+
+        // ── Add-to-session state ──
+        addingExercise: null as Exercise | null,
+        addToSessionId: "" as string,
+        newSessionName: "" as string,
+        addSets: [
+          { type: "work", weight: 0, reps: 0 },
+          { type: "work", weight: 0, reps: 0 },
+          { type: "work", weight: 0, reps: 0 },
+        ] as AddSetRow[],
+        toast: { visible: false, message: "" },
+        _toastTimer: 0,
+
+        // ── Labels (i18n) ──
+        labels: {
+          editTitle: LABELS.exercices.editTitle,
+          addTitle: LABELS.exercices.addTitle,
+          save: LABELS.common.save,
+          add: LABELS.common.add,
+          deleteSet: LABELS.builder.deleteSet,
+          warmupTitle: LABELS.builder.warmupTitle,
+          warmupHint: LABELS.builder.warmupHint,
+          showTipAria: LABELS.exercices.showTipAria,
+          videoAria: LABELS.exercices.videoAria,
+          onYoutube: LABELS.exercices.onYoutube,
+          sets: LABELS.exercices.sets,
+          trendAria: LABELS.tendance.trendAria,
+          trendTitle: LABELS.tendance.title,
+        },
+
+        // ── Tips (added 2026-08-04) ──
+        openTips: [] as string[],
+
+        // ── Init ──
+        init() {
+          this.refresh();
+        },
+
+        refresh() {
+          this.exercises = getExercises();
+          this.sessions = getSessions();
+          this.recomputeSetCounts();
+        },
+
+        recomputeSetCounts() {
+          const counts: Record<string, number> = {};
+          for (const session of this.sessions) {
+            for (const ex of session.exercises) {
+              counts[ex.exerciseId] =
+                (counts[ex.exerciseId] ?? 0) + ex.sets.length;
+            }
+          }
+          this.setCounts = counts;
+        },
+
+        getSetCount(exerciseId: string): number {
+          return this.setCounts[exerciseId] ?? 0;
+        },
+
+        // Deep-link to the trend chart page, scoped to this exercise.
+        trendUrl(ex: Exercise): string {
+          const q = new URLSearchParams({ ex: ex.name });
+          return `${localizedPath("/exercises/trends")}?${q.toString()}`;
+        },
+
+        // ── Derived ──
+        get muscleGroups(): string[] {
+          const fromData = this.exercises.map((e) => e.muscle);
+          const set = new Set<string>([...EXO_DEFAULT_MUSCLES, ...fromData]);
+          return Array.from(set).sort((a, b) => a.localeCompare(b, "fr"));
+        },
+
+        get muscleOptionsForSelect(): { value: string; label: string }[] {
+          const groups = this.muscleGroups;
+          return [
+            ...groups.map((m) => ({ value: m, label: m })),
+            { value: CUSTOM_MUSCLE, label: LABELS.exercices.categories.autre },
+          ];
+        },
+
+        get filtered(): Exercise[] {
+          const q = this.search.trim().toLowerCase();
+          const muscle = this.muscleFilter;
+          return this.exercises.filter((ex) => {
+            if (muscle && ex.muscle !== muscle) return false;
+            if (this.favFilter && !ex.favorite) return false;
+            if (q && !ex.name.toLowerCase().includes(q)) return false;
+            return true;
+          });
+        },
+
+        get countLabel(): string {
+          const n = this.filtered.length;
+          return `${n} ${n > 1 ? LABELS.sessions.exoPlural : LABELS.sessions.exoSingular}`;
+        },
+
+        get hasFilters(): boolean {
+          return Boolean(
+            this.search.trim() || this.muscleFilter || this.favFilter,
+          );
+        },
+
+        // ── Actions ──
+        openAdd() {
+          this.editingId = "";
+          this.form = { name: "", muscle: "", customMuscle: "", category: "" };
+          this.formError = "";
+          this.openDialogById("exo-form-dialog");
+        },
+
+        edit(exercise: Exercise) {
+          this.editingId = exercise.id;
+          const known = this.muscleGroups.includes(exercise.muscle);
+          this.form = {
+            name: exercise.name,
+            muscle: known ? exercise.muscle : CUSTOM_MUSCLE,
+            customMuscle: known ? "" : exercise.muscle,
+            category: exercise.category,
+          };
+          this.formError = "";
+          this.openDialogById("exo-form-dialog");
+        },
+
+        toggleFav(ex: Exercise) {
+          toggleExerciseFavorite(ex.id);
+          this.refresh();
+        },
+
+        save() {
+          const resolved = resolveForm(this.form);
+          if (!resolved) {
+            this.formError = LABELS.exercices.formRequired;
+            return;
+          }
+          try {
+            if (this.editingId) {
+              updateExercise(this.editingId, resolved);
+            } else {
+              saveExercise(resolved);
+            }
+            this.refresh();
+            this.closeDialogById("exo-form-dialog");
+          } catch (err) {
+            this.formError = LABELS.exercices.formError;
+          }
+        },
+
+        closeForm() {
+          this.closeDialogById("exo-form-dialog");
+        },
+
+        askDelete(exercise: Exercise) {
+          this.deletingExercise = exercise;
+          this.deletingName = exercise.name;
+          this.openDialogById("exo-delete-dialog");
+        },
+
+        confirmDelete() {
+          if (!this.deletingExercise) return;
+          deleteExercise(this.deletingExercise.id);
+          this.deletingExercise = null;
+          this.deletingName = "";
+          this.refresh();
+          this.closeDialogById("exo-delete-dialog");
+        },
+
+        // ── Add-to-session actions ──
+        openAddToSession(exercise: Exercise) {
+          this.addingExercise = exercise;
+          this.addToSessionId = "";
+          this.newSessionName = "";
+          this.addSets = [
+            { type: "work", weight: 0, reps: 0 },
+            { type: "work", weight: 0, reps: 0 },
+            { type: "work", weight: 0, reps: 0 },
+          ];
+          // Refresh the sessions list so the picker is up to date.
+          this.sessions = getSessions();
+          this.openDialogById("exo-add-to-session-dialog");
+        },
+
+        closeAddToSession() {
+          this.addingExercise = null;
+          this.addToSessionId = "";
+          this.newSessionName = "";
+          this.closeDialogById("exo-add-to-session-dialog");
+        },
+
+        // ── Tips (added 2026-08-04) ──
+        hasTip(name: string): boolean {
+          return getExerciseTip(name) != null;
+        },
+        getTip(name: string): string {
+          return getExerciseTip(name)?.description ?? "";
+        },
+        getVideoUrl(name: string): string {
+          return getExerciseTip(name)?.videoUrl ?? "";
+        },
+        isTipOpen(exId: string): boolean {
+          return this.openTips.includes(exId);
+        },
+        toggleTip(exId: string) {
+          if (this.isTipOpen(exId)) {
+            this.openTips = this.openTips.filter((id) => id !== exId);
+          } else {
+            this.openTips = [...this.openTips, exId];
+          }
+        },
+
+        addSetToConfig() {
+          this.addSets.push({ type: "work", weight: 0, reps: 0 });
+        },
+
+        removeSetFromConfig(index: number) {
+          if (this.addSets.length <= 1) return;
+          this.addSets.splice(index, 1);
+        },
+
+        hasWorkingWeight(): boolean {
+          return this.addSets.some((s) => s.type === "work" && s.weight > 0);
+        },
+
+        generateWarmup() {
+          // Find the max working weight from existing sets.
+          const workingSets = this.addSets.filter(
+            (s) => s.type === "work" && s.weight > 0,
+          );
+          if (workingSets.length === 0) {
+            this.showToast(LABELS.builder.warmupHint);
+            return;
+          }
+
+          const maxWeight = Math.max(...workingSets.map((s) => s.weight));
+
+          // Generate warmup sets: 40%, 60%, 80% of working weight.
+          const warmupPercents = [0.4, 0.6, 0.8] as const;
+          const warmupReps = [12, 8, 5] as const;
+          const warmups: AddSetRow[] = warmupPercents.map((p, i) => ({
+            type: "warmup",
+            weight: Math.round(maxWeight * p),
+            reps: warmupReps[i],
+          }));
+
+          // Prepend warmups to the working sets.
+          this.addSets = [...warmups, ...this.addSets];
+        },
+
+        showToast(message: string) {
+          this.toast = { visible: true, message };
+          if (this._toastTimer) window.clearTimeout(this._toastTimer);
+          this._toastTimer = window.setTimeout(() => {
+            this.toast = { visible: false, message: "" };
+          }, 2800);
+        },
+
+        submitAddToSession() {
+          if (!this.addingExercise) return;
+          if (!this.addToSessionId) return;
+
+          let sessionId = this.addToSessionId;
+
+          // Create a new session if requested.
+          if (sessionId === "new") {
+            const name =
+              this.newSessionName.trim() ||
+              `${LABELS.sessions.seanceSingular} ${new Date().toLocaleDateString(getLocale() === "fr" ? "fr-FR" : "en-US")}`;
+            const created = saveSession({
+              name,
+              date: new Date().toISOString().split("T")[0],
+              exercises: [],
+              status: "planned",
+            });
+            sessionId = created.id;
+          }
+
+          const sessions = getSessions();
+          const session = sessions.find((s) => s.id === sessionId);
+          if (!session) return;
+
+          const exerciseId = this.addingExercise.id;
+          const exerciseEntry: SessionExercise = {
+            exerciseId,
+            name: this.addingExercise.name,
+            muscle: this.addingExercise.muscle,
+            sets: this.addSets.map<SessionSet>((s, i) => ({
+              exerciseId,
+              setNumber: i + 1,
+              type: s.type,
+              weight: s.weight,
+              reps: s.reps,
+              completed: false,
+            })),
+          };
+
+          session.exercises.push(exerciseEntry);
+          updateSession(session.id, { exercises: session.exercises });
+
+          this.closeAddToSession();
+          this.refresh();
+          this.showToast(LABELS.exercices.toastAdded);
+        },
+
+        // ── Dialog helpers (wrap the global Dialog API) ──
+        openDialogById(id: string) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const fn = (window as any).openDialog as
+            ((i: string) => void) | undefined;
+          if (fn) fn(id);
+        },
+        closeDialogById(id: string) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const fn = (window as any).closeDialog as
+            ((i: string) => void) | undefined;
+          if (fn) fn(id);
+        },
+      }));
+    });
+  </script>
+
+  <style>
+    /* ════════════════════════════════════════════════════
+     CONTAINER
+     ════════════════════════════════════════════════════ */
+    .exo {
+      max-width: 96rem;
+      margin: 0 auto;
+      padding-bottom: 6rem;
+    }
+
+    /* ════════════════════════════════════════════════════
+     TOOLBAR — search + muscle filter pills
+     ════════════════════════════════════════════════════ */
+    .exo__toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Search input ── */
+    .exo__search {
+      position: relative;
+      width: 100%;
+    }
+
+    .exo__search-icon {
+      position: absolute;
+      top: 50%;
+      left: 1.4rem;
+      transform: translateY(-50%);
+      width: 1.8rem;
+      height: 1.8rem;
+      color: var(--color-muted);
+      pointer-events: none;
+    }
+
+    .exo__search-input {
+      width: 100%;
+      height: 4.8rem;
+      padding: 0 1.6rem 0 4.4rem;
+      background-color: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      font-size: 1.4rem;
+      line-height: 1.2;
+      outline: none;
+      transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .exo__search-input::placeholder {
+      color: var(--alpha-text-faint);
+    }
+
+    .exo__search-input::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .exo__search-input:focus {
+      border-color: var(--color-accent);
+      box-shadow: var(--focus-ring);
+    }
+
+    /* ── Filter pills ── */
+    .exo__filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .exo__filter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      white-space: nowrap;
+      height: 4rem;
+      padding: 0 1.4rem;
+      min-width: 6rem;
+      background-color: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      color: var(--color-muted);
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast);
+    }
+
+    .exo__filter svg {
+      flex-shrink: 0;
+    }
+
+    .exo__filter:hover {
+      background-color: var(--color-surface-3);
+      border-color: var(--alpha-border);
+      color: var(--color-text);
+    }
+
+    .exo__filter:active {
+      transform: scale(0.97);
+    }
+
+    .exo__filter.is-active {
+      background-color: color-mix(
+        in srgb,
+        var(--color-accent) 12%,
+        transparent
+      );
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    /* ════════════════════════════════════════════════════
+     META ROW — count + add button
+     ════════════════════════════════════════════════════ */
+    .exo__meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .exo__count {
+      font-size: 1.1rem;
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 600;
+    }
+
+    .exo__add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      height: 4.4rem;
+      padding: 0 1.6rem;
+      background-color: var(--color-accent);
+      color: var(--color-accent-foreground);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow: 0 2px 8px
+        color-mix(in srgb, var(--color-accent) 25%, transparent);
+      transition:
+        background-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+    }
+
+    .exo__add-btn:hover {
+      background-color: var(--color-accent-hover);
+      box-shadow: 0 4px 14px
+        color-mix(in srgb, var(--color-accent) 40%, transparent);
+    }
+
+    .exo__add-btn:active {
+      transform: scale(0.97);
+    }
+
+    .exo__add-icon {
+      display: inline-flex;
+    }
+    .exo__add-icon svg {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+
+    .exo__add-btn--centered {
+      margin: 1.6rem auto 0;
+    }
+
+    /* ════════════════════════════════════════════════════
+     GRID — 1 col → 2 col → 3 col
+     ════════════════════════════════════════════════════ */
+    .exo__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.6rem;
+    }
+
+    @media (min-width: 640px) {
+      .exo__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .exo__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ════════════════════════════════════════════════════
+     CARD
+     ════════════════════════════════════════════════════ */
+    .exo__card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .exo__card-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .exo__card-icon {
+      color: var(--color-accent);
+      flex-shrink: 0;
+    }
+    .exo__card-icon svg {
+      width: 1.8rem;
+      height: 1.8rem;
+    }
+
+    .exo__set-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      height: 2.4rem;
+      padding: 0 0.9rem;
+      background-color: color-mix(
+        in srgb,
+        var(--color-success) 10%,
+        transparent
+      );
+      border: 1px solid
+        color-mix(in srgb, var(--color-success) 30%, transparent);
+      border-radius: var(--radius-pill);
+      color: var(--color-success);
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .exo__set-icon {
+      width: 1.3rem;
+      height: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .exo__set-label {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .exo__card-name {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--color-text);
+      min-width: 0;
+    }
+
+    /* ── Tip toggle + tip body (added 2026-08-04) ── */
+    .exo__tip-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      background-color: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: 50%;
+      color: var(--color-muted);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast);
+    }
+
+    .exo__tip-toggle:hover {
+      background-color: var(--color-surface-3);
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .exo__tip-toggle:active {
+      transform: scale(0.94);
+    }
+
+    .exo__tip-toggle svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .exo__tip {
+      margin: 0;
+      padding: 1rem 1.2rem;
+      background-color: var(--color-surface-2);
+      border-left: 3px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      color: var(--color-muted);
+      font-size: 1.2rem;
+      line-height: 1.5;
+    }
+
+    /* ── YouTube technique link (added 2026-08-04) ── */
+    .exo__tip-video {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+      padding: 0.5rem 0.9rem;
+      background-color: color-mix(
+        in srgb,
+        var(--color-destructive) 10%,
+        transparent
+      );
+      border: 1px solid
+        color-mix(in srgb, var(--color-destructive) 32%, transparent);
+      border-radius: var(--radius-pill);
+      color: var(--color-destructive);
+      font-family: var(--font-body);
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast);
+    }
+
+    .exo__tip-video:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--color-destructive) 18%,
+        transparent
+      );
+      border-color: color-mix(
+        in srgb,
+        var(--color-destructive) 50%,
+        transparent
+      );
+      color: var(--color-destructive);
+    }
+
+    .exo__tip-video:active {
+      transform: scale(0.97);
+    }
+
+    .exo__tip-video svg {
+      width: 1.3rem;
+      height: 1.3rem;
+      fill: currentColor;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
+    .exo__tip-video svg polygon {
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .exo__card-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .exo__card-foot {
+      gap: 0.4rem;
+    }
+
+    .exo__icon-btn {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      width: 4.4rem;
+      height: 4.4rem;
+      background-color: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      color: var(--color-muted);
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
+    }
+
+    .exo__icon-btn:hover {
+      background-color: var(--alpha-bg-soft);
+      border-color: var(--alpha-border-faint);
+      color: var(--color-text);
+    }
+
+    .exo__icon-btn:active {
+      transform: scale(0.94);
+    }
+
+    .exo__icon-btn--trend:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--color-accent) 12%,
+        transparent
+      );
+      border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+      color: var(--color-accent);
+    }
+
+    .exo__fav-btn {
+      color: var(--color-muted);
+    }
+
+    .exo__fav-btn.is-fav {
+      color: var(--color-warning);
+    }
+
+    .exo__fav-btn.is-fav:hover {
+      color: var(--color-warning);
+    }
+
+    .exo__icon {
+      flex-shrink: 0;
+    }
+    .exo__icon svg {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+
+    /* ════════════════════════════════════════════════════
+     EMPTY STATE CTA
+     ════════════════════════════════════════════════════ */
+    .exo__empty-cta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      padding: 0.4rem 0 0.8rem;
+    }
+
+    .exo__reset-btn {
+      display: inline-flex;
+      align-items: center;
+      height: 4.4rem;
+      padding: 0 1.6rem;
+      background-color: transparent;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-muted);
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast);
+    }
+
+    .exo__reset-btn:hover {
+      background-color: var(--color-surface-2);
+      color: var(--color-text);
+      border-color: var(--alpha-border);
+    }
+
+    /* ════════════════════════════════════════════════════
+     FORM
+     ════════════════════════════════════════════════════ */
+    .exo__form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      margin-top: 0.8rem;
+    }
+
+    .exo__field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .exo__label {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: var(--color-muted);
+      line-height: 1.2;
+    }
+
+    .exo__label-req {
+      color: var(--color-destructive);
+      margin-left: 0.2rem;
+    }
+
+    .exo__input,
+    .exo__select {
+      width: 100%;
+      height: 4.4rem;
+      padding: 0 1.4rem;
+      background-color: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      font-size: 1.4rem;
+      line-height: 1.2;
+      outline: none;
+      transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+    }
+
+    .exo__input::placeholder {
+      color: var(--alpha-text-faint);
+    }
+
+    .exo__input:focus,
+    .exo__select:focus {
+      border-color: var(--color-accent);
+      box-shadow: var(--focus-ring);
+    }
+
+    .exo__select-wrap {
+      position: relative;
+    }
+
+    .exo__select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      padding-right: 4rem;
+    }
+
+    .exo__select-icon {
+      position: absolute;
+      right: 1.4rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.6rem;
+      height: 1.6rem;
+      color: var(--color-muted);
+      pointer-events: none;
+    }
+
+    .exo__form-error {
+      background-color: color-mix(
+        in srgb,
+        var(--color-destructive) 10%,
+        transparent
+      );
+      border: 1px solid
+        color-mix(in srgb, var(--color-destructive) 35%, transparent);
+      border-radius: var(--radius-sm);
+      color: var(--color-destructive);
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 0.8rem 1.2rem;
+    }
+
+    .exo__form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
+      margin-top: 0.6rem;
+    }
+
+    /* ════════════════════════════════════════════════════
+     CONFIRM DIALOG
+     ════════════════════════════════════════════════════ */
+    .exo__confirm-text {
+      color: var(--color-text);
+      font-size: 1.3rem;
+      line-height: 1.5;
+    }
+
+    .exo__confirm-text strong {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    /* ════════════════════════════════════════════════════
+     RESPONSIVE — small screens
+     ════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .exo__toolbar {
+        gap: 1.2rem;
+      }
+      .exo__search-input {
+        height: 4.4rem;
+        font-size: 1.3rem;
+      }
+      .exo__filter {
+        height: 4rem;
+        font-size: 1.2rem;
+        padding: 0 1.4rem;
+      }
+      .exo__card-name {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* ════════════════════════════════════════════════════
+     ADD-TO-SESSION DIALOG
+     ════════════════════════════════════════════════════ */
+    :global(#exo-add-to-session-dialog) {
+      max-width: 56rem;
+      width: auto;
+    }
+
+    .exo__add-dialog {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .exo__add-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .exo__add-header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .exo__add-title {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--color-text);
+      word-break: break-word;
+    }
+
+    .exo__add-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.2rem;
+      height: 3.2rem;
+      flex-shrink: 0;
+      background-color: var(--alpha-bg-soft);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      color: var(--color-muted);
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast);
+    }
+
+    .exo__add-close:hover {
+      background-color: var(--alpha-border-faint);
+      color: var(--color-text);
+    }
+
+    .exo__add-close svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .exo__add-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    /* ════════════════════════════════════════════════════
+     SETS TABLE — desktop grid, mobile stacked cards
+     ════════════════════════════════════════════════════ */
+    .exo__add-sets {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    .exo__add-sets-header {
+      display: grid;
+      grid-template-columns: 3.2rem 1fr 8rem 6rem 3.2rem;
+      gap: 0.6rem;
+      align-items: center;
+      padding: 0 0.2rem;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-muted);
+      line-height: 1.2;
+    }
+
+    .exo__add-sets-header span:nth-child(3),
+    .exo__add-sets-header span:nth-child(4) {
+      text-align: center;
+    }
+
+    .exo__add-sets-row {
+      display: grid;
+      grid-template-columns: 3.2rem 1fr 8rem 6rem 3.2rem;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .exo__add-sets-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.8rem;
+      height: 2.8rem;
+      margin-left: 0.2rem;
+      background-color: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      color: var(--color-muted);
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .exo__add-sets-type,
+    .exo__add-sets-weight,
+    .exo__add-sets-reps {
+      min-width: 0;
+    }
+
+    .exo__add-sets-label {
+      display: none;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .exo__select--compact,
+    .exo__input--compact {
+      height: 4rem;
+      font-size: 1.3rem;
+      padding: 0 1.2rem;
+    }
+
+    .exo__select--compact {
+      padding-right: 3.4rem;
+    }
+
+    .exo__add-sets-remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.2rem;
+      height: 3.2rem;
+      background-color: transparent;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      color: var(--color-muted);
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
+    }
+
+    .exo__add-sets-remove:hover:not(:disabled) {
+      background-color: color-mix(
+        in srgb,
+        var(--color-destructive) 12%,
+        transparent
+      );
+      border-color: color-mix(
+        in srgb,
+        var(--color-destructive) 40%,
+        transparent
+      );
+      color: var(--color-destructive);
+    }
+
+    .exo__add-sets-remove:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .exo__add-sets-remove svg {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+
+    .exo__add-sets-add {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      height: 4rem;
+      margin-top: 0.4rem;
+      background-color: transparent;
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-muted);
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
+    }
+
+    .exo__add-sets-add:hover {
+      background-color: var(--alpha-bg-subtle);
+      border-color: var(--alpha-border);
+      border-style: solid;
+      color: var(--color-text);
+    }
+
+    .exo__add-sets-add svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    /* ── Sets table action row (warmup + add) ── */
+    .exo__add-sets-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    @media (min-width: 640px) {
+      .exo__add-sets-actions {
+        flex-direction: row;
+        align-items: stretch;
+      }
+      .exo__add-sets-actions .exo__add-sets-warmup {
+        flex: 0 0 auto;
+      }
+      .exo__add-sets-actions .exo__add-sets-add {
+        flex: 1 1 auto;
+        margin-top: 0;
+      }
+    }
+
+    /* ── Warmup auto-generation button (dashed accent) ── */
+    .exo__add-sets-warmup {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      height: 4rem;
+      padding: 0 1.4rem;
+      background-color: transparent;
+      border: 1px dashed var(--color-accent);
+      border-radius: var(--radius-sm);
+      color: var(--color-accent);
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        border-style var(--transition-fast),
+        color var(--transition-fast);
+    }
+
+    .exo__add-sets-warmup:hover:not(:disabled) {
+      background-color: color-mix(
+        in srgb,
+        var(--color-accent) 10%,
+        transparent
+      );
+      border-style: solid;
+    }
+
+    .exo__add-sets-warmup:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background-color: transparent;
+      color: var(--color-muted);
+      border-color: var(--color-border);
+    }
+
+    .exo__add-sets-warmup svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Sets table: mobile (stacked cards) ── */
+    @media (max-width: 640px) {
+      .exo__add-sets-header {
+        display: none;
+      }
+      .exo__add-sets-row {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "num    remove"
+          "type   type"
+          "weight reps";
+        gap: 0.8rem;
+        padding: 1rem;
+        background-color: var(--color-surface-2);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+      }
+      .exo__add-sets-num {
+        grid-area: num;
+        justify-self: start;
+      }
+      .exo__add-sets-remove {
+        grid-area: remove;
+        justify-self: end;
+      }
+      .exo__add-sets-type {
+        grid-area: type;
+      }
+      .exo__add-sets-weight {
+        grid-area: weight;
+      }
+      .exo__add-sets-reps {
+        grid-area: reps;
+      }
+      .exo__add-sets-label {
+        display: block;
+      }
+    }
+
+    .exo__add-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
+      margin-top: 0.6rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* ════════════════════════════════════════════════════
+     SUCCESS TOAST
+     ════════════════════════════════════════════════════ */
+    .exo__toast {
+      position: fixed;
+      left: 50%;
+      bottom: 2.4rem;
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      max-width: calc(100vw - 3.2rem);
+      padding: 1rem 1.6rem;
+      background-color: var(--color-surface-3);
+      border: 1px solid var(--color-success);
+      border-radius: var(--radius-md);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      font-size: 1.3rem;
+      font-weight: 600;
+      line-height: 1.2;
+      box-shadow:
+        0 10px 30px color-mix(in srgb, #000 50%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--color-success) 15%, transparent);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .exo__toast-icon {
+      color: var(--color-success);
+      flex-shrink: 0;
+    }
+    .exo__toast-icon svg {
+      width: 1.8rem;
+      height: 1.8rem;
+    }
+
+    /* ════════════════════════════════════════════════════
+     REDUCED MOTION
+     ════════════════════════════════════════════════════ */
+    @media (prefers-reduced-motion: reduce) {
+      .exo__add-btn,
+      .exo__filter,
+      .exo__icon-btn,
+      .exo__add-sets-warmup,
+      .exo__add-sets-add,
+      .exo__tip-toggle,
+      .exo__tip-toggle:active {
+        transition: none;
+        transform: none;
+      }
+    }
+  </style>
+</AppLayout>

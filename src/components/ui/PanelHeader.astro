@@ -1,0 +1,14 @@
+---
+interface Props {
+  title: string;
+  meta?: string;
+  class?: string;
+}
+
+const { title, meta, class: className = '' } = Astro.props;
+---
+
+<header class:list={['flex items-baseline justify-between gap-3 flex-wrap mb-[1.4rem]', className]}>
+  <h2 class="font-[var(--font-display)] text-[1.4rem] font-bold uppercase tracking-[0.14em] text-[var(--color-text)] m-0">{title}</h2>
+  {meta && <span class="text-[1.2rem] text-[var(--color-muted)] font-medium">{meta}</span>}
+</header>

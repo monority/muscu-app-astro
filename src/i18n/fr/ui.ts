@@ -140,9 +140,9 @@ export default {
 
   microPatternsDesc: 'Petits motifs récurrents : points d\'état, pills de type de série et contrôle segmenté.',
   dots: 'Points d\'état',
-  dotsDesc: 'Indicateurs d\'état discrets (statut de séance, métadonnées) — même langage que /calendrier.',
+  dotsDesc: 'Indicateurs d\'état discrets (statut de séance, métadonnées) — même langage que /calendar.',
   setTypePills: 'Pills de type de série',
-  setTypePillsDesc: 'Étiquettes warm-up / work / top / drop / failure — copiées de /seances/comparer, à centraliser.',
+  setTypePillsDesc: 'Étiquettes warm-up / work / top / drop / failure — copiées de /sessions/compare, à centraliser.',
   segmented: 'Contrôle segmenté',
   segmentedDesc: 'Bascule semaine / mois — copiée de /progression/stats, à centraliser.',
 };

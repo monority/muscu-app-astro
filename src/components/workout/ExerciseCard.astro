@@ -18,7 +18,7 @@ const completedCount = sets.filter((set) => set.completed).length;
 const classes = ['workout-exercise', completedCount === sets.length && sets.length > 0 && 'workout-exercise--complete', className].filter(Boolean).join(' ');
 ---
 
-<article class:list={['flex flex-col gap-[1.4rem] py-8 border-b border-[var(--color-border)]', className, { 'workout-exercise--complete': completedCount === sets.length && sets.length > 0 }]}>
+<article class:list={['flex flex-col gap-[1.4rem] py-8 border-b border-[var(--color-border)]', classes]}>
   <header class="flex items-start justify-between gap-[1.2rem]">
     <div class="flex items-start gap-4 min-w-0">
       <span class="workout-exercise__marker w-2 h-[3.8rem] shrink-0 bg-[var(--color-border-strong)]" aria-hidden="true"></span>

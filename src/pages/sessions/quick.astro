@@ -1,22 +1,18 @@
 ﻿---
-
-import { t, localizedPath } from '../../i18n';
-import AppLayout from '../../layouts/AppLayout.astro';
-import Button from '../../components/ui/Button.astro';
-import { icons } from '../../lib/icons';
+import { t, localizedPath } from "../../i18n";
+import AppLayout from "../../layouts/AppLayout.astro";
+import Button from "../../components/ui/Button.astro";
+import { icons } from "../../lib/icons";
 const L = t();
 ---
 
 <AppLayout title={L.rapide.title}>
-  <div
-    class="qs"
-    x-data="quickSessionApp()"
-    x-init="init()"
-    x-cloak
-  >
+  <div class="qs" x-data="quickSessionApp()" x-init="init()" x-cloak>
     {/* ─── Top bar (working + resting) ─── */}
     <template x-if="state === 'working' || state === 'resting'">
-      <header class="shrink-0 grid grid-cols-[6rem_1fr_6rem] items-center gap-3 py-3 px-4 border-b border-[var(--alpha-bg-soft)] max-[480px]:grid-cols-[5.2rem_1fr_5.2rem] max-[480px]:p-[1rem] max-[360px]:grid-cols-[4.8rem_minmax(0,1fr)_4.8rem] max-[360px]:gap-1.5">
+      <header
+        class="shrink-0 grid grid-cols-[6rem_1fr_6rem] items-center gap-3 py-3 px-4 border-b border-[var(--alpha-bg-soft)] max-[480px]:grid-cols-[5.2rem_1fr_5.2rem] max-[480px]:p-[1rem] max-[360px]:grid-cols-[4.8rem_minmax(0,1fr)_4.8rem] max-[360px]:gap-1.5"
+      >
         <button
           type="button"
           class="inline-flex items-center justify-center w-[5.6rem] h-[5.6rem] bg-surface-2 text-text border border-border rounded-md cursor-pointer appearance-none transition duration-140 hover:bg-surface-3 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-96 motion-reduce:transition-none max-[480px]:w-[5.2rem] max-[480px]:h-[5.2rem] max-[360px]:w-[4.8rem] max-[360px]:h-[4.8rem]"
@@ -27,16 +23,30 @@ const L = t();
         </button>
 
         <div class="flex flex-col items-center gap-1.5 min-w-0">
-          <span class="text-[1.4rem] text-muted font-semibold text-center leading-[1.2] tracking-[0.01em] max-[480px]:text-[1.2rem] max-[360px]:text-[1.1rem]" aria-live="polite" aria-atomic="true">
-            {L.rapide.setProgress} <strong class="text-text font-bold" x-text="currentSetIndex + 1"></strong>/<span x-text="currentExercise?.sets?.length || 0"></span>
+          <span
+            class="text-[1.4rem] text-muted font-semibold text-center leading-[1.2] tracking-[0.01em] max-[480px]:text-[1.2rem] max-[360px]:text-[1.1rem]"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {L.rapide.setProgress}
+            <strong class="text-text font-bold" x-text="currentSetIndex + 1"
+            ></strong>/<span x-text="currentExercise?.sets?.length || 0"></span>
             <span class="mx-1 opacity-40">·</span>
-            {L.rapide.exerciseProgress} <strong class="text-text font-bold" x-text="currentExerciseIndex + 1"></strong>/<span x-text="totalExercises"></span>
+            {L.rapide.exerciseProgress}
+            <strong
+              class="text-text font-bold"
+              x-text="currentExerciseIndex + 1"></strong>/<span
+              x-text="totalExercises"></span>
           </span>
-          <div class="w-full max-w-[28rem] h-1.5 bg-surface-2 rounded-pill overflow-hidden" aria-hidden="true">
+          <div
+            class="w-full max-w-[28rem] h-1.5 bg-surface-2 rounded-pill overflow-hidden"
+            aria-hidden="true"
+          >
             <div
               class="qs__progress-fill"
               :style="`width: ${progressPercent}%`"
-            ></div>
+            >
+            </div>
           </div>
         </div>
 
@@ -54,18 +64,32 @@ const L = t();
 
     {/* ─── STATE 1 — Selecting ─── */}
     <template x-if="state === 'selecting'">
-      <section class="flex-1 flex items-center justify-center p-6 overflow-y-auto max-[480px]:items-start max-[480px]:p-[2rem_1rem]">
-        <div class="w-full max-w-[52rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3">
-          <div class="w-[9.6rem] h-[9.6rem] rounded-full bg-surface-2 border border-border text-accent inline-flex items-center justify-center max-[480px]:w-[7.2rem] max-[480px]:h-[7.2rem]" aria-hidden="true">
+      <section
+        class="flex-1 flex items-center justify-center p-6 overflow-y-auto max-[480px]:items-start max-[480px]:p-[2rem_1rem]"
+      >
+        <div
+          class="w-full max-w-[52rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3"
+        >
+          <div
+            class="w-[9.6rem] h-[9.6rem] rounded-full bg-surface-2 border border-border text-accent inline-flex items-center justify-center max-[480px]:w-[7.2rem] max-[480px]:h-[7.2rem]"
+            aria-hidden="true"
+          >
             <Fragment set:html={icons.zap(64, 64)} />
           </div>
-          <h1 class="font-display text-[clamp(3.2rem,6vw,4.8rem)] font-bold leading-none m-0 text-text tracking-[-0.01em] max-[480px]:text-[clamp(2.6rem,11vw,3.8rem)]">{L.rapide.title}</h1>
+          <h1
+            class="font-display text-[clamp(3.2rem,6vw,4.8rem)] font-bold leading-none m-0 text-text tracking-[-0.01em] max-[480px]:text-[clamp(2.6rem,11vw,3.8rem)]"
+          >
+            {L.rapide.title}
+          </h1>
           <p class="text-[1.5rem] text-muted leading-[1.4] m-0 max-w-[38rem]">
             {L.rapide.introText}
           </p>
 
           <div class="w-full max-w-[44rem] flex flex-col gap-2 mt-2 text-left">
-            <label class="font-display text-[1.2rem] text-muted uppercase tracking-[0.14em] font-bold" for="qs-session">{L.rapide.session}</label>
+            <label
+              class="font-display text-[1.2rem] text-muted uppercase tracking-[0.14em] font-bold"
+              for="qs-session">{L.rapide.session}</label
+            >
             <select
               id="qs-session"
               class="w-full h-15 px-4 bg-surface-2 border border-border rounded-md text-text font-body text-[1.6rem] font-semibold cursor-pointer appearance-none transition duration-140 hover:bg-surface-3 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
@@ -81,8 +105,12 @@ const L = t();
             </select>
           </div>
 
-          <div class="flex gap-3 w-full max-w-[44rem] mt-1 max-[480px]:flex-col max-[480px]:gap-2">
-            <Button variant="ghost" href={localizedPath("/seances")}>{L.common.back}</Button>
+          <div
+            class="flex gap-3 w-full max-w-[44rem] mt-1 max-[480px]:flex-col max-[480px]:gap-2"
+          >
+            <Button variant="ghost" href={localizedPath("/sessions")}
+              >{L.common.back}</Button
+            >
             <Button
               variant="primary"
               :disabled="!selectedSessionId"
@@ -95,7 +123,10 @@ const L = t();
           <template x-if="availableSessions.length === 0">
             <p class="mt-2 text-muted text-[1.4rem] leading-[1.5]">
               {L.rapide.emptyDesc}
-              <a class="text-accent underline" href={localizedPath("/seances/creer")}>{L.rapide.restart}</a>.
+              <a
+                class="text-accent underline"
+                href={localizedPath("/sessions/create")}>{L.rapide.restart}</a
+              >.
             </p>
           </template>
         </div>
@@ -109,28 +140,60 @@ const L = t();
         @touchstart="onTouchStart($event)"
         @touchend="onTouchEnd($event)"
       >
-        <div class="w-full max-w-[60rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3">
-          <div class="font-display text-[clamp(2.4rem,5.5vw,4rem)] font-bold leading-[1.05] text-text tracking-[-0.01em] break-words max-[360px]:text-[2.2rem]" x-text="trExercise(currentExercise?.name)" aria-live="polite" aria-atomic="true"></div>
-          <div class="text-[1.4rem] text-muted uppercase tracking-[0.14em] font-semibold" x-text="trMuscle(currentExercise?.muscle)"></div>
+        <div
+          class="w-full max-w-[60rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3"
+        >
+          <div
+            class="font-display text-[clamp(2.4rem,5.5vw,4rem)] font-bold leading-[1.05] text-text tracking-[-0.01em] break-words max-[360px]:text-[2.2rem]"
+            x-text="trExercise(currentExercise?.name)"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+          </div>
+          <div
+            class="text-[1.4rem] text-muted uppercase tracking-[0.14em] font-semibold"
+            x-text="trMuscle(currentExercise?.muscle)"
+          >
+          </div>
 
-          <div class="text-[1.6rem] text-muted font-semibold inline-flex items-center gap-2.5 mt-1" aria-live="polite" aria-atomic="true">
-            {L.rapide.setProgress} <span x-text="currentSet.setNumber"></span>
+          <div
+            class="text-[1.6rem] text-muted font-semibold inline-flex items-center gap-2.5 mt-1"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {L.rapide.setProgress}
+            <span x-text="currentSet.setNumber"></span>
             <span
               class="qs__set-type inline-flex items-center h-[2.6rem] px-2.5 rounded-pill text-[1.1rem] font-bold uppercase tracking-[0.04em] bg-surface-2 border border-border"
               :class="'qs__set-type--' + currentSet.type"
-              x-text="typeLabel(currentSet.type)"
-            ></span>
+              x-text="typeLabel(currentSet.type)"></span>
           </div>
 
-          <div class="flex items-center justify-center gap-[clamp(2rem,5vw,4rem)] my-2 max-[480px]:gap-[clamp(1.2rem,8vw,2.4rem)]">
+          <div
+            class="flex items-center justify-center gap-[clamp(2rem,5vw,4rem)] my-2 max-[480px]:gap-[clamp(1.2rem,8vw,2.4rem)]"
+          >
             <div class="flex flex-col items-center leading-none">
-              <span class="font-display text-[clamp(5.2rem,14vw,9.6rem)] font-bold text-text leading-none tracking-[-0.02em] max-[360px]:text-[clamp(4.6rem,18vw,7rem)]" x-text="formatWeight(currentSet.weight)"></span>
-              <span class="font-body text-[1.6rem] text-muted font-semibold uppercase tracking-[0.12em] mt-1" x-text="weightUnit()"></span>
+              <span
+                class="font-display text-[clamp(5.2rem,14vw,9.6rem)] font-bold text-text leading-none tracking-[-0.02em] max-[360px]:text-[clamp(4.6rem,18vw,7rem)]"
+                x-text="formatWeight(currentSet.weight)"></span>
+              <span
+                class="font-body text-[1.6rem] text-muted font-semibold uppercase tracking-[0.12em] mt-1"
+                x-text="weightUnit()"></span>
             </div>
-            <div class="font-display text-[clamp(3.2rem,7vw,5.6rem)] text-muted font-light leading-none" aria-hidden="true">×</div>
+            <div
+              class="font-display text-[clamp(3.2rem,7vw,5.6rem)] text-muted font-light leading-none"
+              aria-hidden="true"
+            >
+              ×
+            </div>
             <div class="flex flex-col items-center leading-none">
-              <span class="font-display text-[clamp(5.2rem,14vw,9.6rem)] font-bold text-text leading-none tracking-[-0.02em] max-[360px]:text-[clamp(4.6rem,18vw,7rem)]" x-text="currentSet.reps"></span>
-              <span class="font-body text-[1.6rem] text-muted font-semibold uppercase tracking-[0.12em] mt-1">{L.rapide.repsUnit}</span>
+              <span
+                class="font-display text-[clamp(5.2rem,14vw,9.6rem)] font-bold text-text leading-none tracking-[-0.02em] max-[360px]:text-[clamp(4.6rem,18vw,7rem)]"
+                x-text="currentSet.reps"></span>
+              <span
+                class="font-body text-[1.6rem] text-muted font-semibold uppercase tracking-[0.12em] mt-1"
+                >{L.rapide.repsUnit}</span
+              >
             </div>
           </div>
 
@@ -182,22 +245,43 @@ const L = t();
 
     {/* ─── STATE 3 — Resting ─── */}
     <template x-if="state === 'resting'">
-      <section class="flex-1 flex items-center justify-center p-6 max-[480px]:items-start max-[480px]:p-[2rem_1rem] max-[480px]:overflow-y-auto">
-        <div class="w-full max-w-[60rem] flex flex-col items-center gap-6 text-center max-[480px]:gap-3">
-          <div class="text-success font-display text-[1.3rem] font-bold tracking-[0.08em] uppercase" role="status" aria-live="polite">
+      <section
+        class="flex-1 flex items-center justify-center p-6 max-[480px]:items-start max-[480px]:p-[2rem_1rem] max-[480px]:overflow-y-auto"
+      >
+        <div
+          class="w-full max-w-[60rem] flex flex-col items-center gap-6 text-center max-[480px]:gap-3"
+        >
+          <div
+            class="text-success font-display text-[1.3rem] font-bold tracking-[0.08em] uppercase"
+            role="status"
+            aria-live="polite"
+          >
             {L.rapide.setRecorded}
           </div>
-          <div class="font-display text-[2rem] text-muted uppercase tracking-[0.16em] font-bold">{L.rapide.resting}</div>
+          <div
+            class="font-display text-[2rem] text-muted uppercase tracking-[0.16em] font-bold"
+          >
+            {L.rapide.resting}
+          </div>
           <div
             class="qs__resting-timer"
             role="timer"
             aria-live="polite"
             :class="{ 'qs__resting-timer--low': restRemaining <= 10 && restRemaining > 0 }"
             x-text="formatRestTime()"
-          ></div>
-          <div class="text-[1.6rem] text-muted leading-[1.4]" x-text="restNextLabel()" aria-live="polite" aria-atomic="true"></div>
+          >
+          </div>
+          <div
+            class="text-[1.6rem] text-muted leading-[1.4]"
+            x-text="restNextLabel()"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+          </div>
 
-          <div class="grid grid-cols-[1fr_1.6fr_1fr] gap-3 w-full max-w-[50rem] max-[480px]:grid-cols-1 max-[480px]:gap-2">
+          <div
+            class="grid grid-cols-[1fr_1.6fr_1fr] gap-3 w-full max-w-[50rem] max-[480px]:grid-cols-1 max-[480px]:gap-2"
+          >
             <Button
               variant="ghost"
               @click="addRestTime(-15)"
@@ -235,8 +319,12 @@ const L = t();
 
     {/* ─── STATE 4 — Completed ─── */}
     <template x-if="state === 'completed'">
-      <section class="flex-1 flex items-center justify-center p-6 overflow-y-auto max-[480px]:items-start max-[480px]:p-[2rem_1rem]">
-        <div class="w-full max-w-[56rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3">
+      <section
+        class="flex-1 flex items-center justify-center p-6 overflow-y-auto max-[480px]:items-start max-[480px]:p-[2rem_1rem]"
+      >
+        <div
+          class="w-full max-w-[56rem] flex flex-col items-center gap-4 text-center max-[480px]:gap-3"
+        >
           <div
             class="qs__done-icon w-[12rem] h-[12rem] rounded-full bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-success inline-flex items-center justify-center mb-1 max-[480px]:w-[8rem] max-[480px]:h-[8rem]"
             :class="{ 'qs__done-icon--partial': recordedSets < totalSets }"
@@ -244,47 +332,92 @@ const L = t();
           >
             <Fragment set:html={icons.checkCircle(80, 80)} />
           </div>
-          <h1 class="qs__done-title font-display text-[clamp(3.2rem,7vw,4.8rem)] font-bold leading-none m-0 text-text tracking-[-0.01em]" x-text="completionTitle"></h1>
-          <p class="qs__done-name text-[1.6rem] text-muted m-0" x-text="session?.name"></p>
-          <p class="qs__done-message text-[1.4rem] text-success -mt-1" x-text="completionMessage" role="status"></p>
+          <h1
+            class="qs__done-title font-display text-[clamp(3.2rem,7vw,4.8rem)] font-bold leading-none m-0 text-text tracking-[-0.01em]"
+            x-text="completionTitle"
+          >
+          </h1>
+          <p
+            class="qs__done-name text-[1.6rem] text-muted m-0"
+            x-text="session?.name"
+          >
+          </p>
+          <p
+            class="qs__done-message text-[1.4rem] text-success -mt-1"
+            x-text="completionMessage"
+            role="status"
+          >
+          </p>
 
-          <div class="w-full grid grid-cols-2 gap-3 mt-4 mb-1 max-[480px]:gap-2 min-[540px]:grid-cols-4">
-            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
-              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="`${recordedSets} / ${totalSets}`"></div>
-              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.setsDone}</div>
+          <div
+            class="w-full grid grid-cols-2 gap-3 mt-4 mb-1 max-[480px]:gap-2 min-[540px]:grid-cols-4"
+          >
+            <div
+              class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5"
+            >
+              <div
+                class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none"
+                x-text="`${recordedSets} / ${totalSets}`"
+              >
+              </div>
+              <div
+                class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]"
+              >
+                {L.rapide.setsDone}
+              </div>
             </div>
-            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
-              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="`${completedExercises} / ${totalExercises}`"></div>
-              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.exercises}</div>
+            <div
+              class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5"
+            >
+              <div
+                class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none"
+                x-text="`${completedExercises} / ${totalExercises}`"
+              >
+              </div>
+              <div
+                class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]"
+              >
+                {L.rapide.exercises}
+              </div>
             </div>
-            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
-              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="formatDuration(sessionDuration)"></div>
-              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.duration}</div>
+            <div
+              class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5"
+            >
+              <div
+                class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none"
+                x-text="formatDuration(sessionDuration)"
+              >
+              </div>
+              <div
+                class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]"
+              >
+                {L.rapide.duration}
+              </div>
             </div>
-            <div class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5">
-              <div class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none" x-text="formatWeight(sessionTotalVolume)"></div>
-              <div class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]">{L.rapide.volume}</div>
+            <div
+              class="bg-surface-2 border border-border rounded-md py-4 px-3 flex flex-col items-center gap-1 max-[480px]:py-3 max-[480px]:px-1.5"
+            >
+              <div
+                class="font-display text-[clamp(2.4rem,4vw,3.2rem)] font-bold text-accent leading-none"
+                x-text="formatWeight(sessionTotalVolume)"
+              >
+              </div>
+              <div
+                class="text-[1.1rem] text-muted uppercase tracking-[0.1em] font-bold max-[480px]:text-[0.9rem] max-[480px]:tracking-[0.06em]"
+              >
+                {L.rapide.volume}
+              </div>
             </div>
           </div>
 
           <div class="flex flex-col gap-3 w-full mt-2 min-[540px]:flex-row">
-            <Button
-              variant="primary"
-              :href="detailHref(session?.id)"
-            >
+            <Button variant="primary" :href="detailHref(session?.id)">
               {L.rapide.viewSession}
             </Button>
-            <Button
-              variant="ghost"
-              :disabled="!canUndo"
-              @click="undoLastSet()"
-            >
+            <Button variant="ghost" :disabled="!canUndo" @click="undoLastSet()">
               {L.rapide.undoLast}
             </Button>
-            <Button
-              variant="ghost"
-              @click="reset()"
-            >
+            <Button variant="ghost" @click="reset()">
               {L.rapide.chooseAnother}
             </Button>
           </div>
@@ -301,55 +434,64 @@ const L = t();
     type Session,
     type SessionSet,
     type SetType,
-    } from '../../lib/storage';
-  import { t, localizedPath } from '../../i18n';
-  import { undoLastCompletedSet } from '../../lib/session-utils';
+  } from "../../lib/storage";
+  import { t, localizedPath } from "../../i18n";
+  import { undoLastCompletedSet } from "../../lib/session-utils";
 
   const LABELS = t();
 
   // ─── Pure helpers (module scope) ───────────────────────
   function typeLabelFn(t: SetType): string {
     switch (t) {
-      case 'warmup': return LABELS.rapide.typeWarmup;
-      case 'work':   return LABELS.rapide.typeWork;
-      case 'top':    return LABELS.rapide.typeTop;
-      case 'drop':   return LABELS.rapide.typeDrop;
-      case 'failure': return LABELS.rapide.typeFailure;
-      default:       return '';
+      case "warmup":
+        return LABELS.rapide.typeWarmup;
+      case "work":
+        return LABELS.rapide.typeWork;
+      case "top":
+        return LABELS.rapide.typeTop;
+      case "drop":
+        return LABELS.rapide.typeDrop;
+      case "failure":
+        return LABELS.rapide.typeFailure;
+      default:
+        return "";
     }
   }
 
   function formatWeightFn(w: number): string {
-    if (!Number.isFinite(w) || w <= 0) return '0';
+    if (!Number.isFinite(w) || w <= 0) return "0";
     const rounded = Math.round(w * 10) / 10;
     return Number.isFinite(rounded) && Number.isInteger(rounded)
       ? String(rounded)
-      : rounded.toFixed(1).replace(/\.0$/, '');
+      : rounded.toFixed(1).replace(/\.0$/, "");
   }
 
   function todayISO(): string {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   }
 
   function formatDurationFn(seconds?: number): string {
-    if (!seconds || seconds <= 0 || !Number.isFinite(seconds)) return '0' + LABELS.rapide.minShort;
+    if (!seconds || seconds <= 0 || !Number.isFinite(seconds))
+      return "0" + LABELS.rapide.minShort;
     const total = Math.floor(seconds);
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
     const s = total % 60;
-    if (h > 0) return `${h}${LABELS.rapide.hShort} ${m.toString().padStart(2, '0')}${LABELS.rapide.minShort}`;
-    if (m > 0) return `${m}${LABELS.rapide.minShort} ${s.toString().padStart(2, '0')}${LABELS.rapide.sShort}`;
+    if (h > 0)
+      return `${h}${LABELS.rapide.hShort} ${m.toString().padStart(2, "0")}${LABELS.rapide.minShort}`;
+    if (m > 0)
+      return `${m}${LABELS.rapide.minShort} ${s.toString().padStart(2, "0")}${LABELS.rapide.sShort}`;
     return `${s}${LABELS.rapide.sShort}`;
   }
 
   const DEFAULT_REST = 90;
 
-  document.addEventListener('alpine:init', () => {
+  document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
 
-    Alpine.data('quickSessionApp', () => ({
-      state: 'selecting' as 'selecting' | 'working' | 'resting' | 'completed',
+    Alpine.data("quickSessionApp", () => ({
+      state: "selecting" as "selecting" | "working" | "resting" | "completed",
 
       availableSessions: [] as Array<{
         id: string;
@@ -357,7 +499,7 @@ const L = t();
         totalSets: number;
         totalVolume: number;
       }>,
-      selectedSessionId: '',
+      selectedSessionId: "",
       session: null as Session | null,
 
       currentExerciseIndex: 0,
@@ -379,14 +521,22 @@ const L = t();
 
       init() {
         this.loadSessions();
-        const requestedSessionId = new URLSearchParams(window.location.search).get('session');
-        if (requestedSessionId && this.availableSessions.some((s) => s.id === requestedSessionId)) {
+        const requestedSessionId = new URLSearchParams(
+          window.location.search,
+        ).get("session");
+        if (
+          requestedSessionId &&
+          this.availableSessions.some((s) => s.id === requestedSessionId)
+        ) {
           this.selectedSessionId = requestedSessionId;
         }
         this._installKeyboard();
         this._requestWakeLock();
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible' && this.state === 'working') {
+        document.addEventListener("visibilitychange", () => {
+          if (
+            document.visibilityState === "visible" &&
+            this.state === "working"
+          ) {
             this._requestWakeLock();
           }
         });
@@ -398,7 +548,7 @@ const L = t();
           this.restInterval = null;
         }
         if (this._keyHandler) {
-          window.removeEventListener('keydown', this._keyHandler);
+          window.removeEventListener("keydown", this._keyHandler);
           this._keyHandler = null;
         }
         this._releaseWakeLock();
@@ -415,11 +565,7 @@ const L = t();
             );
             const totalVolume = s.exercises.reduce(
               (sum, ex) =>
-                sum +
-                ex.sets.reduce(
-                  (v, set) => v + set.weight * set.reps,
-                  0,
-                ),
+                sum + ex.sets.reduce((v, set) => v + set.weight * set.reps, 0),
               0,
             );
             return {
@@ -446,12 +592,12 @@ const L = t();
         this.endTime = 0;
         const actualDate = todayISO();
         this.session.date = actualDate;
-        this.session.status = 'in-progress';
+        this.session.status = "in-progress";
         updateSession(this.session.id, {
           date: actualDate,
-          status: 'in-progress',
+          status: "in-progress",
         });
-        this.state = 'working';
+        this.state = "working";
       },
 
       get currentExercise() {
@@ -596,8 +742,7 @@ const L = t();
 
         const isLastExercise =
           this.currentExerciseIndex === this.session.exercises.length - 1;
-        const isLastSet =
-          this.currentSetIndex === ex.sets.length - 1;
+        const isLastSet = this.currentSetIndex === ex.sets.length - 1;
         if (isLastExercise && isLastSet) {
           this._finishSession();
         } else {
@@ -621,13 +766,13 @@ const L = t();
           this.restInterval = null;
         }
         this.restRemaining = 0;
-        this.state = 'working';
+        this.state = "working";
         this.currentExerciseIndex = res.exerciseIndex;
         this.currentSetIndex = res.setIndex;
-        if (this.session.status === 'completed') {
-          this.session.status = 'in-progress';
+        if (this.session.status === "completed") {
+          this.session.status = "in-progress";
           updateSession(this.session.id, {
-            status: 'in-progress',
+            status: "in-progress",
             exercises: this.session.exercises,
           });
         } else {
@@ -639,7 +784,7 @@ const L = t();
       _startRest() {
         this.restRemaining = DEFAULT_REST;
         this.restPaused = false;
-        this.state = 'resting';
+        this.state = "resting";
         if (this.restInterval) {
           window.clearInterval(this.restInterval);
         }
@@ -662,7 +807,7 @@ const L = t();
           this.restInterval = null;
         }
         this.restRemaining = 0;
-        this.state = 'working';
+        this.state = "working";
       },
 
       skipRest() {
@@ -679,7 +824,7 @@ const L = t();
           this.restInterval = null;
         }
         this._releaseWakeLock();
-        window.location.href = localizedPath('/seances');
+        window.location.href = localizedPath("/sessions");
       },
 
       confirmStop() {
@@ -689,10 +834,10 @@ const L = t();
       _finishSession() {
         if (!this.session) return;
         this.endTime = Date.now();
-        this.session.status = 'completed';
+        this.session.status = "completed";
         this.session.duration = this.sessionDuration;
         updateSession(this.session.id, {
-          status: 'completed',
+          status: "completed",
           duration: this.sessionDuration,
           exercises: this.session.exercises,
         });
@@ -701,7 +846,7 @@ const L = t();
           this.restInterval = null;
         }
         this._releaseWakeLock();
-        this.state = 'completed';
+        this.state = "completed";
       },
 
       reset() {
@@ -711,7 +856,7 @@ const L = t();
         }
         this._releaseWakeLock();
         this.session = null;
-        this.selectedSessionId = '';
+        this.selectedSessionId = "";
         this.currentExerciseIndex = 0;
         this.currentSetIndex = 0;
         this.completedSets = 0;
@@ -719,7 +864,7 @@ const L = t();
         this.endTime = 0;
         this.restRemaining = 0;
         this.loadSessions();
-        this.state = 'selecting';
+        this.state = "selecting";
       },
 
       onTouchStart(e: TouchEvent) {
@@ -747,46 +892,46 @@ const L = t();
           const target = e.target as HTMLElement | null;
           if (
             target &&
-            (target.tagName === 'INPUT' ||
-              target.tagName === 'TEXTAREA' ||
-              target.tagName === 'SELECT')
+            (target.tagName === "INPUT" ||
+              target.tagName === "TEXTAREA" ||
+              target.tagName === "SELECT")
           ) {
             return;
           }
-          if (this.state === 'working') {
-            if (e.key === ' ' || e.key === 'Enter') {
+          if (this.state === "working") {
+            if (e.key === " " || e.key === "Enter") {
               e.preventDefault();
               this.completeSet();
-            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
               e.preventDefault();
               this.nextSet();
-            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
               e.preventDefault();
               this.prevSet();
             }
-          } else if (this.state === 'resting') {
-            if (e.key === ' ' || e.key === 'Enter') {
+          } else if (this.state === "resting") {
+            if (e.key === " " || e.key === "Enter") {
               e.preventDefault();
               this.skipRest();
             }
-          } else if (this.state === 'selecting' || this.state === 'completed') {
-            if (e.key === 'Escape') {
-              if (this.state === 'completed') this.reset();
-              else window.location.href = localizedPath('/seances');
+          } else if (this.state === "selecting" || this.state === "completed") {
+            if (e.key === "Escape") {
+              if (this.state === "completed") this.reset();
+              else window.location.href = localizedPath("/sessions");
             }
           }
         };
-        window.addEventListener('keydown', this._keyHandler);
+        window.addEventListener("keydown", this._keyHandler);
       },
 
       async _requestWakeLock(): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const nav = navigator as any;
-        if (!nav.wakeLock || typeof nav.wakeLock.request !== 'function') {
+        if (!nav.wakeLock || typeof nav.wakeLock.request !== "function") {
           return;
         }
         try {
-          this.wakeLock = await nav.wakeLock.request('screen');
+          this.wakeLock = await nav.wakeLock.request("screen");
         } catch {
           // Permission denied, no user activation, or insecure context.
         }
@@ -794,7 +939,7 @@ const L = t();
 
       _releaseWakeLock() {
         try {
-          if (this.wakeLock && typeof this.wakeLock.release === 'function') {
+          if (this.wakeLock && typeof this.wakeLock.release === "function") {
             this.wakeLock.release();
           }
         } catch {
@@ -814,21 +959,23 @@ const L = t();
         return formatDurationFn(s);
       },
       detailHref(id?: string): string {
-        return localizedPath('/seances/detail?id=' + encodeURIComponent(id || ''));
+        return localizedPath(
+          "/sessions/detail?id=" + encodeURIComponent(id || ""),
+        );
       },
       weightUnit(): string {
-        return 'kg';
+        return "kg";
       },
       formatRestTime(): string {
         const s = this.restRemaining;
         const m = Math.floor(s / 60);
         const r = s % 60;
-        return `${m}:${r.toString().padStart(2, '0')}`;
+        return `${m}:${r.toString().padStart(2, "0")}`;
       },
       restNextLabel(): string {
-        if (!this.currentExercise) return '';
+        if (!this.currentExercise) return "";
         const set = this.currentSet;
-        if (!set) return '';
+        if (!set) return "";
         const weight = this.formatWeight(set.weight);
         const unit = this.weightUnit();
         return `${LABELS.rapide.nextUp} ${weight} ${unit} × ${set.reps}`;
@@ -837,14 +984,12 @@ const L = t();
   });
 </script>
 
-
 <style>
   /* ── Root overlay (position: fixed) ────────────────────── */
   .qs {
     position: fixed;
     inset: 0;
     z-index: 100;
-    background-color: var(--color-bg);
     color: var(--color-text);
     display: flex;
     flex-direction: column;
@@ -855,7 +1000,11 @@ const L = t();
   /* ── Progress fill gradient ────────────────────────────── */
   .qs__progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 65%, white));
+    background: linear-gradient(
+      90deg,
+      var(--color-accent),
+      color-mix(in srgb, var(--color-accent) 65%, white)
+    );
     transition: width 280ms ease;
   }
 
@@ -875,8 +1024,13 @@ const L = t();
     animation: qs-pulse 1s ease-in-out infinite;
   }
   @keyframes qs-pulse {
-    0%, 100% { transform: scale(1); }
-    50%      { transform: scale(1.04); }
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.04);
+    }
   }
 
   /* ── Set-type badge modifiers (Alpine dynamic :class) ─── */
@@ -891,7 +1045,11 @@ const L = t();
     border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
   }
   .qs__set-type--top {
-    background-color: color-mix(in srgb, var(--color-cat-core) 12%, transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--color-cat-core) 12%,
+      transparent
+    );
     color: var(--color-cat-core);
     border-color: color-mix(in srgb, var(--color-cat-core) 30%, transparent);
   }
@@ -901,7 +1059,11 @@ const L = t();
     border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
   }
   .qs__set-type--failure {
-    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--color-destructive) 12%,
+      transparent
+    );
     color: var(--color-destructive);
     border-color: color-mix(in srgb, var(--color-destructive) 30%, transparent);
   }
@@ -911,13 +1073,21 @@ const L = t();
     background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
     color: var(--color-warning);
   }
-  .qs__done-icon--partial ~ .qs__done-title + .qs__done-name + .qs__done-message {
+  .qs__done-icon--partial
+    ~ .qs__done-title
+    + .qs__done-name
+    + .qs__done-message {
     color: var(--color-warning);
   }
 
   /* ── Child component overrides ────────────────────────── */
-  .qs__selecting-actions :global(.button) { flex: 1; }
-  .qs__resting-actions :global(.button) { min-height: 6.4rem; font-size: 1.6rem; }
+  .qs__selecting-actions :global(.button) {
+    flex: 1;
+  }
+  .qs__resting-actions :global(.button) {
+    min-height: 6.4rem;
+    font-size: 1.6rem;
+  }
   .qs__resting-actions :global(.qs__undo) {
     grid-column: 1 / -1;
     min-height: 4.8rem;
@@ -928,14 +1098,25 @@ const L = t();
     font-size: 1.4rem;
     color: var(--color-muted);
   }
-  .qs__undo-working:disabled { opacity: 0.35; }
-  .qs__done-actions :global(.button) { flex: 1; }
+  .qs__undo-working:disabled {
+    opacity: 0.35;
+  }
+  .qs__done-actions :global(.button) {
+    flex: 1;
+  }
 
   /* ── Responsive: child component overrides ────────────── */
   @media (max-width: 480px) {
-    .qs__resting-timer { font-size: clamp(8rem, 32vw, 12rem); }
-    .qs__resting-actions :global(.qs__undo) { grid-column: auto; order: 3; }
-    .qs__selecting-actions :global(.button) { width: 100%; }
+    .qs__resting-timer {
+      font-size: clamp(8rem, 32vw, 12rem);
+    }
+    .qs__resting-actions :global(.qs__undo) {
+      grid-column: auto;
+      order: 3;
+    }
+    .qs__selecting-actions :global(.button) {
+      width: 100%;
+    }
   }
 
   /* ── Reduced motion ───────────────────────────────────── */

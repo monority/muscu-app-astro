@@ -1,18 +1,23 @@
 ﻿---
-import AppLayout from '../../../layouts/AppLayout.astro';
-import PageHeader from '../../../components/layout/PageHeader.astro';
-import Card from '../../../components/ui/Card.astro';
-import CardHeader from '../../../components/ui/CardHeader.astro';
-import CardTitle from '../../../components/ui/CardTitle.astro';
-import CardContent from '../../../components/ui/CardContent.astro';
-import Badge from '../../../components/ui/Badge.astro';
-import Button from '../../../components/ui/Button.astro';
-import Input from '../../../components/ui/Input.astro';
-import Dialog from '../../../components/ui/Dialog.astro';
-import Toast from '../../../components/ui/Toast.astro';
-import { TRAINING_TEMPLATES } from '../../../lib/templates';
-import { t, localizedPath, trTemplateName, trTemplateDesc } from '../../../i18n';
-import { icons } from '../../../lib/icons';
+import AppLayout from "../../../layouts/AppLayout.astro";
+import PageHeader from "../../../components/layout/PageHeader.astro";
+import Card from "../../../components/ui/Card.astro";
+import CardHeader from "../../../components/ui/CardHeader.astro";
+import CardTitle from "../../../components/ui/CardTitle.astro";
+import CardContent from "../../../components/ui/CardContent.astro";
+import Badge from "../../../components/ui/Badge.astro";
+import Button from "../../../components/ui/Button.astro";
+import Input from "../../../components/ui/Input.astro";
+import Dialog from "../../../components/ui/Dialog.astro";
+import Toast from "../../../components/ui/Toast.astro";
+import { TRAINING_TEMPLATES } from "../../../lib/templates";
+import {
+  t,
+  localizedPath,
+  trTemplateName,
+  trTemplateDesc,
+} from "../../../i18n";
+import { icons } from "../../../lib/icons";
 
 const L = t();
 /**
@@ -20,102 +25,100 @@ const L = t();
  * Labels are localised to French for the in-row selector.
  */
 const setTypes = [
-  { value: 'warmup', label: L.builder.types.warmup },
-  { value: 'work', label: L.builder.types.work },
-  { value: 'top', label: L.builder.types.top },
-  { value: 'drop', label: L.builder.types.drop },
-  { value: 'failure', label: L.builder.types.failure },
+  { value: "warmup", label: L.builder.types.warmup },
+  { value: "work", label: L.builder.types.work },
+  { value: "top", label: L.builder.types.top },
+  { value: "drop", label: L.builder.types.drop },
+  { value: "failure", label: L.builder.types.failure },
 ] as const;
 ---
 
 <AppLayout title={L.builder.title}>
   <Toast />
+  <PageHeader title={L.builder.title} description={L.builder.description} />
+
   <div
-    class="max-w-3xl mx-auto px-4 py-6 flex flex-col gap-6"
+    class="flex flex-col gap-6 pb-24"
     x-data="sessionBuilder()"
     x-init="init()"
     x-cloak
   >
-    <PageHeader
-      title={L.builder.title}
-      description={L.builder.description}
-    />
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         ACTION BAR — Annuler / Enregistrer
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <div class="flex items-center justify-end gap-2">
-      <Button
-        variant="secondary"
-        @click="discard()"
-      >
+      <Button variant="secondary" @click="discard()">
         {L.common.cancel}
       </Button>
-      <Button
-        variant="primary"
-        :disabled="!canSave"
-        @click="save()"
-      >
+      <Button variant="primary" :disabled="!canSave" @click="save()">
         <Fragment set:html={icons.save(18, 18)} />
         <span x-text="labels.saveSession">{L.builder.saveSession}</span>
       </Button>
     </div>
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         SESSION INFO CARD — name + date
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <Card>
       <CardHeader>
         <CardTitle>{L.builder.infoTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1">
-            <label for="ses-name" class="text-sm font-medium text-muted">
-              {L.builder.name}
-              <span class="text-destructive ml-1" aria-hidden="true">*</span>
-            </label>
-            <input
-              id="ses-name"
-              type="text"
-              class="bg-surface-2 border border-border rounded-md px-3 py-2 text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder={L.builder.namePlaceholder}
-              x-model="sessionName"
-              required
-              autocomplete="off"
-              maxlength="80"
-            />
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <label for="ses-date" class="text-sm font-medium text-muted">{L.builder.date}</label>
-            <input
-              id="ses-date"
-              type="date"
-              class="bg-surface-2 border border-border rounded-md px-3 py-2 text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent ses-date-input"
-              x-model="sessionDate"
-            />
-          </div>
+          <Input
+            label={L.builder.name}
+            id="ses-name"
+            type="text"
+            required
+            placeholder={L.builder.namePlaceholder}
+            x-model="sessionName"
+            autocomplete="off"
+            maxlength="80"
+          />
+          <Input
+            label={L.builder.date}
+            id="ses-date"
+            type="date"
+            x-model="sessionDate"
+          />
         </div>
       </CardContent>
     </Card>
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         EMPTY STATE — no exercises added yet
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <template x-if="exercises.length === 0">
       <Card>
-        <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
+        <div
+          class="flex flex-col items-center justify-center py-12 px-6 text-center"
+        >
           <div class="text-muted mb-4" aria-hidden="true">
             <Fragment set:html={icons.dumbbellBox(48, 48)} />
           </div>
-          <h3 class="text-lg font-semibold text-text mb-2" x-text="labels.noExoAdded">{L.builder.noExoAdded}</h3>
-          <p class="text-sm text-muted mb-6" x-text="labels.noExoDesc">{L.builder.noExoDesc}</p>
+          <h3
+            class="text-lg font-semibold text-text mb-2"
+            x-text="labels.noExoAdded"
+          >
+            {L.builder.noExoAdded}
+          </h3>
+          <p class="text-sm text-muted mb-6" x-text="labels.noExoDesc">
+            {L.builder.noExoDesc}
+          </p>
           <Button
             class="inline-flex items-center gap-2 bg-accent text-accent-foreground hover:bg-accent-hover rounded-md px-4 py-2 text-sm font-medium transition-colors"
             @click="openPicker()"
           >
-            <span class="flex items-center justify-center"><Fragment set:html={icons.plus(20, 20)} /></span>
+            <span class="flex items-center justify-center"
+              ><Fragment set:html={icons.plus(20, 20)} /></span
+            >
             <span>{L.builder.addExercise}</span>
           </Button>
         </div>
@@ -124,17 +127,24 @@ const setTypes = [
 
     {/* superset offer — link icon and check/close icons */}
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         EXERCISE BLOCKS — one Card per added exercise
         Collapsible: header toggles a body that holds the sets table.
-        ────────────────────────────────────────────────────────── */}
-    <template x-for="(ex, exIdx) in exercises" :key="ex.exerciseId + '-' + exIdx">
+        ────────────────────────────────────────────────────────── */
+    }
+    <template
+      x-for="(ex, exIdx) in exercises"
+      :key="ex.exerciseId + '-' + exIdx"
+    >
       <Card>
-        {/* ── Auto superset offer (added 2026-08-09) ──
+        {
+          /* ── Auto superset offer (added 2026-08-09) ──
             Shown right after the user completes a set on an exercise
             whose previous completed set belongs to a different exercise.
             One click groups both exercises through the existing
-            `supersetId` mechanism (persisted as Session.supersets). */}
+            `supersetId` mechanism (persisted as Session.supersets). */
+        }
         <div
           class="flex items-center gap-3 p-3 mx-4 mb-3 rounded-lg border border-accent bg-surface-2"
           x-show="supersetOfferFor(exIdx) != null"
@@ -154,12 +164,20 @@ const setTypes = [
             aria-hidden="true"
             class="text-accent flex-shrink-0 w-5 h-5"
           >
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            <path
+              d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+            ></path>
+            <path
+              d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+            ></path>
           </svg>
           <div class="flex-1 min-w-0">
-            <span class="text-sm font-semibold text-text block" x-text="labels.supersetSuggest"></span>
-            <span class="text-xs text-muted block" x-text="supersetOfferNames(exIdx)"></span>
+            <span
+              class="text-sm font-semibold text-text block"
+              x-text="labels.supersetSuggest"></span>
+            <span
+              class="text-xs text-muted block"
+              x-text="supersetOfferNames(exIdx)"></span>
           </div>
           <div class="flex items-center gap-2">
             <button
@@ -199,11 +217,19 @@ const setTypes = [
             aria-hidden="true"
             class="w-4 h-4 text-[var(--ses-super-color,var(--color-muted))]"
           >
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            <path
+              d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+            ></path>
+            <path
+              d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+            ></path>
           </svg>
-          <span class="font-medium text-[var(--ses-super-color,var(--color-muted))]">
-            <span x-text="labels.supersetLabel + ' ' + ex.supersetId">Superset</span>
+          <span
+            class="font-medium text-[var(--ses-super-color,var(--color-muted))]"
+          >
+            <span x-text="labels.supersetLabel + ' ' + ex.supersetId"
+              >Superset</span
+            >
             <template x-if="supersetChainFor(ex.supersetId).length > 0">
               <span
                 class="text-xs text-muted"
@@ -218,7 +244,7 @@ const setTypes = [
             :aria-label="labels.supersetRemove"
             :title="labels.supersetRemove"
           >
-              <Fragment set:html={icons.closeX(18, 18)} />
+            <Fragment set:html={icons.closeX(18, 18)} />
           </button>
         </div>
         {/* ── Clickable header (always visible) ── */}
@@ -232,21 +258,30 @@ const setTypes = [
           >
             <div class="flex-1 min-w-0">
               <div class="ses-ex-head flex items-center gap-2">
-                <h3 class="text-base font-semibold text-text truncate" x-text="trExercise(ex.name)"></h3>
+                <h3
+                  class="text-base font-semibold text-text truncate"
+                  x-text="trExercise(ex.name)"
+                >
+                </h3>
                 <Badge
                   variant="category"
                   :class="'badge--cat-' + muscleHue(ex.muscle)"
                   x-text="trMuscle(ex.muscle)"
-                ></Badge>
+                />
               </div>
               <p
                 class="text-sm text-muted mt-0.5"
                 x-show="!isExpanded(exIdx)"
                 x-cloak
                 x-text="exerciseSummary(ex)"
-              ></p>
+              >
+              </p>
             </div>
-            <span class="ses-chevron text-muted transition-transform" :class="{ 'is-open': isExpanded(exIdx) }"><Fragment set:html={icons.chevronDown(20, 20)} /></span>
+            <span
+              class="ses-chevron text-muted transition-transform"
+              :class="{ 'is-open': isExpanded(exIdx) }"
+              ><Fragment set:html={icons.chevronDown(20, 20)} /></span
+            >
           </button>
           <select
             class="ses-ex-superset-select bg-surface-2 border border-border rounded-md px-2 py-1 text-sm text-text max-w-[10rem]"
@@ -257,9 +292,12 @@ const setTypes = [
           >
             <option :value="null">—</option>
             <template x-for="gId in availableSupersetIds()" :key="gId">
-              <option :value="gId" x-text="labels.supersetLabel + ' ' + gId"></option>
+              <option :value="gId" x-text="labels.supersetLabel + ' ' + gId"
+              ></option>
             </template>
-            <option :value="nextSupersetId()" x-text="labels.newSuperset">+ Nouveau superset</option>
+            <option :value="nextSupersetId()" x-text="labels.newSuperset"
+              >+ Nouveau superset</option
+            >
           </select>
           <button
             type="button"
@@ -268,7 +306,9 @@ const setTypes = [
             aria-label={L.builder.removeExerciseAria}
             title="Retirer l'exercice"
           >
-            <span class="flex items-center justify-center"><Fragment set:html={icons.trash(18, 18)} /></span>
+            <span class="flex items-center justify-center"
+              ><Fragment set:html={icons.trash(18, 18)} /></span
+            >
           </button>
         </div>
 
@@ -281,27 +321,49 @@ const setTypes = [
         >
           <CardContent>
             {/* ── Sets table ── */}
-            <div class="overflow-x-auto" role="table" :aria-label="labels.setsFor + ' ' + ex.name">
+            <div
+              class="overflow-x-auto"
+              role="table"
+              :aria-label="labels.setsFor + ' ' + ex.name"
+            >
               <div class="ses-table-head" role="row">
                 <div class="ses-cell ses-cell-num" role="columnheader">#</div>
-                <div class="ses-cell ses-cell-type" role="columnheader">Type</div>
-                <div class="ses-cell ses-cell-num" role="columnheader">Poids (kg)</div>
-                <div class="ses-cell ses-cell-num" role="columnheader">Reps</div>
+                <div class="ses-cell ses-cell-type" role="columnheader">
+                  Type
+                </div>
+                <div class="ses-cell ses-cell-num" role="columnheader">
+                  Poids (kg)
+                </div>
+                <div class="ses-cell ses-cell-num" role="columnheader">
+                  Reps
+                </div>
                 <div class="ses-cell ses-cell-rpe" role="columnheader">RPE</div>
-                <div class="ses-cell ses-cell-action" role="columnheader" aria-label="Actions"></div>
+                <div
+                  class="ses-cell ses-cell-action"
+                  role="columnheader"
+                  aria-label="Actions"
+                >
+                </div>
               </div>
               <template x-for="(set, setIdx) in ex.sets" :key="setIdx">
                 <div class="ses-table-row" role="row">
-                  <div class="ses-cell ses-cell-num" role="cell" x-text="set.setNumber"></div>
+                  <div
+                    class="ses-cell ses-cell-num"
+                    role="cell"
+                    x-text="set.setNumber"
+                  >
+                  </div>
                   <div class="ses-cell ses-cell-type" role="cell">
                     <select
                       class="bg-surface-2 border border-border rounded-md px-2 py-1 text-text text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent"
                       x-model="set.type"
                       :aria-label="labels.setTypeLabel + ' ' + (setIdx + 1)"
                     >
-                      {setTypes.map((t) => (
-                        <option value={t.value}>{t.label}</option>
-                      ))}
+                      {
+                        setTypes.map((t) => (
+                          <option value={t.value}>{t.label}</option>
+                        ))
+                      }
                     </select>
                   </div>
                   <div class="ses-cell ses-cell-num" role="cell">
@@ -315,12 +377,14 @@ const setTypes = [
                         inputmode="decimal"
                         :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
                       />
-                      {/* ── MRV — suggested load (added 2026-08-10) ──
+                      {
+                        /* ── MRV — suggested load (added 2026-08-10) ──
                           Subtle second tap target inside the weight cell.
                           Disabled when the exercise has no useful history
                           (title explains why). Click = confirmation: fills
                           the weight with the suggestion + toast. Never
-                          overwrites a typed weight without this click. */}
+                          overwrites a typed weight without this click. */
+                      }
                       <button
                         type="button"
                         class="p-1 rounded-md text-accent hover:bg-[hsl(30_92%_58%/0.1)] transition-colors"
@@ -330,7 +394,9 @@ const setTypes = [
                         :aria-label="labels.mrvSuggestFor + ' ' + (setIdx + 1)"
                         @click="applyMrv(exIdx, setIdx)"
                       >
-                        <span class="flex items-center justify-center"><Fragment set:html={icons.zap(16, 16)} /></span>
+                        <span class="flex items-center justify-center"
+                          ><Fragment set:html={icons.zap(16, 16)} /></span
+                        >
                       </button>
                     </div>
                   </div>
@@ -345,7 +411,8 @@ const setTypes = [
                       :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
                     />
                   </div>
-                  {/* ── Per-set RPE / uRPE (added 2026-08-09) ──
+                  {
+                    /* ── Per-set RPE / uRPE (added 2026-08-09) ──
                       Compact segmented RPE/uRPE toggle + 0.5-step select.
                       Shown once the set is marked complete; the value
                       persists on the set even if the set is later unmarked.
@@ -353,7 +420,8 @@ const setTypes = [
                       compact pill pattern (surface-3, radius-pill, active =
                       surface fill) and its active state is `set.rpeType
                       !== 'urpe'` (undefined counts as active) — not a plain
-                      `model === value` match, so it is not a drop-in swap. */}
+                      `model === value` match, so it is not a drop-in swap. */
+                  }
                   <div
                     class="ses-cell ses-cell-rpe"
                     role="cell"
@@ -371,15 +439,15 @@ const setTypes = [
                           class="ses-rpe-toggle-btn"
                           :class="{ 'is-active': set.rpeType !== 'urpe' }"
                           @click="set.rpeType = 'rpe'"
-                          :aria-pressed="set.rpeType !== 'urpe'"
-                        >RPE</button>
+                          :aria-pressed="set.rpeType !== 'urpe'">RPE</button
+                        >
                         <button
                           type="button"
                           class="ses-rpe-toggle-btn"
                           :class="{ 'is-active': set.rpeType === 'urpe' }"
                           @click="set.rpeType = 'urpe'"
-                          :aria-pressed="set.rpeType === 'urpe'"
-                        >uRPE</button>
+                          :aria-pressed="set.rpeType === 'urpe'">uRPE</button
+                        >
                       </div>
                       <select
                         class="bg-surface-2 border border-border rounded-md px-2 py-1 text-text text-sm w-full ses-rpe-select"
@@ -412,7 +480,9 @@ const setTypes = [
                       :aria-label="labels.deleteSet + ' ' + (setIdx + 1)"
                       title={L.builder.deleteSet}
                     >
-                      <span class="flex items-center justify-center"><Fragment set:html={icons.closeX(18, 18)} /></span>
+                      <span class="flex items-center justify-center"
+                        ><Fragment set:html={icons.closeX(18, 18)} /></span
+                      >
                     </button>
                   </div>
                 </div>
@@ -420,11 +490,7 @@ const setTypes = [
             </div>
 
             <div class="ses-ex-actions flex items-center gap-2 mt-3">
-              <Button
-                variant="secondary"
-                size="sm"
-                @click="addSet(exIdx)"
-              >
+              <Button variant="secondary" size="sm" @click="addSet(exIdx)">
                 <Fragment set:html={icons.plus(18, 18)} />
                 <span>{L.builder.addSet}</span>
               </Button>
@@ -445,7 +511,9 @@ const setTypes = [
                   stroke-linejoin="round"
                   aria-hidden="true"
                 >
-                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                  <path
+                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+                  ></path>
                 </svg>
                 <span x-text="labels.warmupBtn">{L.builder.warmupBtn}</span>
               </Button>
@@ -455,24 +523,27 @@ const setTypes = [
       </Card>
     </template>
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         ADD EXERCISE — bottom button (shown when ≥1 exercise)
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <template x-if="exercises.length > 0">
       <div class="flex justify-center py-4">
-        <Button
-          class="inline-flex items-center gap-2"
-          @click="openPicker()"
-        >
-          <span class="flex items-center justify-center"><Fragment set:html={icons.plus(20, 20)} /></span>
+        <Button class="inline-flex items-center gap-2" @click="openPicker()">
+          <span class="flex items-center justify-center"
+            ><Fragment set:html={icons.plus(20, 20)} /></span
+          >
           <span>{L.builder.addExercise}</span>
         </Button>
       </div>
     </template>
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         SESSION NOTES — RPE / fatigue / mood / free text
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <template x-if="exercises.length > 0">
       <Card>
         <CardHeader>
@@ -483,12 +554,13 @@ const setTypes = [
             {/* ── RPE slider ── */}
             <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between">
-                <label for="ses-rpe" class="text-sm font-medium text-muted">{L.builder.rpe}</label>
+                <label for="ses-rpe" class="text-sm font-medium text-muted"
+                  >{L.builder.rpe}</label
+                >
                 <span
                   class="ses-rpe-value"
                   :class="'ses-rpe-value--' + rpeTone"
-                  x-text="sessionRpe"
-                ></span>
+                  x-text="sessionRpe"></span>
               </div>
               <div class="flex items-center gap-3">
                 <input
@@ -511,7 +583,11 @@ const setTypes = [
             {/* ── Fatigue (1–5) ── */}
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium text-muted">Fatigue</label>
-              <div class="flex items-center gap-2" role="radiogroup" aria-label="Niveau de fatigue">
+              <div
+                class="flex items-center gap-2"
+                role="radiogroup"
+                aria-label="Niveau de fatigue"
+              >
                 <template x-for="i in 5" :key="'fat-' + i">
                   <button
                     type="button"
@@ -532,7 +608,9 @@ const setTypes = [
                       stroke-linejoin="round"
                       aria-hidden="true"
                     >
-                      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                      <path
+                        d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+                      ></path>
                     </svg>
                   </button>
                 </template>
@@ -542,7 +620,11 @@ const setTypes = [
             {/* ── Mood ── */}
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium text-muted">Humeur</label>
-              <div class="flex items-center gap-2" role="radiogroup" aria-label={L.builder.moodAria}>
+              <div
+                class="flex items-center gap-2"
+                role="radiogroup"
+                aria-label={L.builder.moodAria}
+              >
                 <button
                   type="button"
                   class="ses-mood-btn p-2 rounded-full border border-border bg-transparent text-muted hover:text-accent hover:border-accent transition-colors"
@@ -551,7 +633,24 @@ const setTypes = [
                   :aria-label="labels.moodLabel + ' : ' + labels.moodGreat"
                   @click="setMood('great')"
                 >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    ><circle cx="12" cy="12" r="10"></circle><path
+                      d="M8 14s1.5 2 4 2 4-2 4-2"></path><line
+                      x1="9"
+                      y1="9"
+                      x2="9.01"
+                      y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"
+                    ></line></svg
+                  >
                 </button>
                 <button
                   type="button"
@@ -561,7 +660,20 @@ const setTypes = [
                   :aria-label="labels.moodLabel + ' : ' + labels.moodGood"
                   @click="setMood('good')"
                 >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    ><path
+                      d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+                    ></path></svg
+                  >
                 </button>
                 <button
                   type="button"
@@ -571,7 +683,23 @@ const setTypes = [
                   :aria-label="labels.moodLabel + ' : ' + labels.moodOk"
                   @click="setMood('ok')"
                 >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    ><circle cx="12" cy="12" r="10"></circle><line
+                      x1="8"
+                      y1="15"
+                      x2="16"
+                      y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"
+                    ></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg
+                  >
                 </button>
                 <button
                   type="button"
@@ -581,7 +709,24 @@ const setTypes = [
                   :aria-label="labels.moodLabel + ' : ' + labels.moodTired"
                   @click="setMood('tired')"
                 >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    ><circle cx="12" cy="12" r="10"></circle><path
+                      d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line
+                      x1="9"
+                      y1="9"
+                      x2="9.01"
+                      y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"
+                    ></line></svg
+                  >
                 </button>
                 <button
                   type="button"
@@ -591,31 +736,47 @@ const setTypes = [
                   :aria-label="labels.moodLabel + ' : ' + labels.moodBad"
                   @click="setMood('bad')"
                 >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    ><path d="M2 4v16"></path><path d="M2 8h18a2 2 0 0 1 2 2v10"
+                    ></path><path d="M2 17h20"></path><path d="M6 8v9"
+                    ></path></svg
+                  >
                 </button>
               </div>
             </div>
 
             {/* ── Free-text notes ── */}
             <div class="flex flex-col gap-2">
-              <label for="ses-notes" class="text-sm font-medium text-muted">Notes</label>
+              <label for="ses-notes" class="text-sm font-medium text-muted"
+                >Notes</label
+              >
               <textarea
                 id="ses-notes"
                 class="bg-surface-2 border border-border rounded-md px-3 py-2 text-text text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent w-full"
                 x-model="sessionNotes"
                 placeholder={L.builder.notesPlaceholder}
                 rows="3"
-                maxlength="500"
-              ></textarea>
+                maxlength="500"></textarea>
             </div>
           </div>
         </CardContent>
       </Card>
     </template>
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         VALIDATION HINT — context-aware error message
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <div
       class="text-destructive text-sm text-center py-2"
       x-show="!canSave && (sessionName.trim() || exercises.length > 0)"
@@ -629,13 +790,19 @@ const setTypes = [
       </template>
     </div>
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         EXERCISE PICKER DIALOG
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <Dialog id="ses-picker-dialog" title="Choisir un exercice">
       <div class="flex flex-col max-h-[80vh]">
-        <div class="relative flex items-center border-b border-border px-4 py-2">
-          <span class="text-muted mr-2"><Fragment set:html={icons.searchLine(20, 20)} /></span>
+        <div
+          class="relative flex items-center border-b border-border px-4 py-2"
+        >
+          <span class="text-muted mr-2"
+            ><Fragment set:html={icons.searchLine(20, 20)} /></span
+          >
           <Input
             type="search"
             class="bg-transparent border-none outline-none text-text text-sm flex-1 ses-search-input"
@@ -649,23 +816,36 @@ const setTypes = [
         </div>
 
         {/* ── Templates (added 2026-08-04) ── */}
-        <div class="border-b border-border px-4 py-3" x-show="exerciseSearch.trim() === ''">
+        <div
+          class="border-b border-border px-4 py-3"
+          x-show="exerciseSearch.trim() === ''"
+        >
           <div class="flex items-baseline gap-2 mb-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-muted">Templates</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-muted"
+              >Templates</span
+            >
             <span class="text-xs text-muted">{L.builder.templateHint}</span>
           </div>
           <div class="grid grid-cols-2 gap-2">
-            {TRAINING_TEMPLATES.map((tpl) => (
-              <button
-                type="button"
-                class="flex flex-col gap-1 p-3 rounded-lg border border-border bg-surface-2 text-left hover:border-accent transition-colors"
-                @click={`loadTemplate('${tpl.id}')`}
-              >
-                <span class="text-sm font-semibold text-text">{trTemplateName(tpl.name)}</span>
-                <span class="text-xs text-muted line-clamp-2">{trTemplateDesc(tpl.id)}</span>
-                <span class="text-xs text-muted mt-1">{tpl.exercises.length} {L.builder.exercisesWord}</span>
-              </button>
-            ))}
+            {
+              TRAINING_TEMPLATES.map((tpl) => (
+                <button
+                  type="button"
+                  class="flex flex-col gap-1 p-3 rounded-lg border border-border bg-surface-2 text-left hover:border-accent transition-colors"
+                  @click={`loadTemplate('${tpl.id}')`}
+                >
+                  <span class="text-sm font-semibold text-text">
+                    {trTemplateName(tpl.name)}
+                  </span>
+                  <span class="text-xs text-muted line-clamp-2">
+                    {trTemplateDesc(tpl.id)}
+                  </span>
+                  <span class="text-xs text-muted mt-1">
+                    {tpl.exercises.length} {L.builder.exercisesWord}
+                  </span>
+                </button>
+              ))
+            }
           </div>
         </div>
 
@@ -674,21 +854,29 @@ const setTypes = [
           <template x-if="availableExercises.length === 0">
             <div class="px-4 py-8 text-center text-sm text-muted">
               <p x-text="labels.emptyLibrary">{L.builder.emptyLibrary}</p>
-              <a href={localizedPath("/exercices")} class="text-accent underline" x-text="labels.createExoLink">
+              <a
+                href={localizedPath("/exercises")}
+                class="text-accent underline"
+                x-text="labels.createExoLink"
+              >
                 {L.builder.createExoLink}
               </a>
             </div>
           </template>
 
           {/* ── All exercises already added ── */}
-          <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() === ''">
+          <template
+            x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() === ''"
+          >
             <div class="px-4 py-8 text-center text-sm text-muted">
               <p x-text="labels.allAdded">{L.builder.allAdded}</p>
             </div>
           </template>
 
           {/* ── No match for search ── */}
-          <template x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() !== ''">
+          <template
+            x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() !== ''"
+          >
             <div class="px-4 py-8 text-center text-sm text-muted">
               <p x-text="labels.noSearchMatch">{L.builder.noSearchMatch}</p>
             </div>
@@ -706,13 +894,14 @@ const setTypes = [
                 @click="addExercise(ex)"
                 :aria-label="labels.addExoAria + ' ' + ex.name + ' ' + labels.toSession"
               >
-                <span class="text-sm text-text" x-text="trExercise(ex.name)"></span>
+                <span class="text-sm text-text" x-text="trExercise(ex.name)"
+                ></span>
                 <Badge
                   variant="category"
                   size="sm"
                   :class="'badge--cat-' + muscleHue(ex.muscle)"
                   x-text="trMuscle(ex.muscle)"
-                ></Badge>
+                />
               </button>
               <button
                 type="button"
@@ -760,16 +949,12 @@ const setTypes = [
       </div>
 
       <div slot="footer">
-        <Button
-          variant="secondary"
-          data-dialog-close
-        >
-          Fermer
-        </Button>
+        <Button variant="secondary" data-dialog-close> Fermer </Button>
       </div>
     </Dialog>
 
-    {/* ──────────────────────────────────────────────────────────
+    {
+      /* ──────────────────────────────────────────────────────────
         REST TIMER WIDGET (added 2026-08-04)
         Sticky bar that appears when the user marks a set as
         complete. The duration is sourced per-exercise from
@@ -778,7 +963,8 @@ const setTypes = [
         shorter). The label shows "Repos — <name> (M:SS)" and
         the countdown ticks down every second; a Skip button
         dismisses the widget before the timer elapses.
-        ────────────────────────────────────────────────────────── */}
+        ────────────────────────────────────────────────────────── */
+    }
     <div
       class="ses-rest-timer"
       x-show="restTimer.active"
@@ -796,7 +982,8 @@ const setTypes = [
           class="ses-rest-timer-readout"
           :class="{ 'is-done': restTimerDone }"
           x-text="restTimerDisplay()"
-        ></div>
+        >
+        </div>
       </div>
       <button
         type="button"
@@ -824,36 +1011,39 @@ const setTypes = [
     type SessionSet,
     type SessionMood,
     type SetType,
-  } from '../../../lib/storage';
-  import { getTemplateById, type TemplateExercise } from '../../../lib/templates';
-  import { getExerciseTip } from '../../../lib/exercise-tips';
-  import { getRestTime, formatRestTime } from '../../../lib/rest-times';
-  import { playBeep } from '../../../lib/sound';
-  import { suggestLoadSuggestion } from '../../../lib/mrv';
-  import { t, getLocale, localizedPath } from '../../../i18n';
+  } from "../../../lib/storage";
+  import {
+    getTemplateById,
+    type TemplateExercise,
+  } from "../../../lib/templates";
+  import { getExerciseTip } from "../../../lib/exercise-tips";
+  import { getRestTime, formatRestTime } from "../../../lib/rest-times";
+  import { playBeep } from "../../../lib/sound";
+  import { suggestLoadSuggestion } from "../../../lib/mrv";
+  import { t, getLocale, localizedPath } from "../../../i18n";
 
   const LABELS = t();
 
   // Default set type for newly created sets (mirrors spec).
-  const DEFAULT_SET_TYPE: SetType = 'work';
+  const DEFAULT_SET_TYPE: SetType = "work";
 
   // Fallback category when a template exercise carries no category.
   // Kept in sync with the "Autre" option on the exercices page.
-  const TEMPLATE_FALLBACK_CATEGORY = 'Autre';
+  const TEMPLATE_FALLBACK_CATEGORY = "Autre";
 
   // RPE colour tone buckets — drive both the big number and the slider thumb.
-  function rpeToneFn(rpe: number): 'easy' | 'moderate' | 'hard' | 'max' {
-    if (rpe <= 3) return 'easy';
-    if (rpe <= 6) return 'moderate';
-    if (rpe <= 8) return 'hard';
-    return 'max';
+  function rpeToneFn(rpe: number): "easy" | "moderate" | "hard" | "max" {
+    if (rpe <= 3) return "easy";
+    if (rpe <= 6) return "moderate";
+    if (rpe <= 8) return "hard";
+    return "max";
   }
 
   function rpeLabelFn(rpe: number): string {
     const tone = rpeToneFn(rpe);
-    if (tone === 'easy') return LABELS.builder.rpeEasy;
-    if (tone === 'moderate') return LABELS.builder.rpeModerate;
-    if (tone === 'hard') return LABELS.builder.rpeHard;
+    if (tone === "easy") return LABELS.builder.rpeEasy;
+    if (tone === "moderate") return LABELS.builder.rpeModerate;
+    if (tone === "hard") return LABELS.builder.rpeHard;
     return LABELS.builder.rpeMax;
   }
 
@@ -865,28 +1055,28 @@ const setTypes = [
    */
   type BuilderExercise = SessionExercise & { supersetId: number | null };
 
-  document.addEventListener('alpine:init', () => {
+  document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
 
-    Alpine.data('sessionBuilder', () => ({
+    Alpine.data("sessionBuilder", () => ({
       // ── State ──
-      sessionName: '',
-      sessionDate: new Date().toISOString().split('T')[0],
+      sessionName: "",
+      sessionDate: new Date().toISOString().split("T")[0],
       exercises: [] as BuilderExercise[],
       availableExercises: [] as Exercise[],
       // Completed sessions snapshot read once at init — the MRV engine reads
       // from it (never from localStorage) so row bindings stay cheap.
       allSessions: [] as Session[],
-      exerciseSearch: '',
+      exerciseSearch: "",
       // Per-set RPE values (10 → 4 by 0.5) used by each set's select.
       rpeValues: RPE_OPTIONS,
 
       // ── Notes state (added 2026-08-04) ──
       sessionRpe: 5,
       sessionFatigue: 0, // 0 = not set, 1-5 = level
-      sessionMood: '' as SessionMood | '',
-      sessionNotes: '',
+      sessionMood: "" as SessionMood | "",
+      sessionNotes: "",
 
       // ── Collapse state (added 2026-08-04) ──
       expandedExercises: [] as number[],
@@ -916,7 +1106,7 @@ const setTypes = [
       // timer to dismiss it before it elapses.
       restTimer: {
         active: false,
-        exerciseName: '' as string,
+        exerciseName: "" as string,
         duration: 0, // total seconds for the current run
         remaining: 0, // seconds left
         intervalId: null as number | null,
@@ -1001,26 +1191,28 @@ const setTypes = [
       get filteredExercises(): Exercise[] {
         const q = this.exerciseSearch.trim().toLowerCase();
         const addedIds = new Set(this.exercises.map((se) => se.exerciseId));
-        return this.availableExercises
-          .filter((e) => {
-            if (addedIds.has(e.id)) return false;
-            if (q && !e.name.toLowerCase().includes(q)) return false;
-            return true;
-          })
-          // Favorites first, then alphabetical.
-          .sort((a, b) => {
-            if (Boolean(a.favorite) !== Boolean(b.favorite)) {
-              return a.favorite ? -1 : 1;
-            }
-            return a.name.localeCompare(b.name, 'fr');
-          });
+        return (
+          this.availableExercises
+            .filter((e) => {
+              if (addedIds.has(e.id)) return false;
+              if (q && !e.name.toLowerCase().includes(q)) return false;
+              return true;
+            })
+            // Favorites first, then alphabetical.
+            .sort((a, b) => {
+              if (Boolean(a.favorite) !== Boolean(b.favorite)) {
+                return a.favorite ? -1 : 1;
+              }
+              return a.name.localeCompare(b.name, "fr");
+            })
+        );
       },
 
       get canSave(): boolean {
         return Boolean(this.sessionName.trim()) && this.exercises.length > 0;
       },
 
-      get rpeTone(): 'easy' | 'moderate' | 'hard' | 'max' {
+      get rpeTone(): "easy" | "moderate" | "hard" | "max" {
         return rpeToneFn(this.sessionRpe);
       },
 
@@ -1078,21 +1270,26 @@ const setTypes = [
           (best, s) => (s.weight > (best?.weight || 0) ? s : best),
           exercise.sets[0],
         );
-        const setLabel = exercise.sets.length > 1 ? this.labels.setsPlural : this.labels.setsSingular;
+        const setLabel =
+          exercise.sets.length > 1
+            ? this.labels.setsPlural
+            : this.labels.setsSingular;
         const volume = Math.round(totalVolume);
-        const topLine = top && top.weight > 0
-          ? ` · ${this.labels.top} ${top.weight} kg × ${top.reps}`
-          : '';
+        const topLine =
+          top && top.weight > 0
+            ? ` · ${this.labels.top} ${top.weight} kg × ${top.reps}`
+            : "";
         return `${exercise.sets.length} ${setLabel} · ${totalReps} reps · ${volume} kg${topLine}`;
       },
 
       // ── Actions ──
       openPicker() {
-        this.exerciseSearch = '';
-        this.openDialogById('ses-picker-dialog');
+        this.exerciseSearch = "";
+        this.openDialogById("ses-picker-dialog");
         // Focus the search input once the dialog has opened.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ref = (this as any).$refs?.pickerSearch as HTMLInputElement | undefined;
+        const ref = (this as any).$refs?.pickerSearch as
+          HTMLInputElement | undefined;
         if (ref) {
           requestAnimationFrame(() => ref.focus());
         }
@@ -1105,7 +1302,7 @@ const setTypes = [
           weight: 0,
           reps: 0,
           type: DEFAULT_SET_TYPE,
-          rpeType: 'rpe',
+          rpeType: "rpe",
           completed: false,
         };
         const newEx: BuilderExercise = {
@@ -1117,9 +1314,12 @@ const setTypes = [
         };
         this.exercises.push(newEx);
         // Auto-expand the new exercise so the user can adjust sets right away.
-        this.expandedExercises = [...this.expandedExercises, this.exercises.length - 1];
-        this.exerciseSearch = '';
-        this.closeDialogById('ses-picker-dialog');
+        this.expandedExercises = [
+          ...this.expandedExercises,
+          this.exercises.length - 1,
+        ];
+        this.exerciseSearch = "";
+        this.closeDialogById("ses-picker-dialog");
       },
 
       // ── Templates (added 2026-08-04) ──
@@ -1153,11 +1353,14 @@ const setTypes = [
         if (added.length > 0) {
           this.expandedExercises = [...this.expandedExercises, ...added];
         }
-        this.exerciseSearch = '';
-        this.closeDialogById('ses-picker-dialog');
+        this.exerciseSearch = "";
+        this.closeDialogById("ses-picker-dialog");
       },
 
-      buildBuilderExercise(ex: Exercise, te: TemplateExercise): BuilderExercise {
+      buildBuilderExercise(
+        ex: Exercise,
+        te: TemplateExercise,
+      ): BuilderExercise {
         const sets: SessionSet[] = [];
         for (let i = 0; i < Math.max(1, te.defaultSets); i++) {
           sets.push({
@@ -1166,7 +1369,7 @@ const setTypes = [
             weight: 0,
             reps: te.defaultReps,
             type: DEFAULT_SET_TYPE,
-            rpeType: 'rpe',
+            rpeType: "rpe",
             completed: false,
           });
         }
@@ -1188,10 +1391,10 @@ const setTypes = [
         return getExerciseTip(name) != null;
       },
       getTip(name: string): string {
-        return getExerciseTip(name)?.description ?? '';
+        return getExerciseTip(name)?.description ?? "";
       },
       getVideoUrl(name: string): string {
-        return getExerciseTip(name)?.videoUrl ?? '';
+        return getExerciseTip(name)?.videoUrl ?? "";
       },
       isTipOpen(exId: string): boolean {
         return this.openTips.includes(exId);
@@ -1237,7 +1440,10 @@ const setTypes = [
       onSupersetChange(exIdx: number) {
         const ex = this.exercises[exIdx];
         if (!ex) return;
-        if (!Number.isFinite(ex.supersetId as number) || (ex.supersetId as number) <= 0) {
+        if (
+          !Number.isFinite(ex.supersetId as number) ||
+          (ex.supersetId as number) <= 0
+        ) {
           ex.supersetId = null;
         }
         this.dropOfferForExercise(exIdx);
@@ -1263,7 +1469,8 @@ const setTypes = [
        */
       trName(ex: BuilderExercise): string {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fn = (window as any).trExercise as ((n: string) => string) | undefined;
+        const fn = (window as any).trExercise as
+          ((n: string) => string) | undefined;
         return fn ? fn(ex.name) : ex.name;
       },
 
@@ -1288,7 +1495,10 @@ const setTypes = [
         currentName: string;
         otherName: string;
       } | null {
-        if (this.supersetOffer && this.supersetOffer.currentIdx === exerciseIndex) {
+        if (
+          this.supersetOffer &&
+          this.supersetOffer.currentIdx === exerciseIndex
+        ) {
           return this.supersetOffer;
         }
         return null;
@@ -1299,7 +1509,7 @@ const setTypes = [
        */
       supersetOfferNames(exerciseIndex: number): string {
         const o = this.supersetOfferFor(exerciseIndex);
-        if (!o) return '';
+        if (!o) return "";
         return `${o.otherName} ${this.labels.supersetWith} ${o.currentName}`;
       },
 
@@ -1316,11 +1526,14 @@ const setTypes = [
         const prevId = this.lastCompletedExerciseId;
         this.lastCompletedExerciseId = cur.exerciseId;
         if (!prevId || prevId === cur.exerciseId) return;
-        const otherIdx = this.exercises.findIndex((e) => e.exerciseId === prevId);
+        const otherIdx = this.exercises.findIndex(
+          (e) => e.exerciseId === prevId,
+        );
         if (otherIdx === -1) return;
         const other = this.exercises[otherIdx];
         if (!other) return;
-        if (cur.supersetId != null && cur.supersetId === other.supersetId) return;
+        if (cur.supersetId != null && cur.supersetId === other.supersetId)
+          return;
         this.supersetOffer = {
           currentIdx: exerciseIndex,
           otherIdx,
@@ -1342,7 +1555,8 @@ const setTypes = [
         const cur = this.exercises[o.currentIdx];
         const other = this.exercises[o.otherIdx];
         if (!cur || !other) return;
-        const target = cur.supersetId ?? other.supersetId ?? this.nextSupersetId();
+        const target =
+          cur.supersetId ?? other.supersetId ?? this.nextSupersetId();
         cur.supersetId = target;
         other.supersetId = target;
         this.expandedExercises = [
@@ -1378,7 +1592,7 @@ const setTypes = [
           weight: last ? last.weight : 0,
           reps: last ? last.reps : 0,
           type: DEFAULT_SET_TYPE,
-          rpeType: 'rpe',
+          rpeType: "rpe",
           completed: false,
         };
         ex.sets.push(next);
@@ -1395,7 +1609,7 @@ const setTypes = [
       },
 
       hasWorkingWeight(exercise: SessionExercise): boolean {
-        return exercise.sets.some((s) => s.type === 'work' && s.weight > 0);
+        return exercise.sets.some((s) => s.type === "work" && s.weight > 0);
       },
 
       // ── MRV — suggested load (added 2026-08-10) ──
@@ -1425,8 +1639,8 @@ const setTypes = [
       /** Raison localisée de la suggestion (tooltip du bouton ⚡). */
       mrvTitle(exerciseIndex: number, setIndex: number): string {
         const s = this.mrvSuggestion(exerciseIndex, setIndex);
-        if (!s || s.reason === 'none') return this.labels.mrvNoHistory;
-        if (s.reason === 'epley-cap') return this.labels.mrvCapped;
+        if (!s || s.reason === "none") return this.labels.mrvNoHistory;
+        if (s.reason === "epley-cap") return this.labels.mrvCapped;
         return this.labels.mrvFromHistory;
       },
 
@@ -1441,26 +1655,25 @@ const setTypes = [
         const s = this.mrvSuggestion(exerciseIndex, setIndex);
         if (!set || !s) return;
         if (s.weight == null) {
-          this.showToast(this.labels.mrvNoHistory, 'warning');
+          this.showToast(this.labels.mrvNoHistory, "warning");
           return;
         }
         set.weight = s.weight;
         const weightLabel = s.weight.toLocaleString(
-          getLocale() === 'fr' ? 'fr-FR' : 'en-US',
+          getLocale() === "fr" ? "fr-FR" : "en-US",
           { maximumFractionDigits: 1 },
         );
         this.showToast(
-          this.labels.mrvToast.replace('{weight}', weightLabel),
-          'success',
+          this.labels.mrvToast.replace("{weight}", weightLabel),
+          "success",
         );
       },
 
       /** Wraps the global Toast.astro API (window.showToast, if mounted). */
-      showToast(message: string, variant = 'info') {
+      showToast(message: string, variant = "info") {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fn = (window as any).showToast as
-          | ((m: string, v?: string) => void)
-          | undefined;
+          ((m: string, v?: string) => void) | undefined;
         if (fn) fn(message, variant);
       },
 
@@ -1469,7 +1682,9 @@ const setTypes = [
         if (!ex) return;
 
         // Find the max working weight from existing sets.
-        const workingSets = ex.sets.filter((s) => s.type === 'work' && s.weight > 0);
+        const workingSets = ex.sets.filter(
+          (s) => s.type === "work" && s.weight > 0,
+        );
         if (workingSets.length === 0) return;
 
         const maxWeight = Math.max(...workingSets.map((s) => s.weight));
@@ -1480,17 +1695,20 @@ const setTypes = [
         const warmups: SessionSet[] = warmupPercents.map((p, i) => ({
           exerciseId: ex.exerciseId,
           setNumber: i + 1,
-          type: 'warmup',
+          type: "warmup",
           weight: Math.round(maxWeight * p),
           reps: warmupReps[i],
-          rpeType: 'rpe',
+          rpeType: "rpe",
           completed: false,
         }));
 
         // Prepend warmups and re-number all sets so the displayed # stays 1..N.
         ex.sets = [
           ...warmups,
-          ...ex.sets.map((s, i) => ({ ...s, setNumber: i + warmups.length + 1 })),
+          ...ex.sets.map((s, i) => ({
+            ...s,
+            setNumber: i + warmups.length + 1,
+          })),
         ];
       },
 
@@ -1575,7 +1793,7 @@ const setTypes = [
         this.cancelRestTimerTick();
         this.restTimer = {
           active: false,
-          exerciseName: '',
+          exerciseName: "",
           duration: 0,
           remaining: 0,
           intervalId: null,
@@ -1589,12 +1807,12 @@ const setTypes = [
        * the binding is always safe to render.
        */
       restTimerLabel(): string {
-        if (!this.restTimer.active) return '';
+        if (!this.restTimer.active) return "";
         return `${this.labels.rest} — ${this.restTimer.exerciseName} (${formatRestTime(this.restTimer.duration)})`;
       },
 
       restTimerDisplay(): string {
-        if (!this.restTimer.active) return '0:00';
+        if (!this.restTimer.active) return "0:00";
         return formatRestTime(this.restTimer.remaining);
       },
 
@@ -1609,7 +1827,7 @@ const setTypes = [
        */
       isSoundEnabled(): boolean {
         try {
-          const raw = localStorage.getItem('muscu-settings');
+          const raw = localStorage.getItem("muscu-settings");
           if (!raw) return true;
           const parsed = JSON.parse(raw);
           return parsed.soundAlerts !== false;
@@ -1638,7 +1856,7 @@ const setTypes = [
 
       setMood(mood: SessionMood) {
         // Toggle: clicking the active mood unsets it.
-        this.sessionMood = this.sessionMood === mood ? '' : mood;
+        this.sessionMood = this.sessionMood === mood ? "" : mood;
       },
 
       discard() {
@@ -1646,7 +1864,7 @@ const setTypes = [
           const ok = window.confirm(this.labels.discardConfirm);
           if (!ok) return;
         }
-        window.location.href = localizedPath('/seances');
+        window.location.href = localizedPath("/sessions");
       },
 
       save() {
@@ -1676,255 +1894,554 @@ const setTypes = [
           name: this.sessionName.trim(),
           date: this.sessionDate,
           exercises: cleanExercises,
-          status: 'planned' as const,
+          status: "planned" as const,
         };
         if (this.sessionRpe) payload.rpe = this.sessionRpe;
         if (this.sessionFatigue > 0) payload.fatigue = this.sessionFatigue;
-        if (this.sessionMood !== '') payload.mood = this.sessionMood;
-        if (this.sessionNotes.trim() !== '') payload.notes = this.sessionNotes.trim();
+        if (this.sessionMood !== "") payload.mood = this.sessionMood;
+        if (this.sessionNotes.trim() !== "")
+          payload.notes = this.sessionNotes.trim();
         if (supersets.length > 0) payload.supersets = supersets;
         saveSession(payload);
-        window.location.href = localizedPath('/seances');
+        window.location.href = localizedPath("/sessions");
       },
 
       // ── Dialog helpers (wrap the global Dialog API) ──
       openDialogById(id: string) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fn = (window as any).openDialog as ((i: string) => void) | undefined;
+        const fn = (window as any).openDialog as
+          ((i: string) => void) | undefined;
         if (fn) fn(id);
       },
       closeDialogById(id: string) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fn = (window as any).closeDialog as ((i: string) => void) | undefined;
+        const fn = (window as any).closeDialog as
+          ((i: string) => void) | undefined;
         if (fn) fn(id);
       },
     }));
   });
 </script>
 
-
 <style>
   /* ── Alpine cloak ── */
-  [x-cloak] { display: none !important; }
+  [x-cloak] {
+    display: none !important;
+  }
 
   /* ── Date input: dark color-scheme ── */
-  .ses-date-input { color-scheme: dark; }
+  .ses-date-input {
+    color-scheme: dark;
+  }
 
   /* ── Number input spinner hiding ── */
   .ses-input-inline::-webkit-outer-spin-button,
-  .ses-input-inline::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .ses-input-inline { -moz-appearance: textfield; }
+  .ses-input-inline::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .ses-input-inline {
+    -moz-appearance: textfield;
+  }
 
   /* ── Sets table ── */
-  .ses-table-head, .ses-table-row {
+  .ses-table-head,
+  .ses-table-row {
     display: grid;
-    grid-template-columns: 3.2rem minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1fr) 9.6rem;
-    align-items: center; gap: 0.4rem; padding: 0 1.0rem;
+    grid-template-columns: 3.2rem minmax(0, 1.3fr) minmax(0, 1fr) minmax(
+        0,
+        0.8fr
+      ) minmax(0, 1fr) 9.6rem;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 1rem;
   }
   .ses-table-head {
-    height: 3.2rem; background-color: var(--color-surface-3);
-    font-size: 1.0rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--color-muted);
+    height: 3.2rem;
+    background-color: var(--color-surface-3);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
   }
   .ses-table-row {
-    min-height: 4.0rem; border-top: 1px solid var(--color-border);
+    min-height: 4rem;
+    border-top: 1px solid var(--color-border);
     transition: background-color var(--transition-fast);
   }
-  .ses-table-row:hover { background-color: var(--alpha-bg-subtle); }
-  .ses-cell { display: flex; align-items: center; justify-content: center; min-width: 0; }
-  .ses-cell-num {
-    font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
-    color: var(--color-text); font-variant-numeric: tabular-nums;
+  .ses-table-row:hover {
+    background-color: var(--alpha-bg-subtle);
   }
-  .ses-table-head .ses-cell-num { font-size: 1.0rem; color: var(--color-muted); }
-  .ses-cell-type { justify-content: stretch; }
-  .ses-cell-action { justify-content: flex-end; gap: 0.4rem; }
+  .ses-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+  .ses-cell-num {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+  .ses-table-head .ses-cell-num {
+    font-size: 1rem;
+    color: var(--color-muted);
+  }
+  .ses-cell-type {
+    justify-content: stretch;
+  }
+  .ses-cell-action {
+    justify-content: flex-end;
+    gap: 0.4rem;
+  }
 
   /* ── RPE toggle ── */
   .ses-rpe-toggle-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-height: 4.4rem; padding: 0 0.8rem; background-color: transparent;
-    border: none; border-radius: var(--radius-pill); color: var(--color-muted);
-    font-family: var(--font-body); font-size: 0.95rem; font-weight: 700;
-    line-height: 1; cursor: pointer; appearance: none;
-    transition: background-color var(--transition-fast), color var(--transition-fast),
-                box-shadow var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.4rem;
+    padding: 0 0.8rem;
+    background-color: transparent;
+    border: none;
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    appearance: none;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast),
+      box-shadow var(--transition-fast);
   }
   .ses-rpe-toggle-btn.is-active {
-    background-color: var(--color-surface); color: var(--color-text);
+    background-color: var(--color-surface);
+    color: var(--color-text);
     box-shadow: var(--shadow-1);
   }
-  .ses-rpe-toggle-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .ses-rpe-toggle-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
 
   /* ── RPE slider thumbs ── */
   .ses-rpe-input::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none; width: 2.4rem; height: 2.4rem;
-    border-radius: 50%; background-color: var(--color-success);
-    border: 3px solid var(--color-surface); box-shadow: var(--shadow-2);
-    cursor: grab; transition: background-color var(--transition-fast),
-    transform var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background-color: var(--color-success);
+    border: 3px solid var(--color-surface);
+    box-shadow: var(--shadow-2);
+    cursor: grab;
+    transition:
+      background-color var(--transition-fast),
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
   }
-  .ses-rpe-input:active::-webkit-slider-thumb { cursor: grabbing; transform: scale(1.08); }
+  .ses-rpe-input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+    transform: scale(1.08);
+  }
   .ses-rpe-input::-moz-range-thumb {
-    width: 2.4rem; height: 2.4rem; border-radius: 50%;
-    background-color: var(--color-success); border: 3px solid var(--color-surface);
-    box-shadow: var(--shadow-2); cursor: grab;
-    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background-color: var(--color-success);
+    border: 3px solid var(--color-surface);
+    box-shadow: var(--shadow-2);
+    cursor: grab;
+    transition:
+      background-color var(--transition-fast),
+      transform var(--transition-fast);
   }
-  .ses-rpe-input--easy::-webkit-slider-thumb { background-color: var(--color-success); }
-  .ses-rpe-input--easy::-moz-range-thumb     { background-color: var(--color-success); }
-  .ses-rpe-input--moderate::-webkit-slider-thumb { background-color: var(--color-warning); }
-  .ses-rpe-input--moderate::-moz-range-thumb     { background-color: var(--color-warning); }
-  .ses-rpe-input--hard::-webkit-slider-thumb { background-color: var(--color-accent); }
-  .ses-rpe-input--hard::-moz-range-thumb     { background-color: var(--color-accent); }
-  .ses-rpe-input--max::-webkit-slider-thumb { background-color: var(--color-destructive); }
-  .ses-rpe-input--max::-moz-range-thumb     { background-color: var(--color-destructive); }
+  .ses-rpe-input--easy::-webkit-slider-thumb {
+    background-color: var(--color-success);
+  }
+  .ses-rpe-input--easy::-moz-range-thumb {
+    background-color: var(--color-success);
+  }
+  .ses-rpe-input--moderate::-webkit-slider-thumb {
+    background-color: var(--color-warning);
+  }
+  .ses-rpe-input--moderate::-moz-range-thumb {
+    background-color: var(--color-warning);
+  }
+  .ses-rpe-input--hard::-webkit-slider-thumb {
+    background-color: var(--color-accent);
+  }
+  .ses-rpe-input--hard::-moz-range-thumb {
+    background-color: var(--color-accent);
+  }
+  .ses-rpe-input--max::-webkit-slider-thumb {
+    background-color: var(--color-destructive);
+  }
+  .ses-rpe-input--max::-moz-range-thumb {
+    background-color: var(--color-destructive);
+  }
 
   /* ── RPE value tone variants ── */
-  .ses-rpe-value--easy   { background-color: color-mix(in srgb, var(--color-success) 12%, transparent); color: var(--color-success); border-color: color-mix(in srgb, var(--color-success) 30%, transparent); }
-  .ses-rpe-value--moderate { background-color: color-mix(in srgb, var(--color-warning) 14%, transparent); color: var(--color-warning); border-color: color-mix(in srgb, var(--color-warning) 32%, transparent); }
-  .ses-rpe-value--hard   { background-color: color-mix(in srgb, var(--color-accent) 14%, transparent); color: var(--color-accent); border-color: color-mix(in srgb, var(--color-accent) 34%, transparent); }
-  .ses-rpe-value--max    { background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent); color: var(--color-destructive); border-color: color-mix(in srgb, var(--color-destructive) 34%, transparent); }
+  .ses-rpe-value--easy {
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+    border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+  }
+  .ses-rpe-value--moderate {
+    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    color: var(--color-warning);
+    border-color: color-mix(in srgb, var(--color-warning) 32%, transparent);
+  }
+  .ses-rpe-value--hard {
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 34%, transparent);
+  }
+  .ses-rpe-value--max {
+    background-color: color-mix(
+      in srgb,
+      var(--color-destructive) 14%,
+      transparent
+    );
+    color: var(--color-destructive);
+    border-color: color-mix(in srgb, var(--color-destructive) 34%, transparent);
+  }
 
   /* ── Superset bar color variants ── */
-  .ses-superset-bar--g1 { --ses-super-color: var(--color-superset-g1); background-color: var(--color-superset-g1-bg); }
-  .ses-superset-bar--g2 { --ses-super-color: var(--color-superset-g2); background-color: var(--color-superset-g2-bg); }
-  .ses-superset-bar--g3 { --ses-super-color: var(--color-superset-g3); background-color: var(--color-superset-g3-bg); }
-  .ses-superset-bar--g4 { --ses-super-color: var(--color-superset-g4); background-color: var(--color-superset-g4-bg); }
-  .ses-superset-bar--g5 { --ses-super-color: var(--color-superset-g5); background-color: var(--color-superset-g5-bg); }
+  .ses-superset-bar--g1 {
+    --ses-super-color: var(--color-superset-g1);
+    background-color: var(--color-superset-g1-bg);
+  }
+  .ses-superset-bar--g2 {
+    --ses-super-color: var(--color-superset-g2);
+    background-color: var(--color-superset-g2-bg);
+  }
+  .ses-superset-bar--g3 {
+    --ses-super-color: var(--color-superset-g3);
+    background-color: var(--color-superset-g3-bg);
+  }
+  .ses-superset-bar--g4 {
+    --ses-super-color: var(--color-superset-g4);
+    background-color: var(--color-superset-g4-bg);
+  }
+  .ses-superset-bar--g5 {
+    --ses-super-color: var(--color-superset-g5);
+    background-color: var(--color-superset-g5-bg);
+  }
   .ses-superset-dot {
-    width: 0.9rem; height: 0.9rem; border-radius: var(--radius-pill);
-    background-color: var(--ses-super-color, var(--color-muted)); flex-shrink: 0;
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--ses-super-color, var(--color-muted));
+    flex-shrink: 0;
   }
 
   /* ── Chevron open state ── */
-  .ses-chevron.is-open { transform: rotate(180deg); color: var(--color-accent); }
+  .ses-chevron.is-open {
+    transform: rotate(180deg);
+    color: var(--color-accent);
+  }
 
   /* ── Set complete state ── */
   .ses-set-complete.is-complete {
-    background-color: var(--color-success); border-color: var(--color-success); color: var(--color-bg);
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+    color: var(--color-bg);
   }
   .ses-set-complete.is-complete:hover {
-    background-color: var(--color-success); border-color: var(--color-success);
+    background-color: var(--color-success);
+    border-color: var(--color-success);
   }
-  .ses-set-complete svg { width: 1.6rem; height: 1.6rem; }
+  .ses-set-complete svg {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
 
   /* ── Fatigue / mood active states ── */
   .ses-fatigue-btn.is-active {
-    filter: none; background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    filter: none;
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
     border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
   }
-  .ses-fatigue-btn svg, .ses-mood-btn svg { display: block; }
+  .ses-fatigue-btn svg,
+  .ses-mood-btn svg {
+    display: block;
+  }
   .ses-mood-btn.is-active {
-    filter: none; background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    filter: none;
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
     border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    box-shadow: 0 0 0 2px
+      color-mix(in srgb, var(--color-accent) 18%, transparent);
   }
 
   /* ── Tip callout disc ── */
   .ses-picker-tip::before {
-    content: ""; display: inline-block; width: 0.9rem; height: 0.9rem;
-    margin-right: 0.7rem; vertical-align: middle; border-radius: var(--radius-pill);
+    content: "";
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-right: 0.7rem;
+    vertical-align: middle;
+    border-radius: var(--radius-pill);
     background-color: var(--color-accent);
   }
 
   /* ── Tip video SVG ── */
-  .ses-tip-video svg { width: 1.3rem; height: 1.3rem; fill: currentColor; stroke: currentColor; flex-shrink: 0; }
-  .ses-tip-video svg polygon { fill: currentColor; stroke: none; }
+  .ses-tip-video svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: currentColor;
+    stroke: currentColor;
+    flex-shrink: 0;
+  }
+  .ses-tip-video svg polygon {
+    fill: currentColor;
+    stroke: none;
+  }
 
   /* ── Search input cancel button ── */
-  .ses-search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+  .ses-search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
 
   /* ── Rest timer widget ── */
   .ses-rest-timer {
-    position: fixed; left: 50%; bottom: 1.6rem; transform: translateX(-50%); z-index: 30;
-    display: flex; align-items: center; gap: 1.2rem; width: min(48rem, calc(100% - 3.2rem));
-    padding: 1.0rem 1.2rem; background-color: var(--color-surface-2);
-    border: 1px solid var(--color-accent); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-2), 0 0 0 1px var(--alpha-bg-subtle);
+    position: fixed;
+    left: 50%;
+    bottom: 1.6rem;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    width: min(48rem, calc(100% - 3.2rem));
+    padding: 1rem 1.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      var(--shadow-2),
+      0 0 0 1px var(--alpha-bg-subtle);
   }
   .ses-rest-timer-icon {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 4.0rem; height: 4.0rem; border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
     background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
-    color: var(--color-accent); flex-shrink: 0;
+    color: var(--color-accent);
+    flex-shrink: 0;
   }
-  .ses-rest-timer-icon svg { width: 1.9rem; height: 1.9rem; }
-  .ses-rest-timer-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+  .ses-rest-timer-icon svg {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+  .ses-rest-timer-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
   .ses-rest-timer-label {
-    font-family: var(--font-body); font-size: 1.2rem; font-weight: 600;
-    color: var(--color-text); line-height: 1.2; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap;
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .ses-rest-timer-readout {
-    font-family: var(--font-display); font-size: 2.4rem; font-weight: 700;
-    color: var(--color-accent); line-height: 1; font-variant-numeric: tabular-nums;
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
   }
-  .ses-rest-timer-readout.is-done { color: var(--color-success); }
-  .ses-rest-timer-skip {
-    display: inline-flex; align-items: center; gap: 0.4rem; height: 4.4rem;
-    padding: 0 1.2rem; background-color: var(--alpha-bg-soft);
-    border: 1px solid var(--color-border); border-radius: var(--radius-md);
-    color: var(--color-muted); font-family: var(--font-body); font-size: 1.1rem;
-    font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-    cursor: pointer; flex-shrink: 0;
-    transition: background-color var(--transition-fast), border-color var(--transition-fast),
-                color var(--transition-fast);
+  .ses-rest-timer-readout.is-done {
+    color: var(--color-success);
   }
-  .ses-rest-timer-skip:hover { background-color: var(--alpha-border-faint); border-color: var(--alpha-border); color: var(--color-text); }
-  .ses-rest-timer-skip:active { transform: scale(0.97); }
-  .ses-rest-timer-skip svg { width: 1.3rem; height: 1.3rem; }
+  .ses-rest-timer-skip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 4.4rem;
+    padding: 0 1.2rem;
+    background-color: var(--alpha-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+  .ses-rest-timer-skip:hover {
+    background-color: var(--alpha-border-faint);
+    border-color: var(--alpha-border);
+    color: var(--color-text);
+  }
+  .ses-rest-timer-skip:active {
+    transform: scale(0.97);
+  }
+  .ses-rest-timer-skip svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
 
   /* ── Narrow-phone exercise header grid (480px) ── */
   @media (max-width: 480px) {
     .ses-ex-header {
-      display: grid; grid-template-columns: minmax(0, 1fr) 4.4rem; align-items: start;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 4.4rem;
+      align-items: start;
     }
-    .ses-ex-toggle { grid-column: 1; grid-row: 1; width: 100%; }
-    .ses-ex-header > .ses-ex-superset-select { grid-column: 1; grid-row: 2; width: 100%; max-width: none; margin-top: 0.2rem; }
-    .ses-ex-header > .ses-delete-btn { grid-column: 2; grid-row: 1; }
-    .ses-ex-head { align-items: flex-start; flex-direction: column; gap: 0.5rem; }
-    .ses-ex-actions { align-items: stretch; flex-direction: column; }
-    .ses-ex-actions :global(.button) { width: 100%; }
+    .ses-ex-toggle {
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+    }
+    .ses-ex-header > .ses-ex-superset-select {
+      grid-column: 1;
+      grid-row: 2;
+      width: 100%;
+      max-width: none;
+      margin-top: 0.2rem;
+    }
+    .ses-ex-header > .ses-delete-btn {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .ses-ex-head {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ses-ex-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .ses-ex-actions :global(.button) {
+      width: 100%;
+    }
   }
 
   /* ── Sets table responsive (640px) ── */
   @media (max-width: 640px) {
-    .ses-table-head { display: none; }
+    .ses-table-head {
+      display: none;
+    }
     .ses-table-row {
       grid-template-columns: 1fr 1fr;
-      grid-template-areas: 'num type' 'weight reps' 'rpe rpe' 'action action';
-      gap: 0.6rem; padding: 1.0rem; min-height: 0;
+      grid-template-areas: "num type" "weight reps" "rpe rpe" "action action";
+      gap: 0.6rem;
+      padding: 1rem;
+      min-height: 0;
     }
-    .ses-table-row .ses-cell-num:nth-of-type(1) { grid-area: num; }
-    .ses-table-row .ses-cell-type { grid-area: type; }
-    .ses-table-row .ses-cell-num:nth-of-type(3) { grid-area: weight; }
-    .ses-table-row .ses-cell-num:nth-of-type(4) { grid-area: reps; }
-    .ses-table-row .ses-cell-action { grid-area: action; justify-content: flex-end; padding-top: 0.4rem; border-top: 1px dashed var(--color-border); }
-    .ses-table-row .ses-cell-rpe { grid-area: rpe; justify-content: stretch; padding-top: 0.4rem; }
-    .ses-rpe-set { justify-content: stretch; }
-    .ses-rpe-select { flex: 1 1 auto; width: auto; }
+    .ses-table-row .ses-cell-num:nth-of-type(1) {
+      grid-area: num;
+    }
+    .ses-table-row .ses-cell-type {
+      grid-area: type;
+    }
+    .ses-table-row .ses-cell-num:nth-of-type(3) {
+      grid-area: weight;
+    }
+    .ses-table-row .ses-cell-num:nth-of-type(4) {
+      grid-area: reps;
+    }
+    .ses-table-row .ses-cell-action {
+      grid-area: action;
+      justify-content: flex-end;
+      padding-top: 0.4rem;
+      border-top: 1px dashed var(--color-border);
+    }
+    .ses-table-row .ses-cell-rpe {
+      grid-area: rpe;
+      justify-content: stretch;
+      padding-top: 0.4rem;
+    }
+    .ses-rpe-set {
+      justify-content: stretch;
+    }
+    .ses-rpe-select {
+      flex: 1 1 auto;
+      width: auto;
+    }
   }
 
   /* ── Rest timer narrow (480px) ── */
   @media (max-width: 480px) {
-    .ses-rest-timer { width: calc(100% - 2rem); bottom: 1.0rem; gap: 0.8rem; padding: 0.8rem 1.0rem; }
-    .ses-rest-timer-icon { width: 3.4rem; height: 3.4rem; }
-    .ses-rest-timer-readout { font-size: 2.0rem; }
+    .ses-rest-timer {
+      width: calc(100% - 2rem);
+      bottom: 1rem;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+    }
+    .ses-rest-timer-icon {
+      width: 3.4rem;
+      height: 3.4rem;
+    }
+    .ses-rest-timer-readout {
+      font-size: 2rem;
+    }
   }
 
   /* ── Rest timer skip label sr-only (360px) ── */
   @media (max-width: 360px) {
-    .ses-rest-timer-skip { width: 4.4rem; padding: 0; justify-content: center; }
-    .ses-rest-timer-skip span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-    .ses-rpe-toggle-btn { padding-inline: 0.65rem; }
+    .ses-rest-timer-skip {
+      width: 4.4rem;
+      padding: 0;
+      justify-content: center;
+    }
+    .ses-rest-timer-skip span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .ses-rpe-toggle-btn {
+      padding-inline: 0.65rem;
+    }
   }
 
   /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
-    .ses-fatigue-btn, .ses-mood-btn, .ses-set-complete, .ses-chevron,
-    .ses-rest-timer-skip, .ses-rpe-input, .ses-rpe-value,
-    [class*="transition"] { transition: none !important; }
+    .ses-fatigue-btn,
+    .ses-mood-btn,
+    .ses-set-complete,
+    .ses-chevron,
+    .ses-rest-timer-skip,
+    .ses-rpe-input,
+    .ses-rpe-value,
+    [class*="transition"] {
+      transition: none !important;
+    }
   }
 </style>

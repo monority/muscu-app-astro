@@ -16,7 +16,7 @@ const L = t();
   />
 
   <div
-    class="rec max-w-[88rem] mx-auto pb-24 flex flex-col gap-4"
+    class="rec pb-24 flex flex-col gap-4"
     x-data="recordsApp()"
     x-init="init()"
     x-cloak
@@ -170,7 +170,7 @@ const L = t();
           title={L.records.noRecords}
           description={L.records.noRecordsDesc}
           actionLabel={L.common.startSession}
-          actionHref={localizedPath("/seances/creer")}
+          actionHref={localizedPath("/sessions/create")}
         />
       </div>
     </template>
@@ -404,7 +404,7 @@ const L = t();
       },
 
       historyHref(id: string): string {
-        return localizedPath('/exercices/historique?id=' + encodeURIComponent(id));
+        return localizedPath('/exercises/history?id=' + encodeURIComponent(id));
       },
     }));
   });

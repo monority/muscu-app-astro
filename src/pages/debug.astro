@@ -153,8 +153,8 @@ import '../styles/globals.css';
                 `Séances     : ${s.sessions} (${s.completed} complétées, ${s.inProgress} en cours, ${s.planned} planifiées)\n` +
                 `Progression : ${s.progressRecords} records\n` +
                 `Mesures     : ${s.bodyRecords} entrées\n` +
-                `\nLien démo séance : /seances/detail?id=${s.demoSessionId}\n` +
-                `Lien démo comparaison : /seances/comparer?id1=${s.compareId1}&id2=${s.compareId2}`;
+                `\nLien démo séance : /sessions/detail?id=${s.demoSessionId}\n` +
+                `Lien démo comparaison : /sessions/compare?id1=${s.compareId1}&id2=${s.compareId2}`;
               this.refresh();
               this.busy = false;
               this.message = 'OK — données de test générées. Parcours l’app depuis le dashboard.';

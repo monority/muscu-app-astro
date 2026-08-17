@@ -9,6 +9,7 @@ import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import Button from '../../components/ui/Button.astro';
+import Input from '../../components/ui/Input.astro';
 const L = t();
 ---
 
@@ -19,7 +20,7 @@ const L = t();
   />
 
   <div
-    class="poids max-w-[88rem] mx-auto pb-24 flex flex-col gap-5"
+    class="poids pb-24 flex flex-col gap-5"
     x-data="poidsApp()"
     x-init="init()"
     x-cloak
@@ -32,85 +33,71 @@ const L = t();
       <CardContent>
         <form class="flex flex-col gap-[1.4rem]" @submit.prevent="addEntry()">
           <div class="grid grid-cols-2 gap-x-4 gap-y-0 sm:grid-cols-3 lg:grid-cols-6">
-            <div class="flex flex-col gap-[0.6rem] py-4">
-              <label for="poids-date" class="text-[1.2rem] font-medium text-[var(--color-muted)] leading-[1.2]">{L.poids.date}</label>
-              <input
-                id="poids-date"
-                type="date"
-                class="poids__input"
-                x-model="form.date"
-                required
-              />
-            </div>
-            <div class="flex flex-col gap-[0.6rem] py-4">
-              <label for="poids-weight" class="text-[1.2rem] font-medium text-[var(--color-muted)] leading-[1.2]">
-                {L.poids.weightLabel}
-              </label>
-              <input
-                id="poids-weight"
-                type="number"
-                class="poids__input"
-                step="0.1"
-                min="20"
-                max="300"
-                inputmode="decimal"
-                x-model.number="form.weight"
-                placeholder={L.poids.weightPlaceholder}
-                required
-              />
-            </div>
-            <div class="flex flex-col gap-[0.6rem] py-4">
-              <label for="poids-arm" class="text-[1.2rem] font-medium text-[var(--color-muted)] leading-[1.2]">{L.poids.armLabel}</label>
-              <input
-                id="poids-arm"
-                type="number"
-                class="poids__input"
-                step="0.1"
-                min="0"
-                inputmode="decimal"
-                x-model.number="form.arm"
-                placeholder="—"
-              />
-            </div>
-            <div class="flex flex-col gap-[0.6rem] py-4">
-              <label for="poids-chest" class="text-[1.2rem] font-medium text-[var(--color-muted)] leading-[1.2]">{L.poids.chestLabel}</label>
-              <input
-                id="poids-chest"
-                type="number"
-                class="poids__input"
-                step="0.1"
-                min="0"
-                inputmode="decimal"
-                x-model.number="form.chest"
-                placeholder="—"
-              />
-            </div>
-            <div class="flex flex-col gap-[0.6rem] py-4">
-              <label for="poids-waist" class="text-[1.2rem] font-medium text-[var(--color-muted)] leading-[1.2]">{L.poids.waistLabel}</label>
-              <input
-                id="poids-waist"
-                type="number"
-                class="poids__input"
-                step="0.1"
-                min="0"
-                inputmode="decimal"
-                x-model.number="form.waist"
-                placeholder="—"
-              />
-            </div>
-            <div class="flex flex-col gap-[0.6rem] py-4">
-              <label for="poids-hips" class="text-[1.2rem] font-medium text-[var(--color-muted)] leading-[1.2]">{L.poids.hipsLabel}</label>
-              <input
-                id="poids-hips"
-                type="number"
-                class="poids__input"
-                step="0.1"
-                min="0"
-                inputmode="decimal"
-                x-model.number="form.hips"
-                placeholder="—"
-              />
-            </div>
+            <Input
+              label={L.poids.date}
+              id="poids-date"
+              type="date"
+              x-model="form.date"
+              required
+              class="poids__input"
+            />
+            <Input
+              label={L.poids.weightLabel}
+              id="poids-weight"
+              type="number"
+              step="0.1"
+              min="20"
+              max="300"
+              inputmode="decimal"
+              x-model.number="form.weight"
+              placeholder={L.poids.weightPlaceholder}
+              required
+              class="poids__input"
+            />
+            <Input
+              label={L.poids.armLabel}
+              id="poids-arm"
+              type="number"
+              step="0.1"
+              min="0"
+              inputmode="decimal"
+              x-model.number="form.arm"
+              placeholder="—"
+              class="poids__input"
+            />
+            <Input
+              label={L.poids.chestLabel}
+              id="poids-chest"
+              type="number"
+              step="0.1"
+              min="0"
+              inputmode="decimal"
+              x-model.number="form.chest"
+              placeholder="—"
+              class="poids__input"
+            />
+            <Input
+              label={L.poids.waistLabel}
+              id="poids-waist"
+              type="number"
+              step="0.1"
+              min="0"
+              inputmode="decimal"
+              x-model.number="form.waist"
+              placeholder="—"
+              class="poids__input"
+            />
+            <Input
+              label={L.poids.hipsLabel}
+              id="poids-hips"
+              type="number"
+              step="0.1"
+              min="0"
+              inputmode="decimal"
+              x-model.number="form.hips"
+              placeholder="—"
+              class="poids__input"
+            />
           </div>
 
           <p class="poids__error" x-show="formError" x-text="formError" x-cloak x-transition.opacity.duration.180ms role="alert"></p>

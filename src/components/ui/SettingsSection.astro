@@ -1,0 +1,41 @@
+---
+import { icons } from '../../lib/icons';
+import Card from './Card.astro';
+import CardHeader from './CardHeader.astro';
+import CardTitle from './CardTitle.astro';
+import CardContent from './CardContent.astro';
+
+interface Props {
+  icon: keyof typeof icons;
+  title: string;
+  description?: string;
+  id?: string;
+  class?: string;
+}
+
+const { icon, title, description, id, class: className = '' } = Astro.props;
+---
+
+<section class:list={['set__section', className]} id={id}>
+  <Card>
+    <CardHeader>
+      <div class="flex items-center gap-4 min-w-0">
+        <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+          <Fragment set:html={(icons as Record<string, (w?: number, h?: number) => string>)[icon]?.(24, 24) ?? ''} />
+        </span>
+        <CardTitle>{title}</CardTitle>
+      </div>
+      {description && <p class="text-[1.2rem] text-[var(--color-muted)] m-0 leading-[1.4]">{description}</p>}
+    </CardHeader>
+    <CardContent>
+      <slot />
+    </CardContent>
+  </Card>
+</section>
+
+<style>
+  .set__heading-icon :global(svg) {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+</style>

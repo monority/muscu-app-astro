@@ -16,7 +16,7 @@ const L = t();
   />
 
   <div
-    class="max-w-[96rem] mx-auto flex flex-col gap-6 pb-[6rem]"
+    class="flex flex-col gap-6 pb-24"
     x-data="timerApp()"
     x-init="init()"
     x-cloak
@@ -500,7 +500,7 @@ const L = t();
       // ═══════════════════════════════════════════════════════
       get clockText(): string {
         if (this.mode === 'stopwatch') return this.formatStopwatch(this._currentSwDisplay());
-        return this.formatTime(this._currentCountdownDisplay());
+        return this.formatTime(this.display);
       },
 
       get clockClasses(): string {
@@ -528,10 +528,6 @@ const L = t();
 
       // Internal helpers — used by clockText getter to avoid recomputing
       // the "live" tick twice. Kept private-ish (underscore prefix).
-      _currentCountdownDisplay(): number {
-        if (!this.running) return this.remaining;
-        return Math.max(0, Math.ceil((this.endTime - Date.now()) / 1000));
-      },
 
       _currentSwDisplay(): number {
         if (!this.sw.running) return this.sw.elapsed;
@@ -543,7 +539,7 @@ const L = t();
       // ═══════════════════════════════════════════════════════
       get ringOffset(): number {
         if (this.mode === 'countdown') {
-          const rem = this._currentCountdownDisplay();
+          const rem = this.display;
           const progress = this.totalTime > 0
             ? Math.max(0, Math.min(1, rem / this.totalTime))
             : 0;
@@ -600,8 +596,8 @@ const L = t();
         this.running = true;
         this.endTime = Date.now() + this.remaining * 1000;
         this.lastTick = Date.now();
-        this.intervalId = setInterval(() => this.tick(), 100);
         this.tick();
+        this._scheduleTick();
         this.broadcast();
       },
 
@@ -613,7 +609,7 @@ const L = t();
           this.display = this.remaining;
         }
         if (this.intervalId) {
-          clearInterval(this.intervalId);
+          clearTimeout(this.intervalId);
           this.intervalId = null;
         }
         this.broadcast();
@@ -640,6 +636,13 @@ const L = t();
           this.remaining = 0;
           if (this.soundEnabled && !this.popupOpen) this.beep();
         }
+      },
+
+      _scheduleTick() {
+        this.intervalId = window.setTimeout(() => {
+          this.tick();
+          if (this.running) this._scheduleTick();
+        }, 100);
       },
 
       // ═══════════════════════════════════════════════════════

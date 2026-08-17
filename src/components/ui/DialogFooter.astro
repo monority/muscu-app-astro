@@ -1,4 +1,6 @@
 ---
+import Button from './Button.astro';
+
 interface Props {
   cancelLabel?: string;
   confirmLabel?: string;
@@ -12,26 +14,13 @@ const {
   variant = 'primary',
   class: className = '',
 } = Astro.props;
-
-const btnBase = 'inline-flex items-center justify-center min-h-[4.4rem] px-[1.6rem] rounded-[var(--radius-sm)] font-[var(--font-body)] text-[1.4rem] font-semibold cursor-pointer transition-[background-color,border-color,color,transform] duration-[var(--transition-fast)]';
 ---
 
 <div class:list={['flex justify-end gap-[0.8rem] pt-[1.6rem]', className]}>
-  <button type="button" class:list={[btnBase, 'bg-[var(--color-surface-2)] border border-[var(--color-border-strong)] text-[var(--color-text)] hover:bg-[var(--color-surface-3)]']} data-dialog-close>
+  <Button variant="secondary" type="button" data-dialog-close>
     {cancelLabel}
-  </button>
-  <button type="button" class:list={[btnBase, variant === 'primary' && 'bg-[var(--color-accent)] border border-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:bg-[var(--color-accent-hover)]', variant === 'destructive' && 'dialog-btn-destructive']}>
+  </Button>
+  <Button variant={variant === 'destructive' ? 'destructive' : 'primary'} type="button">
     <slot />
-  </button>
+  </Button>
 </div>
-
-<style>
-  .dialog-btn-destructive {
-    background: transparent;
-    border: 1px solid color-mix(in srgb, var(--color-destructive) 45%, transparent);
-    color: var(--color-destructive);
-  }
-  .dialog-btn-destructive:hover {
-    background: color-mix(in srgb, var(--color-destructive) 10%, transparent);
-  }
-</style>

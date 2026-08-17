@@ -20,7 +20,9 @@ import CardHeader from '../ui/CardHeader.astro';
 import CardTitle from '../ui/CardTitle.astro';
 import CardContent from '../ui/CardContent.astro';
 import Button from '../ui/Button.astro';
+import Toggle from '../ui/Toggle.astro';
 import { t } from '../../i18n';
+import { icons } from '../../lib/icons';
 
 const L = t();
 ---
@@ -36,19 +38,7 @@ const L = t();
     <CardHeader>
       <div class="flex items-center gap-4 min-w-0">
         <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] shrink-0 text-[var(--color-accent)] rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] max-[480px]:w-[3.2rem] max-[480px]:h-[3.2rem]" aria-hidden="true">
-          <svg
-            class="w-[1.8rem] h-[1.8rem] max-[480px]:w-[1.6rem] max-[480px]:h-[1.6rem]"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-          </svg>
+          <Fragment set:html={icons.bell(24, 24)} />
         </span>
         <CardTitle>{L.settings.reminders}</CardTitle>
       </div>
@@ -64,19 +54,11 @@ const L = t();
             <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.reminderToggleDesc}</span>
           </div>
           <div class="rem__row-value shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums">
-            <label class="rem__toggle-wrap inline-flex items-center cursor-pointer min-h-[4.4rem]">
-              <input
-                type="checkbox"
-                class="sr-only rem__toggle-input"
-                role="switch"
-                :checked="settings.reminders.enabled"
-                :aria-checked="settings.reminders.enabled ? 'true' : 'false'"
-                @change="setEnabled($event.target.checked)"
-              />
-              <span class="rem__toggle-track relative w-[4.4rem] h-[2.4rem] rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-[background-color,border-color] duration-200 ease-in-out shrink-0 inline-block">
-                <span class="rem__toggle-thumb absolute top-[2px] left-[3px] w-[1.8rem] h-[1.8rem] rounded-full bg-white transition-transform duration-200 ease-in-out shadow-[var(--shadow-1)] inline-block"></span>
-              </span>
-            </label>
+            <Toggle
+              :checked="settings.reminders.enabled"
+              :aria-checked="settings.reminders.enabled ? 'true' : 'false'"
+              @change="setEnabled($event.target.checked)"
+            />
           </div>
         </div>
 
@@ -364,19 +346,6 @@ const L = t();
     opacity: 0.55;
   }
 
-  .rem__toggle-input:checked + .rem__toggle-track {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-
-  .rem__toggle-input:checked + .rem__toggle-track .rem__toggle-thumb {
-    transform: translateX(20px);
-  }
-
-  .rem__toggle-input:focus-visible + .rem__toggle-track {
-    box-shadow: var(--focus-ring);
-  }
-
   .rem__day:hover:not(:disabled):not(.rem__day--active) {
     background-color: var(--alpha-bg-subtle);
     color: var(--color-text);
@@ -440,8 +409,6 @@ const L = t();
 
   @media (prefers-reduced-motion: reduce) {
     .rem__day,
-    .rem__toggle-track,
-    .rem__toggle-thumb,
     .rem__time { transition: none; }
   }
 </style>
