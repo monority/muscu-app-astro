@@ -15,7 +15,7 @@ const { icon, title, description, class: className = '' } = Astro.props;
       <Fragment set:html={icon} />
     </span>
   )}
-  <h2 class="font-[var(--font-display)] text-[1.6rem] font-bold text-[var(--color-text)]">{title}</h2>
+  <h2 class="text-display text-[1.6rem] font-bold text-[var(--color-text)]">{title}</h2>
 </div>
 {description && <p class="text-[1.3rem] text-[var(--color-muted)] mt-[0.4rem] mb-[1.6rem] leading-[1.5]">{description}</p>}
 

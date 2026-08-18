@@ -1,4 +1,7 @@
 ---
+import FormField from './FormField.astro';
+import { buildDescribedBy } from '../../lib/form-utils';
+
 type InputType =
   | 'button'
   | 'checkbox'
@@ -54,10 +57,7 @@ const {
   ...rest
 } = Astro.props;
 
-const hintId = id ? `${id}-hint` : undefined;
-const errorId = id ? `${id}-error` : undefined;
-const describedBy =
-  [hint && hintId, error && errorId].filter(Boolean).join(" ") || undefined;
+const describedBy = buildDescribedBy(id, hint, error);
 
 const inputClasses = [
   "w-full",
@@ -83,26 +83,7 @@ const inputClasses = [
   .join(" ");
 ---
 
-<div class="flex flex-col">
-  {
-    label && (
-      <label
-        for={id}
-        class="text-[1.3rem] font-medium text-[var(--color-muted)] mb-2 leading-tight"
-      >
-        {label}
-        {required && (
-          <span
-            class="text-[var(--color-destructive)] ml-0.5"
-            aria-hidden="true"
-          >
-            *
-          </span>
-        )}
-      </label>
-    )
-  }
-
+<FormField id={id} label={label} hint={hint} error={error} required={required}>
   <input
     {...rest}
     type={type}
@@ -116,27 +97,4 @@ const inputClasses = [
     aria-describedby={describedBy}
     class={inputClasses}
   />
-
-  {
-    hint && !error && (
-      <p
-        id={hintId}
-        class="text-[1.1rem] text-[var(--color-muted)] mt-1.5 leading-snug"
-      >
-        {hint}
-      </p>
-    )
-  }
-
-  {
-    error && (
-      <p
-        id={errorId}
-        class="text-[1.1rem] text-[var(--color-destructive)] mt-1.5 leading-snug"
-        role="alert"
-      >
-        {error}
-      </p>
-    )
-  }
-</div>
+</FormField>

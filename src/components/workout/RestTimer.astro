@@ -1,0 +1,191 @@
+---
+import Icon from '../ui/Icon.astro';
+import { icons } from '../../lib/icons';
+---
+
+<div
+  class="rest-timer"
+  x-show="restTimer.active"
+  x-cloak
+  x-transition.opacity.duration.180ms
+  role="status"
+  aria-live="polite"
+>
+  <div class="rest-timer__icon" aria-hidden="true">
+    <slot name="icon">
+      <Icon name="clock" size={24} />
+    </slot>
+  </div>
+  <div class="rest-timer__body">
+    <div class="rest-timer__label" x-text="restTimerLabel()"></div>
+    <div
+      class="rest-timer__readout"
+      :class="{ 'is-done': restTimerDone }"
+      x-text="restTimerDisplay()"
+    ></div>
+  </div>
+  <button
+    type="button"
+    class="rest-timer__skip"
+    @click="dismissRestTimer()"
+    :aria-label="restTimerDone ? labels.closeRestTimer ?? labels.closeRest : labels.skipRest"
+  >
+    <slot name="close-icon">
+      <Fragment set:html={icons.closeX()} />
+    </slot>
+    <span x-text="restTimerDone ? labels.close : labels.skip"></span>
+  </button>
+</div>
+
+<style>
+  .rest-timer {
+    position: fixed;
+    left: 50%;
+    bottom: 1.6rem;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    width: min(48rem, calc(100% - 3.2rem));
+    padding: 1rem 1.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      var(--shadow-2),
+      0 0 0 1px var(--alpha-bg-subtle);
+  }
+
+  .rest-timer__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .rest-timer__icon :global(svg) {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .rest-timer__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .rest-timer__label {
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rest-timer__readout {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .rest-timer__readout.is-done {
+    color: var(--color-success);
+  }
+
+  .rest-timer__skip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 4.4rem;
+    padding: 0 1.2rem;
+    background-color: var(--alpha-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .rest-timer__skip:hover {
+    background-color: var(--alpha-border-faint);
+    border-color: var(--alpha-border);
+    color: var(--color-text);
+  }
+
+  .rest-timer__skip:active {
+    transform: scale(0.97);
+  }
+
+  .rest-timer__skip :global(svg) {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  @media (max-width: 480px) {
+    .rest-timer {
+      width: calc(100% - 2rem);
+      bottom: 1rem;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+    }
+    .rest-timer__icon {
+      width: 3.4rem;
+      height: 3.4rem;
+    }
+    .rest-timer__readout {
+      font-size: 2rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .rest-timer__skip {
+      width: 4.4rem;
+      padding: 0;
+      justify-content: center;
+    }
+    .rest-timer__skip span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rest-timer__skip {
+      transition: none;
+    }
+    .rest-timer__skip:active {
+      transform: none;
+    }
+  }
+</style>

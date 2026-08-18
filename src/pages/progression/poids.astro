@@ -3,6 +3,7 @@
 import { t } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
+import Icon from '../../components/ui/Icon.astro';
 import Card from '../../components/ui/Card.astro';
 import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
@@ -126,7 +127,7 @@ const L = t();
         <div class="poids__stat poids__stat--hero">
           <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.latest}</span>
           <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.weight)"></span>
+            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.weight)"></span>
             <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.common.kg}</span>
           </div>
           <span
@@ -149,7 +150,7 @@ const L = t();
         <div class="poids__stat" x-show="latest?.arm != null">
           <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.armLabel}</span>
           <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.arm)"></span>
+            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.arm)"></span>
             <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
           </div>
           <span
@@ -162,7 +163,7 @@ const L = t();
         <div class="poids__stat" x-show="latest?.chest != null">
           <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.chestLabel}</span>
           <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.chest)"></span>
+            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.chest)"></span>
             <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
           </div>
           <span
@@ -175,7 +176,7 @@ const L = t();
         <div class="poids__stat" x-show="latest?.waist != null">
           <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.waistLabel}</span>
           <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.waist)"></span>
+            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.waist)"></span>
             <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
           </div>
           <span
@@ -188,7 +189,7 @@ const L = t();
         <div class="poids__stat" x-show="latest?.hips != null">
           <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.hipsLabel}</span>
           <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.hips)"></span>
+            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.hips)"></span>
             <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
           </div>
           <span
@@ -251,13 +252,13 @@ const L = t();
                 <template x-for="(r, i) in [...records].reverse()" :key="i">
                   <tr>
                     <td x-text="formatDate(r.date)"></td>
-                    <td class="font-[var(--font-display)] tabular-nums font-semibold text-[var(--color-text)]" x-text="sessionsSinceDate(r.date)"></td>
-                    <td class="font-[var(--font-display)] tabular-nums font-semibold text-[var(--color-text)]" x-text="formatVolume(volumeSinceDate(r.date))"></td>
-                    <td class="font-[var(--font-display)] tabular-nums font-semibold text-[var(--color-text)]" x-text="formatNumber(r.weight) + ' kg'"></td>
-                    <td class="font-[var(--font-display)] tabular-nums font-semibold text-[var(--color-text)]" x-text="r.arm != null ? formatNumber(r.arm) + ' cm' : '—'"></td>
-                    <td class="font-[var(--font-display)] tabular-nums font-semibold text-[var(--color-text)]" x-text="r.chest != null ? formatNumber(r.chest) + ' cm' : '—'"></td>
-                    <td class="font-[var(--font-display)] tabular-nums font-semibold text-[var(--color-text)]" x-text="r.waist != null ? formatNumber(r.waist) + ' cm' : '—'"></td>
-                    <td class="font-[var(--font-display)] tabular-nums font-semibold text-[var(--color-text)]" x-text="r.hips != null ? formatNumber(r.hips) + ' cm' : '—'"></td>
+                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="sessionsSinceDate(r.date)"></td>
+                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="formatVolume(volumeSinceDate(r.date))"></td>
+                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="formatNumber(r.weight) + ' kg'"></td>
+                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.arm != null ? formatNumber(r.arm) + ' cm' : '—'"></td>
+                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.chest != null ? formatNumber(r.chest) + ' cm' : '—'"></td>
+                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.waist != null ? formatNumber(r.waist) + ' cm' : '—'"></td>
+                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.hips != null ? formatNumber(r.hips) + ' cm' : '—'"></td>
                     <td class="text-right">
                       <button
                         type="button"
@@ -266,19 +267,7 @@ const L = t();
                         :aria-label="deleteLabel(r.date)"
                         title={L.poids.delete}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          aria-hidden="true"
-                        >
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                        </svg>
+                        <Icon name="trash" size={20} />
                       </button>
                     </td>
                   </tr>

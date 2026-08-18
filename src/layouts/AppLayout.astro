@@ -3,6 +3,7 @@ import "../styles/globals.css";
 import AppShell from "../components/layout/AppShell.astro";
 import Background from "../components/layout/Background.astro";
 import QuickSearch from "../components/layout/QuickSearch.astro";
+import Toast from "../components/ui/Toast.astro";
 import { t, setLocale, getLocale, localizedPath } from "../i18n";
 
 /**
@@ -30,6 +31,10 @@ interface Props {
   description?: string;
   groups?: NavTree;
 }
+
+const currentPath = Astro.url.pathname;
+const currentLocale = currentPath.startsWith("/en") ? "en" : "fr";
+setLocale(currentLocale);
 
 const L = t();
 
@@ -83,13 +88,6 @@ const {
   description,
   groups = defaultGroups,
 } = Astro.props;
-
-const currentPath = Astro.url.pathname;
-
-// Derive the active locale from the URL so the nav tree (and the
-// <html lang>) always match the page being rendered.
-const currentLocale = currentPath.startsWith("/en") ? "en" : "fr";
-setLocale(currentLocale);
 
 // Mark active state on each item (and its children when present)
 // so the Sidebar and the mobile drawer can highlight the right
@@ -217,6 +215,9 @@ const groupsWithActive = groups.map((g) => ({
     {/* Global command palette — searches pages/exercises/sessions.
         Opened by the sidebar search field, "/", or Ctrl/Cmd+K. */}
     <QuickSearch />
+
+    {/* Global toast — persists across page navigations. */}
+    <Toast />
 
     <script is:inline>
       // Register the service worker for offline use (gym wifi is spotty).

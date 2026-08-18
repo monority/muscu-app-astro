@@ -17,7 +17,7 @@ const classes = ['workout-set', completed && 'workout-set--completed', className
 const ariaLabel = `${index} · ${weight} ${L.common.kg} × ${reps} ${L.common.reps}${type ? ` · ${type}` : ''}${completed ? ` · ${L.sessions.completed}` : ''}`;
 ---
 
-<div class:list={['grid grid-cols-[3.2rem_minmax(6rem,1fr)2rem_minmax(6rem,1fr)auto_2.4rem] items-center gap-[0.8rem] min-h-[4.8rem] px-4 border-b border-[var(--color-border)] text-[var(--color-muted)] max-[480px]:grid-cols-[2.6rem_minmax(5rem,1fr)1.4rem_minmax(5rem,1fr)auto_2rem] max-[480px]:gap-1 max-[480px]:px-[0.4rem]', { 'workout-set--completed': completed }]} role="listitem" aria-label={ariaLabel}>
+<div class:list={['set-row-grid min-h-[4.8rem] px-4 border-b-separator text-[var(--color-muted)] max-[480px]:px-[0.4rem]', { 'workout-set--completed': completed }]} role="listitem" aria-label={ariaLabel}>
   <span class:list={['text-[var(--color-muted)] text-[1.1rem] font-extrabold tracking-[0.06em]', { 'text-[var(--color-text)]': completed }]} aria-hidden="true">{String(index).padStart(2, '0')}</span>
   <span class:list={['text-[var(--color-text)] text-[1.5rem] font-[750] tabular-nums', { 'text-[var(--color-text)]': completed }]}>{weight}<small class="ml-1 text-[var(--color-muted)] text-[1rem] font-semibold">{L.common.kg}</small></span>
   <span class="text-[var(--color-accent)] text-[1.3rem] text-center" aria-hidden="true">×</span>

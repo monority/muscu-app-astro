@@ -23,6 +23,7 @@
  * backdrop closes too (see the click handler in the script below).
  */
 import { t } from "../../i18n";
+import Icon from "../ui/Icon.astro";
 
 const L = t();
 ---
@@ -36,19 +37,7 @@ const L = t();
   <div class="quick-search__panel">
     {/* ── Input ─────────────────────────────────────────── */}
     <div class="quick-search__input">
-      <svg
-        class="quick-search__input-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <circle cx="11" cy="11" r="8"></circle>
-        <path d="m21 21-4.3-4.3"></path>
-      </svg>
+      <Icon name="search" size={18} class="quick-search__input-icon" />
       <input
         type="search"
         class="quick-search__field"
@@ -109,19 +98,7 @@ const L = t();
 
       <div class="quick-search__empty" x-show="noResults">
         <div class="quick-search__empty-icon" aria-hidden="true">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-            <path d="m8.5 8.5 5 5"></path>
-            <path d="m13.5 8.5-5 5"></path>
-          </svg>
+          <Icon name="searchX" size={24} />
         </div>
         <p class="quick-search__empty-title" x-text="emptyTitle"></p>
         <p class="quick-search__empty-hint" x-text="emptyHint"></p>

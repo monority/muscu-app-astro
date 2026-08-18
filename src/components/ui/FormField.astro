@@ -1,28 +1,57 @@
 ---
+/**
+ * FormField — shared label + hint + error wrapper for form controls.
+ *
+ * Used by Input.astro and Select.astro to eliminate the duplicated
+ * label/hint/error markup and the describedBy computation.
+ */
+
 interface Props {
-  label: string;
-  for?: string;
-  required?: boolean;
+  id?: string;
+  label?: string;
   hint?: string;
+  error?: string;
+  required?: boolean;
   class?: string;
-  [key: string]: unknown;
 }
 
 const {
+  id,
   label,
-  for: forId,
-  required = false,
   hint,
+  error,
+  required = false,
   class: className = '',
-  ...rest
 } = Astro.props;
+
+const hintId = id ? `${id}-hint` : undefined;
+const errorId = id ? `${id}-error` : undefined;
 ---
 
-<div class:list={['flex flex-col gap-[0.6rem]', className]}>
-  <label for={forId} class="text-[1.3rem] font-medium text-[var(--color-muted)] leading-[1.3]">
-    {label}
-    {required && <span class="text-[var(--color-destructive)] ml-[0.2rem]" aria-hidden="true">*</span>}
-  </label>
+<div class:list={['flex flex-col', className]}>
+  {label && (
+    <label
+      for={id}
+      class="text-[1.3rem] font-medium text-[var(--color-muted)] mb-2 leading-tight"
+    >
+      {label}
+      {required && (
+        <span class="text-[var(--color-destructive)] ml-0.5" aria-hidden="true">*</span>
+      )}
+    </label>
+  )}
+
   <slot />
-  {hint && <p class="text-[1.1rem] text-[var(--color-muted)] leading-[1.4]">{hint}</p>}
+
+  {hint && !error && (
+    <p id={hintId} class="text-[1.1rem] text-[var(--color-muted)] mt-1.5 leading-snug">
+      {hint}
+    </p>
+  )}
+
+  {error && (
+    <p id={errorId} class="text-[1.1rem] text-[var(--color-destructive)] mt-1.5 leading-snug" role="alert">
+      {error}
+    </p>
+  )}
 </div>

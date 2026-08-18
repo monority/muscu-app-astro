@@ -1,13 +1,16 @@
 ---
-import { icons } from '../../lib/icons';
+import Icon from './Icon.astro';
 import Button from './Button.astro';
+import Card from './Card.astro';
+import type { IconName } from '../../lib/icons';
 
 interface Props {
-  iconName?: keyof typeof icons;
+  iconName?: IconName;
   title: string;
   description?: string;
   actionLabel?: string;
   actionHref?: string;
+  variant?: 'default' | 'error';
   class?: string;
 }
 
@@ -17,51 +20,56 @@ const {
   description,
   actionLabel,
   actionHref,
+  variant = 'default',
   class: className = "",
 } = Astro.props;
 
 const hasAction = Boolean(actionLabel && actionHref);
-
-const wrapperClasses = [
-  "flex flex-col items-center justify-center",
-  "py-12 px-6",
-  "max-w-sm mx-auto",
-  "text-center",
-  className,
-]
-  .filter(Boolean)
-  .join(" ");
+const isError = variant === 'error';
 ---
 
-<div class={wrapperClasses} role="status">
-  {
-    iconName && (
+{isError ? (
+  <Card class={className}>
+    <div class="flex flex-col items-center text-center gap-3 py-5 max-w-[32rem] mx-auto">
+      {iconName && (
+        <div
+          class="inline-flex items-center justify-center w-[6rem] h-[6rem] rounded-full text-[var(--color-destructive)] bg-[color-mix(in_srgb,var(--color-destructive)_10%,transparent)]"
+          aria-hidden="true"
+        >
+          <Icon name={iconName} size={30} />
+        </div>
+      )}
+      <h2 class="text-display text-[2rem] text-[var(--color-text)]">{title}</h2>
+      {description && <p class="text-[var(--color-muted)] text-[1.3rem] leading-[1.5]">{description}</p>}
+      {hasAction && (
+        <Button href={actionHref} variant="primary" class="mt-1">
+          {actionLabel}
+        </Button>
+      )}
+    </div>
+  </Card>
+) : (
+  <div class:list={['flex flex-col items-center justify-center py-12 px-6 max-w-sm mx-auto text-center', className]} role="status">
+    {iconName && (
       <div
         class="flex items-center justify-center w-12 h-12 rounded-full text-[var(--color-muted)] bg-[var(--alpha-bg-soft)]"
         aria-hidden="true"
       >
-        <Fragment set:html={(icons as Record<string, (w?: number, h?: number) => string>)[iconName]?.(24, 24) ?? ''} />
+        <Icon name={iconName} size={24} />
       </div>
-    )
-  }
-
-  <h3 class="font-[var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] mt-4 text-center">
-    {title}
-  </h3>
-
-  {
-    description && (
+    )}
+    <h3 class="text-display text-[1.5rem] font-bold text-[var(--color-text)] mt-4 text-center">
+      {title}
+    </h3>
+    {description && (
       <p class="text-[1.2rem] text-[var(--color-muted)] mt-2 text-center">
         {description}
       </p>
-    )
-  }
-
-  {
-    hasAction && (
+    )}
+    {hasAction && (
       <Button href={actionHref} variant="primary" class="mt-4">
         {actionLabel}
       </Button>
-    )
-  }
-</div>
+    )}
+  </div>
+)}

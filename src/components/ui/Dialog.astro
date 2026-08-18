@@ -28,6 +28,7 @@ interface Props {
 }
 
 import { t } from '../../i18n';
+import Icon from './Icon.astro';
 
 const L = t();
 
@@ -55,7 +56,7 @@ const classes = [
     <header class="flex flex-row justify-between items-center mb-4 gap-3">
       <h2
         id={`${id}-title`}
-        class="font-[var(--font-display)] text-[1.5rem] font-bold leading-tight"
+        class="text-display text-[1.5rem] font-bold leading-tight"
       >
         {title}
       </h2>
@@ -65,20 +66,7 @@ const classes = [
         aria-label={L.common.close}
         class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/5 text-[var(--color-muted)] hover:bg-white/10 hover:text-[var(--color-text)] transition-colors duration-[160ms] cursor-pointer"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="w-4 h-4"
-          aria-hidden="true"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <Icon name="closeX" size={16} />
       </button>
     </header>
   )}

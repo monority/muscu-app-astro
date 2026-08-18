@@ -32,6 +32,7 @@
  */
 
 import type { Session } from './storage';
+import { completedSets } from './session-utils';
 
 export type VolumePeriod = 'week' | 'month' | 'all';
 
@@ -82,24 +83,23 @@ export function volumeByMuscle(
   }
 
   const totals = new Map<string, number>();
-  for (const session of sessions) {
-    if (session.status !== 'completed') continue;
-    if (!session.date) continue;
+
+  // Pre-filter sessions by date window before iterating sets.
+  const filtered = sessions.filter((session) => {
+    if (session.status !== 'completed') return false;
+    if (!session.date) return false;
     if (minTime !== null) {
       const t = new Date(session.date + 'T00:00:00').getTime();
-      if (isNaN(t) || t < minTime) continue;
+      if (isNaN(t) || t < minTime) return false;
     }
+    return true;
+  });
 
-    for (const ex of session.exercises) {
-      const muscle =
-        ex.muscle && ex.muscle.trim().length > 0 ? ex.muscle : OTHER_MUSCLE;
-      let sum = 0;
-      for (const set of ex.sets) {
-        if (!set.completed) continue;
-        sum += set.weight * set.reps;
-      }
-      if (sum > 0) totals.set(muscle, (totals.get(muscle) ?? 0) + sum);
-    }
+  for (const { exercise, set } of completedSets(filtered)) {
+    const muscle =
+      exercise.muscle && exercise.muscle.trim().length > 0 ? exercise.muscle : OTHER_MUSCLE;
+    const vol = set.weight * set.reps;
+    if (vol > 0) totals.set(muscle, (totals.get(muscle) ?? 0) + vol);
   }
 
   const total = Array.from(totals.values()).reduce((s, v) => s + v, 0);

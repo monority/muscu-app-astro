@@ -5,14 +5,12 @@ import Card from '../../components/ui/Card.astro';
 import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
-import Input from '../../components/ui/Input.astro';
 import Select from '../../components/ui/Select.astro';
 import Button from '../../components/ui/Button.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import SettingsSection from '../../components/ui/SettingsSection.astro';
 import SettingsBottomBar from '../../components/layout/SettingsBottomBar.astro';
 import ReminderSettings from '../../components/params/ReminderSettings.astro';
-import Toast from '../../components/ui/Toast.astro';
 import { t } from '../../i18n';
 import { icons } from '../../lib/icons';
 
@@ -37,8 +35,8 @@ const APP_VERSION = '0.0.1';
 // the same i18n keys used by the section headings so both stay in sync.
 const SETTINGS_SECTIONS = [
   { id: 'set-profile', label: L.settings.profile },
-  { id: 'set-goals', label: L.settings.goals },
   { id: 'set-units', label: L.settings.units },
+  { id: 'set-goals', label: L.settings.goals },
   { id: 'set-timer', label: L.settings.timerSettings },
   { id: 'set-reminder', label: L.settings.reminders },
   { id: 'set-data', label: L.settings.data },
@@ -53,8 +51,6 @@ const SETTINGS_SECTIONS = [
     description={L.settings.description}
   />
 
-  <Toast />
-
   <div
     class="pb-[calc(var(--bottom-nav-height,5.6rem)+2rem)] flex flex-col gap-[2rem] max-sm:gap-[1.4rem]"
     x-data="settingsApp()"
@@ -65,142 +61,55 @@ const SETTINGS_SECTIONS = [
         1. PROFIL
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="user" title={L.settings.profile} description={L.settings.profileDesc} id="set-profile">
-      {/* Display mode */}
-      <div class="flex flex-col gap-0 mt-[1.2rem]" x-show="!editingProfile" x-cloak x-transition.opacity.duration.200ms>
+      <div class="flex flex-col gap-0 mt-[1.2rem]">
         <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
           <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.pseudo}</span>
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.pseudo}</span>
             <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.pseudoDesc}</span>
           </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums max-w-[24rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal" x-text="display.pseudo || labels.notSet"></div>
+          <div class="shrink-0 w-full max-w-[24rem] max-sm:max-w-full">
+            <input
+              type="text"
+              id="set-pseudo"
+              class="set__sync-input w-full h-[4.4rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.3rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
+              x-model="display.pseudo"
+              @change="savePseudo()"
+              :placeholder="labels.pseudoPlaceholder"
+              maxlength="40"
+              autocomplete="nickname"
+              aria-label={L.settings.pseudo}
+            />
+          </div>
         </div>
         <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
           <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.email}</span>
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.email}</span>
             <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.emailDesc}</span>
           </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums max-w-[24rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal" x-text="display.email || labels.notSet"></div>
-        </div>
-        <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
-          <Button type="button" variant="secondary" @click="startEditProfile()">
-            {L.common.edit}
-          </Button>
-        </div>
-      </div>
-
-      {/* Edit mode */}
-      <form
-        class="flex flex-col gap-[1.4rem] mt-[1.2rem]"
-        x-show="editingProfile"
-        @submit.prevent="saveProfile()"
-        x-cloak
-        x-transition.opacity.duration.200ms
-      >
-        <div class="flex flex-col">
-          <Input
-            label={L.settings.pseudo}
-            id="set-pseudo"
-            type="text"
-            placeholder={L.settings.pseudoPlaceholder}
-            x-model="form.pseudo"
-            maxlength={40}
-            autocomplete="nickname"
-          />
-        </div>
-        <div class="flex flex-col">
-          <Input
-            label={L.settings.email}
-            id="set-email"
-            type="email"
-            placeholder={L.settings.emailPlaceholder}
-            x-model="form.email"
-            autocomplete="email"
-          />
-        </div>
-        <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
-          <Button type="button" variant="ghost" @click="cancelEditProfile()">
-            {L.common.cancel}
-          </Button>
-          <Button type="submit" variant="primary">
-            {L.common.save}
-          </Button>
-        </div>
-      </form>
-    </SettingsSection>
-
-    {/* ═════════════════════════════════════════════════════
-        2. OBJECTIFS
-        ═════════════════════════════════════════════════════ */}
-    <SettingsSection icon="target" title={L.settings.goals} description={L.settings.goalsDesc} id="set-goals">
-      <div class="flex flex-col gap-0 mt-[1.2rem]">
-        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyGoalCount}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyGoalTrackedDesc}</span>
-          </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-            <div class="set__goal-input-wrap inline-flex items-stretch h-[4.4rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden transition-[border-color,box-shadow] duration-[140ms] max-sm:self-start">
-              <button
-                type="button"
-                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
-                aria-label={L.settings.weeklyGoalDecrease}
-                @click="setWeeklyGoal(display.weeklyGoal - 1)"
-              >
-                <Fragment set:html={icons.minus(24, 24)} />
-              </button>
-              <input
-                id="set-weekly-goal"
-                type="number"
-                min="1"
-                max="7"
-                step="1"
-                inputmode="numeric"
-                class="no-spinner appearance-textfield w-[5.2rem] shrink-0 border-0 border-l border-r border-[var(--color-border)] bg-transparent text-[var(--color-text)] font-[var(--font-display)] text-[1.6rem] font-bold text-center tabular-nums outline-none p-0 leading-none"
-                :value="display.weeklyGoal"
-                @change="setWeeklyGoal(parseInt($event.target.value, 10))"
-                aria-label={L.settings.weeklyGoalCount}
-              />
-              <button
-                type="button"
-                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
-                aria-label={L.settings.weeklyGoalIncrease}
-                @click="setWeeklyGoal(display.weeklyGoal + 1)"
-              >
-                <Fragment set:html={icons.plus(24, 24)} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyProgress}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyProgressDesc}</span>
-          </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-            <span class="inline-flex items-baseline gap-[0.3rem] font-[var(--font-body)] tabular-nums">
-              <span class="font-[var(--font-display)] text-[1.8rem] font-bold text-[var(--color-accent)] leading-none" x-text="weeklyDone"></span>
-              <span class="text-[var(--color-muted)] text-[1.4rem] font-medium mx-[0.1rem]" aria-hidden="true">/</span>
-              <span class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] leading-none" x-text="display.weeklyGoal"></span>
-              <span class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]" x-text="labels.seanceSingular">{L.settings.seanceSingular}</span>
-              <span
-                class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]"
-                x-text="display.weeklyGoal > 1 ? 's' : ''"
-              ></span>
-            </span>
+          <div class="shrink-0 w-full max-w-[24rem] max-sm:max-w-full">
+            <input
+              type="email"
+              id="set-email"
+              class="set__sync-input w-full h-[4.4rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.3rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
+              x-model="display.email"
+              @change="saveEmail()"
+              :placeholder="labels.emailPlaceholder"
+              autocomplete="email"
+              aria-label={L.settings.email}
+            />
           </div>
         </div>
       </div>
     </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
-        3. UNITÉS
+        2. UNITÉS
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="ruler" title={L.settings.units} description={L.settings.unitsDesc} id="set-units">
       <div class="flex flex-col gap-0 mt-[1.2rem]">
         <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
           <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weightUnit}</span>
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weightUnit}</span>
             <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weightUnitDesc}</span>
           </div>
           <div class="inline-flex p-[0.3rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full max-sm:self-start" role="group" aria-label={L.settings.weightUnit}>
@@ -227,7 +136,7 @@ const SETTINGS_SECTIONS = [
 
         <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
           <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.repsFormat}</span>
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.repsFormat}</span>
             <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.repsDesc}</span>
           </div>
           <div class="inline-flex p-[0.3rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full max-sm:self-start" role="group" aria-label={L.settings.repsFormat}>
@@ -255,77 +164,113 @@ const SETTINGS_SECTIONS = [
     </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
+        3. OBJECTIFS
+        ═════════════════════════════════════════════════════ */}
+    <SettingsSection icon="target" title={L.settings.goals} description={L.settings.goalsDesc} id="set-goals">
+      <div class="flex flex-col gap-0 mt-[1.2rem]">
+        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyGoalCount}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyGoalTrackedDesc}</span>
+          </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+            <div class="set__goal-input-wrap inline-flex items-stretch h-[4.4rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden transition-[border-color,box-shadow] duration-[140ms] max-sm:self-start">
+              <button
+                type="button"
+                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
+                aria-label={L.settings.weeklyGoalDecrease}
+                @click="setWeeklyGoal(display.weeklyGoal - 1)"
+              >
+                <Fragment set:html={icons.minus(24, 24)} />
+              </button>
+              <input
+                id="set-weekly-goal"
+                type="number"
+                min="1"
+                max="7"
+                step="1"
+                inputmode="numeric"
+                class="no-spinner appearance-textfield w-[5.2rem] shrink-0 border-0 border-l border-r border-[var(--color-border)] bg-transparent text-[var(--color-text)] text-display text-[1.6rem] font-bold text-center tabular-nums outline-none p-0 leading-none"
+                :value="display.weeklyGoal"
+                @change="setWeeklyGoal(parseInt($event.target.value, 10))"
+                aria-label={L.settings.weeklyGoalCount}
+              />
+              <button
+                type="button"
+                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
+                aria-label={L.settings.weeklyGoalIncrease}
+                @click="setWeeklyGoal(display.weeklyGoal + 1)"
+              >
+                <Fragment set:html={icons.plus(24, 24)} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyProgress}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyProgressDesc}</span>
+          </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+            <span class="inline-flex items-baseline gap-[0.3rem] font-[var(--font-body)] tabular-nums">
+              <span class="text-display text-[1.8rem] font-bold text-[var(--color-accent)] leading-none" x-text="weeklyDone"></span>
+              <span class="text-[var(--color-muted)] text-[1.4rem] font-medium mx-[0.1rem]" aria-hidden="true">/</span>
+              <span class="text-display text-[1.4rem] font-bold text-[var(--color-text)] leading-none" x-text="display.weeklyGoal"></span>
+              <span class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]" x-text="labels.seanceSingular">{L.settings.seanceSingular}</span>
+              <span
+                class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]"
+                x-text="display.weeklyGoal > 1 ? 's' : ''"
+              ></span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </SettingsSection>
+
+    {/* ═════════════════════════════════════════════════════
         4. TIMER
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="clockStopwatch" title={L.settings.timerSettings} description={L.settings.timerDesc} id="set-timer">
-      <form class="flex flex-col gap-[1.4rem] mt-[1.2rem]" @submit.prevent="saveTimer()">
-        <div class="flex flex-col gap-0 mt-[1.2rem]">
-          <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-            <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-              <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.defaultRestTime}</span>
-              <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.defaultRestTimeDesc}</span>
-            </div>
-            <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-              <Select
-                id="set-rest-time"
-                name="restTime"
-                options={restOptions}
-                x-model="form.defaultRestTime"
+      <div class="flex flex-col gap-0 mt-[1.2rem]">
+        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.defaultRestTime}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.defaultRestTimeDesc}</span>
+          </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+            <Select
+              id="set-rest-time"
+              name="restTime"
+              options={restOptions}
+              :value="String(display.defaultRestTime)"
+              @change="saveRestTime($event.target.value)"
+            />
+          </div>
+        </div>
+
+        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
+          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
+            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.soundAlerts}</span>
+            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.soundAlertsDesc}</span>
+          </div>
+          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+            <label class="inline-flex items-center cursor-pointer min-h-[4.4rem]">
+              <input
+                type="checkbox"
+                class="sr-only set__toggle-input"
+                role="switch"
+                :checked="display.soundAlerts"
+                :aria-checked="display.soundAlerts ? 'true' : 'false'"
+                @change="saveSoundAlerts($event.target.checked)"
               />
-            </div>
-          </div>
-
-          <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-            <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-              <span class="font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.soundAlerts}</span>
-              <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.soundAlertsDesc}</span>
-            </div>
-            <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-              <label class="inline-flex items-center cursor-pointer min-h-[4.4rem]">
-                <input
-                  type="checkbox"
-                  class="sr-only set__toggle-input"
-                  role="switch"
-                  :checked="form.soundAlerts"
-                  :aria-checked="form.soundAlerts ? 'true' : 'false'"
-                  @change="form.soundAlerts = $event.target.checked"
-                />
-                <span class="set__toggle-track relative w-[4.4rem] h-[2.4rem] rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-[background-color,border-color] duration-[200ms] shrink-0 inline-block">
-                  <span class="set__toggle-thumb absolute top-[2px] left-[3px] w-[1.8rem] h-[1.8rem] rounded-full bg-white transition-transform duration-[200ms] shadow-[var(--shadow-1)] inline-block"></span>
-                </span>
-              </label>
-            </div>
+              <span class="set__toggle-track relative w-[4.4rem] h-[2.4rem] rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-[background-color,border-color] duration-[200ms] shrink-0 inline-block">
+                <span class="set__toggle-thumb absolute top-[2px] left-[3px] w-[1.8rem] h-[1.8rem] rounded-full bg-white transition-transform duration-[200ms] shadow-[var(--shadow-1)] inline-block"></span>
+              </span>
+            </label>
           </div>
         </div>
-
-        <p
-          class="text-[1.1rem] text-[var(--color-warning)] m-0 leading-[1.3]"
-          x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
-          x-cloak
-          x-text="labels.unsavedChanges"
-        >
-          {L.settings.unsavedChanges}
-        </p>
-
-        <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
-          <Button
-            type="button"
-            variant="ghost"
-            @click="resetTimerForm()"
-            x-show="form.defaultRestTime !== String(display.defaultRestTime) || form.soundAlerts !== display.soundAlerts"
-            x-cloak
-          >
-            {L.common.cancel}
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            x-bind:disabled="form.defaultRestTime === String(display.defaultRestTime) && form.soundAlerts === display.soundAlerts"
-          >
-            {L.common.save}
-          </Button>
-        </div>
-      </form>
+      </div>
     </SettingsSection>
 
     {/* ═════════════════════════════════════════════════════
@@ -344,7 +289,7 @@ const SETTINGS_SECTIONS = [
               <Fragment set:html={icons.download(24, 24)} />
             </div>
             <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-              <h4 class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportJSON}</h4>
+              <h4 class="text-display text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportJSON}</h4>
               <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
                 {L.settings.exportJSONDesc}
               </p>
@@ -367,7 +312,7 @@ const SETTINGS_SECTIONS = [
               <Fragment set:html={icons.table(24, 24)} />
             </div>
             <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-              <h4 class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportCSV}</h4>
+              <h4 class="text-display text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportCSV}</h4>
               <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
                 {L.settings.exportCSVDesc}
               </p>
@@ -390,7 +335,7 @@ const SETTINGS_SECTIONS = [
               <Fragment set:html={icons.upload(24, 24)} />
             </div>
             <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-              <h4 class="font-[var(--font-display)] text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.import}</h4>
+              <h4 class="text-display text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.import}</h4>
               <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
                 {L.settings.importDesc}
               </p>
@@ -452,7 +397,7 @@ const SETTINGS_SECTIONS = [
         </CardHeader>
 
         <CardContent>
-          <form class="flex flex-col gap-[1.4rem] mt-[1.2rem]" @submit.prevent="saveSync()">
+          <div class="flex flex-col gap-[1.4rem] mt-[1.2rem]">
             <div class="flex flex-col gap-0 mt-[1.2rem]">
               <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
                 <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
@@ -465,6 +410,7 @@ const SETTINGS_SECTIONS = [
                     id="set-sync-url"
                     class="set__sync-input w-full h-[4.2rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.25rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
                     x-model="syncForm.url"
+                    @change="saveSyncFields()"
                     :placeholder="labels.syncUrlPlaceholder"
                     autocomplete="url"
                     spellcheck="false"
@@ -483,6 +429,7 @@ const SETTINGS_SECTIONS = [
                     id="set-sync-username"
                     class="set__sync-input w-full h-[4.2rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.25rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
                     x-model="syncForm.username"
+                    @change="saveSyncFields()"
                     :placeholder="labels.syncUsernamePlaceholder"
                     autocomplete="username"
                     spellcheck="false"
@@ -502,6 +449,7 @@ const SETTINGS_SECTIONS = [
                     id="set-sync-password"
                     class="set__sync-input w-full h-[4.2rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.25rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
                     x-model="syncForm.password"
+                    @change="saveSyncFields()"
                     :placeholder="labels.syncPasswordPlaceholder"
                     autocomplete="off"
                     aria-label={L.settings.sync.password}
@@ -509,23 +457,7 @@ const SETTINGS_SECTIONS = [
                 </div>
               </div>
             </div>
-
-            <div class="flex justify-end items-center gap-2 mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]">
-              <button
-                type="button"
-                class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
-                @click="cancelSync()"
-              >
-                {L.common.cancel}
-              </button>
-              <button
-                type="submit"
-                class="set__data-btn set__sync-btn--primary appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-accent border border-accent text-accent-foreground rounded-[var(--radius-sm)] font-body text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {L.common.save}
-              </button>
-            </div>
-          </form>
+          </div>
 
           {/* Last sync status + Google Drive note */}
           <div class="flex flex-col gap-[0.2rem] mt-[1.2rem]" x-show="syncConfigured" x-cloak>
@@ -687,7 +619,6 @@ const SETTINGS_SECTIONS = [
     <SettingsBottomBar
       sections={SETTINGS_SECTIONS}
       activeSection="set-profile"
-      saveLabel={L.common.save}
     />
   </div>
 </AppLayout>
@@ -701,7 +632,6 @@ const SETTINGS_SECTIONS = [
     importAllData,
     resetAllData,
     getSessionsThisWeek,
-    type Settings,
   } from '../../lib/storage';
   import {
     syncPush,
@@ -714,15 +644,6 @@ const SETTINGS_SECTIONS = [
 
   const LABELS = t();
 
-
-  function cloneForm(s: Settings) {
-    return {
-      pseudo: s.pseudo,
-      email: s.email,
-      defaultRestTime: String(s.defaultRestTime),
-      soundAlerts: s.soundAlerts,
-    };
-  }
 
   function downloadBlob(filename: string, content: string, mime: string): void {
     const blob = new Blob([content], { type: mime });
@@ -737,14 +658,6 @@ const SETTINGS_SECTIONS = [
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  function formatSavedAt(): string {
-    const now = new Date();
-    const hh = now.getHours().toString().padStart(2, '0');
-    const mm = now.getMinutes().toString().padStart(2, '0');
-    const ss = now.getSeconds().toString().padStart(2, '0');
-    return `${LABELS.settings.savedAtPrefix}${hh}:${mm}:${ss}`;
-  }
-
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
@@ -752,8 +665,6 @@ const SETTINGS_SECTIONS = [
     Alpine.data('settingsApp', () => ({
       // ── State ──
       display: getSettings(),
-      form: cloneForm(getSettings()),
-      editingProfile: false,
       exporting: false,
       exportingCsv: false,
       importing: false,
@@ -769,7 +680,6 @@ const SETTINGS_SECTIONS = [
         preparing: LABELS.settings.preparing,
         importing: LABELS.settings.importing,
         seanceSingular: LABELS.settings.seanceSingular,
-        unsavedChanges: LABELS.settings.unsavedChanges,
         storageError: LABELS.settings.storageError,
         exportFailed: LABELS.settings.exportFailed,
         exportCsvFailed: LABELS.settings.exportCsvFailed,
@@ -780,6 +690,8 @@ const SETTINGS_SECTIONS = [
         readError: LABELS.settings.readError,
         allDataReset: LABELS.settings.allDataReset,
         savedAtPrefix: LABELS.settings.savedAtPrefix,
+        pseudoPlaceholder: LABELS.settings.pseudoPlaceholder,
+        emailPlaceholder: LABELS.settings.emailPlaceholder,
         syncUrl: LABELS.settings.sync.url,
         syncUrlPlaceholder: LABELS.settings.sync.urlPlaceholder,
         syncConflict: LABELS.settings.sync.conflict,
@@ -807,7 +719,6 @@ const SETTINGS_SECTIONS = [
       init() {
         // Re-sync in case another tab/page wrote new defaults.
         this.display = getSettings();
-        this.form = cloneForm(this.display);
         this.weeklyDone = getSessionsThisWeek().length;
         this.syncForm = {
           url: this.display.webdav?.url || '',
@@ -816,84 +727,57 @@ const SETTINGS_SECTIONS = [
         };
         this.syncConfigured = Boolean(this.display.webdav?.url);
         this.syncLastLabel = this.lastSyncLabel(this.display.webdav?.lastSyncAt);
-
-        // Autosave on any section save action dispatched by the fixed
-        // bottom bar (SettingsBottomBar.astro).
-        document.addEventListener("settings-save", (e: Event) => {
-          const section = (e as CustomEvent).detail?.section;
-          this.saveSection(section);
-        });
       },
 
-      saveSection(section: string) {
-        // Sections that write settings live directly in `display` and
-        // persist automatically; only Profile and Timer keep unsaved edits
-        // in `this.form`, so those are the ones backed by an explicit save.
-        switch (section) {
-          case 'set-profile':
-            if (this.editingProfile) this.saveProfile();
-            else window.showToast(formatSavedAt(), 'success');
-            break;
-          case 'set-timer':
-            this.saveTimer();
-            break;
-          case 'set-sync':
-            this.saveSync();
-            break;
-          default:
-            // Units, goals, data and about auto-save (or expose their own
-            // actions); nothing left to flush here.
-            window.showToast(formatSavedAt(), 'success');
-        }
+      toastSaved() {
+        window.showToast(
+          this.labels.savedAtPrefix +
+            new Date().toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            }),
+          'success',
+        );
       },
 
-      // ── Profile ──
-      startEditProfile() {
-        this.form = cloneForm(this.display);
-        this.editingProfile = true;
+      // ── Profile (auto-save on change) ──
+      savePseudo() {
+        this.display = updateSettings({ pseudo: this.display.pseudo.trim() });
+        this.toastSaved();
       },
 
-      cancelEditProfile() {
-        this.form = cloneForm(this.display);
-        this.editingProfile = false;
-      },
-
-      saveProfile() {
-        const pseudo = this.form.pseudo.trim();
-        const email = this.form.email.trim();
-        this.display = updateSettings({ pseudo, email });
-        this.form = cloneForm(this.display);
-        this.editingProfile = false;
-        window.showToast(formatSavedAt(), 'success');
+      saveEmail() {
+        this.display = updateSettings({ email: this.display.email.trim() });
+        this.toastSaved();
       },
 
       // ── Units (auto-save) ──
       setUnit(unit: 'kg' | 'lbs') {
         if (this.display.unit === unit) return;
         this.display = updateSettings({ unit });
-        window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
+        this.toastSaved();
       },
 
       setRepsFormat(format: 'simple' | 'range') {
         if (this.display.repsFormat === format) return;
         this.display = updateSettings({ repsFormat: format });
-        window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
+        this.toastSaved();
       },
 
-      // ── Timer ──
-      saveTimer() {
-        const rest = parseInt(this.form.defaultRestTime, 10);
+      // ── Timer (auto-save on change) ──
+      saveRestTime(value: string) {
+        const rest = parseInt(value, 10);
         if (!Number.isFinite(rest) || rest < 5 || rest > 3600) return;
-        this.display = updateSettings({
-          defaultRestTime: rest,
-          soundAlerts: this.form.soundAlerts,
-        });
-        this.form = cloneForm(this.display);
-        window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
+        if (this.display.defaultRestTime === rest) return;
+        this.display = updateSettings({ defaultRestTime: rest });
+        this.toastSaved();
       },
 
-      resetTimerForm() {
-        this.form = cloneForm(this.display);
+      saveSoundAlerts(checked: boolean) {
+        if (this.display.soundAlerts === checked) return;
+        this.display = updateSettings({ soundAlerts: checked });
+        this.toastSaved();
       },
 
       // ── Weekly goal (auto-save on change) ──
@@ -980,7 +864,6 @@ const SETTINGS_SECTIONS = [
             const parsed = JSON.parse(text);
             importAllData(parsed);
             this.display = getSettings();
-            this.form = cloneForm(this.display);
             window.showToast(this.labels.backupRestored, 'success');
           } catch (err) {
             window.showToast(
@@ -1011,19 +894,17 @@ const SETTINGS_SECTIONS = [
         if (this.resetConfirmText !== 'SUPPRIMER') return;
         resetAllData();
         this.display = getSettings();
-        this.form = cloneForm(this.display);
-        this.editingProfile = false;
         this.resetConfirmText = '';
         this.closeDialogById('set-reset-dialog');
         window.showToast(this.labels.allDataReset, 'success');
       },
 
       // ── WebDAV sync ──
-      saveSync() {
-        // Saving an empty field clears the stored connection; saving a
-        // complete URL stores it and marks the connection as configured.
+      saveSyncFields() {
+        // Persists the current sync form; an empty url clears the stored
+        // connection, a complete url marks it configured.
         this.persistSyncConfig();
-        window.showToast(formatSavedAt(), 'success');
+        this.toastSaved();
       },
 
       /** Persists the current sync form into Settings and refreshes the
@@ -1059,16 +940,6 @@ const SETTINGS_SECTIONS = [
         this.syncLastLabel = this.lastSyncLabel(
           this.display.webdav?.lastSyncAt,
         );
-      },
-
-      cancelSync() {
-        // Discard unsaved edits and restore the persisted connection.
-        const webdav = this.display.webdav;
-        this.syncForm = {
-          url: webdav?.url || '',
-          username: webdav?.username || '',
-          password: webdav?.password || '',
-        };
       },
 
       lastSyncLabel(lastSyncAt?: string): string {
@@ -1164,7 +1035,6 @@ const SETTINGS_SECTIONS = [
           // Destructive: replaces all local data with the remote backup.
           importAllData(snapshot);
           this.display = getSettings();
-          this.form = cloneForm(this.display);
           this.persistSyncConfigWithNow();
           this.closeDialogById('set-restore-dialog');
           window.showToast(this.labels.syncRestored, 'success');

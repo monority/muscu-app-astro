@@ -27,6 +27,7 @@ interface Props {
 }
 
 const { duration = 3000 } = Astro.props;
+import Icon from './Icon.astro';
 ---
 
 <div
@@ -47,38 +48,22 @@ const { duration = 3000 } = Astro.props;
   >
     <!-- Variant icons -->
     <span class="toast__icon" x-show="variant === 'success'" x-cloak aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
+      <Icon name="check" size={18} />
     </span>
     <span class="toast__icon" x-show="variant === 'error'" x-cloak aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
+      <Icon name="closeX" size={18} />
     </span>
     <span class="toast__icon" x-show="variant === 'info'" x-cloak aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="12" x2="12" y2="16"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-      </svg>
+      <Icon name="infoCircle" size={18} />
     </span>
     <span class="toast__icon" x-show="variant === 'warning'" x-cloak aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-        <line x1="12" y1="9" x2="12" y2="13"></line>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-      </svg>
+      <Icon name="alertTriangle" size={18} />
     </span>
 
     <p class="toast__message" x-text="message"></p>
 
     <button type="button" class="toast__close" @click="dismiss()" aria-label="Close">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
+      <Icon name="closeX" size={16} />
     </button>
   </div>
 </div>
@@ -89,7 +74,7 @@ const { duration = 3000 } = Astro.props;
      ════════════════════════════════════════════════════ */
   .toast-root {
     position: fixed;
-    bottom: 2.4rem;
+    bottom: calc(var(--bottom-nav-height, 5.6rem) + 1.2rem);
     right: 2.4rem;
     z-index: 1000;
     max-width: 42rem;

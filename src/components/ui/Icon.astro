@@ -2,5 +2,7 @@
 import { icons } from '../../lib/icons';
 interface Props { name: string; size?: number; class?: string; [key: string]: unknown; }
 const { name, size = 20, class: className = '', ...rest } = Astro.props;
+const raw = (icons as Record<string, (w?: number, h?: number) => string>)[name]?.(size, size) ?? '';
+const svg = className ? raw.replace('<svg ', `<svg class="${className}" `) : raw;
 ---
-<Fragment set:html={(icons as Record<string, (w?: number, h?: number) => string>)[name]?.(size, size) ?? ''} />
+<Fragment set:html={svg} />

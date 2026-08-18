@@ -12,8 +12,9 @@
  */
 import Sidebar from "./Sidebar.astro";
 import Header from "./Header.astro";
+import Icon from "../ui/Icon.astro";
 import { t } from "../../i18n";
-import { renderIcon, chevronDown } from "../../lib/nav-icons";
+import { navId, renderIcon, chevronDown } from "../../lib/nav";
 
 export type NavLeaf = { label: string; href: string; active?: boolean };
 export type NavItem = {
@@ -36,13 +37,6 @@ const { groups, title, class: className = "" } = Astro.props as unknown as Props
 const L = t();
 
 const classes = ["app-shell", className].filter(Boolean).join(" ");
-
-// Stable slug used as the drawer accordion group id (mirrors Sidebar's navId).
-const navId = (href: string): string =>
-  href
-    .replace(/^\/(en)?\//, "")
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/^-+|-+$/g, "");
 ---
 
 <div class={classes} x-data="themeApp()" x-init="init()">
@@ -75,26 +69,7 @@ const navId = (href: string): string =>
       <div class="drawer__header">
         <div class="drawer__brand">
           <span class="drawer__brand-icon" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M14.4 14.4 9.6 9.6"></path>
-              <path
-                d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
-              ></path>
-              <path d="m21.5 21.5-1.4-1.4"></path>
-              <path d="M3.9 3.9 2.5 2.5"></path>
-              <path
-                d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
-              ></path>
-            </svg>
+            <Icon name="dumbbell" size={20} />
           </span>
           <span class="drawer__brand-text">muscu.app</span>
         </div>
@@ -104,20 +79,7 @@ const navId = (href: string): string =>
           aria-label={L.layout.closeMenu}
           data-mobile-close
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M5 5L15 15M15 5L5 15"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-            ></path>
-          </svg>
+          <Icon name="closeCross" size={20} />
         </button>
       </div>
 
@@ -213,21 +175,7 @@ const navId = (href: string): string =>
           data-logout
           aria-label={L.layout.logoutAria}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
+          <Icon name="logout" size={16} />
         <span>{L.layout.logout}</span>
       </button>
     </div>
@@ -905,7 +853,5 @@ const navId = (href: string): string =>
     transform: scale(0.98);
   }
   /* ── Content stage ─────────────────────────────────────── */
-  .page-content::before { content: ""; position: absolute; top: 0; right: var(--page-padding-desktop); width: 1px; height: 12rem; background: linear-gradient(var(--color-accent), transparent); opacity: 0.45; pointer-events: none; }
-  @media (max-width: 640px) { .page-content::before { display: none; } }
 
 </style>

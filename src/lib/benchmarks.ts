@@ -14,6 +14,7 @@
  */
 
 import { calculate1RM, type Session } from './storage';
+import { completedSets } from './session-utils';
 
 // ============================================================================
 // Types
@@ -78,17 +79,10 @@ export function best1RMForExercise(
   sessions: Session[],
 ): number | null {
   let best: number | null = null;
-  for (const session of sessions) {
-    if (session.status !== 'completed') continue;
-    for (const ex of session.exercises) {
-      if (ex.exerciseId !== exerciseId) continue;
-      for (const set of ex.sets) {
-        if (!set.completed) continue;
-        const oneRepMax = calculate1RM(set.weight, set.reps);
-        if (oneRepMax > 0 && (best === null || oneRepMax > best)) {
-          best = oneRepMax;
-        }
-      }
+  for (const { set } of completedSets(sessions, exerciseId)) {
+    const oneRepMax = calculate1RM(set.weight, set.reps);
+    if (oneRepMax > 0 && (best === null || oneRepMax > best)) {
+      best = oneRepMax;
     }
   }
   return best;
@@ -133,11 +127,8 @@ export function buildBenchmarkRows(
 ): BenchmarkRow[] {
   return lifts.map((lift) => {
     const ids = new Set<string>();
-    for (const session of sessions) {
-      if (session.status !== 'completed') continue;
-      for (const ex of session.exercises) {
-        if (ex.name === lift.name) ids.add(ex.exerciseId);
-      }
+    for (const { exercise } of completedSets(sessions)) {
+      if (exercise.name === lift.name) ids.add(exercise.exerciseId);
     }
     let userValue: number | null = null;
     for (const id of ids) {

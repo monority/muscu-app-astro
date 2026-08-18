@@ -51,6 +51,7 @@
  */
 
 import { calculate1RM, type Session, type SessionSet } from './storage';
+import { completedSets } from './session-utils';
 
 /** Description textuelle de la formule V1 (transparence roadmap / UI). */
 export const MRV_FORMULA =
@@ -120,12 +121,9 @@ function mostRecentCompletedSets(
 
   for (const session of ordered) {
     const sets: SessionSet[] = [];
-    for (const ex of session.exercises) {
-      if (ex.exerciseId !== exerciseId) continue;
-      for (const set of ex.sets) {
-        if (set.completed && Number.isFinite(set.weight) && set.weight > 0) {
-          sets.push(set);
-        }
+    for (const { set } of completedSets([session], exerciseId)) {
+      if (Number.isFinite(set.weight) && set.weight > 0) {
+        sets.push(set);
       }
     }
     if (sets.length > 0) return sets;

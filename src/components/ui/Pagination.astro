@@ -15,6 +15,7 @@ interface Props {
 }
 
 import { t } from '../../i18n';
+import Icon from './Icon.astro';
 
 const L = t();
 
@@ -101,18 +102,7 @@ const disabledClasses = 'opacity-40 pointer-events-none';
         aria-disabled={isFirst ? 'true' : undefined}
         tabindex={isFirst ? -1 : undefined}
       >
-        <svg
-          class="h-4 w-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
+        <Icon name="chevronLeft" size={16} />
       </a>
 
       {/* Page numbers + ellipsis */}
@@ -151,18 +141,7 @@ const disabledClasses = 'opacity-40 pointer-events-none';
         aria-disabled={isLast ? 'true' : undefined}
         tabindex={isLast ? -1 : undefined}
       >
-        <svg
-          class="h-4 w-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M9 6l6 6-6 6" />
-        </svg>
+        <Icon name="chevronRight" size={16} />
       </a>
     </nav>
   )

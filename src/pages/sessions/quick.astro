@@ -165,7 +165,7 @@ const L = t();
             <span x-text="currentSet.setNumber"></span>
             <span
               class="qs__set-type inline-flex items-center h-[2.6rem] px-2.5 rounded-pill text-[1.1rem] font-bold uppercase tracking-[0.04em] bg-surface-2 border border-border"
-              :class="'qs__set-type--' + currentSet.type"
+              :class="'tone--' + currentSet.type"
               x-text="typeLabel(currentSet.type)"></span>
           </div>
 
@@ -1031,41 +1031,6 @@ const L = t();
     50% {
       transform: scale(1.04);
     }
-  }
-
-  /* ── Set-type badge modifiers (Alpine dynamic :class) ─── */
-  .qs__set-type--work {
-    background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
-    color: var(--color-accent);
-    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
-  }
-  .qs__set-type--warmup {
-    background-color: color-mix(in srgb, var(--color-warning) 12%, transparent);
-    color: var(--color-warning);
-    border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
-  }
-  .qs__set-type--top {
-    background-color: color-mix(
-      in srgb,
-      var(--color-cat-core) 12%,
-      transparent
-    );
-    color: var(--color-cat-core);
-    border-color: color-mix(in srgb, var(--color-cat-core) 30%, transparent);
-  }
-  .qs__set-type--drop {
-    background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
-    color: var(--color-info);
-    border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
-  }
-  .qs__set-type--failure {
-    background-color: color-mix(
-      in srgb,
-      var(--color-destructive) 12%,
-      transparent
-    );
-    color: var(--color-destructive);
-    border-color: color-mix(in srgb, var(--color-destructive) 30%, transparent);
   }
 
   /* ── Done icon modifier (Alpine dynamic :class) ───────── */

@@ -1,6 +1,7 @@
 ---
 import Badge from '../ui/Badge.astro';
-import { t, getLocale, trExercise, trMuscle } from '../../i18n';
+import { t, trExercise, trMuscle } from '../../i18n';
+import { formatDateShort } from '../../lib/format';
 
 const L = t();
 interface Props {
@@ -17,12 +18,12 @@ interface Props {
 const { name, date, duration, exerciseCount, totalVolume, exercises = [], status = 'planned', class: className = '' } = Astro.props as Props;
 const statusConfig = { completed: { variant: 'success' as const, label: L.sessions.completed }, 'in-progress': { variant: 'accent' as const, label: L.sessions.inProgress }, planned: { variant: 'default' as const, label: L.sessions.planned } };
 const config = statusConfig[status];
-const formattedDate = (() => { const d = new Date(date); return Number.isNaN(d.getTime()) ? date : d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }); })();
+const formattedDate = formatDateShort(date);
 const visibleExercises = exercises.slice(0, 4);
 const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
 ---
 
-<article class:list={['workout-record grid grid-cols-[0.5rem_minmax(0,1fr)auto] gap-4 items-start py-8 border-b border-[var(--color-border)]', `workout-record--${status}`, className]}>
+<article class:list={['workout-record grid grid-cols-[0.5rem_minmax(0,1fr)auto] gap-4 items-start py-8 border-b-separator', `workout-record--${status}`, className]}>
   <div class="workout-record__status w-[0.5rem] h-full min-h-[8rem] bg-[var(--color-border-strong)]" aria-hidden="true"><span></span></div>
   <div class="min-w-0">
     <div class="flex items-center justify-between gap-[1.2rem] max-[480px]:items-start max-[480px]:flex-col">
@@ -30,10 +31,10 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
       <Badge variant={config.variant} size="sm">{config.label}</Badge>
     </div>
     <dl class="flex flex-wrap gap-[1.2rem_2.4rem] mt-4 max-[480px]:gap-[1rem_1.4rem]">
-      <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.common.date}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{formattedDate}</dd></div>
-      <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.common.exercises}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{exerciseCount}</dd></div>
-      {duration && <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.common.duration}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{duration}</dd></div>}
-      {totalVolume && <div class="flex flex-col gap-[0.2rem]"><dt class="text-[var(--color-muted)] text-[0.95rem] font-extrabold tracking-[0.12em] uppercase">{L.sessions.volume}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{totalVolume}</dd></div>}
+      <div class="flex flex-col gap-[0.2rem]"><dt class="dt-label">{L.common.date}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{formattedDate}</dd></div>
+      <div class="flex flex-col gap-[0.2rem]"><dt class="dt-label">{L.common.exercises}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{exerciseCount}</dd></div>
+      {duration && <div class="flex flex-col gap-[0.2rem]"><dt class="dt-label">{L.common.duration}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{duration}</dd></div>}
+      {totalVolume && <div class="flex flex-col gap-[0.2rem]"><dt class="dt-label">{L.sessions.volume}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{totalVolume}</dd></div>}
     </dl>
     {visibleExercises.length > 0 && <div class="flex flex-wrap gap-[0.6rem_1.2rem] mt-[1.2rem] text-[var(--color-muted)] text-[1.2rem]">
       {visibleExercises.map((ex) => <span class="inline-flex gap-1 items-baseline">{trExercise(ex.name)} <small class="text-[var(--color-accent)] text-[1rem]">{trMuscle(ex.muscle)} · {ex.setCount}</small></span>)}

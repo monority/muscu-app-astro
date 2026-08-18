@@ -1,12 +1,13 @@
 ---
-import { icons } from '../../lib/icons';
+import Icon from './Icon.astro';
 import Card from './Card.astro';
 import CardHeader from './CardHeader.astro';
 import CardTitle from './CardTitle.astro';
 import CardContent from './CardContent.astro';
+import type { IconName } from '../../lib/icons';
 
 interface Props {
-  icon: keyof typeof icons;
+  icon: IconName;
   title: string;
   description?: string;
   id?: string;
@@ -21,7 +22,7 @@ const { icon, title, description, id, class: className = '' } = Astro.props;
     <CardHeader>
       <div class="flex items-center gap-4 min-w-0">
         <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
-          <Fragment set:html={(icons as Record<string, (w?: number, h?: number) => string>)[icon]?.(24, 24) ?? ''} />
+          <Icon name={icon} size={24} />
         </span>
         <CardTitle>{title}</CardTitle>
       </div>

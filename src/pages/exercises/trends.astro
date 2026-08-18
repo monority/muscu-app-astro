@@ -5,7 +5,7 @@ import PageHeader from '../../components/layout/PageHeader.astro';
 import Card from '../../components/ui/Card.astro';
 import Segmented from '../../components/ui/Segmented.astro';
 import BackLink from '../../components/ui/BackLink.astro';
-import NotFoundState from '../../components/ui/NotFoundState.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
 import { icons } from '../../lib/icons';
 const L = t();
 ---
@@ -25,7 +25,8 @@ const L = t();
     <BackLink href={localizedPath("/exercises")} label={L.tendance.back} />
 
     <template x-if="notFound">
-      <NotFoundState
+      <EmptyState
+        variant="error"
         title={L.tendance.notFound}
         description={L.tendance.notFoundDesc}
         actionLabel={L.tendance.viewExercises}

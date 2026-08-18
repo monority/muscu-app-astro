@@ -32,6 +32,7 @@ const {
   name,
   id,
   class: className = '',
+  ...rest
 } = Astro.props;
 
 const wrapperClasses = [
@@ -53,6 +54,7 @@ const wrapperClasses = [
     class="toggle-input sr-only"
     role="switch"
     aria-checked={checked ? 'true' : 'false'}
+    {...rest}
   />
   <span class="toggle-track">
     <span class="toggle-thumb"></span>

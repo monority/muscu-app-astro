@@ -2,15 +2,13 @@
 /**
  * SettingsBottomBar — fixed bottom navigation for the settings page.
  *
- * - Desktop (≥1024px): horizontal row of section tabs (text labels) with
- *   a prominent save button on the right.
+ * - Desktop (≥1024px): horizontal row of section tabs (text labels).
  * - Mobile  (<1024px): horizontally scrollable tab strip (icon + short
- *   label) with the save button pinned on the right.
+ *   label).
  *
  * Clicking a tab scrolls to the corresponding <section id> rendered by the
- * settings page. The save button dispatches a `settings-save` CustomEvent
- * carrying the active section id; the settings page listens for it and
- * triggers the relevant save action.
+ * settings page. Settings auto-save on change, so this bar is navigation
+ * only.
  *
  * The bar sits at z-index `2` (sticky in the settings page flow, below the
  * mobile drawer at `z-index: 60`) and uses the shared design tokens so it
@@ -19,20 +17,19 @@
 interface Props {
   sections: { id: string; label: string }[];
   activeSection?: string;
-  saveLabel?: string;
 }
 
 import { t } from "../../i18n";
 
 const L = t();
 
-const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro.props as Props;
+const { sections, activeSection = "profile" } = Astro.props as Props;
 ---
 
 <nav
   class="set-bar"
   aria-label={L.settings.sectionsAria}
-  x-data={`settingsBarApp(${JSON.stringify(activeSection)}, ${JSON.stringify(saveLabel)})`}
+  x-data={`settingsBarApp(${JSON.stringify(activeSection)})`}
   data-sections={JSON.stringify(sections)}
 >
   <div class="set-bar__tabs" x-ref="tabs">
@@ -51,26 +48,6 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
       </button>
     </template>
   </div>
-
-  <button type="button" class="set-bar__save" @click="saveActive()">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-      <polyline points="17 21 17 13 7 13 7 21"></polyline>
-      <polyline points="7 3 7 8 15 8"></polyline>
-    </svg>
-    <span x-text="saveLabel"></span>
-  </button>
 </nav>
 
 <script>
@@ -109,10 +86,9 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
       return icons[id] ?? "";
     };
 
-    Alpine.data("settingsBarApp", (initialActive: string, saveLabel: string) => ({
+    Alpine.data("settingsBarApp", (initialActive: string) => ({
       activeSection: initialActive || "profile",
       sections: [] as { id: string; label: string }[],
-      saveLabel: saveLabel || "Enregistrer",
       observer: null as IntersectionObserver | null,
 
       init() {
@@ -131,6 +107,7 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
 
         alpine.$nextTick(() => {
           this.setupScrollspy();
+          this.scrollTabIntoView(this.activeSection);
         });
       },
 
@@ -147,6 +124,11 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
           Objectifs: "Obj.",
           Unités: "Unités",
           Timer: "Timer",
+          Rappels: "Rappels",
+          "Rappel d'entraînement": "Rappel",
+          "Rappel du jour": "Rappel",
+          Reminders: "Reminder",
+          "Training reminder": "Reminder",
           Données: "Données",
           "Synchronisation WebDAV": "Synchro",
           "WebDAV sync": "Synchro",
@@ -155,29 +137,25 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
         return short[label] || label;
       },
 
-      select(id: string) {
-        this.activeSection = id;
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        // Keep the active tab visible within the scrollable strip.
+      scrollTabIntoView(id: string, behavior: ScrollBehavior = "smooth") {
+        // Keep the active tab fully visible inside the scrollable strip so
+        // long labels (e.g. "Synchronisation WebDAV") are never cut off.
         const alpine = this as unknown as AlpineMagicThis;
         const tab = alpine.$root.querySelector(`[data-tab="${id}"]`);
-        const tabs = alpine.$refs.tabs;
-        if (tab && tabs && "scrollIntoView" in tabs) {
+        if (tab && "scrollIntoView" in tab) {
           tab.scrollIntoView({
-            behavior: "smooth",
+            behavior,
             inline: "center",
             block: "nearest",
           });
         }
       },
 
-      saveActive() {
-        document.dispatchEvent(
-          new CustomEvent("settings-save", {
-            detail: { section: this.activeSection },
-          }),
-        );
+      select(id: string) {
+        this.activeSection = id;
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        this.scrollTabIntoView(id);
       },
 
       setupScrollspy() {
@@ -191,7 +169,10 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
               b.boundingClientRect.top < a.boundingClientRect.top ? b : a,
             );
             const id = (top.target as HTMLElement).id;
-            if (id && this.activeSection !== id) this.activeSection = id;
+            if (id && this.activeSection !== id) {
+              this.activeSection = id;
+              this.scrollTabIntoView(id, "auto");
+            }
           },
           { rootMargin: "-20% 0px -60% 0px", threshold: 0 },
         );
@@ -279,33 +260,6 @@ const { sections, activeSection = "profile", saveLabel = "Enregistrer" } = Astro
   }
   .set-bar__tab-label--short {
     display: inline;
-  }
-
-  .set-bar__save {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    height: 4.0rem;
-    padding: 0 1.8rem;
-    margin-right: 1.2rem;
-    border: none;
-    border-radius: var(--radius-md);
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    font-weight: 600;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background-color var(--transition-fast);
-  }
-  .set-bar__save:hover {
-    background-color: var(--color-accent-hover);
-  }
-  .set-bar__save :global(svg) {
-    width: 1.8rem;
-    height: 1.8rem;
   }
 
   /* ── Desktop (≥1024px) ──────────────────────────────── */

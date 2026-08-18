@@ -7,7 +7,6 @@ import Badge from '../../components/ui/Badge.astro';
 import Card from '../../components/ui/Card.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import BackLink from '../../components/ui/BackLink.astro';
-import NotFoundState from '../../components/ui/NotFoundState.astro';
 import { icons } from '../../lib/icons';
 const L = t();
 ---
@@ -28,7 +27,8 @@ const L = t();
     <BackLink href={localizedPath("/exercises")} label={L.historique.back} />
 
     <template x-if="notFound">
-      <NotFoundState
+      <EmptyState
+        variant="error"
         title={L.historique.notFound}
         description={L.historique.notFoundDesc}
         actionLabel={L.historique.viewExercises}

@@ -4,9 +4,41 @@
  * Kept free of Alpine / DOM concerns so they stay unit-testable.
  */
 
-import type { Session, SessionSet } from './storage';
+import type { Session, SessionSet, SessionExercise } from './storage';
 
 type SessionStatus = 'completed' | 'in-progress' | 'planned';
+
+// ============================================================================
+// Shared iteration helpers
+// ============================================================================
+
+export interface CompletedSetContext {
+  session: Session;
+  exercise: SessionExercise;
+  set: SessionSet;
+}
+
+/**
+ * Generator that yields all completed sets from completed sessions.
+ * Optionally filters by exerciseId. Eliminates the nested loop pattern
+ * duplicated across benchmarks.ts, mrv.ts, volume-stats.ts, etc.
+ */
+export function* completedSets(
+  sessions: Session[],
+  exerciseId?: string,
+): Generator<CompletedSetContext> {
+  for (const session of sessions) {
+    if (session.status !== 'completed') continue;
+    for (const exercise of session.exercises) {
+      if (exerciseId && exercise.exerciseId !== exerciseId) continue;
+      for (const set of exercise.sets) {
+        if (set.completed) {
+          yield { session, exercise, set };
+        }
+      }
+    }
+  }
+}
 
 /** Status labels object with translations for each status. */
 export interface StatusLabels {

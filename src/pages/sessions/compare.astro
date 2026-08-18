@@ -8,6 +8,7 @@ import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import Badge from '../../components/ui/Badge.astro';
+import Icon from '../../components/ui/Icon.astro';
 import { icons } from '../../lib/icons';
 import BackLink from '../../components/ui/BackLink.astro';
 const L = t();
@@ -148,7 +149,7 @@ const L = t();
                       <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="volumeDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      <Icon name="minus" size={20} />
                     </template>
                   </span>
                   <span x-text="volumeDelta.label"></span>
@@ -183,7 +184,7 @@ const L = t();
                       <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="exercisesDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      <Icon name="minus" size={20} />
                     </template>
                   </span>
                   <span x-text="exercisesDelta.label"></span>
@@ -218,7 +219,7 @@ const L = t();
                       <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="setsDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      <Icon name="minus" size={20} />
                     </template>
                   </span>
                   <span x-text="setsDelta.label"></span>
@@ -253,7 +254,7 @@ const L = t();
                       <Fragment set:html={icons.arrowDown(18, 18)} />
                     </template>
                     <template x-if="bestSetDelta.direction === 'equal'">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      <Icon name="minus" size={20} />
                     </template>
                   </span>
                   <span x-text="bestSetDelta.label"></span>

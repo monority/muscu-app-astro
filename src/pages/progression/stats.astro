@@ -28,7 +28,7 @@ const L = t();
       x-cloak
       role="status"
     >
-      <span class="font-[var(--font-display)] text-[clamp(2rem,4vw,3rem)] font-bold text-[var(--color-text)]">{L.stats.noData}</span>
+      <span class="text-display text-[clamp(2rem,4vw,3rem)] font-bold text-[var(--color-text)]">{L.stats.noData}</span>
       <p class="max-w-42rem m-0 text-[var(--color-muted)] text-[1.4rem]">{L.stats.empty}</p>
       <a
         href={localizedPath("/sessions/create")}
@@ -42,7 +42,7 @@ const L = t();
       <div class="stats__sum stats__sum--hero flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
         <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.volumeTotal}</span>
         <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value font-[var(--font-display)] text-[2.6rem] font-bold text-[var(--color-accent)] tabular-nums leading-[1.1]" x-text="formatNumber(totalVolume12w)"></span>
+          <span class="stats__sum-value text-display text-[2.6rem] font-bold text-[var(--color-accent)] tabular-nums leading-[1.1]" x-text="formatNumber(totalVolume12w)"></span>
           <span class="stats__sum-unit font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.common.kg}</span>
         </div>
         <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]" x-text="sessions12w + ' ' + labels.sessionSingular + (sessions12w > 1 ? 's' : '') + ' ' + labels.completed"></span>
@@ -51,7 +51,7 @@ const L = t();
       <div class="stats__sum flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
         <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.sessions12w}</span>
         <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="sessions12w"></span>
+          <span class="stats__sum-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="sessions12w"></span>
         </div>
         <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]">{L.stats.completed}</span>
       </div>
@@ -59,7 +59,7 @@ const L = t();
       <div class="stats__sum flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
         <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.avgDuration}</span>
         <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatDuration(avgDuration)"></span>
+          <span class="stats__sum-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatDuration(avgDuration)"></span>
         </div>
         <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]" x-text="durationSessionCount > 0 ? labels.on + durationSessionCount + ' ' + labels.sessionSingular + (durationSessionCount > 1 ? 's' : '') : labels.noTimed"></span>
       </div>
@@ -67,7 +67,7 @@ const L = t();
       <div class="stats__sum flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
         <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.regularity}</span>
         <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value font-[var(--font-display)] text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="consistencyPct + '%'"></span>
+          <span class="stats__sum-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="consistencyPct + '%'"></span>
         </div>
           <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]" x-text="activeWeeks + ' ' + (activeWeeks > 1 ? labels.activeWeeks : labels.activeWeek) + ' / 12'"></span>
       </div>
@@ -128,7 +128,7 @@ const L = t();
         {/* ── Opt-in : enregistre l'INTENTION, ne déclenche AUCUN appel réseau ── */}
         <div class="stats__bench-optin flex items-center justify-between gap-8 py-[1.4rem] px-[1.6rem] my-[1.2rem] mb-[1.6rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] max-md:flex-col max-md:items-start max-md:gap-2">
           <div class="stats__bench-optin-label flex flex-col gap-[0.3rem] min-w-0">
-            <span class="stats__bench-optin-title font-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.stats.benchmarksOptInLabel}</span>
+            <span class="stats__bench-optin-title text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.stats.benchmarksOptInLabel}</span>
             <span class="stats__bench-optin-hint text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.stats.benchmarksOptInDesc}</span>
           </div>
           <Toggle
