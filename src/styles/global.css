@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import './tokens.css';
+@import '../components/ui/Button/Button.css';
+@import './reset.css';
+@import './utilities.css';
+
+/* ---------- Base layer (Tailwind v4 cascade) ----------
+ * Everything below MUST live in @layer base so the universal reset
+ * does NOT beat @layer utilities (unlayered > layered in the cascade).
+ */
+@layer base {
+
+/* ---------- Number input steppers ----------
+ * Native spinner hiding + the .input-stepper chevron styles live in
+ * /public/input-stepper.css (NOT here): Astro ships public/ verbatim,
+ * so the build's LightningsCSS can't strip the -webkit- prefixes that
+ * Chromium requires on ::-webkit-inner-spin-button.
+ */
+
+} /* end @layer base */

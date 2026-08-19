@@ -8,7 +8,37 @@ interface Props {
 const { keyLabel, description, class: className = '' } = Astro.props;
 ---
 
-<span class:list={['inline-flex items-center gap-[0.6rem]', className]}>
-  <kbd class="inline-flex items-center justify-center min-w-[2.8rem] h-[2.8rem] px-[0.6rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-sm)] font-[var(--font-body)] text-[1.2rem] font-semibold text-[var(--color-muted)] leading-none">{keyLabel}</kbd>
-  <span class="text-[1.2rem] text-[var(--color-muted)]">{description}</span>
+<span class:list={['kbd-hint', className]}>
+  <kbd class="kbd-hint__key">{keyLabel}</kbd>
+  <span class="kbd-hint__desc">{description}</span>
 </span>
+
+<style>
+  .kbd-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .kbd-hint__key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.8rem;
+    height: 2.8rem;
+    padding: 0 0.6rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    line-height: 1;
+  }
+
+  .kbd-hint__desc {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+  }
+</style>

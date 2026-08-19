@@ -1,9 +1,9 @@
 ---
 /**
- * Header — slim top bar.
+ * Header â€” slim top bar.
  *
  * Layout (palworld.tools-style):
- *   [ ☰ ]   [ page title ]                              [ actions … ]
+ *   [ â˜° ]   [ page title ]                              [ actions â€¦ ]
  *
  * - Hamburger is visible only on mobile/tablet (<1024px); it toggles
  *   a slide-in drawer (rendered by AppShell) that mirrors the
@@ -13,7 +13,7 @@
  * - Quick-search trigger (icon + hint + "/" shortcut) sits right
  *   next to the hamburger in the topbar, always visible, so it stays
  *   reachable on every screen size.
- * - `title` is the current page title — shows the heading right
+ * - `title` is the current page title â€” shows the heading right
  *   where the user is looking, no need to scroll the content.
  */
 interface Props {
@@ -22,7 +22,7 @@ interface Props {
 }
 
 import { t } from "../../i18n";
-import Icon from "../ui/Icon.astro";
+import Icon from "../ui/Icon/Icon.astro";
 
 const L = t();
 
@@ -46,7 +46,7 @@ const { title, class: className = "" } = Astro.props as Props;
     </button>
 
     {
-      /* Search — opens the global quick-search palette on every
+      /* Search â€” opens the global quick-search palette on every
         screen size. */
     }
     <button
@@ -70,14 +70,14 @@ const { title, class: className = "" } = Astro.props as Props;
       <slot name="actions" />
 
       {
-        /* User / theme / locale controls — moved up from the sidebar
+        /* User / theme / locale controls â€” moved up from the sidebar
           footer so they stay reachable on every screen size. */
       }
       <div class="topbar__controls" x-data="localeApp()">
         {/* User info (populated by the AppShell auth script) */}
         <div class="topbar__user" data-user-zone hidden>
-          <span class="topbar__user-name" data-user-name>—</span>
-          <span class="topbar__user-email" data-user-email>—</span>
+          <span class="topbar__user-name" data-user-name>â€”</span>
+          <span class="topbar__user-email" data-user-email>â€”</span>
         </div>
 
         {/* Logout */}
@@ -92,7 +92,7 @@ const { title, class: className = "" } = Astro.props as Props;
         </button>
 
         {
-          /* Theme toggle — toggleTheme()/isDark() resolve from the
+          /* Theme toggle â€” toggleTheme()/isDark() resolve from the
             parent themeApp scope on the AppShell root. */
         }
         <button
@@ -169,7 +169,7 @@ const { title, class: className = "" } = Astro.props as Props;
 </script>
 
 <style>
-  /* ── Shell ─────────────────────────────────────────────── */
+  /* â”€â”€ Shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .topbar {
     top: 0;
     z-index: 2;
@@ -181,8 +181,10 @@ const { title, class: className = "" } = Astro.props as Props;
     border-bottom: 1px solid var(--color-border);
   }
 
-  /* ── Solid fallback when backdrop-filter is unavailable ── */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* â”€â”€ Solid fallback when backdrop-filter is unavailable â”€â”€ */
+  @supports not (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
     .topbar {
       background-color: var(--color-surface);
     }
@@ -196,7 +198,7 @@ const { title, class: className = "" } = Astro.props as Props;
     padding: 0 var(--page-padding-tablet);
   }
 
-  /* ── Page title ────────────────────────────────────────── */
+  /* â”€â”€ Page title â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .topbar__context {
     display: flex;
     flex-direction: column;
@@ -226,7 +228,7 @@ const { title, class: className = "" } = Astro.props as Props;
     white-space: nowrap;
   }
 
-  /* ── Right cluster ─────────────────────────────────────── */
+  /* â”€â”€ Right cluster â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .topbar__right {
     display: flex;
     align-items: center;
@@ -235,7 +237,7 @@ const { title, class: className = "" } = Astro.props as Props;
     flex: 0 0 auto;
   }
 
-  /* ── Hamburger ─────────────────────────────────────────── */
+  /* â”€â”€ Hamburger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .topbar__hamburger {
     display: inline-flex;
     flex-direction: column;
@@ -277,7 +279,7 @@ const { title, class: className = "" } = Astro.props as Props;
     transform: translateY(-6px) rotate(-45deg);
   }
 
-  /* ── Search trigger ───────────────────────────────────── */
+  /* â”€â”€ Search trigger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   /* Same visual language as the hamburger; opens the global
      quick-search palette on every screen size. */
   .topbar__search {
@@ -318,7 +320,7 @@ const { title, class: className = "" } = Astro.props as Props;
     pointer-events: none;
   }
 
-  /* ── User / theme / locale controls ────────────────────── */
+  /* â”€â”€ User / theme / locale controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .topbar__controls {
     display: flex;
     align-items: center;
@@ -362,7 +364,7 @@ const { title, class: className = "" } = Astro.props as Props;
     white-space: nowrap;
   }
 
-  /* Icon buttons — same visual language as the hamburger/search. */
+  /* Icon buttons â€” same visual language as the hamburger/search. */
   .topbar__logout,
   .topbar__control {
     display: inline-flex;
@@ -439,7 +441,7 @@ const { title, class: className = "" } = Astro.props as Props;
     display: inline-flex;
   }
 
-  /* ── Responsive ────────────────────────────────────────── */
+  /* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   @media (min-width: 1024px) {
     .topbar__hamburger {
       display: none;
@@ -453,11 +455,13 @@ const { title, class: className = "" } = Astro.props as Props;
     .topbar__inner {
       padding: 0 var(--page-padding-mobile);
     }
-    .topbar__context-kicker { display: none; }
+    .topbar__context-kicker {
+      display: none;
+    }
     .topbar__title {
       font-size: 1.3rem;
     }
-    /* Save topbar space on small screens — keep the controls usable
+    /* Save topbar space on small screens â€” keep the controls usable
        without allowing the search hint to push the right cluster offscreen. */
     .topbar__user-email,
     .topbar__control-label,
@@ -475,18 +479,34 @@ const { title, class: className = "" } = Astro.props as Props;
     }
   }
 
-  /* ── Reduced motion ────────────────────────────────────── */
+  /* â”€â”€ Reduced motion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   @media (prefers-reduced-motion: reduce) {
     .topbar__hamburger-bar {
       transition: none;
     }
   }
-  /* ── Performance command bar overrides ───────────────── */
-  .topbar { background: color-mix(in srgb, var(--color-bg) 94%, transparent); backdrop-filter: blur(12px); }
-  .topbar__inner { gap: 1.6rem; }
-  .topbar__context { border-left: 1px solid var(--color-border); padding-left: 1.6rem; }
-  .topbar__search { background: var(--alpha-bg-subtle); border-color: var(--color-border); }
-  .topbar__search:hover { background: var(--alpha-bg-soft); }
-  .topbar__control, .topbar__logout, .topbar__hamburger { border-radius: var(--radius-sm); }
-
+  /* â”€â”€ Performance command bar overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .topbar {
+    background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .topbar__inner {
+    gap: 1.6rem;
+  }
+  .topbar__context {
+    border-left: 1px solid var(--color-border);
+    padding-left: 1.6rem;
+  }
+  .topbar__search {
+    background: var(--alpha-bg-subtle);
+    border-color: var(--color-border);
+  }
+  .topbar__search:hover {
+    background: var(--alpha-bg-soft);
+  }
+  .topbar__control,
+  .topbar__logout,
+  .topbar__hamburger {
+    border-radius: var(--radius-sm);
+  }
 </style>

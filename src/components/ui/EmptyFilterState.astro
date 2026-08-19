@@ -1,6 +1,6 @@
 ---
 import EmptyState from './EmptyState.astro';
-import Button from './Button.astro';
+import Button from './Button/Button.astro';
 
 interface Props {
   title: string;
@@ -14,18 +14,18 @@ const {
   title,
   description,
   searchValue,
-  resetLabel = 'Réinitialiser',
+  resetLabel = 'RÃƒÂ©initialiser',
   class: className = '',
 } = Astro.props;
 ---
 
-<div class:list={['flex flex-col items-center gap-[1.6rem] p-[2rem] text-center', className]}>
+<div class:list={['empty-filter-state', className]}>
   <EmptyState title={title} description={description} />
   {(searchValue || resetLabel) && (
-    <div class="flex flex-col items-center gap-[1rem]">
+    <div class="empty-filter-state__action">
       {searchValue && (
-        <p class="text-[1.3rem] text-[var(--color-muted)]">
-          Aucun résultat pour « <span x-text={searchValue}></span> ».
+        <p class="empty-filter-state__text">
+          Aucun rÃƒÂ©sultat pour Ã‚Â« <span x-text={searchValue}></span> Ã‚Â».
         </p>
       )}
       <Button variant="ghost" size="sm" data-dialog-close x-on:click={searchValue ? `${searchValue} = ''` : undefined}>
@@ -34,3 +34,26 @@ const {
     </div>
   )}
 </div>
+
+<style>
+  .empty-filter-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.6rem;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .empty-filter-state__action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .empty-filter-state__text {
+    font-size: 1.3rem;
+    color: var(--color-muted);
+  }
+</style>

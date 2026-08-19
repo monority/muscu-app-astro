@@ -1,13 +1,13 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
-import Badge from '../../components/ui/Badge.astro';
-import Card from '../../components/ui/Card.astro';
+import Badge from '../../components/ui/Badge/Badge.astro';
+import Card from '../../components/ui/Card/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import { icons } from '../../lib/icons';
-import Icon from '../../components/ui/Icon.astro';
+import Icon from '../../components/ui/Icon/Icon.astro';
 import { t, localizedPath } from '../../i18n';
 import BackLink from '../../components/ui/BackLink.astro';
-import Button from '../../components/ui/Button.astro';
+import Button from '../../components/ui/Button/Button.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import RestTimer from '../../components/workout/RestTimer.astro';
 
@@ -1088,7 +1088,7 @@ const L = t();
       // Builds a 1080×1080 PNG summary of the current session
       // and triggers a browser download. Pure canvas API — no
       // external dependencies. Font fallback chain uses Inter
-      // (loaded via globals.css) and falls back to system sans.
+      // (loaded via global.css) and falls back to system sans.
       async generateShareCard(): Promise<void> {
         if (!this.session) return;
 

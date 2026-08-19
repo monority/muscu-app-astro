@@ -8,7 +8,34 @@ interface Props {
 const { title, meta, class: className = '' } = Astro.props;
 ---
 
-<header class:list={['flex items-baseline justify-between gap-3 flex-wrap mb-[1.4rem]', className]}>
-  <h2 class="text-display text-[1.4rem] font-bold uppercase tracking-[0.14em] text-[var(--color-text)] m-0">{title}</h2>
-  {meta && <span class="text-[1.2rem] text-[var(--color-muted)] font-medium">{meta}</span>}
+<header class:list={['panel-header', className]}>
+  <h2 class="panel-header__title">{title}</h2>
+  {meta && <span class="panel-header__meta">{meta}</span>}
 </header>
+
+<style>
+  .panel-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+  }
+
+  .panel-header__title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .panel-header__meta {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+</style>

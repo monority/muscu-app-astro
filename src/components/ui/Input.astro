@@ -58,29 +58,6 @@ const {
 } = Astro.props;
 
 const describedBy = buildDescribedBy(id, hint, error);
-
-const inputClasses = [
-  "w-full",
-  "px-3",
-  "p-2",
-  "bg-[var(--color-surface-2)]",
-  "border",
-  error ? "border-[var(--color-destructive)]" : "border-[var(--color-border)]",
-  "rounded-[var(--radius-sm)]",
-  "text-[var(--color-text)]",
-  "placeholder:text-white/25",
-  "outline-none",
-  "transition-[border-color,box-shadow]",
-  "duration-[160ms]",
-  "ease-[ease]",
-  "focus:border-[var(--color-accent)]",
-  "focus:shadow-[var(--focus-ring)]",
-  "disabled:opacity-50",
-  "disabled:cursor-not-allowed",
-  className,
-]
-  .filter(Boolean)
-  .join(" ");
 ---
 
 <FormField id={id} label={label} hint={hint} error={error} required={required}>
@@ -95,6 +72,37 @@ const inputClasses = [
     required={required}
     aria-invalid={error ? "true" : undefined}
     aria-describedby={describedBy}
-    class={inputClasses}
+    class:list={['input', error && 'input--error', className]}
   />
 </FormField>
+
+<style>
+  .input {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .input:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .input--error {
+    border-color: var(--color-destructive);
+  }
+</style>

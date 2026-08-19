@@ -9,12 +9,14 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
-
-const classes = ['border-b border-[var(--color-border)]', className]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<thead class={classes}>
+<thead class:list={['table-head', className]}>
   <slot />
 </thead>
+
+<style>
+  .table-head {
+    border-bottom: 1px solid var(--color-border);
+  }
+</style>

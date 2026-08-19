@@ -1,11 +1,11 @@
 ---
 /**
- * Pagination — design-system primitive.
+ * Pagination Ã¢â‚¬â€ design-system primitive.
  *
  * Renders a flex row of previous/next anchors + page-number links
  * with smart ellipsis collapsing. Visual state comes from
  * `@theme` tokens in src/styles/tokens.css (--color-accent,
- * --color-muted, --radius-sm, …).
+ * --color-muted, --radius-sm, Ã¢â‚¬Â¦).
  */
 interface Props {
   currentPage: number;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 import { t } from '../../i18n';
-import Icon from './Icon.astro';
+import Icon from './Icon/Icon.astro';
 
 const L = t();
 
@@ -66,37 +66,21 @@ for (let i = 0; i < sortedPages.length; i++) {
 
 const isFirst = currentPage === 1;
 const isLast = currentPage === totalPages;
-
-const wrapperClasses = [
-  'flex items-center gap-1',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
-
-const pageBase =
-  'inline-flex items-center justify-center min-w-[3.2rem] h-10 px-2.5 text-[1.2rem] rounded-[var(--radius-sm)] transition-colors duration-[160ms] select-none';
-
-const activeClasses =
-  'bg-[var(--color-accent)] text-white font-semibold pointer-events-none';
-const inactiveClasses =
-  'text-[var(--color-muted)] hover:bg-white/5 hover:text-white';
-const disabledClasses = 'opacity-40 pointer-events-none';
 ---
 
 {
   totalPages > 1 && (
     <nav
-      class={wrapperClasses}
+      class:list={['pagination', className]}
       aria-label={L.common.paginationAria}
     >
       {/* Previous */}
       <a
         href={isFirst ? undefined : buildHref(currentPage - 1)}
         class:list={[
-          pageBase,
-          inactiveClasses,
-          isFirst ? disabledClasses : '',
+          'pagination__page',
+          'pagination__page--inactive',
+          isFirst && 'pagination__page--disabled',
         ]}
         aria-label={L.common.prevPage}
         aria-disabled={isFirst ? 'true' : undefined}
@@ -107,19 +91,19 @@ const disabledClasses = 'opacity-40 pointer-events-none';
 
       {/* Page numbers + ellipsis */}
       {items.map((item) =>
-        item.kind === 'ellipsis' ? (            <span
-            class="inline-flex items-center justify-center min-w-[3.2rem] h-10 text-[1.2rem] text-[var(--color-muted)] select-none"
-
+        item.kind === 'ellipsis' ? (
+          <span
+            class="pagination__ellipsis"
             aria-hidden="true"
           >
-            …
+            Ã¢â‚¬Â¦
           </span>
         ) : (
           <a
             href={buildHref(item.page)}
             class:list={[
-              pageBase,
-              item.page === currentPage ? activeClasses : inactiveClasses,
+              'pagination__page',
+              item.page === currentPage ? 'pagination__page--active' : 'pagination__page--inactive',
             ]}
             aria-current={item.page === currentPage ? 'page' : undefined}
             aria-label={L.common.pageAria.replace('{page}', String(item.page))}
@@ -133,9 +117,9 @@ const disabledClasses = 'opacity-40 pointer-events-none';
       <a
         href={isLast ? undefined : buildHref(currentPage + 1)}
         class:list={[
-          pageBase,
-          inactiveClasses,
-          isLast ? disabledClasses : '',
+          'pagination__page',
+          'pagination__page--inactive',
+          isLast && 'pagination__page--disabled',
         ]}
         aria-label={L.common.nextPage}
         aria-disabled={isLast ? 'true' : undefined}
@@ -146,3 +130,56 @@ const disabledClasses = 'opacity-40 pointer-events-none';
     </nav>
   )
 }
+
+<style>
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .pagination__page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.2rem;
+    height: 4rem;
+    padding: 0 1rem;
+    font-size: 1.2rem;
+    border-radius: var(--radius-sm);
+    transition: color 160ms ease;
+    user-select: none;
+  }
+
+  .pagination__page--active {
+    background-color: var(--color-accent);
+    color: white;
+    font-weight: 600;
+    pointer-events: none;
+  }
+
+  .pagination__page--inactive {
+    color: var(--color-muted);
+  }
+
+  .pagination__page--inactive:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+  }
+
+  .pagination__page--disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .pagination__ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.2rem;
+    height: 4rem;
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    user-select: none;
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+import './Card.css';
+
+interface Props {
+  variant?: 'default' | 'elevated' | 'interactive';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  hover?: boolean;
+  clickable?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  padding = 'md',
+  hover = false,
+  clickable = false,
+  class: className = '',
+} = Astro.props;
+
+const isInteractive = hover || clickable || variant === 'interactive';
+
+const classes = [
+  'card',
+  `card--${variant}`,
+  `card--pad-${padding}`,
+  isInteractive && 'card--interactive',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div class={classes}>
+  <slot />
+</div>

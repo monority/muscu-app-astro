@@ -4,15 +4,18 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
-
-const classes = [
-  'flex gap-[var(--spacing-1)] text-display text-[1.4rem] font-bold',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<h3 class={classes}>
+<h3 class:list={['card-title', className]}>
   <slot />
 </h3>
+
+<style>
+  .card-title {
+    display: flex;
+    gap: var(--spacing-1);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+</style>

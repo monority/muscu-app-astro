@@ -1,20 +1,20 @@
 ---
 /**
- * QuickSearch — shadcn-style command palette / quick-search modal.
+ * QuickSearch â€” shadcn-style command palette / quick-search modal.
  *
  * Global search overlay (native <dialog>) that searches across:
  *   - Pages (static list, localized nav labels)
  *   - Exercises (from localStorage via getExercises(); display names +
  *     muscles translated on the EN locale via trExercise/trMuscle)
- *   - Sessions (from getSessions(), by name → /sessions/detail?id=…)
+ *   - Sessions (from getSessions(), by name â†’ /sessions/detail?id=â€¦)
  *
  * Pages always win, then exercises, then sessions, each under a small
- * group header. Clicking a row (or pressing ↵ on the highlighted one)
+ * group header. Clicking a row (or pressing â†µ on the highlighted one)
  * navigates via window.location.
  *
  * Triggers:
  *   - Any element with `data-quick-search-trigger` (e.g. the Sidebar
- *     search field) — clicked via event delegation
+ *     search field) â€” clicked via event delegation
  *   - "/" key (ignored while typing in an input/textarea/contenteditable)
  *   - Ctrl/Cmd+K (always)
  *   - window.quickSearch.open() / close() from any script
@@ -23,7 +23,7 @@
  * backdrop closes too (see the click handler in the script below).
  */
 import { t } from "../../i18n";
-import Icon from "../ui/Icon.astro";
+import Icon from "../ui/Icon/Icon.astro";
 
 const L = t();
 ---
@@ -35,7 +35,7 @@ const L = t();
   x-data="commandMenu()"
 >
   <div class="quick-search__panel">
-    {/* ── Input ─────────────────────────────────────────── */}
+    {/* â”€â”€ Input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
     <div class="quick-search__input">
       <Icon name="search" size={18} class="quick-search__input-icon" />
       <input
@@ -57,7 +57,7 @@ const L = t();
       <kbd class="quick-search__esc" aria-hidden="true">esc</kbd>
     </div>
 
-    {/* ── Results ───────────────────────────────────────── */}
+    {/* â”€â”€ Results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
     <div
       class="quick-search__list"
       @keydown.down.prevent="move(1)"
@@ -105,7 +105,7 @@ const L = t();
       </div>
     </div>
 
-    {/* ── Footer hints ──────────────────────────────────── */}
+    {/* â”€â”€ Footer hints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
     <footer class="quick-search__footer" id="quick-search-hints">
       <div class="quick-search__hint">
         <span class="quick-search__keys">
@@ -116,11 +116,11 @@ const L = t();
         <span x-text="hintOpen"></span>
       </div>
       <div class="quick-search__hint">
-        <kbd aria-hidden="true">↑↓</kbd>
+        <kbd aria-hidden="true">â†‘â†“</kbd>
         <span x-text="hintNav"></span>
       </div>
       <div class="quick-search__hint">
-        <kbd aria-hidden="true">↵</kbd>
+        <kbd aria-hidden="true">â†µ</kbd>
         <span x-text="hintSelect"></span>
       </div>
       <div class="quick-search__hint">
@@ -181,7 +181,7 @@ const L = t();
     flex-direction: column;
   }
 
-  /* ── Input ────────────────────────────────────────────── */
+  /* â”€â”€ Input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .quick-search__input {
     display: flex;
     align-items: center;
@@ -230,7 +230,7 @@ const L = t();
     flex-shrink: 0;
   }
 
-  /* ── Results list ─────────────────────────────────────── */
+  /* â”€â”€ Results list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .quick-search__list {
     max-height: min(44rem, 55vh);
     overflow-y: auto;
@@ -289,7 +289,7 @@ const L = t();
     flex-shrink: 0;
   }
 
-  /* ── Empty state ──────────────────────────────────────── */
+  /* â”€â”€ Empty state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .quick-search__empty {
     display: flex;
     flex-direction: column;
@@ -320,7 +320,7 @@ const L = t();
     margin: 0;
   }
 
-  /* ── Footer hints ─────────────────────────────────────── */
+  /* â”€â”€ Footer hints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .quick-search__footer {
     display: flex;
     align-items: center;
@@ -349,7 +349,7 @@ const L = t();
     line-height: 1.2;
   }
 
-  /* Key-combo chips (Ctrl + K + /) sit tighter than the hint→label gap. */
+  /* Key-combo chips (Ctrl + K + /) sit tighter than the hintâ†’label gap. */
   .quick-search__keys {
     display: inline-flex;
     align-items: center;
@@ -391,7 +391,7 @@ const L = t();
   const rankScore = (name: string, q: string): number =>
     normalize(name).startsWith(q) ? 0 : 1;
 
-  // ─── Alpine component ─────────────────────────────────────
+  // â”€â”€â”€ Alpine component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
@@ -465,7 +465,7 @@ const L = t();
             result.push({ id: "pages", title: L.command.pages, items: pageHits });
           }
 
-          // 2. Exercises — match the raw (FR) name, the translated name
+          // 2. Exercises â€” match the raw (FR) name, the translated name
           //    (so the EN locale can find "bench press"), and the muscle
           //    group. When the query matches a muscle (fr key or en
           //    translation via trMuscle), the exercises of that muscle are
@@ -525,7 +525,7 @@ const L = t();
             }
           }
 
-          // 3. Sessions — match by name.
+          // 3. Sessions â€” match by name.
           if (q) {
             const sess = this.sessions
               .filter((s) => matches(s.name, q))
@@ -581,7 +581,7 @@ const L = t();
     });
   });
 
-  // ─── Window bridge + global wiring ────────────────────────
+  // â”€â”€â”€ Window bridge + global wiring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let qsBound = false;
 
   function resetCmdState(dlg: HTMLDialogElement): void {
@@ -591,7 +591,7 @@ const L = t();
       const data = a.$data(dlg) as { reset?: () => void } | undefined;
       data?.reset?.();
     } catch {
-      // Alpine not ready yet — the next open() call will reset again.
+      // Alpine not ready yet â€” the next open() call will reset again.
     }
   }
 
@@ -614,7 +614,7 @@ const L = t();
     if (!dlg) return;
     qsBound = true;
 
-    // Backdrop click → close (click lands on the dialog element itself
+    // Backdrop click â†’ close (click lands on the dialog element itself
     // when it hits the backdrop, same technique as Dialog.astro).
     dlg.addEventListener("click", (e) => {
       if (e.target !== dlg) return;

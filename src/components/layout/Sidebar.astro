@@ -1,38 +1,21 @@
 ---
 /**
- * Sidebar — fixed left navigation, palworld.tools style.
+ * Sidebar â€” fixed left navigation, palworld.tools style.
  *
- * Visible on desktop (≥1024px) only. On smaller viewports, the
+ * Visible on desktop (â‰¥1024px) only. On smaller viewports, the
  * AppShell renders a slide-in drawer with the same nav data so
  * users get the same IA on every screen size.
  *
  * Structure:
  *   [logo + brand]
- *   [search field → exercises search (/exercises)]
- *   [nav groups → items (with optional sub-items)]
+ *   [search field â†’ exercises search (/exercises)]
+ *   [nav groups â†’ items (with optional sub-items)]
  *   [footer]
  */
 import { t } from "../../i18n";
 import { navId, renderIcon, chevronDown } from "../../lib/nav";
-import Icon from "../ui/Icon.astro";
-
-interface NavLeaf {
-  label: string;
-  href: string;
-  active?: boolean;
-}
-interface NavItem {
-  label: string;
-  href: string;
-  icon?: string;
-  children?: NavLeaf[];
-  active?: boolean;
-  parentActive?: boolean;
-}
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
+import Icon from "../ui/Icon/Icon.astro";
+import type { NavGroup } from "../../lib/types";
 
 interface Props {
   groups: NavGroup[];
@@ -137,8 +120,8 @@ const L = t();
 </aside>
 
 <style>
-  /* ── Shell ─────────────────────────────────────────────── */
-  /* Fixed on desktop (≥1024px) so it stays pinned to the viewport
+  /* â”€â”€ Shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* Fixed on desktop (â‰¥1024px) so it stays pinned to the viewport
      regardless of long page content (e.g. session builder with many
      exercises + notes). Hidden on mobile via the responsive block
      at the bottom, where `position` is irrelevant. */
@@ -161,7 +144,7 @@ const L = t();
     z-index: 1;
   }
 
-  /* ── Logo ──────────────────────────────────────────────── */
+  /* â”€â”€ Logo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar__logo {
     display: flex;
     align-items: center;
@@ -206,7 +189,7 @@ const L = t();
     line-height: 1;
   }
 
-  /* ── Search ────────────────────────────────────────────── */
+  /* â”€â”€ Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar__search {
     padding: 0 1.2rem 1.6rem;
   }
@@ -270,7 +253,7 @@ const L = t();
     pointer-events: none;
   }
 
-  /* ── Nav ───────────────────────────────────────────────── */
+  /* â”€â”€ Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar__nav {
     flex: 1;
     padding: 0 0.8rem;
@@ -357,7 +340,7 @@ const L = t();
     min-width: 0;
   }
 
-  /* Collapsible toggle chevron — rotates when the group is expanded. */
+  /* Collapsible toggle chevron â€” rotates when the group is expanded. */
   .nav-item__chevron {
     display: inline-flex;
     flex-shrink: 0;
@@ -369,8 +352,8 @@ const L = t();
     transform: rotate(180deg);
   }
 
-  /* ── Child items (accordion body) ─────────────────────────── */
-  /* Animated with the grid-template-rows 0fr → 1fr technique so the
+  /* â”€â”€ Child items (accordion body) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* Animated with the grid-template-rows 0fr â†’ 1fr technique so the
      height transition works without requiring a fixed max-height. */
   .nav-children {
     display: grid;
@@ -421,7 +404,7 @@ const L = t();
     display: block;
   }
 
-  /* ── Footer ────────────────────────────────────────────── */
+  /* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar__footer {
     padding: 1.6rem;
     border-top: 1px solid var(--color-border);
@@ -440,7 +423,7 @@ const L = t();
     margin: 0;
   }
 
-  /* ── User session block ────────────────────────────────── */
+  /* â”€â”€ User session block â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar__user {
     display: flex;
     flex-direction: column;
@@ -531,7 +514,7 @@ const L = t();
     transform: scale(0.98);
   }
 
-  /* ── Theme toggle (added 2026-08-04) ────────────────────── */
+  /* â”€â”€ Theme toggle (added 2026-08-04) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar__theme-toggle {
     display: inline-flex;
     align-items: center;
@@ -599,7 +582,7 @@ const L = t();
     text-align: left;
   }
 
-  /* ── Focus visible ─────────────────────────────────────── */
+  /* â”€â”€ Focus visible â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .nav-item:focus-visible,
   .nav-item--toggle:focus-visible,
   .nav-child:focus-visible {
@@ -607,21 +590,21 @@ const L = t();
     box-shadow: var(--focus-ring);
   }
 
-  /* ── Solid fallback when backdrop-filter is unavailable ── */
+  /* â”€â”€ Solid fallback when backdrop-filter is unavailable â”€â”€ */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .sidebar {
       background-color: var(--color-surface);
     }
   }
 
-  /* ── Responsive ────────────────────────────────────────── */
+  /* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   @media (max-width: 1023px) {
     .sidebar {
       display: none;
     }
   }
 
-  /* ── Reduced motion ────────────────────────────────────── */
+  /* â”€â”€ Reduced motion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   @media (prefers-reduced-motion: reduce) {
     .nav-item,
     .nav-child,
@@ -634,7 +617,7 @@ const L = t();
       transform: none;
     }
   }
-  /* ── Performance rail overrides ────────────────────────── */
+  /* â”€â”€ Performance rail overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar {
     width: var(--sidebar-width);
     background: color-mix(in srgb, var(--color-bg) 92%, transparent);

@@ -1,7 +1,7 @@
 ---
-import Icon from './Icon.astro';
-import Button from './Button.astro';
-import Card from './Card.astro';
+import Icon from './Icon/Icon.astro';
+import Button from './Button/Button.astro';
+import Card from './Card/Card.astro';
 import type { IconName } from '../../lib/icons';
 
 interface Props {
@@ -30,17 +30,17 @@ const isError = variant === 'error';
 
 {isError ? (
   <Card class={className}>
-    <div class="flex flex-col items-center text-center gap-3 py-5 max-w-[32rem] mx-auto">
+    <div class="empty-state empty-state--centered">
       {iconName && (
         <div
-          class="inline-flex items-center justify-center w-[6rem] h-[6rem] rounded-full text-[var(--color-destructive)] bg-[color-mix(in_srgb,var(--color-destructive)_10%,transparent)]"
+          class="empty-state__icon empty-state__icon--error"
           aria-hidden="true"
         >
           <Icon name={iconName} size={30} />
         </div>
       )}
-      <h2 class="text-display text-[2rem] text-[var(--color-text)]">{title}</h2>
-      {description && <p class="text-[var(--color-muted)] text-[1.3rem] leading-[1.5]">{description}</p>}
+      <h2 class="empty-state__title empty-state__title--large">{title}</h2>
+      {description && <p class="empty-state__desc">{description}</p>}
       {hasAction && (
         <Button href={actionHref} variant="primary" class="mt-1">
           {actionLabel}
@@ -49,20 +49,20 @@ const isError = variant === 'error';
     </div>
   </Card>
 ) : (
-  <div class:list={['flex flex-col items-center justify-center py-12 px-6 max-w-sm mx-auto text-center', className]} role="status">
+  <div class:list={['empty-state', className]} role="status">
     {iconName && (
       <div
-        class="flex items-center justify-center w-12 h-12 rounded-full text-[var(--color-muted)] bg-[var(--alpha-bg-soft)]"
+        class="empty-state__icon"
         aria-hidden="true"
       >
         <Icon name={iconName} size={24} />
       </div>
     )}
-    <h3 class="text-display text-[1.5rem] font-bold text-[var(--color-text)] mt-4 text-center">
+    <h3 class="empty-state__title">
       {title}
     </h3>
     {description && (
-      <p class="text-[1.2rem] text-[var(--color-muted)] mt-2 text-center">
+      <p class="empty-state__desc">
         {description}
       </p>
     )}
@@ -73,3 +73,64 @@ const isError = variant === 'error';
     )}
   </div>
 )}
+
+<style>
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4.8rem 2.4rem;
+    max-width: 32rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .empty-state--centered {
+    padding: 2rem 0;
+  }
+
+  .empty-state__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.8rem;
+    height: 4.8rem;
+    border-radius: 50%;
+    color: var(--color-muted);
+    background-color: var(--alpha-bg-soft);
+  }
+
+  .empty-state__icon--error {
+    width: 6rem;
+    height: 6rem;
+    color: var(--color-destructive);
+    background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
+  }
+
+  .empty-state__title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-top: 1.6rem;
+    text-align: center;
+  }
+
+  .empty-state__title--large {
+    font-size: 2rem;
+    margin-top: 0;
+  }
+
+  .empty-state__desc {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    margin-top: 0.8rem;
+    text-align: center;
+  }
+
+  .empty-state--centered .empty-state__desc {
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+</style>

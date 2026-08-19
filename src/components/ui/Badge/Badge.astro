@@ -1,0 +1,71 @@
+---
+import './Badge.css';
+
+type Variant =
+  | 'default'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'info'
+  | 'accent'
+  | 'category'
+  | 'superset';
+
+type Tone = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'core' | 'other';
+type Group = 'g1' | 'g2' | 'g3' | 'g4' | 'g5' | 'none';
+
+interface Props {
+  variant?: Variant;
+  size?: 'sm' | 'md';
+  tone?: Tone;
+  group?: Group;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  tone,
+  group = 'none',
+  class: className = '',
+  ...attrs
+} = Astro.props;
+
+const sizeMap: Record<NonNullable<Props['size']>, string> = {
+  sm: 'px-2 py-0.5 text-[1.0rem] uppercase tracking-wider',
+  md: 'px-2.5 py-1 text-[1.2rem]',
+};
+
+const variantClasses: Record<Variant, string> = {
+  default: 'bg-white/5 text-[var(--color-muted)]',
+  success: 'bg-green-500/10 text-[var(--color-success)]',
+  warning: 'bg-yellow-500/10 text-[var(--color-warning)]',
+  danger: 'bg-red-500/10 text-[var(--color-destructive)]',
+  info: 'bg-blue-500/10 text-[var(--color-info)]',
+  accent: 'bg-orange-500/10 text-[var(--color-accent)]',
+  category: tone
+    ? `badge--category badge--cat-${tone}`
+    : 'badge--category',
+  superset:
+    group !== 'none'
+      ? `badge--superset badge--group-${group}`
+      : 'badge--superset badge--category',
+};
+
+const baseClasses =
+  'inline-flex items-center font-semibold whitespace-nowrap rounded-[var(--radius-pill)]';
+
+const classes = [
+  baseClasses,
+  variantClasses[variant],
+  sizeMap[size],
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span class={classes} {...attrs}>
+  <slot />
+</span>

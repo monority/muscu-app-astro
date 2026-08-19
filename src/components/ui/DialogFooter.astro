@@ -1,5 +1,5 @@
 ---
-import Button from './Button.astro';
+import Button from './Button/Button.astro';
 
 interface Props {
   cancelLabel?: string;
@@ -16,7 +16,7 @@ const {
 } = Astro.props;
 ---
 
-<div class:list={['flex justify-end gap-[0.8rem] pt-[1.6rem]', className]}>
+<div class:list={['dialog-footer', className]}>
   <Button variant="secondary" type="button" data-dialog-close>
     {cancelLabel}
   </Button>
@@ -24,3 +24,12 @@ const {
     <slot />
   </Button>
 </div>
+
+<style>
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    padding-top: 1.6rem;
+  }
+</style>

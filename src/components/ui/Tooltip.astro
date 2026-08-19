@@ -19,63 +19,112 @@ const {
 } = Astro.props;
 
 const id = `tooltip-${crypto.randomUUID()}`;
-
-const positionMap: Record<NonNullable<Props['position']>, string> = {
-  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-  left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-  right: 'left-full top-1/2 -translate-y-1/2 ml-2',
-};
-
-const arrowPositionMap: Record<NonNullable<Props['position']>, string> = {
-  top: 'top-full left-1/2 -translate-x-1/2',
-  bottom: 'bottom-full left-1/2 -translate-x-1/2',
-  left: 'left-full top-1/2 -translate-y-1/2',
-  right: 'right-full top-1/2 -translate-y-1/2',
-};
-
-const arrowBorderMap: Record<NonNullable<Props['position']>, string> = {
-  top: 'border-width: 6px 5px 0 5px; border-top-color: var(--color-surface-3);',
-  bottom: 'border-width: 0 5px 6px 5px; border-bottom-color: var(--color-surface-3);',
-  left: 'border-width: 5px 6px 5px 0; border-left-color: var(--color-surface-3);',
-  right: 'border-width: 5px 0 5px 6px; border-right-color: var(--color-surface-3);',
-};
-
-const wrapperClasses = [
-  'relative inline-flex group',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
-
-const bubbleClasses = [
-  'absolute z-50',
-  'px-3 py-2',
-  'text-[1.2rem] font-medium whitespace-nowrap',
-  'bg-[var(--color-surface-3)] text-[var(--color-text)]',
-  'rounded-[var(--radius-sm)]',
-  'shadow-[var(--shadow-1)]',
-  'pointer-events-none',
-  'opacity-0 transition-opacity duration-200 delay-200',
-  'group-hover:opacity-100 group-focus-within:opacity-100',
-  'min-w-[80px] text-center',
-  positionMap[position],
-]
-  .filter(Boolean)
-  .join(' ');
-
-const arrowClasses = [
-  'absolute h-0 w-0 border-solid border-transparent',
-  arrowPositionMap[position],
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<span class={wrapperClasses} aria-describedby={id}>
+<span class:list={['tooltip-wrapper', className]} aria-describedby={id}>
   <slot />
-  <span id={id} role="tooltip" class={bubbleClasses}>
+  <span id={id} role="tooltip" class:list={['tooltip', `tooltip--${position}`]}>
     {content}
-    <span class={arrowClasses} style={arrowBorderMap[position]} aria-hidden="true"></span>
+    <span class:list={['tooltip__arrow', `tooltip__arrow--${position}`]} aria-hidden="true"></span>
   </span>
 </span>
+
+<style>
+  .tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .tooltip {
+    position: absolute;
+    z-index: 50;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    white-space: nowrap;
+    background-color: var(--color-surface-3);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-1);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 200ms ease 200ms;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .tooltip-wrapper:hover .tooltip,
+  .tooltip-wrapper:focus-within .tooltip {
+    opacity: 1;
+  }
+
+  /* Positions */
+  .tooltip--top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.8rem;
+  }
+
+  .tooltip--bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.8rem;
+  }
+
+  .tooltip--left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 0.8rem;
+  }
+
+  .tooltip--right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 0.8rem;
+  }
+
+  /* Arrows */
+  .tooltip__arrow {
+    position: absolute;
+    height: 0;
+    width: 0;
+    border-style: solid;
+    border-color: transparent;
+  }
+
+  .tooltip__arrow--top {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 5px 0 5px;
+    border-top-color: var(--color-surface-3);
+  }
+
+  .tooltip__arrow--bottom {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 5px 6px 5px;
+    border-bottom-color: var(--color-surface-3);
+  }
+
+  .tooltip__arrow--left {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px 6px 5px 0;
+    border-left-color: var(--color-surface-3);
+  }
+
+  .tooltip__arrow--right {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px 0 5px 6px;
+    border-right-color: var(--color-surface-3);
+  }
+</style>

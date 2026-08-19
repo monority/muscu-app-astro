@@ -1,5 +1,5 @@
 /* ── Shared button system ──────────────────────────────────
- * Imported by globals.css (for raw HTML) AND Button.astro (component).
+ * Imported by global.css (for raw HTML) AND Button.astro (component).
  * Single source of truth: variants, sizes, states, loading spinner. */
 
 .button,

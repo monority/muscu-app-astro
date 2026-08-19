@@ -1,8 +1,8 @@
 ---
 /**
- * AppShell — orchestrates Sidebar + Header into the full layout.
+ * AppShell â€” orchestrates Sidebar + Header into the full layout.
  *
- * - Desktop (≥1024px): sidebar (left) + topbar (top) + content
+ * - Desktop (â‰¥1024px): sidebar (left) + topbar (top) + content
  * - Mobile  (<1024px): topbar (with hamburger) + content
  *                    + slide-in drawer (same nav as the sidebar)
  *
@@ -12,20 +12,10 @@
  */
 import Sidebar from "./Sidebar.astro";
 import Header from "./Header.astro";
-import Icon from "../ui/Icon.astro";
+import Icon from "../ui/Icon/Icon.astro";
 import { t } from "../../i18n";
 import { navId, renderIcon, chevronDown } from "../../lib/nav";
-
-export type NavLeaf = { label: string; href: string; active?: boolean };
-export type NavItem = {
-  label: string;
-  href: string;
-  icon?: string;
-  children?: NavLeaf[];
-  active?: boolean;
-  parentActive?: boolean;
-};
-export type NavGroup = { label: string; items: NavItem[] };
+import type { NavGroup } from "../../lib/types";
 
 interface Props {
   groups: NavGroup[];
@@ -162,12 +152,12 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
         }
       </nav>
 
-      {/* Footer — user session + logout (mirrors sidebar) */}
+      {/* Footer â€” user session + logout (mirrors sidebar) */}
       <div class="drawer__user" data-user-zone hidden>
         <div class="drawer__user-info">
           <span class="drawer__user-label">{L.layout.signedInAs}</span>
-          <span class="drawer__user-name" data-user-name>—</span>
-          <span class="drawer__user-email" data-user-email>—</span>
+          <span class="drawer__user-name" data-user-name>â€”</span>
+          <span class="drawer__user-email" data-user-email>â€”</span>
         </div>
         <button
           type="button"
@@ -184,7 +174,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
 </div>
 
 <script>
-  // ── Mobile drawer toggle ────────────────────────────────
+  // â”€â”€ Mobile drawer toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   (() => {
     const toggle = document.querySelector<HTMLButtonElement>(
       "[data-mobile-toggle]"
@@ -268,7 +258,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     });
   })();
 
-  // ── Auth gate + session display ─────────────────────────
+  // â”€â”€ Auth gate + session display â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Runs only for pages that render the AppShell (every page except
   // /login, which uses AppLayout with empty groups and therefore
   // doesn't get this script). Keeps the public/login surface small
@@ -281,14 +271,14 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     window.location.href = localizedPath("/login");
   };
 
-  // ── Wire logout buttons (sidebar + drawer) ──────────────
+  // â”€â”€ Wire logout buttons (sidebar + drawer) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   document
     .querySelectorAll<HTMLButtonElement>("[data-logout]")
     .forEach((btn) => {
       btn.addEventListener("click", logout);
     });
 
-  // ── Populate user session zones ─────────────────────────
+  // â”€â”€ Populate user session zones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const auth = getAuth();
   if (auth) {
     document.querySelectorAll<HTMLElement>("[data-user-name]").forEach((el) => {
@@ -303,12 +293,12 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
       el.removeAttribute("hidden");
     });
   } else {
-    // No session → bounce to the login page. /login itself does NOT
+    // No session â†’ bounce to the login page. /login itself does NOT
     // render the AppShell, so this redirect never loops.
     window.location.replace("/login");
   }
 
-  // ── Theme + nav accordion Alpine data factory (added 2026-08-04) ─
+  // â”€â”€ Theme + nav accordion Alpine data factory (added 2026-08-04) â”€
   // Exposed as `themeApp()` on the AppShell root. The <head> init
   // script in AppLayout.astro sets `data-theme` synchronously
   // before paint, so by the time Alpine boots we just need to
@@ -316,7 +306,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
   // toggle to localStorage.
   //
   // The accordion state (`collapsed`) is shared between the desktop
-  // sidebar and the mobile drawer — both live under this single
+  // sidebar and the mobile drawer â€” both live under this single
   // x-data root, so the same id toggles both copies.
   document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -341,7 +331,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
         try {
           window.localStorage.setItem("muscu-theme", this.theme);
         } catch {
-          // private mode / quota — silently ignore, the in-memory
+          // private mode / quota â€” silently ignore, the in-memory
           // theme still applies for the current session
         }
       },
@@ -350,7 +340,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
         return this.theme === "dark";
       },
 
-      // ── Nav accordion ─────────────────────────────────────
+      // â”€â”€ Nav accordion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       // Groups are expanded by default; `collapsed` holds the ids of
       // the collapsed groups (persisted under `muscu:nav:collapsed`).
       isExpanded(id: string): boolean {
@@ -364,7 +354,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
         try {
           window.localStorage.setItem(ACCORDION_KEY, JSON.stringify(this.collapsed));
         } catch {
-          // private mode / quota — in-memory state still applies
+          // private mode / quota â€” in-memory state still applies
         }
       },
 
@@ -399,13 +389,13 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
 </script>
 
 <style>
-  /* ── Shell layout ─────────────────────────────────────── */
+  /* â”€â”€ Shell layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .app-shell {
     display: flex;
     min-height: 100vh;
     align-items: stretch;
     /* Transparent so the decorative background layer (Background.astro)
-       shows through — the html/body still carry the base color. */
+       shows through â€” the html/body still carry the base color. */
   }
 
   .main-area {
@@ -413,7 +403,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     min-width: 0;
     display: flex;
     flex-direction: column;
-    /* No background — the decorative layer shows through. */
+    /* No background â€” the decorative layer shows through. */
     /* Mobile: the body is the scroll container, the topbar is
        `position: sticky` in Header.astro and pins to the top of
        the viewport. Desktop overrides below switch to an in-page
@@ -434,7 +424,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     min-height: 0;
   }
 
-  /* ── Desktop: fixed sidebar + header ───────────────────── */
+  /* â”€â”€ Desktop: fixed sidebar + header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   /* Take the sidebar and topbar out of the flex flow so long pages
      (e.g. session builder with many exercises + notes) can no
      longer push them off screen. The main column gets the
@@ -456,7 +446,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
       right: 0;
       height: var(--topbar-height);
       z-index: 50;
-      /* Translucent + blur — same glass edge as Header.astro. */
+      /* Translucent + blur â€” same glass edge as Header.astro. */
       background-color: color-mix(in srgb, var(--color-bg) 78%, transparent);
       -webkit-backdrop-filter: blur(16px) saturate(1.4);
       backdrop-filter: blur(16px) saturate(1.4);
@@ -471,7 +461,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     }
   }
 
-  /* ── Drawer shell ──────────────────────────────────────── */
+  /* â”€â”€ Drawer shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .drawer {
     position: fixed;
     inset: 0;
@@ -517,7 +507,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     transform: translateX(0);
   }
 
-  /* ── Drawer header ────────────────────────────────────── */
+  /* â”€â”€ Drawer header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .drawer__header {
     display: flex;
     align-items: center;
@@ -577,7 +567,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     box-shadow: var(--focus-ring);
   }
 
-  /* ── Drawer nav ────────────────────────────────────────── */
+  /* â”€â”€ Drawer nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .drawer__nav {
     flex: 1;
     overflow-y: auto;
@@ -663,7 +653,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     min-width: 0;
   }
 
-  /* Collapsible toggle chevron — rotates when the group is expanded. */
+  /* Collapsible toggle chevron â€” rotates when the group is expanded. */
   .drawer__item-chevron {
     display: inline-flex;
     flex-shrink: 0;
@@ -675,8 +665,8 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     transform: rotate(180deg);
   }
 
-  /* ── Drawer child items (accordion body) ── */
-  /* Same 0fr → 1fr grid animation as the desktop sidebar. */
+  /* â”€â”€ Drawer child items (accordion body) â”€â”€ */
+  /* Same 0fr â†’ 1fr grid animation as the desktop sidebar. */
   .drawer__children {
     display: grid;
     grid-template-rows: 0fr;
@@ -727,7 +717,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     box-shadow: var(--focus-ring);
   }
 
-  /* ── Responsive ────────────────────────────────────────── */
+  /* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   @media (min-width: 1024px) {
     .drawer {
       display: none;
@@ -746,7 +736,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     }
   }
 
-  /* ── Reduced motion ────────────────────────────────────── */
+  /* â”€â”€ Reduced motion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   @media (prefers-reduced-motion: reduce) {
     .drawer__backdrop,
     .drawer__panel,
@@ -761,7 +751,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     }
   }
 
-  /* ── Drawer user session + logout ────────────────────── */
+  /* â”€â”€ Drawer user session + logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .drawer__user {
     display: flex;
     flex-direction: column;
@@ -852,6 +842,6 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
   .drawer__logout:active {
     transform: scale(0.98);
   }
-  /* ── Content stage ─────────────────────────────────────── */
+  /* â”€â”€ Content stage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 </style>

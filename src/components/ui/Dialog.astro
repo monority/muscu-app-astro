@@ -1,10 +1,10 @@
 ---
 /**
- * Dialog — native <dialog> modal primitive.
+ * Dialog Ã¢â‚¬â€ native <dialog> modal primitive.
  *
  * Usage:
- *   <Dialog id="confirm-delete" title="Supprimer la séance ?">
- *     <p>Cette action est irréversible.</p>
+ *   <Dialog id="confirm-delete" title="Supprimer la sÃƒÂ©ance ?">
+ *     <p>Cette action est irrÃƒÂ©versible.</p>
  *     <div slot="footer">
  *       <Button variant="secondary" data-dialog-close>Annuler</Button>
  *       <Button variant="destructive">Confirmer</Button>
@@ -12,12 +12,12 @@
  *   </Dialog>
  *
  * Open from anywhere:
- *   - <button data-dialog-trigger="confirm-delete">…</button>
+ *   - <button data-dialog-trigger="confirm-delete">Ã¢â‚¬Â¦</button>
  *   - window.openDialog('confirm-delete')
  *   - document.getElementById('confirm-delete').showModal()
  *
  * Close:
- *   - <button data-dialog-close>…</button>
+ *   - <button data-dialog-close>Ã¢â‚¬Â¦</button>
  *   - window.closeDialog('confirm-delete')
  *   - Escape key, backdrop click (auto-handled)
  */
@@ -27,49 +27,51 @@ interface Props {
   class?: string;
 }
 
-import { t } from '../../i18n';
-import Icon from './Icon.astro';
+import { t } from "../../i18n";
+import Icon from "./Icon/Icon.astro";
 
 const L = t();
 
-const {
-  id = 'dialog',
-  title,
-  class: className = '',
-} = Astro.props;
+const { id = "dialog", title, class: className = "" } = Astro.props;
 
 const classes = [
-  'bg-[var(--color-surface)]',
-  'border border-[var(--color-border)]',
-  'rounded-[var(--radius-xl)]',
-  'p-6',
-  'w-full max-w-6xl',
-  'text-[var(--color-text)]',
+  "bg-[var(--color-surface)]",
+  "border border-[var(--color-border)]",
+  "rounded-[var(--radius-xl)]",
+  "p-6",
+  "w-full max-w-6xl",
+  "text-[var(--color-text)]",
   className,
 ]
   .filter(Boolean)
-  .join(' ');
+  .join(" ");
 ---
 
-<dialog id={id} class={classes} aria-labelledby={title ? `${id}-title` : undefined}>
-  {title && (
-    <header class="flex flex-row justify-between items-center mb-4 gap-3">
-      <h2
-        id={`${id}-title`}
-        class="text-display text-[1.5rem] font-bold leading-tight"
-      >
-        {title}
-      </h2>
-      <button
-        type="button"
-        data-dialog-close
-        aria-label={L.common.close}
-        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/5 text-[var(--color-muted)] hover:bg-white/10 hover:text-[var(--color-text)] transition-colors duration-[160ms] cursor-pointer"
-      >
-        <Icon name="closeX" size={16} />
-      </button>
-    </header>
-  )}
+<dialog
+  id={id}
+  class={classes}
+  aria-labelledby={title ? `${id}-title` : undefined}
+>
+  {
+    title && (
+      <header class="flex flex-row justify-between items-center mb-4 gap-3">
+        <h2
+          id={`${id}-title`}
+          class="text-display text-[1.5rem] font-bold leading-tight"
+        >
+          {title}
+        </h2>
+        <button
+          type="button"
+          data-dialog-close
+          aria-label={L.common.close}
+          class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/5 text-[var(--color-muted)] hover:bg-white/10 hover:text-[var(--color-text)] transition-colors duration-[160ms] cursor-pointer"
+        >
+          <Icon name="closeX" size={16} />
+        </button>
+      </header>
+    )
+  }
 
   <div class="dialog-body text-[1.3rem]">
     <slot />
@@ -81,7 +83,7 @@ const classes = [
 </dialog>
 
 <style>
-  /* ════════════════════════════════════════════════════
+  /* 
      BASE DIALOG STYLES
      The native <dialog> element relies on UA stylesheet
      centering (position: fixed; inset-block: 0; margin: auto)
@@ -90,7 +92,7 @@ const classes = [
      modal is reliably centered both horizontally and
      vertically on every browser, regardless of utility
      classes layered on top.
-     ════════════════════════════════════════════════════ */
+      */
   dialog {
     position: fixed;
     inset: 0;
@@ -107,7 +109,7 @@ const classes = [
     background-color: color-mix(in srgb, #000 60%, transparent);
   }
 
-  /* Open animation — fade + scale */
+  /* Open animation Ã¢â‚¬â€ fade + scale */
   @keyframes dialog-in {
     from {
       opacity: 0;
@@ -120,8 +122,12 @@ const classes = [
   }
 
   @keyframes backdrop-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   dialog[open] {
@@ -142,7 +148,7 @@ const classes = [
 </style>
 
 <script>
-  // ─── Public API ───────────────────────────────────────────────
+  //Public API
   // Expose helpers so any page can open/close a Dialog by id.
   declare global {
     interface Window {
@@ -152,18 +158,18 @@ const classes = [
   }
 
   const FOCUSABLE_SELECTOR = [
-    'a[href]',
-    'area[href]',
-    'button:not([disabled])',
+    "a[href]",
+    "area[href]",
+    "button:not([disabled])",
     'input:not([disabled]):not([type="hidden"])',
-    'select:not([disabled])',
-    'textarea:not([disabled])',
-    'iframe',
-    'object',
-    'embed',
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    "iframe",
+    "object",
+    "embed",
     '[contenteditable="true"]',
     '[tabindex]:not([tabindex="-1"])',
-  ].join(',');
+  ].join(",");
 
   // Track the element that opened each dialog so we can restore focus.
   const openerMap = new WeakMap<HTMLDialogElement, HTMLElement | null>();
@@ -173,14 +179,14 @@ const classes = [
       dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
     ).filter(
       (el) =>
-        !el.hasAttribute('disabled') &&
+        !el.hasAttribute("disabled") &&
         el.tabIndex !== -1 &&
         el.offsetParent !== null,
     );
   }
 
   function trapFocus(dialog: HTMLDialogElement, e: KeyboardEvent) {
-    if (e.key !== 'Tab') return;
+    if (e.key !== "Tab") return;
     const focusables = getFocusable(dialog);
     if (focusables.length === 0) {
       e.preventDefault();
@@ -200,13 +206,13 @@ const classes = [
   }
 
   function attach(dialog: HTMLDialogElement) {
-    if (dialog.dataset.dialogReady === 'true') return;
-    dialog.dataset.dialogReady = 'true';
+    if (dialog.dataset.dialogReady === "true") return;
+    dialog.dataset.dialogReady = "true";
 
-    // Backdrop click → close (target === dialog when click is on backdrop,
+    // Backdrop click Ã¢â€ â€™ close (target === dialog when click is on backdrop,
     // because the dialog element itself fills the backdrop area only at the
     // edge, not in the content; we also check rect to be safe).
-    dialog.addEventListener('click', (e) => {
+    dialog.addEventListener("click", (e) => {
       if (e.target !== dialog) return;
       const rect = dialog.getBoundingClientRect();
       const inside =
@@ -218,14 +224,14 @@ const classes = [
     });
 
     // Focus trap
-    dialog.addEventListener('keydown', (e) => {
+    dialog.addEventListener("keydown", (e) => {
       trapFocus(dialog, e);
     });
 
     // Restore focus on close
-    dialog.addEventListener('close', () => {
+    dialog.addEventListener("close", () => {
       const opener = openerMap.get(dialog);
-      if (opener && typeof opener.focus === 'function') {
+      if (opener && typeof opener.focus === "function") {
         opener.focus();
       }
       openerMap.set(dialog, null);
@@ -234,7 +240,7 @@ const classes = [
 
   function openDialog(id: string) {
     const dialog = document.getElementById(id) as HTMLDialogElement | null;
-    if (!dialog || dialog.tagName !== 'DIALOG') return;
+    if (!dialog || dialog.tagName !== "DIALOG") return;
     attach(dialog);
     openerMap.set(dialog, document.activeElement as HTMLElement | null);
     if (!dialog.open) {
@@ -255,36 +261,40 @@ const classes = [
   window.openDialog = openDialog;
   window.closeDialog = closeDialog;
 
-  // ─── Wire up triggers & close buttons ────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Wire up triggers & close buttons Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   function bindTriggers() {
-    document.querySelectorAll<HTMLElement>('[data-dialog-trigger]').forEach((el) => {
-      if (el.dataset.dialogBound === 'true') return;
-      el.dataset.dialogBound = 'true';
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        const id = el.dataset.dialogTrigger;
-        if (id) openDialog(id);
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-trigger]")
+      .forEach((el) => {
+        if (el.dataset.dialogBound === "true") return;
+        el.dataset.dialogBound = "true";
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          const id = el.dataset.dialogTrigger;
+          if (id) openDialog(id);
+        });
       });
-    });
 
-    document.querySelectorAll<HTMLElement>('[data-dialog-close]').forEach((el) => {
-      if (el.dataset.dialogCloseBound === 'true') return;
-      el.dataset.dialogCloseBound = 'true';
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        const dialog = el.closest('dialog') as HTMLDialogElement | null;
-        if (dialog) dialog.close();
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-close]")
+      .forEach((el) => {
+        if (el.dataset.dialogCloseBound === "true") return;
+        el.dataset.dialogCloseBound = "true";
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          const dialog = el.closest("dialog") as HTMLDialogElement | null;
+          if (dialog) dialog.close();
+        });
       });
-    });
   }
 
   // Run after DOM ready; safe to call multiple times.
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindTriggers);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindTriggers);
   } else {
     bindTriggers();
   }
 
   // Re-bind on Astro view transitions / dynamic content
-  document.addEventListener('astro:page-load', bindTriggers);
+  document.addEventListener("astro:page-load", bindTriggers);
 </script>

@@ -7,17 +7,19 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
-
-const classes = [
-  'border-b border-[var(--color-border)]',
-  'hover:bg-white/[0.02]',
-  'transition-colors',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<tr class={classes}>
+<tr class:list={['table-row', className]}>
   <slot />
 </tr>
+
+<style>
+  .table-row {
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 160ms ease;
+  }
+
+  .table-row:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+</style>

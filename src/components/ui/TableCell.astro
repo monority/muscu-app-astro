@@ -9,16 +9,20 @@ interface Props {
 }
 
 const { numeric = false, class: className = '' } = Astro.props;
-
-const classes = [
-  'px-4 py-3 text-[1.3rem] text-[var(--color-text)]',
-  numeric ? 'tabular-nums' : '',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<td class={classes}>
+<td class:list={['table-cell', numeric && 'table-cell--numeric', className]}>
   <slot />
 </td>
+
+<style>
+  .table-cell {
+    padding: 1.2rem 1.6rem;
+    font-size: 1.3rem;
+    color: var(--color-text);
+  }
+
+  .table-cell--numeric {
+    font-variant-numeric: tabular-nums;
+  }
+</style>

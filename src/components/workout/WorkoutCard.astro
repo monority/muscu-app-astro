@@ -1,5 +1,5 @@
 ---
-import Badge from '../ui/Badge.astro';
+import Badge from '../ui/Badge/Badge.astro';
 import { t, trExercise, trMuscle } from '../../i18n';
 import { formatDateShort } from '../../lib/format';
 
@@ -37,11 +37,11 @@ const hiddenCount = Math.max(0, exercises.length - visibleExercises.length);
       {totalVolume && <div class="flex flex-col gap-[0.2rem]"><dt class="dt-label">{L.sessions.volume}</dt><dd class="text-[var(--color-text)] text-[1.3rem] font-[650] tabular-nums">{totalVolume}</dd></div>}
     </dl>
     {visibleExercises.length > 0 && <div class="flex flex-wrap gap-[0.6rem_1.2rem] mt-[1.2rem] text-[var(--color-muted)] text-[1.2rem]">
-      {visibleExercises.map((ex) => <span class="inline-flex gap-1 items-baseline">{trExercise(ex.name)} <small class="text-[var(--color-accent)] text-[1rem]">{trMuscle(ex.muscle)} · {ex.setCount}</small></span>)}
+      {visibleExercises.map((ex) => <span class="inline-flex gap-1 items-baseline">{trExercise(ex.name)} <small class="text-[var(--color-accent)] text-[1rem]">{trMuscle(ex.muscle)} Â· {ex.setCount}</small></span>)}
       {hiddenCount > 0 && <span class="text-[var(--color-muted)] !important">+{hiddenCount} {L.common.exercises}</span>}
     </div>}
   </div>
-  <span class="text-[var(--color-accent)] text-[1.8rem]" aria-hidden="true">↗</span>
+  <span class="text-[var(--color-accent)] text-[1.8rem]" aria-hidden="true">â†—</span>
 </article>
 
 <style>

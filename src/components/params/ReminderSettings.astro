@@ -1,6 +1,6 @@
 ---
 /**
- * Session reminders — settings card + notification watcher.
+ * Session reminders â€” settings card + notification watcher.
  *
  * Follows the settings page conventions (Card primitives, CSS vars,
  * auto-save via `updateSettings`). The Alpine data registered below
@@ -11,15 +11,15 @@
  * (cooldown persisted in localStorage + module-level fallback).
  *
  * Notification permission is requested ONLY when the user clicks the
- * explicit "Activer les notifications" button — never on page load.
+ * explicit "Activer les notifications" button â€” never on page load.
  * When permission is not granted, the reminder falls back to the
  * in-app toast (`window.showToast`).
  */
-import Card from '../ui/Card.astro';
+import Card from '../ui/Card/Card.astro';
 import CardHeader from '../ui/CardHeader.astro';
 import CardTitle from '../ui/CardTitle.astro';
 import CardContent from '../ui/CardContent.astro';
-import Button from '../ui/Button.astro';
+import Button from '../ui/Button/Button.astro';
 import Toggle from '../ui/Toggle.astro';
 import { t } from '../../i18n';
 import { icons } from '../../lib/icons';
@@ -47,7 +47,7 @@ const L = t();
 
     <CardContent>
       <div class="rem__rows flex flex-col gap-0 mt-[1.2rem]" :class="{ 'rem__rows--disabled': !settings.reminders.enabled }">
-        {/* ── Master toggle ── */}
+        {/* â”€â”€ Master toggle â”€â”€ */}
         <div class="rem__row flex items-center justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
           <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
             <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderToggleLabel}</span>
@@ -62,7 +62,7 @@ const L = t();
           </div>
         </div>
 
-        {/* ── Day-of-week pickers ── */}
+        {/* â”€â”€ Day-of-week pickers â”€â”€ */}
         <div class="rem__row rem__row--form flex items-start justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
           <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
             <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderDaysLabel}</span>
@@ -85,7 +85,7 @@ const L = t();
           </div>
         </div>
 
-        {/* ── Time input ── */}
+        {/* â”€â”€ Time input â”€â”€ */}
         <div class="rem__row rem__row--form flex items-start justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
           <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
             <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderTimeLabel}</span>
@@ -103,14 +103,14 @@ const L = t();
           </div>
         </div>
 
-        {/* ── Permission request / status (only when reminders are on) ── */}
+        {/* â”€â”€ Permission request / status (only when reminders are on) â”€â”€ */}
         <div
           class="rem__status flex flex-col gap-[0.6rem] mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]"
           x-show="settings.reminders.enabled"
           x-cloak
           x-transition.opacity.duration.200ms
         >
-          {/* Unsupported browser → graceful info message */}
+          {/* Unsupported browser â†’ graceful info message */}
           <p
             class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-muted)]"
             x-show="!supported"
@@ -120,7 +120,7 @@ const L = t();
             {L.settings.reminderUnsupported}
           </p>
 
-          {/* Permission not yet asked → explicit opt-in button */}
+          {/* Permission not yet asked â†’ explicit opt-in button */}
           <template x-if="supported && permission === 'default'">
             <div>
               <Button
@@ -144,7 +144,7 @@ const L = t();
             {L.settings.reminderGranted}
           </p>
 
-          {/* Denied → explain how to unblock */}
+          {/* Denied â†’ explain how to unblock */}
           <template x-if="supported && permission === 'denied'">
             <div>
               <p class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-warning)] font-semibold" x-text="labels.denied">
@@ -183,7 +183,7 @@ const L = t();
 
     Alpine.data('reminderSettings', () => ({
       settings: getSettings(),
-      // Mon → Sun UI order; values are Date#getDay() (0 = Sunday).
+      // Mon â†’ Sun UI order; values are Date#getDay() (0 = Sunday).
       days: [
         { v: 1, label: L.settings.reminderDayMon },
         { v: 2, label: L.settings.reminderDayTue },
@@ -215,7 +215,7 @@ const L = t();
         this._timer = window.setInterval(() => this.check(), 30000);
       },
 
-      // ── Notification permission ──
+      // â”€â”€ Notification permission â”€â”€
       syncPermission() {
         this.supported = typeof Notification !== 'undefined';
         this.permission = this.supported
@@ -241,7 +241,7 @@ const L = t();
         }
       },
 
-      // ── Persistence (auto-save, unit/goal section pattern) ──
+      // â”€â”€ Persistence (auto-save, unit/goal section pattern) â”€â”€
       setEnabled(checked: boolean) {
         this.settings = updateSettings({
           reminders: { ...this.settings.reminders, enabled: checked },
@@ -264,7 +264,7 @@ const L = t();
         });
       },
 
-      // ── Reminder watcher ──
+      // â”€â”€ Reminder watcher â”€â”€
       check() {
         const r = this.settings?.reminders;
         if (!r || !r.enabled) return;
@@ -314,12 +314,12 @@ const L = t();
               body: this.labels.notifBody,
               tag: 'muscu-reminder',
             });
-            // Notification created — a browser click focuses the app URL
+            // Notification created â€” a browser click focuses the app URL
             // by default. Keeping the handle avoids an unused binding.
             void n;
             return;
           } catch {
-            // Permission type drift or blocked context → toast fallback.
+            // Permission type drift or blocked context â†’ toast fallback.
           }
         }
         // In-app toast fallback when Notification API is unavailable or
@@ -336,9 +336,9 @@ const L = t();
 </script>
 
 <style>
-  /* ═════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      STATE-DEPENDENT SELECTORS (cannot be Tailwind utilities)
-     ═════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .rem__rows--disabled .rem__row-label,
   .rem__rows--disabled .rem__row-title,
   .rem__rows--disabled .rem__row-hint,
@@ -387,9 +387,9 @@ const L = t();
     cursor: pointer;
   }
 
-  /* ═════════════════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      RESPONSIVE
-     ═════════════════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   @media (max-width: 640px) {
     .rem__row {
       flex-direction: column;

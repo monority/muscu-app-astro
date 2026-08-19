@@ -4,15 +4,19 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
-
-const classes = [
-  'flex flex-row justify-end gap-2 pt-3 border-t border-[var(--color-border)]',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<div class={classes}>
+<div class:list={['card-footer', className]}>
   <slot />
 </div>
+
+<style>
+  .card-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--color-border);
+  }
+</style>

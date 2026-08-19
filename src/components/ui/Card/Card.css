@@ -1,0 +1,36 @@
+/* ── Card component ─────────────────────────────────────── */
+.card {
+  min-width: 0;
+  background: var(--surface-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+/* Padding variants */
+.card--pad-none { padding: 0; }
+.card--pad-sm { padding: 1.2rem; }
+.card--pad-md { padding: 1.6rem; }
+.card--pad-lg { padding: 2.4rem; }
+
+/* Elevated variant */
+.card--elevated {
+  background: var(--surface-panel-elevated);
+  border-color: var(--color-border-strong);
+}
+
+/* Interactive variant */
+.card--interactive {
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+.card--interactive:hover {
+  background: var(--surface-panel-elevated);
+  border-color: var(--alpha-border);
+}
+.card--interactive:active {
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card--interactive {
+    transition: none;
+  }
+}

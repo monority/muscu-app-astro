@@ -120,7 +120,7 @@ function beep(): void {
 /**
  * Widget → app token map. The injected stylesheet only ever references
  * --tw-* vars; resolveTwTokens() fills them at mount time from the host
- * document's app tokens (globals.css is in scope both on /timer/pop and in
+ * document's app tokens (global.css is in scope both on /timer/pop and in
  * a Picture-in-Picture window, whose document copies the opener's
  * stylesheets). Reading the computed host tokens — AFTER data-theme has been
  * applied — makes the widget inherit the host theme, so the old
@@ -133,7 +133,7 @@ const RING_RADIUS = 88;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 const WIDGET_CSS = `
-/* Widget inherits the host theme: globals.css is imported by pop.astro and
+/* Widget inherits the host theme: global.css is imported by pop.astro and
    copied into Picture-in-Picture windows alongside the opener stylesheets,
    so every --color-* / --alpha-* / --shadow-* / --radius-* / --font-*
    resolves to the active [data-theme] palette. No hardcoded colors live
