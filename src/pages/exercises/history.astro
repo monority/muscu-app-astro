@@ -3,8 +3,8 @@
 import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import Badge from '../../components/ui/Badge/Badge.astro';
-import Card from '../../components/ui/Card/Card.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Card from '../../components/ui/Card.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 import BackLink from '../../components/ui/BackLink.astro';
 import { icons } from '../../lib/icons';
@@ -18,7 +18,7 @@ const L = t();
   />
 
   <div
-    class="pb-24 flex flex-col gap-5"
+    class="hist__main"
     x-data="exerciseHistoryApp()"
     x-init="init()"
     x-cloak
@@ -38,17 +38,17 @@ const L = t();
 
     {/* ── Loaded exercise ── */}
     <template x-if="!notFound && exercise">
-      <div class="flex flex-col gap-5">
+      <div class="hist__body">
         {/* ── Header ── */}
-        <header class="flex flex-col gap-2">
-          <div class="flex items-start justify-between gap-3 flex-wrap">
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="hist__title-icon inline-flex items-center justify-center w-[4.4rem] h-[4.4rem] shrink-0 rounded-md text-accent" aria-hidden="true">
+        <header class="hist__header">
+          <div class="hist__header-row">
+            <div class="hist__header-left">
+              <div class="hist__title-icon" aria-hidden="true">
                 <Fragment set:html={icons.dumbbellBox(24, 24)} />
               </div>
-              <h1 class="hist__title font-display font-bold text-text leading-[1.1] tracking-[-0.01em] break-words" x-text="trExercise(exercise.name)"></h1>
+              <h1 class="hist__title" x-text="trExercise(exercise.name)"></h1>
             </div>
-            <div class="inline-flex flex-wrap gap-[0.6rem] items-center">
+            <div class="hist__badges">
               <Badge
                 variant="category"
                 size="sm"
@@ -62,20 +62,20 @@ const L = t();
 
         {/* ── Chart ── */}
         <Card padding="lg">
-          <div class="flex flex-col">
-            <header class="flex items-baseline justify-between gap-3 flex-wrap mb-[1.4rem]">
-              <h2 class="font-display text-[1.4rem] font-bold uppercase tracking-[0.14em] text-text m-0">{L.historique.historyTitle}</h2>
-              <span class="text-[1.2rem] text-muted font-medium" x-text="chartMeta"></span>
+          <div class="hist__chart-wrap">
+            <header class="hist__section-header">
+              <h2 class="hist__section-title">{L.historique.historyTitle}</h2>
+              <span class="hist__meta" x-text="chartMeta"></span>
             </header>
 
             <template x-if="chartData.length === 0">
-              <p class="text-muted text-[1.3rem] leading-normal text-center py-6 px-3">
+              <p class="hist__empty-msg">
                 {L.historique.historyEmpty}
               </p>
             </template>
 
             <template x-if="chartData.length > 0">
-              <div class="flex flex-col gap-2">
+              <div class="hist__chart-body">
                 <svg
                   class="hist__chart"
                   viewBox="0 0 800 300"
@@ -126,10 +126,10 @@ const L = t();
                 </svg>
 
                 {/* X axis date labels (subset to avoid overlap) */}
-                <div class="flex justify-between py-0 px-3 text-muted text-[1.1rem] font-semibold uppercase tracking-[0.06em]" x-show="chartData.length > 0">
+                <div class="hist__x-labels" x-show="chartData.length > 0">
                   <template x-for="(d, i) in chartData" :key="'l' + i">
                     <span
-                      class="tabular-nums"
+                      class="hist__x-tick"
                       :class="{ 'hist__chart-tick--start': i === 0, 'hist__chart-tick--end': i === chartData.length - 1 }"
                       x-show="i === 0 || i === chartData.length - 1 || i === Math.floor(chartData.length / 2)"
                       x-text="formatDateShort(d.date)"
@@ -143,66 +143,66 @@ const L = t();
 
         {/* ── Stats grid ── */}
         <template x-if="history.length > 0">
-          <div class="hist__stats grid grid-cols-1 gap-0 border-t border-b border-border">
+          <div class="hist__stats">
             {/* Best 1RM */}
-            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
-              <div class="inline-flex items-center gap-[0.6rem]">
-                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.trendingUp(16, 16)} /></span>
-                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.best1RM}</span>
+            <div class="hist__stat">
+              <div class="hist__stat-label">
+                <span class="hist__stat-icon"><Fragment set:html={icons.trendingUp(16, 16)} /></span>
+                <span class="hist__stat-name">{L.historique.best1RM}</span>
               </div>
-              <div class="flex items-baseline gap-1">
+              <div class="hist__stat-row">
                 <span class="hist__stat-value" x-text="formatNumber(best1RM)"></span>
-                <span class="font-body text-[1.2rem] text-muted font-semibold">kg</span>
+                <span class="hist__stat-unit">kg</span>
               </div>
-              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="best1RMDate ? formatDate(best1RMDate) : '—'"></span>
+              <span class="hist__stat-date" x-text="best1RMDate ? formatDate(best1RMDate) : '—'"></span>
             </div>
 
             {/* Best weight */}
-            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
-              <div class="inline-flex items-center gap-[0.6rem]">
-                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.volumeBox(16, 16)} /></span>
-                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.bestWeight}</span>
+            <div class="hist__stat">
+              <div class="hist__stat-label">
+                <span class="hist__stat-icon"><Fragment set:html={icons.volumeBox(16, 16)} /></span>
+                <span class="hist__stat-name">{L.historique.bestWeight}</span>
               </div>
-              <div class="flex items-baseline gap-1">
+              <div class="hist__stat-row">
                 <span class="hist__stat-value" x-text="formatNumber(bestWeight)"></span>
-                <span class="font-body text-[1.2rem] text-muted font-semibold">kg</span>
+                <span class="hist__stat-unit">kg</span>
               </div>
-              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="bestWeightDate ? formatDate(bestWeightDate) : '—'"></span>
+              <span class="hist__stat-date" x-text="bestWeightDate ? formatDate(bestWeightDate) : '—'"></span>
             </div>
 
             {/* Max reps */}
-            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
-              <div class="inline-flex items-center gap-[0.6rem]">
-                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.arrowUpDown(16, 16)} /></span>
-                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.maxReps}</span>
+            <div class="hist__stat">
+              <div class="hist__stat-label">
+                <span class="hist__stat-icon"><Fragment set:html={icons.arrowUpDown(16, 16)} /></span>
+                <span class="hist__stat-name">{L.historique.maxReps}</span>
               </div>
-              <div class="flex items-baseline gap-1">
+              <div class="hist__stat-row">
                 <span class="hist__stat-value" x-text="maxReps"></span>
-                <span class="font-body text-[1.2rem] text-muted font-semibold">reps</span>
+                <span class="hist__stat-unit">reps</span>
               </div>
-              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="maxRepsDate ? formatDate(maxRepsDate) : '—'"></span>
+              <span class="hist__stat-date" x-text="maxRepsDate ? formatDate(maxRepsDate) : '—'"></span>
             </div>
 
             {/* Total volume */}
-            <div class="hist__stat flex flex-col gap-[0.6rem] min-w-0 py-[1.8rem] px-5 bg-transparent border-0 border-b border-border rounded-none">
-              <div class="inline-flex items-center gap-[0.6rem]">
-                <span class="w-[1.5rem] h-[1.5rem] text-accent shrink-0"><Fragment set:html={icons.trendingUpLine(16, 16)} /></span>
-                <span class="text-[1.1rem] text-muted uppercase tracking-[0.12em] font-bold">{L.historique.totalVolume}</span>
+            <div class="hist__stat">
+              <div class="hist__stat-label">
+                <span class="hist__stat-icon"><Fragment set:html={icons.trendingUpLine(16, 16)} /></span>
+                <span class="hist__stat-name">{L.historique.totalVolume}</span>
               </div>
-              <div class="flex items-baseline gap-1">
+              <div class="hist__stat-row">
                 <span class="hist__stat-value" x-text="formatNumber(totalVolume)"></span>
-                <span class="font-body text-[1.2rem] text-muted font-semibold">kg</span>
+                <span class="hist__stat-unit">kg</span>
               </div>
-              <span class="text-[1.1rem] text-muted capitalize mt-[0.2rem]" x-text="sessionCountLabel"></span>
+              <span class="hist__stat-date" x-text="sessionCountLabel"></span>
             </div>
           </div>
         </template>
 
         {/* ── History table ── */}
-        <section class="flex flex-col">
-          <header class="flex items-baseline justify-between gap-3 flex-wrap mb-[1.4rem]">
-            <h2 class="font-display text-[1.4rem] font-bold uppercase tracking-[0.14em] text-text m-0">{L.historique.tableTitle}</h2>
-            <span class="text-[1.2rem] text-muted font-medium" x-text="tableMeta"></span>
+        <section class="hist__table-section">
+          <header class="hist__table-header">
+            <h2 class="hist__table-title">{L.historique.tableTitle}</h2>
+            <span class="hist__table-meta" x-text="tableMeta"></span>
           </header>
 
           <template x-if="history.length === 0">
@@ -218,8 +218,8 @@ const L = t();
           </template>
 
           <template x-if="history.length > 0">
-            <div class="overflow-x-auto rounded-md border border-border">
-              <table class="hist__table w-full border-collapse text-[1.3rem]">
+            <div class="hist__table-wrap">
+              <table class="hist__table">
                 <thead>
                   <tr>
                     <th scope="col">{L.historique.colDate}</th>
@@ -234,9 +234,9 @@ const L = t();
                   <template x-for="(row, idx) in historyDesc" :key="idx">
                     <tr class="hist__tr">
                       <td data-label={L.historique.colDate}>
-                        <div class="hist__date flex flex-col gap-[0.2rem]">
+                        <div class="hist__date">
                           <span class="hist__date-main font-semibold text-text" x-text="formatDate(row.date)"></span>
-                          <span class="text-[1.1rem] text-muted capitalize" x-text="row.sessionName"></span>
+                          <span class="hist__session-name" x-text="row.sessionName"></span>
                         </div>
                       </td>
                       <td class="hist__num font-display tabular-nums font-semibold text-right" data-label={L.historique.colWeight} x-text="formatNumber(row.weight) + ' kg'"></td>
@@ -601,6 +601,60 @@ const L = t();
     font-size: clamp(2.4rem, 4.5vw, 3.4rem);
   }
 
+  .hist__table-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hist__table-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+  }
+
+  .hist__table-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .hist__table-meta {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
+  .hist__table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+  }
+
+  .hist__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.3rem;
+  }
+
+  .hist__date {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .hist__session-name {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: capitalize;
+  }
+
   .hist__chart {
     width: 100%;
     height: auto;
@@ -788,9 +842,4 @@ const L = t();
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .hist__error-link {
-      transition: none;
-    }
-  }
 </style>

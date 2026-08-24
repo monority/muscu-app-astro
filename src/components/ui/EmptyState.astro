@@ -1,7 +1,7 @@
 ---
-import Icon from './Icon/Icon.astro';
-import Button from './Button/Button.astro';
-import Card from './Card/Card.astro';
+import Icon from './Icon.astro';
+import Button from './Button.astro';
+import Card from './Card.astro';
 import type { IconName } from '../../lib/icons';
 
 interface Props {
@@ -42,7 +42,7 @@ const isError = variant === 'error';
       <h2 class="empty-state__title empty-state__title--large">{title}</h2>
       {description && <p class="empty-state__desc">{description}</p>}
       {hasAction && (
-        <Button href={actionHref} variant="primary" class="mt-1">
+        <Button href={actionHref} variant="primary" class="empty-state__action">
           {actionLabel}
         </Button>
       )}
@@ -67,7 +67,7 @@ const isError = variant === 'error';
       </p>
     )}
     {hasAction && (
-      <Button href={actionHref} variant="primary" class="mt-4">
+      <Button href={actionHref} variant="primary" class="empty-state__action--lg">
         {actionLabel}
       </Button>
     )}
@@ -133,4 +133,7 @@ const isError = variant === 'error';
     font-size: 1.3rem;
     line-height: 1.5;
   }
+
+  .empty-state__action { margin-top: 0.4rem; }
+  .empty-state__action--lg { margin-top: 1.6rem; }
 </style>

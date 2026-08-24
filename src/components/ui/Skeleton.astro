@@ -15,14 +15,7 @@ const {
   class: className = '',
 } = Astro.props;
 
-const variantClasses: Record<NonNullable<Props['variant']>, string> = {
-  text: 'h-4 rounded-[var(--radius-sm)]',
-  circle: 'rounded-full aspect-square',
-  rect: 'rounded-[var(--radius-md)]',
-};
-
-const baseClasses =
-  'skeleton block bg-[var(--color-surface-2)] animate-pulse';
+const isMultiline = variant === 'text' && lines > 1;
 
 const buildStyle = (w?: string, h?: string): string => {
   const parts: string[] = [];
@@ -30,8 +23,6 @@ const buildStyle = (w?: string, h?: string): string => {
   if (h) parts.push(`height:${h}`);
   return parts.join(';');
 };
-
-const isMultiline = variant === 'text' && lines > 1;
 
 const getLineWidth = (index: number, total: number): string => {
   if (index === total - 1) return '60%';
@@ -41,29 +32,31 @@ const getLineWidth = (index: number, total: number): string => {
 ---
 
 {isMultiline ? (
-  <div class:list={['flex flex-col gap-1.5', className]} aria-hidden="true">
+  <div class:list={['skeleton-group', className]} aria-hidden="true">
     {Array.from({ length: lines }, (_, i) => (
       <span
-        class:list={[baseClasses, variantClasses[variant]]}
+        class:list={['skeleton', `skeleton--${variant}`]}
         style={buildStyle(getLineWidth(i, lines), height)}
       />
     ))}
   </div>
 ) : (
   <span
-    class:list={[baseClasses, variantClasses[variant], className]}
+    class:list={['skeleton', `skeleton--${variant}`, className]}
     style={buildStyle(width, height)}
     aria-hidden="true"
   />
 )}
 
 <style>
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+  .skeleton-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
   }
 
   .skeleton {
+    display: block;
     background: linear-gradient(
       90deg,
       var(--color-surface-2) 0%,
@@ -74,9 +67,21 @@ const getLineWidth = (index: number, total: number): string => {
     animation: shimmer 1.5s ease-in-out infinite;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .skeleton {
-      animation: none;
-    }
+  .skeleton--text {
+    height: 1rem;
+    border-radius: var(--radius-sm);
   }
+  .skeleton--circle {
+    border-radius: 50%;
+    aspect-ratio: 1;
+  }
+  .skeleton--rect {
+    border-radius: var(--radius-md);
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
 </style>

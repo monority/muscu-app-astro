@@ -1,12 +1,4 @@
 ---
-/**
- * Checkbox — design-system primitive.
- *
- * Hidden native <input type="checkbox"> + custom-styled visual box.
- * State is driven by Tailwind peer/group variants, so the same element
- * handles hover, focus-visible, checked, and disabled transitions.
- * All colors come from the @theme tokens in src/styles/tokens.css.
- */
 interface Props {
   label?: string;
   checked?: boolean;
@@ -25,52 +17,28 @@ const {
   class: className = "",
 } = Astro.props;
 
-const labelClasses = [
-  "group inline-flex items-center gap-3",
-  "min-h-[44px] min-w-[44px] py-3 pl-1 pr-3",
-  "cursor-pointer select-none",
-  "text-[1.3rem] text-[var(--color-text)]",
-  disabled ? "opacity-50 cursor-not-allowed" : "",
+const classes = [
+  "checkbox",
+  disabled && "is-disabled",
   className,
 ]
   .filter(Boolean)
   .join(" ");
-
-const boxClasses = [
-  "shrink-0",
-  "w-[22px] h-[22px]",
-  "inline-flex items-center justify-center",
-  "border border-[var(--color-border)]",
-  "rounded-[5px]",
-  "bg-transparent",
-  "transition-[background-color,border-color,box-shadow] duration-200",
-  "group-hover:border-[var(--color-muted)]",
-  "peer-focus-visible:shadow-[var(--focus-ring)]",
-  "peer-checked:bg-[var(--color-accent)]",
-  "peer-checked:border-[var(--color-accent)]",
-  "peer-checked:group-hover:border-[var(--color-accent)]",
-].join(" ");
-
-const checkClasses = [
-  "w-3.5 h-3.5 text-white",
-  "opacity-0 peer-checked:opacity-100",
-  "transition-opacity duration-200",
-].join(" ");
 ---
 
-<label for={id} class={labelClasses}>
+<label for={id} class:list={["checkbox__label", classes]}>
   <input
     type="checkbox"
     id={id}
     name={name}
     checked={checked}
     disabled={disabled}
-    class="peer sr-only"
+    class="checkbox__input"
   />
 
-  <span aria-hidden="true" class={boxClasses}>
+  <span aria-hidden="true" class="checkbox__box">
     <svg
-      class={checkClasses}
+      class="checkbox__check"
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -85,5 +53,85 @@ const checkClasses = [
     </svg>
   </span>
 
-  {label && <span class="leading-none">{label}</span>}
+  {label && <span class="checkbox__text">{label}</span>}
 </label>
+
+<style>
+  .checkbox__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-height: 4.4rem;
+    min-width: 4.4rem;
+    padding: 0.8rem 0.8rem 0.8rem 0.4rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.3rem;
+    color: var(--color-text);
+  }
+
+  .checkbox__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .checkbox__box {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    background: transparent;
+    transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .checkbox__check {
+    width: 1.4rem;
+    height: 1.4rem;
+    color: white;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  .checkbox__text {
+    line-height: 1;
+  }
+
+  /* Hover */
+  .checkbox__label:hover .checkbox__box {
+    border-color: var(--color-muted);
+  }
+
+  /* Focus-visible */
+  .checkbox__input:focus-visible ~ .checkbox__box {
+    box-shadow: var(--focus-ring);
+  }
+
+  /* Checked */
+  .checkbox__input:checked ~ .checkbox__box {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .checkbox__input:checked ~ .checkbox__box .checkbox__check {
+    opacity: 1;
+  }
+  .checkbox__label:hover .checkbox__input:checked ~ .checkbox__box {
+    border-color: var(--color-accent);
+  }
+
+  /* Disabled */
+  .checkbox__label.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

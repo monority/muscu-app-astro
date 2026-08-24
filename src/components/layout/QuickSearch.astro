@@ -23,7 +23,7 @@
  * backdrop closes too (see the click handler in the script below).
  */
 import { t } from "../../i18n";
-import Icon from "../ui/Icon/Icon.astro";
+import Icon from "../ui/Icon.astro";
 
 const L = t();
 ---
@@ -168,12 +168,6 @@ const L = t();
 
   .quick-search[open] {
     animation: quick-search-in 180ms ease-out;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .quick-search[open] {
-      animation: none;
-    }
   }
 
   .quick-search__panel {

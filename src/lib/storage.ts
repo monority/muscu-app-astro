@@ -66,6 +66,7 @@ export interface SessionExercise {
 
 export interface Session {
   id: string;
+  sourceSessionId?: string;
   name: string;
   date: string; // ISO date
   duration?: number; // seconds

@@ -1,0 +1,102 @@
+---
+import './Badge.css';
+
+type Variant =
+  | 'default'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'info'
+  | 'accent'
+  | 'category'
+  | 'superset';
+
+type Tone = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'core' | 'other';
+type Group = 'g1' | 'g2' | 'g3' | 'g4' | 'g5' | 'none';
+
+interface Props {
+  variant?: Variant;
+  size?: 'sm' | 'md';
+  tone?: Tone;
+  group?: Group;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  tone,
+  group = 'none',
+  class: className = '',
+  ...attrs
+} = Astro.props;
+---
+
+<span
+  class:list={[
+    'badge',
+    `badge--${variant}`,
+    `badge--${size}`,
+    variant === 'category' && tone && `badge--cat-${tone}`,
+    variant === 'superset' && group !== 'none' && `badge--group-${group}`,
+    className,
+  ]}
+  {...attrs}
+>
+  <slot />
+</span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: var(--radius-pill);
+  }
+
+  /* Sizes */
+  .badge--sm {
+    padding: 0 0.6rem;
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge--md {
+    padding: 0.2rem 0.8rem;
+    font-size: 1.2rem;
+  }
+
+  /* Variants */
+  .badge--default {
+    background-color: hsl(0 0% 100% / 0.05);
+    color: var(--color-muted);
+  }
+  .badge--success {
+    background-color: hsl(142 71% 45% / 0.10);
+    color: var(--color-success);
+  }
+  .badge--warning {
+    background-color: hsl(48 96% 50% / 0.10);
+    color: var(--color-warning);
+  }
+  .badge--danger {
+    background-color: hsl(0 84% 60% / 0.10);
+    color: var(--color-destructive);
+  }
+  .badge--info {
+    background-color: hsl(217 91% 60% / 0.10);
+    color: var(--color-info);
+  }
+  .badge--accent {
+    background-color: hsl(25 95% 53% / 0.10);
+    color: var(--color-accent);
+  }
+
+  /* Category + superset variants (from Badge.css) */
+  .badge--category,
+  .badge--superset {
+    /* handled by Badge.css */
+  }
+</style>

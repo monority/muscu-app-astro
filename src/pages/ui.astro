@@ -2,13 +2,13 @@
 
 import { t, localizedPath } from '../i18n';
 import AppLayout from '../layouts/AppLayout.astro';
-import Button from '../components/ui/Button/Button.astro';
-import Card from '../components/ui/Card/Card.astro';
+import Button from '../components/ui/Button.astro';
+import Card from '../components/ui/Card.astro';
 import CardHeader from '../components/ui/CardHeader.astro';
 import CardTitle from '../components/ui/CardTitle.astro';
 import CardContent from '../components/ui/CardContent.astro';
 import CardFooter from '../components/ui/CardFooter.astro';
-import Badge from '../components/ui/Badge/Badge.astro';
+import Badge from '../components/ui/Badge.astro';
 import Input from '../components/ui/Input.astro';
 import Select from '../components/ui/Select.astro';
 import Checkbox from '../components/ui/Checkbox.astro';
@@ -26,7 +26,7 @@ import TableCell from '../components/ui/TableCell.astro';
 import Pagination from '../components/ui/Pagination.astro';
 import Tooltip from '../components/ui/Tooltip.astro';
 import Skeleton from '../components/ui/Skeleton.astro';
-import Avatar from '../components/ui/Avatar/Avatar.astro';
+import Avatar from '../components/ui/Avatar.astro';
 import Progress from '../components/ui/Progress.astro';
 import EmptyState from '../components/ui/EmptyState.astro';
 import Segmented from '../components/ui/Segmented.astro';
@@ -310,7 +310,7 @@ const workoutCards = [
 
       <Card>
         <CardHeader>
-          <div class="flex flex-row items-center justify-between gap-[var(--spacing-3)]">
+          <div class="ui__card-header">
             <CardTitle>{L.ui.titlePlusBadge}</CardTitle>
             <Badge variant="accent" size="sm">{L.ui.new}</Badge>
           </div>
@@ -327,7 +327,7 @@ const workoutCards = [
     <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; margin: 0 0 1.2rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em;">{L.ui.fullCard}</h3>
     <Card>
       <CardHeader>
-        <div class="flex flex-row items-center justify-between gap-[var(--spacing-3)]">
+        <div class="ui__card-header">
           <CardTitle>{L.ui.compositeCard}</CardTitle>
           <Badge variant="success" size="sm">{L.sessions.completed}</Badge>
         </div>
@@ -798,6 +798,14 @@ const workoutCards = [
 </AppLayout>
 
 <style>
+  .ui__card-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-3);
+  }
+
   /* Micro-pattern samples — copy-paste from production pages until
      centralized as primitives (REFONTE residual). Tokens only. */
   .demo-dot {

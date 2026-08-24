@@ -111,7 +111,9 @@ const groupsWithActive = groups.map((g) => ({
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="stylesheet" href="/input-stepper.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
     {/* theme-color cannot read CSS vars at rest — the attribute below is a
         static fallback; the theme bootstrap script overwrites it with the
         real --color-accent value (pop.astro precedent). */}
@@ -150,29 +152,7 @@ const groupsWithActive = groups.map((g) => ({
         chosen the light theme. The Alpine-side toggle lives in
         AppShell.astro; this block is the only thing that needs to
         be inline to avoid a flash. */}
-    <script is:inline>
-      (function () {
-        try {
-          var theme = localStorage.getItem('muscu-theme') || 'dark';
-          if (theme !== 'light' && theme !== 'dark') theme = 'dark';
-          document.documentElement.setAttribute('data-theme', theme);
-          /* Sync the browser chrome color with the real --color-accent
-             token (bundled stylesheet carries it on :root). Falls back
-             to the static meta content while the bundle is loading. */
-          var accent = getComputedStyle(document.documentElement)
-            .getPropertyValue('--color-accent').trim();
-          var meta = document.querySelector('meta[name="theme-color"]');
-          if (meta && accent) meta.setAttribute('content', accent);
-        } catch (e) {
-          /* localStorage unavailable (SSR / private mode) — keep
-             the default dark theme via the @theme block. */
-        }
-      })();
-      /* Pin the root background synchronously so an early paint never
-         flashes white while the bundled stylesheet is still loading.
-         `var(--color-bg)` resolves once the bundle applies; global.css
-         re-asserts the pre-bundle fallback for the dark default. */
-    </script>
+    <script is:inline src="/theme-bootstrap.js" data-meta-var="--color-accent"></script>
     <style is:inline>
       html { background-color: var(--color-bg); }
     </style>

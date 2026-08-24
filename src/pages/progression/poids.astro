@@ -3,13 +3,13 @@
 import { t } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import Icon from '../../components/ui/Icon/Icon.astro';
-import Card from '../../components/ui/Card/Card.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Card from '../../components/ui/Card.astro';
 import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
-import Button from '../../components/ui/Button/Button.astro';
+import Button from '../../components/ui/Button.astro';
 import Input from '../../components/ui/Input.astro';
 const L = t();
 ---
@@ -21,19 +21,18 @@ const L = t();
   />
 
   <div
-    class="poids pb-24 flex flex-col gap-5"
+    class="poids"
     x-data="poidsApp()"
     x-init="init()"
     x-cloak
   >
-    {/* ═══ Entry form ═══ */}
     <Card>
       <CardHeader>
         <CardTitle>{L.poids.newMeasure}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form class="flex flex-col gap-[1.4rem]" @submit.prevent="addEntry()">
-          <div class="grid grid-cols-2 gap-x-4 gap-y-0 sm:grid-cols-3 lg:grid-cols-6">
+        <form class="poids__form" @submit.prevent="addEntry()">
+          <div class="poids__grid">
             <Input
               label={L.poids.date}
               id="poids-date"
@@ -104,7 +103,7 @@ const L = t();
           <p class="poids__error" x-show="formError" x-text="formError" x-cloak x-transition.opacity.duration.180ms role="alert"></p>
           <p class="poids__success" x-show="success" x-text="success" x-cloak x-transition.opacity.duration.180ms role="status" aria-live="polite"></p>
 
-          <div class="poids__actions flex justify-end items-center gap-2 flex-wrap">
+          <div class="poids__actions">
             <Button
               type="button"
               variant="secondary"
@@ -121,79 +120,78 @@ const L = t();
       </CardContent>
     </Card>
 
-    {/* ═══ Stats grid ═══ */}
     <template x-if="records.length > 0">
       <div class="poids__stats">
         <div class="poids__stat poids__stat--hero">
-          <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.latest}</span>
-          <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.weight)"></span>
-            <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.common.kg}</span>
+          <span class="poids__stat-label">{L.poids.latest}</span>
+          <div class="poids__stat-row">
+            <span class="poids__stat-value" x-text="formatNumber(latest?.weight)"></span>
+            <span class="poids__stat-unit">{L.common.kg}</span>
           </div>
           <span
-            class="poids__stat-delta text-[1.1rem] text-[var(--color-muted)] font-medium"
+            class="poids__stat-delta"
             :class="weightDelta < 0 ? 'is-down' : weightDelta > 0 ? 'is-up' : ''"
             x-text="formatDelta(weightDelta, 'kg')"
           ></span>
           <span
-            class="text-[1.1rem] text-[var(--color-accent)] font-medium"
+            class="poids__stat-info"
             x-show="latest && sessionsSinceDate(latest.date) > 0"
             x-text="formatSessionsSince(latest?.date)"
           ></span>
           <span
-            class="text-[var(--color-accent)]"
+            class="poids__stat-volume"
             x-show="latest && volumeSinceDate(latest.date) > 0"
             x-text="formatVolume(volumeSinceDate(latest?.date))"
           ></span>
         </div>
 
         <div class="poids__stat" x-show="latest?.arm != null">
-          <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.armLabel}</span>
-          <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.arm)"></span>
-            <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
+          <span class="poids__stat-label">{L.poids.armLabel}</span>
+          <div class="poids__stat-row">
+            <span class="poids__stat-value" x-text="formatNumber(latest?.arm)"></span>
+            <span class="poids__stat-unit">{L.poids.unitCm}</span>
           </div>
           <span
-            class="poids__stat-delta text-[1.1rem] text-[var(--color-muted)] font-medium"
+            class="poids__stat-delta"
             :class="armDelta < 0 ? 'is-down' : armDelta > 0 ? 'is-up' : ''"
             x-text="formatDelta(armDelta, 'cm')"
           ></span>
         </div>
 
         <div class="poids__stat" x-show="latest?.chest != null">
-          <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.chestLabel}</span>
-          <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.chest)"></span>
-            <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
+          <span class="poids__stat-label">{L.poids.chestLabel}</span>
+          <div class="poids__stat-row">
+            <span class="poids__stat-value" x-text="formatNumber(latest?.chest)"></span>
+            <span class="poids__stat-unit">{L.poids.unitCm}</span>
           </div>
           <span
-            class="poids__stat-delta text-[1.1rem] text-[var(--color-muted)] font-medium"
+            class="poids__stat-delta"
             :class="chestDelta < 0 ? 'is-down' : chestDelta > 0 ? 'is-up' : ''"
             x-text="formatDelta(chestDelta, 'cm')"
           ></span>
         </div>
 
         <div class="poids__stat" x-show="latest?.waist != null">
-          <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.waistLabel}</span>
-          <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.waist)"></span>
-            <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
+          <span class="poids__stat-label">{L.poids.waistLabel}</span>
+          <div class="poids__stat-row">
+            <span class="poids__stat-value" x-text="formatNumber(latest?.waist)"></span>
+            <span class="poids__stat-unit">{L.poids.unitCm}</span>
           </div>
           <span
-            class="poids__stat-delta text-[1.1rem] text-[var(--color-muted)] font-medium"
+            class="poids__stat-delta"
             :class="waistDelta < 0 ? 'is-down' : waistDelta > 0 ? 'is-up' : ''"
             x-text="formatDelta(waistDelta, 'cm')"
           ></span>
         </div>
 
         <div class="poids__stat" x-show="latest?.hips != null">
-          <span class="text-[1rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.poids.hipsLabel}</span>
-          <div class="flex items-baseline gap-1">
-            <span class="poids__stat-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatNumber(latest?.hips)"></span>
-            <span class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.poids.unitCm}</span>
+          <span class="poids__stat-label">{L.poids.hipsLabel}</span>
+          <div class="poids__stat-row">
+            <span class="poids__stat-value" x-text="formatNumber(latest?.hips)"></span>
+            <span class="poids__stat-unit">{L.poids.unitCm}</span>
           </div>
           <span
-            class="poids__stat-delta text-[1.1rem] text-[var(--color-muted)] font-medium"
+            class="poids__stat-delta"
             :class="hipsDelta < 0 ? 'is-down' : hipsDelta > 0 ? 'is-up' : ''"
             x-text="formatDelta(hipsDelta, 'cm')"
           ></span>
@@ -201,12 +199,11 @@ const L = t();
       </div>
     </template>
 
-    {/* ═══ Weight chart (SVG) ═══ */}
     <Card>
       <CardHeader>
-        <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div class="poids__chart-header">
           <CardTitle>{L.poids.chartTitle}</CardTitle>
-          <span class="text-[1.1rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold" x-show="records.length > 0">
+          <span class="poids__record-count" x-show="records.length > 0">
             <span x-text="records.length"></span>
             {L.poids.entrySingular}<span x-show="records.length > 1">s</span>
           </span>
@@ -221,19 +218,18 @@ const L = t();
           />
         </template>
         <template x-if="records.length > 0">
-          <div class="w-full overflow-x-auto" x-html="renderChart()"></div>
+          <div class="poids__chart-wrap" x-html="renderChart()"></div>
         </template>
       </CardContent>
     </Card>
 
-    {/* ═══ History table ═══ */}
     <template x-if="records.length > 0">
       <Card>
         <CardHeader>
           <CardTitle>{L.historique.titleShort}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="overflow-x-auto border border-[var(--color-border)] rounded-[var(--radius-md)]">
+          <div class="poids__table-wrap">
             <table class="poids__table">
               <thead>
                 <tr>
@@ -245,21 +241,21 @@ const L = t();
                   <th scope="col">{L.poids.chestLabel}</th>
                   <th scope="col">{L.poids.waistLabel}</th>
                   <th scope="col">{L.poids.hipsLabel}</th>
-                  <th scope="col" class="!text-right"></th>
+                  <th scope="col" class="poids__table-header-cell--right"></th>
                 </tr>
               </thead>
               <tbody>
                 <template x-for="(r, i) in [...records].reverse()" :key="i">
                   <tr>
                     <td x-text="formatDate(r.date)"></td>
-                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="sessionsSinceDate(r.date)"></td>
-                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="formatVolume(volumeSinceDate(r.date))"></td>
-                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="formatNumber(r.weight) + ' kg'"></td>
-                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.arm != null ? formatNumber(r.arm) + ' cm' : '—'"></td>
-                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.chest != null ? formatNumber(r.chest) + ' cm' : '—'"></td>
-                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.waist != null ? formatNumber(r.waist) + ' cm' : '—'"></td>
-                    <td class="text-display tabular-nums font-semibold text-[var(--color-text)]" x-text="r.hips != null ? formatNumber(r.hips) + ' cm' : '—'"></td>
-                    <td class="text-right">
+                    <td class="poids__table-cell" x-text="sessionsSinceDate(r.date)"></td>
+                    <td class="poids__table-cell" x-text="formatVolume(volumeSinceDate(r.date))"></td>
+                    <td class="poids__table-cell" x-text="formatNumber(r.weight) + ' kg'"></td>
+                    <td class="poids__table-cell" x-text="r.arm != null ? formatNumber(r.arm) + ' cm' : '—'"></td>
+                    <td class="poids__table-cell" x-text="r.chest != null ? formatNumber(r.chest) + ' cm' : '—'"></td>
+                    <td class="poids__table-cell" x-text="r.waist != null ? formatNumber(r.waist) + ' cm' : '—'"></td>
+                    <td class="poids__table-cell" x-text="r.hips != null ? formatNumber(r.hips) + ' cm' : '—'"></td>
+                    <td class="poids__table-cell--right">
                       <button
                         type="button"
                         class="poids__icon-btn"
@@ -343,7 +339,6 @@ const L = t();
     const Alpine = (window as any).Alpine;
 
     Alpine.data('poidsApp', () => ({
-      // ── State ──
       records: [] as BodyRecord[],
       sessions: [] as Session[],
       form: {
@@ -357,18 +352,15 @@ const L = t();
       formError: '',
       success: '',
 
-      // ── Init ──
       init() {
         this.refresh();
       },
 
-      // ── Data ──
       refresh() {
         this.records = getBodyRecords();
         this.sessions = getSessions();
       },
 
-      // ── Derived ──
       sessionsSinceDate(date: string): number {
         const index = this.records.findIndex((record) => record.date === date);
         const nextDate = index >= 0 ? this.records[index + 1]?.date : undefined;
@@ -423,7 +415,6 @@ const L = t();
         return this.latest.hips - this.previous.hips;
       },
 
-      // ── Actions ──
       resetForm() {
         this.form = {
           date: todayISO(),
@@ -494,7 +485,6 @@ const L = t();
         this.refresh();
       },
 
-      // ── Display helpers ──
       formatNumber(n: number | null | undefined): string {
         return fmtNum(n);
       },
@@ -508,12 +498,6 @@ const L = t();
         return fmtDelta(delta, unit);
       },
 
-      /**
-       * Renders an SVG line chart of the weight history. The chart is
-       * rebuilt on every call so it always reflects the latest data.
-       * Coordinates use a 0..1000 × 0..260 viewBox so it scales cleanly
-       * to any container width via preserveAspectRatio.
-       */
       renderChart(): string {
         if (this.records.length === 0) return '';
         const W = 1000;
@@ -525,8 +509,6 @@ const L = t();
         const plotW = W - PAD_L - PAD_R;
         const plotH = H - PAD_T - PAD_B;
 
-        // Chart colors — read from the design tokens so the SVG stays in
-        // sync with the current theme (dark/light) without hardcoded hexes.
         const accent = cssVar('--color-accent');
         const bg = cssVar('--color-bg');
         const muted = cssVar('--color-muted');
@@ -536,7 +518,6 @@ const L = t();
         const weights = this.records.map((r) => r.weight);
         let minW = Math.min(...weights);
         let maxW = Math.max(...weights);
-        // Add a small padding so the line never touches the chart edges.
         const span = maxW - minW;
         if (span < 1) {
           minW = minW - 0.5;
@@ -555,22 +536,18 @@ const L = t();
           return PAD_T + (1 - (w - minW) / (maxW - minW)) * plotH;
         };
 
-        // Y-axis ticks (4 levels).
         const ticks: number[] = [];
         for (let k = 0; k <= 3; k++) {
           ticks.push(minW + ((maxW - minW) * k) / 3);
         }
 
-        // Build the path.
         const path = this.records
           .map((r, i) => `${i === 0 ? 'M' : 'L'} ${xAt(i).toFixed(1)} ${yAt(r.weight).toFixed(1)}`)
           .join(' ');
 
-        // First/last as accent points.
         const first = this.records[0];
         const last = this.records[this.records.length - 1];
 
-        // X labels: show first, middle, last to avoid clutter.
         const labelIdxs: number[] = [];
         if (this.records.length === 1) {
           labelIdxs.push(0);
@@ -584,17 +561,14 @@ const L = t();
 
         let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="poids__chart" role="img" aria-label="${LABELS.poids.chartTitle}">`;
 
-        // Background
         svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
 
-        // Grid lines + Y labels
         for (const t of ticks) {
           const y = yAt(t);
           svg += `<line x1="${PAD_L}" y1="${y.toFixed(1)}" x2="${W - PAD_R}" y2="${y.toFixed(1)}" stroke="${grid}" stroke-width="1"/>`;
           svg += `<text x="${PAD_L - 8}" y="${(y + 4).toFixed(1)}" font-size="14" fill="${muted}" text-anchor="end" font-family="var(--font-display, sans-serif)">${Math.round(t * 10) / 10}</text>`;
         }
 
-        // Area under the line
         const areaPath =
           `M ${xAt(0).toFixed(1)} ${(H - PAD_B).toFixed(1)} ` +
           this.records
@@ -604,20 +578,16 @@ const L = t();
         svg += `<defs><linearGradient id="poids-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${accent}" stop-opacity="0.35"/><stop offset="100%" stop-color="${accent}" stop-opacity="0"/></linearGradient></defs>`;
         svg += `<path d="${areaPath}" fill="url(#poids-grad)"/>`;
 
-        // Line
         svg += `<path d="${path}" fill="none" stroke="${accent}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
 
-        // First / last accent dots
         svg += `<circle cx="${xAt(0).toFixed(1)}" cy="${yAt(first.weight).toFixed(1)}" r="5" fill="${accent}" stroke="${bg}" stroke-width="2"/>`;
         svg += `<circle cx="${xAt(this.records.length - 1).toFixed(1)}" cy="${yAt(last.weight).toFixed(1)}" r="6" fill="${accent}" stroke="${bg}" stroke-width="2"/>`;
 
-        // X labels
         for (const i of labelIdxs) {
           const r = this.records[i];
           svg += `<text x="${xAt(i).toFixed(1)}" y="${(H - PAD_B + 24).toFixed(1)}" font-size="14" fill="${muted}" text-anchor="middle" font-family="var(--font-body, sans-serif)">${fmtDate(r.date)}</text>`;
         }
 
-        // Min / max labels on the right of first/last dots
         svg += `<text x="${(xAt(0) - 12).toFixed(1)}" y="${(yAt(first.weight) + 4).toFixed(1)}" font-size="14" font-weight="700" fill="${text}" text-anchor="end" font-family="var(--font-display, sans-serif)">${Math.round(first.weight * 10) / 10} kg</text>`;
         svg += `<text x="${(xAt(this.records.length - 1) + 12).toFixed(1)}" y="${(yAt(last.weight) + 4).toFixed(1)}" font-size="14" font-weight="700" fill="${text}" text-anchor="start" font-family="var(--font-display, sans-serif)">${Math.round(last.weight * 10) / 10} kg</text>`;
 
@@ -629,7 +599,38 @@ const L = t();
 </script>
 
 <style is:global>
-  /* ═══ Input ═══ */
+  .poids {
+    padding-bottom: 9.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.0rem;
+  }
+
+  .poids__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .poids__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.6rem;
+    row-gap: 0;
+  }
+
+  @media (min-width: 640px) {
+    .poids__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .poids__grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
   .poids__input {
     width: 100%;
     height: 4.6rem;
@@ -655,7 +656,6 @@ const L = t();
     color-scheme: dark;
   }
 
-  /* ═══ Error / Success ═══ */
   .poids__error {
     background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent);
     border: 1px solid color-mix(in srgb, var(--color-destructive) 30%, transparent);
@@ -678,7 +678,14 @@ const L = t();
     margin: 0;
   }
 
-  /* ═══ Stats grid ═══ */
+  .poids__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
   .poids__stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -733,13 +740,47 @@ const L = t();
     }
   }
 
-  /* Hero value override */
   .poids__stat--hero .poids__stat-value {
     font-size: 3rem;
     color: var(--color-accent);
   }
 
-  /* Delta conditional colors */
+  .poids__stat-label {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+
+  .poids__stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .poids__stat-value {
+    font-family: var(--font-display, sans-serif);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .poids__stat-unit {
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    color: var(--color-muted);
+    font-weight: 600;
+  }
+
+  .poids__stat-delta {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
   .poids__stat-delta.is-up {
     color: var(--color-accent);
   }
@@ -748,7 +789,37 @@ const L = t();
     color: var(--color-success);
   }
 
-  /* ═══ Chart ═══ */
+  .poids__stat-info {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+
+  .poids__stat-volume {
+    color: var(--color-accent);
+  }
+
+  .poids__chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .poids__record-count {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+  }
+
+  .poids__chart-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
   .poids__chart {
     width: 100%;
     height: auto;
@@ -756,7 +827,12 @@ const L = t();
     display: block;
   }
 
-  /* ═══ Table ═══ */
+  .poids__table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
   .poids__table {
     width: 100%;
     border-collapse: collapse;
@@ -777,6 +853,10 @@ const L = t();
     white-space: nowrap;
   }
 
+  .poids__table-header-cell--right {
+    text-align: right;
+  }
+
   .poids__table tbody td {
     padding: 0.9rem 1.4rem;
     border-bottom: 1px solid var(--color-border);
@@ -791,13 +871,20 @@ const L = t();
     background-color: var(--color-surface-2);
   }
 
-  @media (max-width: 640px) {
-    .poids__table {
-      min-width: 72rem;
-    }
+  .poids__table-cell {
+    font-family: var(--font-display, sans-serif);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--color-text);
   }
 
-  /* ═══ Icon button ═══ */
+  .poids__table-cell--right {
+    text-align: right;
+    padding: 0.9rem 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
   .poids__icon-btn {
     display: inline-flex;
     align-items: center;
@@ -825,7 +912,12 @@ const L = t();
     height: 1.6rem;
   }
 
-  /* ═══ Responsive ═══ */
+  @media (max-width: 640px) {
+    .poids__table {
+      min-width: 72rem;
+    }
+  }
+
   @media (max-width: 480px) {
     .poids__actions {
       flex-direction: column-reverse;
@@ -837,16 +929,6 @@ const L = t();
     }
   }
 
-  /* ═══ Reduced motion ═══ */
-  @media (prefers-reduced-motion: reduce) {
-    .poids__input,
-    .poids__icon-btn {
-      transition: none;
-      transform: none;
-    }
-  }
-
-  /* ═══ Nested component overrides ═══ */
   :global(.poids > .surface) { background: transparent; border: 0; border-top: 1px solid var(--color-border); border-radius: 0; }
   :global(.poids > .surface:last-child) { border-bottom: 1px solid var(--color-border); }
   :global(.poids > .surface > .p-4), :global(.poids > .surface > .p-6) { padding-left: 0; padding-right: 0; }

@@ -164,6 +164,3 @@
 
 @keyframes button-spin { to { transform: rotate(360deg); } }
 
-@media (prefers-reduced-motion: reduce) {
-  .button, .btn, .button__spinner { transition: none; animation: none; }
-}

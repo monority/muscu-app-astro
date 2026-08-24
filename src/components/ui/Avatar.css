@@ -36,3 +36,6 @@
 .avatar__fallback--sm { font-size: 1.2rem; }
 .avatar__fallback--md { font-size: 1.4rem; }
 .avatar__fallback--lg { font-size: 1.6rem; }
+
+.is-hidden { display: none; }
+.is-transparent { opacity: 0; }

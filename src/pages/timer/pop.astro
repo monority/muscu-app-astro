@@ -12,27 +12,8 @@ const lang = Astro.currentLocale ?? defaultLocale;
     <title>Timer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    {/* Fonts come from the global.css @import (Inter) — no separate link needed. */}
-    <script is:inline>
-      /* Match the app's theme (dark default) so the popup never flashes white. */
-      (function () {
-        try {
-          var theme = localStorage.getItem('muscu-theme') || 'dark';
-          if (theme !== 'light' && theme !== 'dark') theme = 'dark';
-          document.documentElement.setAttribute('data-theme', theme);
-          // Sync the browser chrome color with the real --color-bg token
-          // (global.css is imported above, so the token is in scope; data-theme
-          // is set first so light/dark resolves). The dark fallback value stays
-          // for a no-token edge. Runs pre-paint, before the native meta content
-          // can show.
-          var bg =
-            getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() ||
-            '#0d0d0d';
-          var meta = document.querySelector('meta[name="theme-color"]');
-          if (meta) meta.content = bg;
-        } catch (e) {}
-      })();
-    </script>
+    {/* Fonts come from the <link> in AppLayout or global.css — no separate link needed. */}
+    <script is:inline src="/theme-bootstrap.js" data-meta-var="--color-bg"></script>
   </head>
   <body>
     <div id="tw-mount" class="w-full min-h-screen"></div>

@@ -14,7 +14,7 @@
  */
 import { t } from "../../i18n";
 import { navId, renderIcon, chevronDown } from "../../lib/nav";
-import Icon from "../ui/Icon/Icon.astro";
+import Icon from "../ui/Icon.astro";
 import type { NavGroup } from "../../lib/types";
 
 interface Props {
@@ -604,19 +604,6 @@ const L = t();
     }
   }
 
-  /* â”€â”€ Reduced motion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-  @media (prefers-reduced-motion: reduce) {
-    .nav-item,
-    .nav-child,
-    .nav-children,
-    .nav-item__chevron,
-    .sidebar__search-link,
-    .sidebar__logout,
-    .sidebar__logout:active {
-      transition: none;
-      transform: none;
-    }
-  }
   /* â”€â”€ Performance rail overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar {
     width: var(--sidebar-width);

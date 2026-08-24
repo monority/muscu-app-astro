@@ -22,7 +22,7 @@ interface Props {
 }
 
 import { t } from "../../i18n";
-import Icon from "../ui/Icon/Icon.astro";
+import Icon from "../ui/Icon.astro";
 
 const L = t();
 
@@ -479,12 +479,6 @@ const { title, class: className = "" } = Astro.props as Props;
     }
   }
 
-  /* â”€â”€ Reduced motion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-  @media (prefers-reduced-motion: reduce) {
-    .topbar__hamburger-bar {
-      transition: none;
-    }
-  }
   /* â”€â”€ Performance command bar overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .topbar {
     background: color-mix(in srgb, var(--color-bg) 94%, transparent);

@@ -13,21 +13,85 @@ interface Props {
 }
 
 const { index, weight, reps, completed, type, class: className = '' } = Astro.props as Props;
-const classes = ['workout-set', completed && 'workout-set--completed', className].filter(Boolean).join(' ');
 const ariaLabel = `${index} · ${weight} ${L.common.kg} × ${reps} ${L.common.reps}${type ? ` · ${type}` : ''}${completed ? ` · ${L.sessions.completed}` : ''}`;
 ---
 
-<div class:list={['set-row-grid min-h-[4.8rem] px-4 border-b-separator text-[var(--color-muted)] max-[480px]:px-[0.4rem]', { 'workout-set--completed': completed }]} role="listitem" aria-label={ariaLabel}>
-  <span class:list={['text-[var(--color-muted)] text-[1.1rem] font-extrabold tracking-[0.06em]', { 'text-[var(--color-text)]': completed }]} aria-hidden="true">{String(index).padStart(2, '0')}</span>
-  <span class:list={['text-[var(--color-text)] text-[1.5rem] font-[750] tabular-nums', { 'text-[var(--color-text)]': completed }]}>{weight}<small class="ml-1 text-[var(--color-muted)] text-[1rem] font-semibold">{L.common.kg}</small></span>
-  <span class="text-[var(--color-accent)] text-[1.3rem] text-center" aria-hidden="true">×</span>
-  <span class:list={['text-[var(--color-text)] text-[1.5rem] font-[750] tabular-nums', { 'text-[var(--color-text)]': completed }]}>{reps}<small class="ml-1 text-[var(--color-muted)] text-[1rem] font-semibold">{L.common.reps}</small></span>
-  {type && <span class:list={['py-1 px-[0.6rem] text-[var(--color-info)] text-[0.95rem] font-extrabold tracking-[0.08em] uppercase max-[480px]:text-[0.85rem]', { 'text-[var(--color-text)]': completed }]}>{type}</span>}
-  <span class:list={['text-[var(--color-muted)] text-[1.3rem] text-center', { 'text-[var(--color-accent)]': completed }]} aria-hidden="true">
+<div
+  class:list={['set-row-grid', 'set-row', { 'set-row--completed': completed }, className]}
+  role="listitem"
+  aria-label={ariaLabel}
+>
+  <span class:list={['set-row__index', { 'set-row__index--completed': completed }]} aria-hidden="true">{String(index).padStart(2, '0')}</span>
+  <span class:list={['set-row__weight', { 'set-row__weight--completed': completed }]}>
+    {weight}<small class="set-row__unit">{L.common.kg}</small>
+  </span>
+  <span class="set-row__x" aria-hidden="true">×</span>
+  <span class:list={['set-row__reps', { 'set-row__reps--completed': completed }]}>
+    {reps}<small class="set-row__unit">{L.common.reps}</small>
+  </span>
+  {type && <span class:list={['set-row__type', { 'set-row__type--completed': completed }]}>{type}</span>}
+  <span class:list={['set-row__check', { 'set-row__check--completed': completed }]} aria-hidden="true">
     {completed ? '✓' : '—'}
   </span>
 </div>
 
 <style>
-  .workout-set:last-child { border-bottom: 0; }
+  .set-row {
+    min-height: 4.8rem;
+    padding: 0 1.6rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-muted);
+  }
+
+  .set-row:last-child { border-bottom: 0; }
+
+  .set-row__index {
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+  .set-row__index--completed { color: var(--color-text); }
+
+  .set-row__weight,
+  .set-row__reps {
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .set-row__x {
+    color: var(--color-accent);
+    font-size: 1.3rem;
+    text-align: center;
+  }
+
+  .set-row__unit {
+    margin-left: 0.4rem;
+    color: var(--color-muted);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .set-row__type {
+    padding: 0.4rem 0.6rem;
+    color: var(--color-info);
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .set-row__check {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    text-align: center;
+  }
+  .set-row__check--completed { color: var(--color-accent); }
+
+  @media (max-width: 480px) {
+    .set-row { padding: 0 0.4rem; }
+    .set-row__type { font-size: 0.85rem; }
+  }
 </style>

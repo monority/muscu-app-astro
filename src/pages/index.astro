@@ -1,7 +1,7 @@
 ---import AppLayout from "../layouts/AppLayout.astro";
 import PageHeader from "../components/layout/PageHeader.astro";
-import Badge from "../components/ui/Badge/Badge.astro";
-import Icon from "../components/ui/Icon/Icon.astro";
+import Badge from "../components/ui/Badge.astro";
+import Icon from "../components/ui/Icon.astro";
 import { t, setLocale, defaultLocale, localizedPath } from "../i18n";
 
 setLocale(Astro.currentLocale ?? defaultLocale);
@@ -166,14 +166,14 @@ title={L.dashboard.title}
       <section class="dash__kpis" aria-label={L.dashboard.kpisAria}>
         {/* Volume */}
         <div class="dash__kpi dash__kpi--volume">
-          <div class="flex flex-col gap-1">
+          <div class="dash__kpi-content">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
                 <Icon name="dumbbell" size={16} />
               </span>
               <span class="dash__kpi-label">{L.dashboard.totalVolume}</span>
             </div>
-            <div class="flex items-baseline">
+            <div class="dash__kpi-row">
               <span
                 class="dash__kpi-value"
                 x-text="formatVolume(kpis.totalVolume)"></span>
@@ -184,14 +184,14 @@ title={L.dashboard.title}
 
         {/* Séances */}
         <div class="dash__kpi dash__kpi--sessions">
-          <div class="flex flex-col gap-1">
+          <div class="dash__kpi-content">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
                 <Icon name="calendar" size={16} />
               </span>
               <span class="dash__kpi-label">{L.dashboard.totalSessions}</span>
             </div>
-            <div class="flex items-baseline">
+            <div class="dash__kpi-row">
               <span class="dash__kpi-value" x-text="kpis.totalSessions"></span>
               <span
                 class="dash__kpi-unit"
@@ -204,14 +204,14 @@ title={L.dashboard.title}
 
         {/* Meilleurs PRs */}
         <div class="dash__kpi dash__kpi--pr">
-          <div class="flex flex-col gap-1">
+          <div class="dash__kpi-content">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
                 <Icon name="award" size={16} />
               </span>
               <span class="dash__kpi-label">{L.dashboard.bestPRs}</span>
             </div>
-            <div class="flex items-baseline">
+            <div class="dash__kpi-row">
               <span class="dash__kpi-value" x-text="kpis.bestPRs"></span>
               <span
                 class="dash__kpi-unit"
@@ -230,14 +230,14 @@ title={L.dashboard.title}
 
         {/* Série en cours */}
         <div class="dash__kpi dash__kpi--streak">
-          <div class="flex flex-col gap-1">
+          <div class="dash__kpi-content">
             <div class="dash__kpi-head">
               <span class="dash__kpi-icon" aria-hidden="true">
                 <Icon name="flame" size={16} />
               </span>
               <span class="dash__kpi-label">{L.dashboard.streak}</span>
             </div>
-            <div class="flex items-baseline">
+            <div class="dash__kpi-row">
               <span class="dash__kpi-value" x-text="kpis.streak"></span>
               <span
                 class="dash__kpi-unit"
@@ -1089,6 +1089,17 @@ title={L.dashboard.title}
     color: var(--color-text);
   }
 
+  .dash__kpi-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .dash__kpi-row {
+    display: flex;
+    align-items: baseline;
+  }
+
   .dash__kpi-head {
     display: flex;
     align-items: center;
@@ -1608,20 +1619,6 @@ title={L.dashboard.title}
 
     .dash__kpi:nth-child(3) {
       border-left: 1px solid var(--color-border);
-    }
-  }
-
-  /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
-  @media (prefers-reduced-motion: reduce) {
-    .dash__session,
-    .dash__see-all,
-    .dash__empty-link,
-    .dash__goal-ring-fill,
-    .dash__goal-bar-fill,
-    .dash__trend-bar {
-      transition: none;
     }
   }
 

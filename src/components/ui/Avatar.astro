@@ -58,21 +58,21 @@ const initials = fallback
     const fallback = avatar.querySelector<HTMLElement>('[data-avatar-fallback]');
 
     if (!img || !fallback) {
-      fallback?.classList.remove('hidden');
+      fallback?.classList.remove('is-hidden');
       return;
     }
 
-    fallback.classList.remove('hidden');
-    img.classList.add('opacity-0');
+    fallback.classList.remove('is-hidden');
+    img.classList.add('is-transparent');
 
     const showImg = () => {
-      img.classList.remove('opacity-0');
-      fallback.classList.add('hidden');
+      img.classList.remove('is-transparent');
+      fallback.classList.add('is-hidden');
     };
 
     const showFallback = () => {
-      img.classList.add('opacity-0');
-      fallback.classList.remove('hidden');
+      img.classList.add('is-transparent');
+      fallback.classList.remove('is-hidden');
     };
 
     if (img.complete && img.naturalWidth > 0) {

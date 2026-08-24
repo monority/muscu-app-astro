@@ -1,26 +1,4 @@
 ---
-/**
- * Dialog Ã¢â‚¬â€ native <dialog> modal primitive.
- *
- * Usage:
- *   <Dialog id="confirm-delete" title="Supprimer la sÃƒÂ©ance ?">
- *     <p>Cette action est irrÃƒÂ©versible.</p>
- *     <div slot="footer">
- *       <Button variant="secondary" data-dialog-close>Annuler</Button>
- *       <Button variant="destructive">Confirmer</Button>
- *     </div>
- *   </Dialog>
- *
- * Open from anywhere:
- *   - <button data-dialog-trigger="confirm-delete">Ã¢â‚¬Â¦</button>
- *   - window.openDialog('confirm-delete')
- *   - document.getElementById('confirm-delete').showModal()
- *
- * Close:
- *   - <button data-dialog-close>Ã¢â‚¬Â¦</button>
- *   - window.closeDialog('confirm-delete')
- *   - Escape key, backdrop click (auto-handled)
- */
 interface Props {
   id?: string;
   title?: string;
@@ -28,44 +6,29 @@ interface Props {
 }
 
 import { t } from "../../i18n";
-import Icon from "./Icon/Icon.astro";
+import Icon from "./Icon.astro";
 
 const L = t();
 
 const { id = "dialog", title, class: className = "" } = Astro.props;
-
-const classes = [
-  "bg-[var(--color-surface)]",
-  "border border-[var(--color-border)]",
-  "rounded-[var(--radius-xl)]",
-  "p-6",
-  "w-full max-w-6xl",
-  "text-[var(--color-text)]",
-  className,
-]
-  .filter(Boolean)
-  .join(" ");
 ---
 
 <dialog
   id={id}
-  class={classes}
+  class:list={['dialog', className]}
   aria-labelledby={title ? `${id}-title` : undefined}
 >
   {
     title && (
-      <header class="flex flex-row justify-between items-center mb-4 gap-3">
-        <h2
-          id={`${id}-title`}
-          class="text-display text-[1.5rem] font-bold leading-tight"
-        >
+      <header class="dialog__header">
+        <h2 id={`${id}-title`} class="dialog__title">
           {title}
         </h2>
         <button
           type="button"
           data-dialog-close
           aria-label={L.common.close}
-          class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/5 text-[var(--color-muted)] hover:bg-white/10 hover:text-[var(--color-text)] transition-colors duration-[160ms] cursor-pointer"
+          class="dialog__close"
         >
           <Icon name="closeX" size={16} />
         </button>
@@ -73,83 +36,103 @@ const classes = [
     )
   }
 
-  <div class="dialog-body text-[1.3rem]">
+  <div class="dialog__body">
     <slot />
   </div>
 
-  <footer class="flex flex-row justify-end gap-2 mt-6">
+  <footer class="dialog__footer">
     <slot name="footer" />
   </footer>
 </dialog>
 
 <style>
-  /* 
-     BASE DIALOG STYLES
-     The native <dialog> element relies on UA stylesheet
-     centering (position: fixed; inset-block: 0; margin: auto)
-     that breaks the moment Tailwind's `w-full` (width: 100%)
-     is applied. We re-assert explicit centering here so the
-     modal is reliably centered both horizontally and
-     vertically on every browser, regardless of utility
-     classes layered on top.
-      */
-  dialog {
+  .dialog {
     position: fixed;
     inset: 0;
     margin: auto;
     border: none;
     background-color: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: 2.4rem;
+    width: 100%;
+    max-width: 60rem;
+    color: var(--color-text);
     max-height: calc(100vh - 4rem);
     overflow-y: auto;
-    color: inherit;
   }
 
-  /* Backdrop */
-  dialog::backdrop {
+  .dialog::backdrop {
     background-color: color-mix(in srgb, #000 60%, transparent);
   }
 
-  /* Open animation Ã¢â‚¬â€ fade + scale */
+  .dialog__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.6rem;
+    gap: 1.2rem;
+  }
+
+  .dialog__title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .dialog__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background: hsl(0 0% 100% / 0.05);
+    color: var(--color-muted);
+    border: none;
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+  .dialog__close:hover {
+    background: hsl(0 0% 100% / 0.10);
+    color: var(--color-text);
+  }
+
+  .dialog__body {
+    font-size: 1.3rem;
+  }
+
+  .dialog__footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 2.4rem;
+  }
+
   @keyframes dialog-in {
-    from {
-      opacity: 0;
-      transform: scale(0.96) translateY(4px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
+    from { opacity: 0; transform: scale(0.96) translateY(4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
   @keyframes backdrop-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
-  dialog[open] {
+  .dialog[open] {
     animation: dialog-in 180ms ease-out;
   }
 
-  dialog[open]::backdrop {
+  .dialog[open]::backdrop {
     animation: backdrop-in 180ms ease-out;
   }
 
-  /* Respect reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    dialog[open],
-    dialog[open]::backdrop {
-      animation: none;
-    }
-  }
 </style>
 
 <script>
-  //Public API
-  // Expose helpers so any page can open/close a Dialog by id.
   declare global {
     interface Window {
       openDialog?: (id: string) => void;
@@ -171,7 +154,6 @@ const classes = [
     '[tabindex]:not([tabindex="-1"])',
   ].join(",");
 
-  // Track the element that opened each dialog so we can restore focus.
   const openerMap = new WeakMap<HTMLDialogElement, HTMLElement | null>();
 
   function getFocusable(dialog: HTMLDialogElement): HTMLElement[] {
@@ -209,9 +191,6 @@ const classes = [
     if (dialog.dataset.dialogReady === "true") return;
     dialog.dataset.dialogReady = "true";
 
-    // Backdrop click Ã¢â€ â€™ close (target === dialog when click is on backdrop,
-    // because the dialog element itself fills the backdrop area only at the
-    // edge, not in the content; we also check rect to be safe).
     dialog.addEventListener("click", (e) => {
       if (e.target !== dialog) return;
       const rect = dialog.getBoundingClientRect();
@@ -223,12 +202,10 @@ const classes = [
       if (!inside) dialog.close();
     });
 
-    // Focus trap
     dialog.addEventListener("keydown", (e) => {
       trapFocus(dialog, e);
     });
 
-    // Restore focus on close
     dialog.addEventListener("close", () => {
       const opener = openerMap.get(dialog);
       if (opener && typeof opener.focus === "function") {
@@ -245,10 +222,8 @@ const classes = [
     openerMap.set(dialog, document.activeElement as HTMLElement | null);
     if (!dialog.open) {
       dialog.showModal();
-      // Focus the first focusable inside, falling back to the dialog itself.
       const focusables = getFocusable(dialog);
       const target = focusables[0] ?? dialog;
-      // Defer to next frame so the animation/transition doesn't fight focus.
       requestAnimationFrame(() => target.focus());
     }
   }
@@ -261,7 +236,6 @@ const classes = [
   window.openDialog = openDialog;
   window.closeDialog = closeDialog;
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Wire up triggers & close buttons Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   function bindTriggers() {
     document
       .querySelectorAll<HTMLElement>("[data-dialog-trigger]")
@@ -288,13 +262,11 @@ const classes = [
       });
   }
 
-  // Run after DOM ready; safe to call multiple times.
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bindTriggers);
   } else {
     bindTriggers();
   }
 
-  // Re-bind on Astro view transitions / dynamic content
   document.addEventListener("astro:page-load", bindTriggers);
 </script>

@@ -2,15 +2,15 @@
 import { t } from "../../i18n";
 import AppLayout from "../../layouts/AppLayout.astro";
 import PageHeader from "../../components/layout/PageHeader.astro";
-import Badge from "../../components/ui/Badge/Badge.astro";
-import Icon from "../../components/ui/Icon/Icon.astro";
-import Card from "../../components/ui/Card/Card.astro";
+import Badge from "../../components/ui/Badge.astro";
+import Icon from "../../components/ui/Icon.astro";
+import Card from "../../components/ui/Card.astro";
 import CardFooter from "../../components/ui/CardFooter.astro";
 import Dialog from "../../components/ui/Dialog.astro";
 import SearchInput from "../../components/ui/SearchInput.astro";
 import IconButton from "../../components/ui/IconButton.astro";
 import EmptyState from "../../components/ui/EmptyState.astro";
-import Button from "../../components/ui/Button/Button.astro";
+import Button from "../../components/ui/Button.astro";
 import { icons } from "../../lib/icons";
 
 const L = t();
@@ -102,7 +102,7 @@ const categories = [
             variant="interactive"
             hover
             clickable
-            class="flex flex-col gap-[1.2rem]"
+            class="exo__card-body"
           >
             <span class="exo__card-head">
               <span class="exo__card-icon" set:html={icons.dumbbellBox()} />
@@ -913,7 +913,9 @@ const categories = [
         },
 
         hasWorkingWeight(): boolean {
-          return this.addSets.some((s) => s.type === "work" && s.weight > 0);
+          return this.addSets.some(
+            (s) => (s.type === "work" || s.type === "top") && s.weight > 0,
+          );
         },
 
         generateWarmup() {
@@ -2028,20 +2030,10 @@ const categories = [
       height: 1.8rem;
     }
 
-    /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
-    @media (prefers-reduced-motion: reduce) {
-      .exo__add-btn,
-      .exo__filter,
-      .exo__icon-btn,
-      .exo__add-sets-warmup,
-      .exo__add-sets-add,
-      .exo__tip-toggle,
-      .exo__tip-toggle:active {
-        transition: none;
-        transform: none;
-      }
+    .exo__card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
     }
   </style>
 </AppLayout>

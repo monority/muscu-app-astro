@@ -29,8 +29,4 @@
 .card--interactive:active {
   transform: translateY(1px);
 }
-@media (prefers-reduced-motion: reduce) {
-  .card--interactive {
-    transition: none;
-  }
-}
+

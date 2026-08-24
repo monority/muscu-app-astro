@@ -12,7 +12,7 @@
  */
 import Sidebar from "./Sidebar.astro";
 import Header from "./Header.astro";
-import Icon from "../ui/Icon/Icon.astro";
+import Icon from "../ui/Icon.astro";
 import { t } from "../../i18n";
 import { navId, renderIcon, chevronDown } from "../../lib/nav";
 import type { NavGroup } from "../../lib/types";
@@ -314,6 +314,32 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
 
     const ACCORDION_KEY = "muscu:nav:collapsed";
 
+    function readCollapsed(): string[] {
+      try {
+        const raw = window.localStorage.getItem(ACCORDION_KEY);
+        const saved = raw ? JSON.parse(raw) : [];
+        return Array.isArray(saved) ? saved : [];
+      } catch {
+        return [];
+      }
+    }
+
+    /** Auto-expand groups containing the active page (runs pre-render). */
+    function expandActiveGroups(collapsed: string[]): string[] {
+      const groups = document.querySelectorAll<HTMLElement>("[data-nav-group]");
+      const next = [...collapsed];
+      groups.forEach((el) => {
+        if (el.querySelector(".is-active")) {
+          const id = el.getAttribute("data-nav-group");
+          if (id) {
+            const i = next.indexOf(id);
+            if (i >= 0) next.splice(i, 1);
+          }
+        }
+      });
+      return next;
+    }
+
     Alpine.data("themeApp", () => ({
       theme: "dark" as "dark" | "light",
       collapsed: [] as string[],
@@ -322,7 +348,8 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
         const current =
           document.documentElement.getAttribute("data-theme") || "dark";
         this.theme = current === "light" ? "light" : "dark";
-        this.initAccordion();
+        // Restore collapsed state from localStorage
+        this.collapsed = readCollapsed();
       },
 
       toggleTheme() {
@@ -354,35 +381,8 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
         try {
           window.localStorage.setItem(ACCORDION_KEY, JSON.stringify(this.collapsed));
         } catch {
-          // private mode / quota â€” in-memory state still applies
+          // private mode / quota — in-memory state still applies
         }
-      },
-
-      initAccordion() {
-        try {
-          const raw = window.localStorage.getItem(ACCORDION_KEY);
-          const saved = raw ? JSON.parse(raw) : [];
-          this.collapsed = Array.isArray(saved) ? saved : [];
-        } catch {
-          this.collapsed = [];
-        }
-        // Auto-expand any group whose children contain the active page
-        // (e.g. /progression/records opens the "Progression" group even
-        // if the user collapsed it earlier).
-        const alpine = this as unknown as AlpineMagicThis;
-        alpine.$nextTick(() => {
-          alpine.$el
-            .querySelectorAll<HTMLElement>("[data-nav-group]")
-            .forEach((el) => {
-              if (el.querySelector(".is-active")) {
-                const id = el.getAttribute("data-nav-group");
-                if (id) {
-                  const i = this.collapsed.indexOf(id);
-                  if (i >= 0) this.collapsed.splice(i, 1);
-                }
-              }
-            });
-        });
       },
     }));
   });
@@ -736,20 +736,6 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     }
   }
 
-  /* â”€â”€ Reduced motion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-  @media (prefers-reduced-motion: reduce) {
-    .drawer__backdrop,
-    .drawer__panel,
-    .drawer__item,
-    .drawer__children,
-    .drawer__item-chevron,
-    .drawer__subitem,
-    .drawer__logout,
-    .drawer__logout:active {
-      transition: none;
-      transform: none;
-    }
-  }
 
   /* â”€â”€ Drawer user session + logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .drawer__user {

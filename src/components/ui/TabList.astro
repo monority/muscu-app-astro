@@ -1,17 +1,4 @@
 ---
-/**
- * TabList — renders the row of tab triggers.
- *
- * Each tab is a <button role="tab"> wired to a <TabPanel> via a shared id.
- * The active tab is controlled server-side via the `activeTab` prop; the
- * embedded <script> handles click + keyboard navigation and syncs the
- * visibility of the matching <TabPanel>.
- *
- * Visual states:
- *   - active  : text-[--color-text]  +  border-b-2 border-[--color-accent]
- *   - inactive: text-[--color-muted] hover:text-[--color-text]
- *   - disabled: opacity-50, non-interactive
- */
 interface Tab {
   id: string;
   label: string;
@@ -25,50 +12,12 @@ interface Props {
 }
 
 const { tabs, activeTab, class: className = '' } = Astro.props;
-
-const listClasses = [
-  'flex',
-  'items-end',
-  'gap-0.5',
-  'border-b',
-  'border-[var(--color-border)]',
-  'overflow-x-auto',
-  'overflow-y-hidden',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<div role="tablist" aria-orientation="horizontal" class={listClasses}>
+<div role="tablist" aria-orientation="horizontal" class:list={['tab-list', className]}>
   {
     tabs.map((tab) => {
       const isActive = activeTab !== undefined && tab.id === activeTab;
-      const buttonClasses = [
-        'relative',
-        'px-4',
-        'py-2.5',
-        'text-[1.2rem]',
-        'font-medium',
-        'whitespace-nowrap',
-        'select-none',
-        'border-b-2',
-        '-mb-px',
-        'transition-colors',
-        'duration-[160ms]',
-        'ease-[ease]',
-        'outline-none',
-        'rounded-t-[var(--radius-sm)]',
-        isActive
-          ? 'text-[var(--color-text)] border-[var(--color-accent)] font-semibold'
-          : 'text-[var(--color-muted)] border-transparent hover:text-[var(--color-text)]',
-        tab.disabled
-          ? 'opacity-50 cursor-not-allowed pointer-events-none'
-          : 'cursor-pointer',
-      ]
-        .filter(Boolean)
-        .join(' ');
-
       return (
         <button
           type="button"
@@ -80,7 +29,11 @@ const listClasses = [
           disabled={tab.disabled}
           data-tab-trigger
           data-tab-id={tab.id}
-          class={buttonClasses}
+          class:list={[
+            'tab-list__trigger',
+            isActive && 'is-active',
+            tab.disabled && 'is-disabled',
+          ]}
         >
           {tab.label}
         </button>
@@ -89,18 +42,52 @@ const listClasses = [
   }
 </div>
 
+<style>
+  .tab-list {
+    display: flex;
+    align-items: end;
+    gap: 0.2rem;
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .tab-list__trigger {
+    position: relative;
+    padding: 1rem 1.6rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    white-space: nowrap;
+    user-select: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 160ms ease;
+    outline: none;
+  }
+
+  .tab-list__trigger:hover {
+    color: var(--color-text);
+  }
+
+  .tab-list__trigger.is-active {
+    color: var(--color-text);
+    border-bottom-color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .tab-list__trigger.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+</style>
+
 <script>
-  /**
-   * Tabs controller — ARIA Authoring Practices "tabs" pattern.
-   *
-   * - Click on a trigger toggles aria-selected/tabindex on triggers and
-   *   shows/hides the matching [data-tab-panel] within the same root.
-   * - Arrow keys (Left/Right) cycle between enabled triggers, Home/End
-   *   jump to first/last. The newly focused tab is also activated.
-   * - On init, the panel matching the SSR-selected trigger is shown and
-   *   every other panel is hidden. If no trigger is marked active, the
-   *   first non-disabled one is activated.
-   */
   function initTabs() {
     const roots = document.querySelectorAll<HTMLElement>('[data-tabs-root]');
     roots.forEach((root) => {
@@ -132,8 +119,6 @@ const listClasses = [
         });
       };
 
-      // Sync the visible panel to whichever trigger is currently marked
-      // active (SSR default or user-set). Fallback: first non-disabled.
       const preselected =
         triggers.find((t) => t.getAttribute('aria-selected') === 'true') ??
         triggers.find((t) => !t.disabled) ??
@@ -144,7 +129,6 @@ const listClasses = [
         trigger.addEventListener('click', () => activate(trigger));
       });
 
-      // Roving keyboard navigation scoped to this tablist.
       root.addEventListener('keydown', (event) => {
         const target = event.target as HTMLElement;
         if (target.getAttribute('role') !== 'tab') return;

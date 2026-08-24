@@ -10,7 +10,7 @@
  * every arm group maps to the teal "arms" tone.
  *
  * Components render the tone as the CSS class `badge--cat-<tone>`
- * (see src/components/ui/Badge/Badge.astro). The helper stays i18n-agnostic:
+ * (see src/components/ui/Badge.astro). The helper stays i18n-agnostic:
  * it takes the stored key and returns a tone name; Alpine consumers
  * read it from `window.muscleHue` (exposed in AppLayout.astro, same
  * pattern as `window.trMuscle`).

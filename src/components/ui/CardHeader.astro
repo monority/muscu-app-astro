@@ -4,15 +4,17 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
-
-const classes = [
-  'flex flex-col gap-[var(--spacing-2)] pb-[var(--spacing-3)]',
-  className,
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
-<div class={classes}>
+<div class:list={['card-header', className]}>
   <slot />
 </div>
+
+<style>
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    padding-bottom: var(--spacing-3);
+  }
+</style>

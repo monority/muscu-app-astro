@@ -1,24 +1,20 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import Card from '../../components/ui/Card/Card.astro';
+import Card from '../../components/ui/Card.astro';
 import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import Select from '../../components/ui/Select.astro';
-import Button from '../../components/ui/Button/Button.astro';
+import Button from '../../components/ui/Button.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import SettingsSection from '../../components/ui/SettingsSection.astro';
 import SettingsBottomBar from '../../components/layout/SettingsBottomBar.astro';
-import ReminderSettings from '../../components/params/ReminderSettings.astro';
+import ReminderSettings from '../../components/workout/ReminderSettings.astro';
 import { t } from '../../i18n';
 import { icons } from '../../lib/icons';
 
 const L = t();
-/**
- * Static rest-time presets (seconds). Used by the Timer settings select
- * and matches the presets surfaced on /timer.
- */
 const REST_PRESETS = [30, 45, 60, 90, 120, 180, 240, 300] as const;
 const restOptions = REST_PRESETS.map((s) => {
   const mins = Math.floor(s / 60);
@@ -28,11 +24,8 @@ const restOptions = REST_PRESETS.map((s) => {
   return { value: String(s), label };
 });
 
-// App version mirrored from package.json
 const APP_VERSION = '0.0.1';
 
-// Section metadata for the fixed bottom navigation bar. Labels come from
-// the same i18n keys used by the section headings so both stay in sync.
 const SETTINGS_SECTIONS = [
   { id: 'set-profile', label: L.settings.profile },
   { id: 'set-units', label: L.settings.units },
@@ -52,7 +45,7 @@ const SETTINGS_SECTIONS = [
   />
 
   <div
-    class="pb-[calc(var(--bottom-nav-height,5.6rem)+2rem)] flex flex-col gap-[2rem] max-sm:gap-[1.4rem]"
+    class="set"
     x-data="settingsApp()"
     x-init="init()"
     x-cloak
@@ -61,17 +54,17 @@ const SETTINGS_SECTIONS = [
         1. PROFIL
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="user" title={L.settings.profile} description={L.settings.profileDesc} id="set-profile">
-      <div class="flex flex-col gap-0 mt-[1.2rem]">
-        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.pseudo}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.pseudoDesc}</span>
+      <div class="set__rows">
+        <div class="set__row">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.pseudo}</span>
+            <span class="set__label-desc">{L.settings.pseudoDesc}</span>
           </div>
-          <div class="shrink-0 w-full max-w-[24rem] max-sm:max-w-full">
+          <div class="set__control">
             <input
               type="text"
               id="set-pseudo"
-              class="set__sync-input w-full h-[4.4rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.3rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
+              class="set__sync-input"
               x-model="display.pseudo"
               @change="savePseudo()"
               :placeholder="labels.pseudoPlaceholder"
@@ -81,16 +74,16 @@ const SETTINGS_SECTIONS = [
             />
           </div>
         </div>
-        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.email}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.emailDesc}</span>
+        <div class="set__row">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.email}</span>
+            <span class="set__label-desc">{L.settings.emailDesc}</span>
           </div>
-          <div class="shrink-0 w-full max-w-[24rem] max-sm:max-w-full">
+          <div class="set__control">
             <input
               type="email"
               id="set-email"
-              class="set__sync-input w-full h-[4.4rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.3rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
+              class="set__sync-input"
               x-model="display.email"
               @change="saveEmail()"
               :placeholder="labels.emailPlaceholder"
@@ -106,16 +99,16 @@ const SETTINGS_SECTIONS = [
         2. UNITÉS
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="ruler" title={L.settings.units} description={L.settings.unitsDesc} id="set-units">
-      <div class="flex flex-col gap-0 mt-[1.2rem]">
-        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weightUnit}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weightUnitDesc}</span>
+      <div class="set__rows">
+        <div class="set__row">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.weightUnit}</span>
+            <span class="set__label-desc">{L.settings.weightUnitDesc}</span>
           </div>
-          <div class="inline-flex p-[0.3rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full max-sm:self-start" role="group" aria-label={L.settings.weightUnit}>
+          <div class="set__seg-group" role="group" aria-label={L.settings.weightUnit}>
             <button
               type="button"
-              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              class="set__seg-btn"
               :class="{ 'is-active': display.unit === 'kg' }"
               :aria-pressed="display.unit === 'kg'"
               @click="setUnit('kg')"
@@ -124,7 +117,7 @@ const SETTINGS_SECTIONS = [
             </button>
             <button
               type="button"
-              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              class="set__seg-btn"
               :class="{ 'is-active': display.unit === 'lbs' }"
               :aria-pressed="display.unit === 'lbs'"
               @click="setUnit('lbs')"
@@ -134,15 +127,15 @@ const SETTINGS_SECTIONS = [
           </div>
         </div>
 
-        <div class="flex items-center justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:items-start max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.repsFormat}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.repsDesc}</span>
+        <div class="set__row">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.repsFormat}</span>
+            <span class="set__label-desc">{L.settings.repsDesc}</span>
           </div>
-          <div class="inline-flex p-[0.3rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full max-sm:self-start" role="group" aria-label={L.settings.repsFormat}>
+          <div class="set__seg-group" role="group" aria-label={L.settings.repsFormat}>
             <button
               type="button"
-              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              class="set__seg-btn"
               :class="{ 'is-active': display.repsFormat === 'simple' }"
               :aria-pressed="display.repsFormat === 'simple'"
               @click="setRepsFormat('simple')"
@@ -151,7 +144,7 @@ const SETTINGS_SECTIONS = [
             </button>
             <button
               type="button"
-              class="set__seg-btn appearance-none bg-transparent border border-transparent text-[var(--color-muted)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] px-4 h-[4.4rem] min-w-[6.4rem] rounded-full cursor-pointer [transition:background-color_140ms_ease,_color_140ms_ease,_box-shadow_140ms_ease,_transform_140ms_ease]"
+              class="set__seg-btn"
               :class="{ 'is-active': display.repsFormat === 'range' }"
               :aria-pressed="display.repsFormat === 'range'"
               @click="setRepsFormat('range')"
@@ -167,17 +160,17 @@ const SETTINGS_SECTIONS = [
         3. OBJECTIFS
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="target" title={L.settings.goals} description={L.settings.goalsDesc} id="set-goals">
-      <div class="flex flex-col gap-0 mt-[1.2rem]">
-        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyGoalCount}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyGoalTrackedDesc}</span>
+      <div class="set__rows">
+        <div class="set__row set__row--start">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.weeklyGoalCount}</span>
+            <span class="set__label-desc">{L.settings.weeklyGoalTrackedDesc}</span>
           </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-            <div class="set__goal-input-wrap inline-flex items-stretch h-[4.4rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden transition-[border-color,box-shadow] duration-[140ms] max-sm:self-start">
+          <div class="set__control set__control--right">
+            <div class="set__goal-wrap">
               <button
                 type="button"
-                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
+                class="set__goal-btn"
                 aria-label={L.settings.weeklyGoalDecrease}
                 @click="setWeeklyGoal(display.weeklyGoal - 1)"
               >
@@ -190,14 +183,14 @@ const SETTINGS_SECTIONS = [
                 max="7"
                 step="1"
                 inputmode="numeric"
-                class="no-spinner appearance-textfield w-[5.2rem] shrink-0 border-0 border-l border-r border-[var(--color-border)] bg-transparent text-[var(--color-text)] text-display text-[1.6rem] font-bold text-center tabular-nums outline-none p-0 leading-none"
+                class="set__goal-input"
                 :value="display.weeklyGoal"
                 @change="setWeeklyGoal(parseInt($event.target.value, 10))"
                 aria-label={L.settings.weeklyGoalCount}
               />
               <button
                 type="button"
-                class="set__goal-step appearance-none bg-transparent border-0 text-[var(--color-muted)] w-[4.4rem] shrink-0 cursor-pointer inline-flex items-center justify-center transition-[background-color,color] duration-[140ms]"
+                class="set__goal-btn"
                 aria-label={L.settings.weeklyGoalIncrease}
                 @click="setWeeklyGoal(display.weeklyGoal + 1)"
               >
@@ -207,19 +200,19 @@ const SETTINGS_SECTIONS = [
           </div>
         </div>
 
-        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.weeklyProgress}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.weeklyProgressDesc}</span>
+        <div class="set__row set__row--start">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.weeklyProgress}</span>
+            <span class="set__label-desc">{L.settings.weeklyProgressDesc}</span>
           </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-            <span class="inline-flex items-baseline gap-[0.3rem] font-[var(--font-body)] tabular-nums">
-              <span class="text-display text-[1.8rem] font-bold text-[var(--color-accent)] leading-none" x-text="weeklyDone"></span>
-              <span class="text-[var(--color-muted)] text-[1.4rem] font-medium mx-[0.1rem]" aria-hidden="true">/</span>
-              <span class="text-display text-[1.4rem] font-bold text-[var(--color-text)] leading-none" x-text="display.weeklyGoal"></span>
-              <span class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]" x-text="labels.seanceSingular">{L.settings.seanceSingular}</span>
+          <div class="set__control set__control--right">
+            <span class="set__progress">
+              <span class="set__progress-done" x-text="weeklyDone"></span>
+              <span class="set__progress-sep" aria-hidden="true">/</span>
+              <span class="set__progress-goal" x-text="display.weeklyGoal"></span>
+              <span class="set__progress-unit" x-text="labels.seanceSingular">{L.settings.seanceSingular}</span>
               <span
-                class="text-[1.1rem] text-[var(--color-muted)] font-medium ml-[0.3rem]"
+                class="set__progress-plural"
                 x-text="display.weeklyGoal > 1 ? 's' : ''"
               ></span>
             </span>
@@ -232,13 +225,13 @@ const SETTINGS_SECTIONS = [
         4. TIMER
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="clockStopwatch" title={L.settings.timerSettings} description={L.settings.timerDesc} id="set-timer">
-      <div class="flex flex-col gap-0 mt-[1.2rem]">
-        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.defaultRestTime}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.defaultRestTimeDesc}</span>
+      <div class="set__rows">
+        <div class="set__row set__row--start">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.defaultRestTime}</span>
+            <span class="set__label-desc">{L.settings.defaultRestTimeDesc}</span>
           </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+          <div class="set__control set__control--right">
             <Select
               id="set-rest-time"
               name="restTime"
@@ -249,23 +242,23 @@ const SETTINGS_SECTIONS = [
           </div>
         </div>
 
-        <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.settings.soundAlerts}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.soundAlertsDesc}</span>
+        <div class="set__row set__row--start">
+          <div class="set__label">
+            <span class="set__label-title">{L.settings.soundAlerts}</span>
+            <span class="set__label-desc">{L.settings.soundAlertsDesc}</span>
           </div>
-          <div class="shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
-            <label class="inline-flex items-center cursor-pointer min-h-[4.4rem]">
+          <div class="set__control set__control--right">
+            <label class="set__toggle">
               <input
                 type="checkbox"
-                class="sr-only set__toggle-input"
+                class="set__toggle-input sr-only"
                 role="switch"
                 :checked="display.soundAlerts"
                 :aria-checked="display.soundAlerts ? 'true' : 'false'"
                 @change="saveSoundAlerts($event.target.checked)"
               />
-              <span class="set__toggle-track relative w-[4.4rem] h-[2.4rem] rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-[background-color,border-color] duration-[200ms] shrink-0 inline-block">
-                <span class="set__toggle-thumb absolute top-[2px] left-[3px] w-[1.8rem] h-[1.8rem] rounded-full bg-white transition-transform duration-[200ms] shadow-[var(--shadow-1)] inline-block"></span>
+              <span class="set__toggle-track">
+                <span class="set__toggle-thumb"></span>
               </span>
             </label>
           </div>
@@ -282,22 +275,22 @@ const SETTINGS_SECTIONS = [
         6. DONNÉES
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="database" title={L.settings.data} description={L.settings.dataDesc} id="set-data">
-      <div class="grid grid-cols-1 gap-[1.2rem] mt-[1.2rem] sm:grid-cols-2 lg:grid-cols-3">
-        <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
-          <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
-            <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+      <div class="set__data-grid">
+        <div class="set__data-tile">
+          <div class="set__data-tile-header">
+            <div class="set__data-tile-icon" aria-hidden="true">
               <Fragment set:html={icons.download(24, 24)} />
             </div>
-            <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-              <h4 class="text-display text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportJSON}</h4>
-              <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
+            <div class="set__data-tile-content">
+              <h4 class="set__data-tile-title">{L.settings.exportJSON}</h4>
+              <p class="set__data-tile-desc">
                 {L.settings.exportJSONDesc}
               </p>
             </div>
           </div>
           <button
             type="button"
-            class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="set__data-tile-btn"
             @click="exportData()"
             :disabled="exporting"
           >
@@ -306,21 +299,21 @@ const SETTINGS_SECTIONS = [
           </button>
         </div>
 
-        <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
-          <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
-            <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+        <div class="set__data-tile">
+          <div class="set__data-tile-header">
+            <div class="set__data-tile-icon" aria-hidden="true">
               <Fragment set:html={icons.table(24, 24)} />
             </div>
-            <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-              <h4 class="text-display text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.exportCSV}</h4>
-              <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
+            <div class="set__data-tile-content">
+              <h4 class="set__data-tile-title">{L.settings.exportCSV}</h4>
+              <p class="set__data-tile-desc">
                 {L.settings.exportCSVDesc}
               </p>
             </div>
           </div>
           <button
             type="button"
-            class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="set__data-tile-btn"
             @click="exportCSV()"
             :disabled="exportingCsv"
           >
@@ -329,21 +322,21 @@ const SETTINGS_SECTIONS = [
           </button>
         </div>
 
-        <div class="flex flex-col gap-[1.2rem] p-[1.8rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] transition-[border-color,box-shadow] duration-[200ms] relative hover:border-[var(--alpha-border)] hover:shadow-[var(--shadow-2)] max-[480px]:p-[1.4rem]">
-          <div class="flex items-start gap-[1.2rem] max-sm:gap-4">
-            <div class="set__data-tile-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+        <div class="set__data-tile">
+          <div class="set__data-tile-header">
+            <div class="set__data-tile-icon" aria-hidden="true">
               <Fragment set:html={icons.upload(24, 24)} />
             </div>
-            <div class="min-w-0 flex flex-col gap-[var(--spacing-1)]">
-              <h4 class="text-display text-[1.4rem] font-bold text-[var(--color-text)] m-0">{L.settings.import}</h4>
-              <p class="text-[1.15rem] text-[var(--color-muted)] m-0 leading-[1.4]">
+            <div class="set__data-tile-content">
+              <h4 class="set__data-tile-title">{L.settings.import}</h4>
+              <p class="set__data-tile-desc">
                 {L.settings.importDesc}
               </p>
             </div>
           </div>
           <button
             type="button"
-            class="set__data-btn appearance-none inline-flex items-center justify-center h-[4.4rem] px-4 bg-transparent border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] font-[var(--font-body)] text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="set__data-tile-btn"
             @click="triggerImport()"
             :disabled="importing"
           >
@@ -362,17 +355,17 @@ const SETTINGS_SECTIONS = [
       </div>
 
           {/* Danger zone */}
-          <div class="mt-[2.4rem] p-5 bg-[color-mix(in_srgb,var(--color-destructive)_4%,transparent)] border border-[color-mix(in_srgb,var(--color-destructive)_28%,transparent)] rounded-[var(--radius-md)] max-[480px]:p-[1.6rem]">
-            <div class="flex items-center gap-2 mb-[0.6rem]">
-              <span class="set__danger-badge inline-flex items-center h-[2.2rem] px-2 bg-[color-mix(in_srgb,var(--color-destructive)_14%,transparent)] border border-[color-mix(in_srgb,var(--color-destructive)_40%,transparent)] rounded-[var(--radius-sm)] text-destructive text-[1.1rem] font-bold tracking-[0.10em]">DANGER</span>
-              <h4 class="font-display text-[1.5rem] font-bold text-text m-0">{L.settings.resetAll}</h4>
+          <div class="set__danger">
+            <div class="set__danger-header">
+              <span class="set__danger-badge">DANGER</span>
+              <h4 class="set__danger-title">{L.settings.resetAll}</h4>
             </div>
-            <p class="text-[1.2rem] text-muted leading-[1.5] mb-[1.4rem]">
+            <p class="set__danger-desc">
               {L.settings.resetDesc}
             </p>
             <button
               type="button"
-              class="set__danger-btn appearance-none inline-flex items-center h-[4.4rem] px-[1.8rem] bg-transparent text-destructive border border-[color-mix(in_srgb,var(--color-destructive)_50%,transparent)] rounded-[var(--radius-sm)] font-body text-[1.2rem] font-bold tracking-[0.02em] cursor-pointer transition-[background-color,box-shadow,transform] duration-[140ms] active:scale-[0.97]"
+              class="set__danger-btn"
               @click="askReset()"
             >
               {L.settings.resetAction}
@@ -386,29 +379,29 @@ const SETTINGS_SECTIONS = [
     <section class="set__section" id="set-sync">
       <Card>
         <CardHeader>
-          <div class="flex items-center gap-4 min-w-0">
-            <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-accent border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+          <div class="set__sync-heading">
+            <span class="set__heading-icon" aria-hidden="true">
               <Fragment set:html={icons.cloud(24, 24)} />
             </span>
             <CardTitle>{L.settings.sync.title}</CardTitle>
           </div>
-          <p class="text-[1.2rem] text-muted m-0 leading-[1.4]">{L.settings.sync.desc}</p>
-          <p class="m-0 text-[1.15rem] leading-[1.45] text-muted">{L.settings.sync.corsNote}</p>
+          <p class="set__sync-desc">{L.settings.sync.desc}</p>
+          <p class="set__sync-cors">{L.settings.sync.corsNote}</p>
         </CardHeader>
 
         <CardContent>
-          <div class="flex flex-col gap-[1.4rem] mt-[1.2rem]">
-            <div class="flex flex-col gap-0 mt-[1.2rem]">
-              <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-                <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                  <label class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]" for="set-sync-url" x-text="labels.syncUrl">{L.settings.sync.url}</label>
-                  <span class="text-[1.1rem] text-muted leading-[1.3]" x-text="labels.syncConflict">{L.settings.sync.conflict}</span>
+          <div class="set__sync-fields">
+            <div class="set__rows">
+              <div class="set__row set__row--start">
+                <div class="set__label">
+                  <label class="set__label-title" for="set-sync-url" x-text="labels.syncUrl">{L.settings.sync.url}</label>
+                  <span class="set__label-desc" x-text="labels.syncConflict">{L.settings.sync.conflict}</span>
                 </div>
-                <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+                <div class="set__control set__control--right">
                   <input
                     type="text"
                     id="set-sync-url"
-                    class="set__sync-input w-full h-[4.2rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.25rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
+                    class="set__sync-input"
                     x-model="syncForm.url"
                     @change="saveSyncFields()"
                     :placeholder="labels.syncUrlPlaceholder"
@@ -419,15 +412,15 @@ const SETTINGS_SECTIONS = [
                 </div>
               </div>
 
-              <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-                <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                  <label class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]" for="set-sync-username">{L.settings.sync.username}</label>
+              <div class="set__row set__row--start">
+                <div class="set__label">
+                  <label class="set__label-title" for="set-sync-username">{L.settings.sync.username}</label>
                 </div>
-                <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+                <div class="set__control set__control--right">
                   <input
                     type="text"
                     id="set-sync-username"
-                    class="set__sync-input w-full h-[4.2rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.25rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
+                    class="set__sync-input"
                     x-model="syncForm.username"
                     @change="saveSyncFields()"
                     :placeholder="labels.syncUsernamePlaceholder"
@@ -438,16 +431,16 @@ const SETTINGS_SECTIONS = [
                 </div>
               </div>
 
-              <div class="flex items-start justify-between gap-8 py-4 border-b border-[var(--alpha-bg-soft)] last:border-b-0 last:pb-0 first:pt-0 max-sm:flex-col max-sm:gap-2">
-                <div class="flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-                  <label class="font-display text-[1.4rem] font-semibold text-text leading-[1.2]" for="set-sync-password">{L.settings.sync.password}</label>
-                  <span class="text-[1.1rem] text-muted leading-[1.3]">{L.settings.sync.passwordNote}</span>
+              <div class="set__row set__row--start">
+                <div class="set__label">
+                  <label class="set__label-title" for="set-sync-password">{L.settings.sync.password}</label>
+                  <span class="set__label-desc">{L.settings.sync.passwordNote}</span>
                 </div>
-                <div class="shrink-0 text-right text-[1.3rem] text-muted tabular-nums w-auto max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap max-sm:text-left max-sm:max-w-full max-sm:whitespace-normal max-sm:w-full">
+                <div class="set__control set__control--right">
                   <input
                     type="password"
                     id="set-sync-password"
-                    class="set__sync-input w-full h-[4.2rem] px-3 bg-surface-2 border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.25rem] outline-none transition-[border-color,box-shadow] duration-[140ms] placeholder:text-muted"
+                    class="set__sync-input"
                     x-model="syncForm.password"
                     @change="saveSyncFields()"
                     :placeholder="labels.syncPasswordPlaceholder"
@@ -460,18 +453,18 @@ const SETTINGS_SECTIONS = [
           </div>
 
           {/* Last sync status + Google Drive note */}
-          <div class="flex flex-col gap-[0.2rem] mt-[1.2rem]" x-show="syncConfigured" x-cloak>
-            <span class="text-[1.1rem] font-bold tracking-[0.08em] uppercase text-muted">{L.settings.sync.lastSync}</span>
-            <span class="text-[1.25rem] text-text" x-text="syncLastLabel"></span>
+          <div class="set__sync-status" x-show="syncConfigured" x-cloak>
+            <span class="set__sync-status-label">{L.settings.sync.lastSync}</span>
+            <span class="set__sync-status-value" x-text="syncLastLabel"></span>
           </div>
-          <p class="m-0 text-[1.15rem] leading-[1.45] text-muted">{L.settings.sync.googleDrive}</p>
+          <p class="set__sync-note">{L.settings.sync.googleDrive}</p>
 
           {/* Manual-only actions */}
-          <div class="flex flex-wrap gap-2 mt-[1.4rem]">
+          <div class="set__sync-actions">
             <Button
               variant="secondary"
               type="button"
-              class="flex-auto min-w-[12rem]"
+              class="set__sync-btn"
               :disabled="syncBusy !== null || !syncForm.url.trim()"
               :loading="syncBusy === 'test'"
               @click="testSync()"
@@ -482,7 +475,7 @@ const SETTINGS_SECTIONS = [
             <Button
               variant="primary"
               type="button"
-              class="flex-auto min-w-[12rem]"
+              class="set__sync-btn"
               :disabled="syncBusy !== null || !syncForm.url.trim()"
               :loading="syncBusy === 'push'"
               @click="pushSync()"
@@ -493,7 +486,7 @@ const SETTINGS_SECTIONS = [
             <Button
               variant="secondary"
               type="button"
-              class="flex-auto min-w-[12rem]"
+              class="set__sync-btn"
               :disabled="syncBusy !== null || !syncForm.url.trim()"
               :loading="syncBusy === 'pull'"
               @click="askRestore()"
@@ -510,36 +503,36 @@ const SETTINGS_SECTIONS = [
         8. À PROPOS
         ═════════════════════════════════════════════════════ */}
     <SettingsSection icon="infoCircle" title={L.settings.about} description={L.settings.aboutDesc} id="set-about">
-      <dl class="grid grid-cols-1 gap-0 mt-[1.2rem] sm:grid-cols-2 sm:gap-x-6">
-        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.version}</dt>
-          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">
-            <span class="set__about-pill inline-flex items-center h-6 px-4 bg-[color-mix(in_srgb,var(--color-accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--color-accent)_30%,transparent)] rounded-full text-[var(--color-accent)] text-[1.1rem] font-bold tracking-[0.04em] tabular-nums">v{APP_VERSION}</span>
+      <dl class="set__about-grid">
+        <div class="set__about-row">
+          <dt class="set__about-dt">{L.settings.version}</dt>
+          <dd class="set__about-dd">
+            <span class="set__about-pill">v{APP_VERSION}</span>
           </dd>
         </div>
-        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.storage}</dt>
-          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">{L.settings.storageValue}</dd>
+        <div class="set__about-row">
+          <dt class="set__about-dt">{L.settings.storage}</dt>
+          <dd class="set__about-dd">{L.settings.storageValue}</dd>
         </div>
-        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.mode}</dt>
-          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">{L.settings.modeValue}</dd>
+        <div class="set__about-row">
+          <dt class="set__about-dt">{L.settings.mode}</dt>
+          <dd class="set__about-dd">{L.settings.modeValue}</dd>
         </div>
-        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.fonts}</dt>
-          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">Inter</dd>
+        <div class="set__about-row">
+          <dt class="set__about-dt">{L.settings.fonts}</dt>
+          <dd class="set__about-dd">Inter</dd>
         </div>
-        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.icons}</dt>
-          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">Lucide</dd>
+        <div class="set__about-row">
+          <dt class="set__about-dt">{L.settings.icons}</dt>
+          <dd class="set__about-dd">Lucide</dd>
         </div>
-        <div class="set__about-row flex items-center justify-between py-2.5 border-b border-[var(--alpha-bg-soft)] gap-4">
-          <dt class="text-[1.2rem] text-[var(--color-muted)] font-medium m-0">{L.settings.framework}</dt>
-          <dd class="font-[var(--font-body)] text-[1.3rem] text-[var(--color-text)] font-semibold m-0 text-right">Astro 7</dd>
+        <div class="set__about-row">
+          <dt class="set__about-dt">{L.settings.framework}</dt>
+          <dd class="set__about-dd">Astro 7</dd>
         </div>
       </dl>
 
-      <p class="mt-4 pt-4 border-t border-[var(--alpha-bg-soft)] text-[1.2rem] text-[var(--color-muted)] leading-[1.6] italic">
+      <p class="set__about-credits">
         {L.settings.credits}
       </p>
     </SettingsSection>
@@ -548,19 +541,19 @@ const SETTINGS_SECTIONS = [
         RESET CONFIRMATION DIALOG
         ═════════════════════════════════════════════════════ */}
     <Dialog id="set-reset-dialog" title={`${L.settings.resetAll} ?`}>
-      <p class="text-text text-[1.3rem] leading-normal mb-[0.8rem]">
+      <p class="set__dialog-text">
         {L.settings.resetConfirmIntro}
-        <strong class="text-destructive font-bold"> {L.settings.resetConfirmIntroStrong}</strong> —
+        <strong class="text-destructive"> {L.settings.resetConfirmIntroStrong}</strong> —
         {L.settings.resetConfirmIntroList}
       </p>
-      <p class="text-muted text-[1.2rem] leading-normal mb-[0.8rem]">
-        {L.settings.resetConfirmAction} <strong class="text-destructive font-bold">SUPPRIMER</strong> {L.settings.resetConfirmActionOutro}
+      <p class="set__dialog-muted">
+        {L.settings.resetConfirmAction} <strong class="text-destructive">SUPPRIMER</strong> {L.settings.resetConfirmActionOutro}
         {L.settings.resetIrreversible}
       </p>
-      <div class="mt-[1.2rem]">
+      <div class="set__dialog-input-wrap">
         <input
           type="text"
-          class="set__confirm-input w-full h-[4.4rem] px-[1.4rem] bg-bg border border-border rounded-[var(--radius-sm)] text-text font-body text-[1.4rem] font-semibold tracking-[0.08em] text-center outline-none transition-[border-color,box-shadow] duration-[140ms]"
+          class="set__confirm-input"
           placeholder="SUPPRIMER"
           x-model="resetConfirmText"
           autocomplete="off"
@@ -591,8 +584,8 @@ const SETTINGS_SECTIONS = [
         WEBDAV RESTORE CONFIRMATION DIALOG
         ═════════════════════════════════════════════════════ */}
     <Dialog id="set-restore-dialog" title={L.settings.sync.restoreTitle}>
-      <p class="text-text text-[1.3rem] leading-normal mb-[0.8rem]">{L.settings.sync.restoreBody}</p>
-      <p class="text-muted text-[1.2rem] leading-normal mb-[0.8rem]">
+      <p class="set__dialog-text">{L.settings.sync.restoreBody}</p>
+      <p class="set__dialog-muted">
         {L.settings.sync.restoreIrreversible}
       </p>
 
@@ -654,7 +647,6 @@ const SETTINGS_SECTIONS = [
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    // Defer revoke so the download has time to start in Safari/Firefox.
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
@@ -663,7 +655,6 @@ const SETTINGS_SECTIONS = [
     const Alpine = (window as any).Alpine;
 
     Alpine.data('settingsApp', () => ({
-      // ── State ──
       display: getSettings(),
       exporting: false,
       exportingCsv: false,
@@ -715,9 +706,7 @@ const SETTINGS_SECTIONS = [
         syncError: LABELS.settings.sync.error,
       },
 
-      // ── Init ──
       init() {
-        // Re-sync in case another tab/page wrote new defaults.
         this.display = getSettings();
         this.weeklyDone = getSessionsThisWeek().length;
         this.syncForm = {
@@ -741,7 +730,6 @@ const SETTINGS_SECTIONS = [
         );
       },
 
-      // ── Profile (auto-save on change) ──
       savePseudo() {
         this.display = updateSettings({ pseudo: this.display.pseudo.trim() });
         this.toastSaved();
@@ -752,7 +740,6 @@ const SETTINGS_SECTIONS = [
         this.toastSaved();
       },
 
-      // ── Units (auto-save) ──
       setUnit(unit: 'kg' | 'lbs') {
         if (this.display.unit === unit) return;
         this.display = updateSettings({ unit });
@@ -765,7 +752,6 @@ const SETTINGS_SECTIONS = [
         this.toastSaved();
       },
 
-      // ── Timer (auto-save on change) ──
       saveRestTime(value: string) {
         const rest = parseInt(value, 10);
         if (!Number.isFinite(rest) || rest < 5 || rest > 3600) return;
@@ -780,10 +766,7 @@ const SETTINGS_SECTIONS = [
         this.toastSaved();
       },
 
-      // ── Weekly goal (auto-save on change) ──
       setWeeklyGoal(value: number) {
-        // Clamp into [1, 7] and reject NaN. The input's min/max attributes
-        // already constrain the UI, but be defensive.
         if (!Number.isFinite(value)) return;
         const next = Math.min(7, Math.max(1, Math.round(value)));
         if (this.display.weeklyGoal === next) return;
@@ -791,7 +774,6 @@ const SETTINGS_SECTIONS = [
         window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
       },
 
-      // ── Data ──
       exportData() {
         this.exporting = true;
         try {
@@ -841,13 +823,12 @@ const SETTINGS_SECTIONS = [
       },
 
       triggerImport() {
-        // The hidden <input type="file"> is the sibling of the trigger button.
         const root = (this as unknown as AlpineMagicThis).$root;
         const input = root.querySelector<HTMLInputElement>(
           '.set__file-input',
         );
         if (input) {
-          input.value = ''; // allow re-selecting the same file
+          input.value = '';
           input.click();
         }
       },
@@ -899,17 +880,11 @@ const SETTINGS_SECTIONS = [
         window.showToast(this.labels.allDataReset, 'success');
       },
 
-      // ── WebDAV sync ──
       saveSyncFields() {
-        // Persists the current sync form; an empty url clears the stored
-        // connection, a complete url marks it configured.
         this.persistSyncConfig();
         this.toastSaved();
       },
 
-      /** Persists the current sync form into Settings and refreshes the
-       *  configured flag + last-sync label. Keeps the timestamp when the
-       *  connection is kept, clears it when the URL is emptied. */
       persistSyncConfig() {
         const url = this.syncForm.url.trim();
         this.display = updateSettings({
@@ -926,7 +901,6 @@ const SETTINGS_SECTIONS = [
         );
       },
 
-      /** Persists the sync form and stamps a fresh success timestamp. */
       persistSyncConfigWithNow() {
         this.display = updateSettings({
           webdav: {
@@ -958,7 +932,6 @@ const SETTINGS_SECTIONS = [
           }
           return label;
         }
-        // Plain errors (e.g. importAllData validation) carry their message.
         return err instanceof Error && err.message
           ? err.message
           : this.labels.syncFallback;
@@ -1005,8 +978,6 @@ const SETTINGS_SECTIONS = [
             this.syncForm.password,
             snapshot,
           );
-          // Last-write-wins: record the successful push so the status line
-          // reflects the most recent sync.
           this.persistSyncConfigWithNow();
           window.showToast(this.labels.syncPushed, 'success');
         } catch (err) {
@@ -1032,7 +1003,6 @@ const SETTINGS_SECTIONS = [
             this.syncForm.username,
             this.syncForm.password,
           );
-          // Destructive: replaces all local data with the remote backup.
           importAllData(snapshot);
           this.display = getSettings();
           this.persistSyncConfigWithNow();
@@ -1045,7 +1015,6 @@ const SETTINGS_SECTIONS = [
         }
       },
 
-      // ── Dialog helpers ──
       openDialogById(id: string) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fn = (window as any).openDialog as ((i: string) => void) | undefined;
@@ -1062,36 +1031,126 @@ const SETTINGS_SECTIONS = [
 
 <style>
   /* ═════════════════════════════════════════════════════
-     Custom CSS that can't be Tailwind utility classes
+     Settings page scoped styles (BEM: set__*)
      ═════════════════════════════════════════════════════ */
 
-  /* Anchors targeted by the bottom bar: keep the heading clear of the
-     sticky topbar when scrolled into view. */
-  .set__section {
-    scroll-margin-top: calc(var(--topbar-height, 5.6rem) + 1rem);
+  .set {
+    padding-bottom: calc(var(--bottom-nav-height, 5.6rem) + 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
   }
 
-  /* SVG sizing inside icon containers (can't add classes to
-     dynamically generated SVGs via Fragment set:html). */
-  .set__heading-icon svg,
-  .set__data-tile-icon svg {
-    width: 1.8rem;
-    height: 1.8rem;
+  /* ── Rows ── */
+  .set__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 1.2rem;
   }
 
-  /* Toggle switch — custom checked/focus sibling selectors */
-  .set__toggle-input:checked + .set__toggle-track {
-    background-color: var(--color-accent);
+  .set__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--alpha-bg-soft);
+  }
+  .set__row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .set__row:first-child {
+    padding-top: 0;
+  }
+  .set__row--start {
+    align-items: flex-start;
+  }
+
+  /* ── Label ── */
+  .set__label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    min-width: 0;
+    flex: 1;
+  }
+  .set__label-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+  .set__label-desc {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.3;
+  }
+
+  /* ── Control ── */
+  .set__control {
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 24rem;
+  }
+  .set__control--right {
+    text-align: right;
+    font-size: 1.3rem;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Sync input (used for pseudo, email, webdav fields) ── */
+  .set__sync-input {
+    width: 100%;
+    height: 4.4rem;
+    padding: 0 0.75rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .set__sync-input::placeholder {
+    color: var(--color-muted);
+  }
+  .set__sync-input:focus {
     border-color: var(--color-accent);
-  }
-  .set__toggle-input:checked + .set__toggle-track .set__toggle-thumb {
-    transform: translateX(20px);
-  }
-  .set__toggle-input:focus-visible + .set__toggle-track {
     box-shadow: var(--focus-ring);
   }
 
-  /* Segmented button — active/hover/focus states (Alpine :class toggle) */
+  /* ── Segmented control ── */
+  .set__seg-group {
+    display: inline-flex;
+    padding: 0.3rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 9999px;
+  }
+  .set__seg-btn {
+    appearance: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0 1rem;
+    height: 4.4rem;
+    min-width: 6.4rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  }
   .set__seg-btn.is-active {
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
@@ -1110,47 +1169,468 @@ const SETTINGS_SECTIONS = [
     box-shadow: var(--focus-ring);
   }
 
-  /* Goal input wrap — focus-within ring */
-  .set__goal-input-wrap:focus-within {
+  /* ── Goal input ── */
+  .set__goal-wrap {
+    display: inline-flex;
+    align-items: stretch;
+    height: 4.4rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .set__goal-wrap:focus-within {
     border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
   }
-
-  /* Goal step hover/active */
-  .set__goal-step:hover {
+  .set__goal-btn {
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    color: var(--color-muted);
+    width: 4.4rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 140ms ease, color 140ms ease;
+  }
+  .set__goal-btn:hover {
     background-color: var(--alpha-bg-subtle);
     color: var(--color-text);
   }
-  .set__goal-step:active {
+  .set__goal-btn:active {
     background-color: var(--alpha-bg-hover);
   }
-
-  /* Goal input — webkit number spinner hiding */
+  .set__goal-input {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+    width: 5.2rem;
+    flex-shrink: 0;
+    border: 0;
+    border-left: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+    background-color: transparent;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    outline: none;
+    padding: 0;
+    line-height: 1;
+  }
   .set__goal-input::-webkit-outer-spin-button,
   .set__goal-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
 
-  /* Data button — hover:not(:disabled) */
-  .set__data-btn:hover:not(:disabled) {
+  /* ── Progress display ── */
+  .set__progress {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
+  }
+  .set__progress-done {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1;
+  }
+  .set__progress-sep {
+    color: var(--color-muted);
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin: 0 0.1rem;
+  }
+  .set__progress-goal {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+  }
+  .set__progress-unit {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    font-weight: 500;
+    margin-left: 0.3rem;
+  }
+  .set__progress-plural {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    font-weight: 500;
+    margin-left: 0.3rem;
+  }
+
+  /* ── Toggle switch ── */
+  .set__toggle {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    min-height: 4.4rem;
+  }
+  .set__toggle-track {
+    position: relative;
+    width: 4.4rem;
+    height: 2.4rem;
+    border-radius: 9999px;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    transition: background-color 200ms ease, border-color 200ms ease;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+  .set__toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 9999px;
+    background-color: white;
+    transition: transform 200ms ease;
+    box-shadow: var(--shadow-1);
+    display: inline-block;
+  }
+  .set__toggle-input:checked + .set__toggle-track {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .set__toggle-input:checked + .set__toggle-track .set__toggle-thumb {
+    transform: translateX(20px);
+  }
+  .set__toggle-input:focus-visible + .set__toggle-track {
+    box-shadow: var(--focus-ring);
+  }
+
+  /* ── Data tiles ── */
+  .set__data-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    margin-top: 1.2rem;
+  }
+  .set__data-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 1.8rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+    position: relative;
+  }
+  .set__data-tile:hover {
+    border-color: var(--alpha-border);
+    box-shadow: var(--shadow-2);
+  }
+  .set__data-tile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+  .set__data-tile-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  }
+  .set__data-tile-icon :global(svg) {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+  .set__data-tile-content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  .set__data-tile-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+  .set__data-tile-desc {
+    font-size: 1.15rem;
+    color: var(--color-muted);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .set__data-tile-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 4.4rem;
+    padding: 0 1rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+  }
+  .set__data-tile-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .set__data-tile-btn:hover:not(:disabled) {
     background-color: var(--alpha-bg-soft);
     border-color: var(--alpha-border);
   }
 
-  /* Sync primary button — hover:not(:disabled) */
-  .set__sync-btn--primary:hover:not(:disabled) {
-    background-color: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
+  /* ── Danger zone ── */
+  .set__danger {
+    margin-top: 2.4rem;
+    padding: 1.25rem;
+    background-color: color-mix(in srgb, var(--color-destructive) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-destructive) 28%, transparent);
+    border-radius: var(--radius-md);
   }
-
-  /* Danger button — hover with color-mix */
+  .set__danger-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+  .set__danger-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 2.2rem;
+    padding: 0 0.5rem;
+    background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-destructive) 40%, transparent);
+    border-radius: var(--radius-sm);
+    color: var(--color-destructive);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+  }
+  .set__danger-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+  .set__danger-desc {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    line-height: 1.5;
+    margin-bottom: 1.4rem;
+  }
+  .set__danger-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    height: 4.4rem;
+    padding: 0 1.8rem;
+    background-color: transparent;
+    color: var(--color-destructive);
+    border: 1px solid color-mix(in srgb, var(--color-destructive) 50%, transparent);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  }
+  .set__danger-btn:active {
+    transform: scale(0.97);
+  }
   .set__danger-btn:hover {
     background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
     box-shadow: 0 4px 14px color-mix(in srgb, var(--color-destructive) 25%, transparent);
   }
 
-  /* Confirm input — placeholder + focus ring with color-mix */
+  /* ── Sync section ── */
+  .set__section {
+    scroll-margin-top: calc(var(--topbar-height, 5.6rem) + 1rem);
+  }
+  .set__heading-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  }
+  .set__heading-icon :global(svg) {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+  .set__sync-heading {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .set__sync-desc {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .set__sync-cors {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+  .set__sync-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    margin-top: 1.2rem;
+  }
+  .set__sync-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 1.2rem;
+  }
+  .set__sync-status-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .set__sync-status-value {
+    font-size: 1.25rem;
+    color: var(--color-text);
+  }
+  .set__sync-note {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+  .set__sync-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.4rem;
+  }
+  .set__sync-btn {
+    flex: 1 1 auto;
+    min-width: 12rem;
+  }
+
+  /* ── About section ── */
+  .set__about-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-top: 1.2rem;
+  }
+  .set__about-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--alpha-bg-soft);
+    gap: 1rem;
+  }
+  .set__about-row:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+  .set__about-dt {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    font-weight: 500;
+    margin: 0;
+  }
+  .set__about-dd {
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    color: var(--color-text);
+    font-weight: 600;
+    margin: 0;
+    text-align: right;
+  }
+  .set__about-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 1.5rem;
+    padding: 0 1rem;
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+    border-radius: 9999px;
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .set__about-credits {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--alpha-bg-soft);
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* ── Dialog ── */
+  .set__dialog-text {
+    color: var(--color-text);
+    font-size: 1.3rem;
+    line-height: 1.5;
+    margin-bottom: 0.8rem;
+  }
+  .set__dialog-muted {
+    color: var(--color-muted);
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin-bottom: 0.8rem;
+  }
+  .set__dialog-input-wrap {
+    margin-top: 1.2rem;
+  }
+  .set__confirm-input {
+    width: 100%;
+    height: 4.4rem;
+    padding: 0 1.4rem;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-align: center;
+    outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
   .set__confirm-input::placeholder {
     color: var(--alpha-text-faint);
     font-weight: 500;
@@ -1161,30 +1641,19 @@ const SETTINGS_SECTIONS = [
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-destructive) 25%, transparent);
   }
 
-  /* Sync input — focus ring */
-  .set__sync-input:focus {
-    border-color: var(--color-accent);
-    box-shadow: var(--focus-ring);
+  .text-destructive {
+    color: var(--color-destructive);
   }
 
-  /* About row — complex nth-child selectors for border cleanup */
-  .set__about-row:nth-last-child(-n + 2) {
-    border-bottom: none;
-  }
-
-  /* ═════════════════════════════════════════════════════
-     Responsive — SVG sizing
-     ═════════════════════════════════════════════════════ */
-  @media (max-width: 640px) {
-    .set__heading-icon svg,
-    .set__data-tile-icon svg {
-      width: 1.6rem;
-      height: 1.6rem;
-    }
-  }
-
-  /* About row — responsive border overrides (complex selectors) */
+  /* ── Responsive ── */
   @media (min-width: 640px) {
+    .set__data-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .set__about-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0 1.5rem;
+    }
     .set__about-row:nth-last-child(-n + 2) {
       border-bottom: 1px solid var(--alpha-bg-soft);
     }
@@ -1192,18 +1661,46 @@ const SETTINGS_SECTIONS = [
       border-bottom: none;
     }
   }
-
-  /* ═════════════════════════════════════════════════════
-     Reduced motion
-     ═════════════════════════════════════════════════════ */
-  @media (prefers-reduced-motion: reduce) {
-    .set__seg-btn,
-    .set__data-btn,
-    .set__danger-btn,
-    .set__goal-step,
-    .set__toggle-track,
-    .set__toggle-thumb {
-      transition: none;
+  @media (min-width: 1024px) {
+    .set__data-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 640px) {
+    .set {
+      gap: 1.4rem;
+    }
+    .set__row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .set__seg-group {
+      align-self: flex-start;
+    }
+    .set__data-tile {
+      padding: 1.4rem;
+    }
+    .set__data-tile-icon {
+      width: 3.2rem;
+      height: 3.2rem;
+    }
+    .set__data-tile-icon :global(svg) {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+    .set__heading-icon :global(svg) {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+    .set__control {
+      max-width: 100%;
+    }
+    .set__danger {
+      padding: 1.6rem;
+    }
+    .set__data-tile-header {
+      gap: 1rem;
     }
   }
 </style>

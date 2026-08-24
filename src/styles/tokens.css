@@ -1,7 +1,6 @@
-@import "tailwindcss";
-
-@theme {
-  /* Colors mapped to Tailwind v4 namespace */
+/* ── CSS Custom Properties (design tokens) ── */
+:root {
+  /* Colors */
   --color-bg: #080B0F;
   --color-surface: #0D1218;
   --color-surface-2: #131A22;
@@ -13,16 +12,13 @@
   --color-accent-foreground: #1B1005;
   --color-border-strong: hsl(0 0% 100% / 0.16);
   --color-success: #22C55E;
-  /* Deep-green foreground for text/icons sitting on the success fill. */
   --color-success-foreground: hsl(150 90% 10%);
   --color-destructive: #EF4444;
   --color-warning: #EAB308;
   --color-info: #3B82F6;
   --color-border: hsl(0 0% 100% / 0.08);
 
-  /* Stat hues — one hue per dashboard stat category. Hue carries
-     meaning: green = volume, purple = PRs, amber = streak, blue =
-     sessions. Each has a soft tinted background for icon discs. */
+  /* Stat hues */
   --color-stat-volume: hsl(152 60% 42%);
   --color-stat-volume-bg: hsl(152 60% 42% / 0.10);
   --color-stat-pr: hsl(270 60% 55%);
@@ -32,13 +28,7 @@
   --color-stat-sessions: hsl(200 80% 50%);
   --color-stat-sessions-bg: hsl(200 80% 50% / 0.10);
 
-  /* Muscle category hues — one hue family per muscle group (see the
-     MUSCLE_TONE map in src/lib/colors.ts). 12 stored muscle groups
-     collapse into 6 families so the language stays compact. Hues are
-     the same families as the volume-donut palette (MUSCLE_PALETTE in
-     progression/stats.astro): chest=rose, back=indigo, shoulders=
-     bronze, arms=teal, legs=green, core=purple. Each has a 10% wash
-     (-bg) for badge/pill backgrounds. */
+  /* Muscle category hues */
   --color-cat-chest: hsl(345 65% 58%);
   --color-cat-chest-bg: hsl(345 65% 58% / 0.10);
   --color-cat-back: hsl(240 55% 62%);
@@ -52,10 +42,7 @@
   --color-cat-core: hsl(265 50% 60%);
   --color-cat-core-bg: hsl(265 50% 60% / 0.10);
 
-  /* Superset group hues g1..g5 — the builder/detail group palette,
-     previously hardcoded hexes (#D97706, #38BDF8, #A855F7, #22C55E,
-     #F472B6), now tokenized. Same hues, dark theme tuned for text
-     contrast; -bg variants are the same 10% wash as the stat hues. */
+  /* Superset group hues */
   --color-superset-g1: hsl(38 95% 45%);
   --color-superset-g1-bg: hsl(38 95% 45% / 0.10);
   --color-superset-g2: hsl(198 93% 60%);
@@ -86,18 +73,11 @@
   /* Typography */
   --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
 
-/* ── Raw CSS variables (for use outside Tailwind utilities) ── */
-:root {
-  /* Shadows */
+  /* Shadows & transitions */
   --shadow-1: 0 1px 2px hsl(220 30% 2% / 0.28);
   --shadow-2: 0 12px 28px hsl(220 30% 2% / 0.22);
-
-  /* Focus ring */
   --focus-ring: 0 0 0 3px hsl(30 92% 58% / 0.42);
-
-  /* Transitions */
   --transition-fast: 140ms ease;
   --transition-base: 200ms ease;
   --transition-normal: 240ms ease;
@@ -112,26 +92,12 @@
   --page-padding-mobile: 1.6rem;
   --gap-card: 1.2rem;
   --gap-section: 1.6rem;
-
-  /* Shared panel surfaces. Keeping these semantic prevents each page from
-     inventing a slightly different card treatment. */
   --surface-panel: color-mix(in srgb, var(--color-surface) 88%, transparent);
   --surface-panel-elevated: color-mix(in srgb, var(--color-surface-2) 90%, transparent);
-
-  /* Typography anchors. Pages can share hierarchy without repeating
-     one-off clamp values or drifting line-height decisions. */
   --text-page-title: clamp(2.4rem, 4vw, 3.6rem);
   --text-page-title-leading: 1.02;
   --text-page-title-tracking: -0.03em;
-
-  /* Secondary text — referenced by some components. Falls back to
-     --color-muted when no override is provided. */
   --color-text-secondary: var(--color-muted);
-
-  /* Alpha overlays — translucent tints used for nested surfaces,
-     row hover states, inset highlights and faint borders. In the
-     dark theme they are white-on-dark; the light theme overrides
-     them to black-on-light so the same rule works on both. */
   --alpha-bg-subtle: hsl(0 0% 100% / 0.04);
   --alpha-bg-soft: hsl(0 0% 100% / 0.06);
   --alpha-bg-hover: hsl(0 0% 100% / 0.08);
@@ -139,11 +105,6 @@
   --alpha-border: hsl(0 0% 100% / 0.18);
   --alpha-text-faint: hsl(0 0% 100% / 0.25);
   --alpha-highlight: hsl(0 0% 100% / 0.22);
-
-  /* Decorative background (Background.astro) — “ambient” 2026
-     aesthetic: diffuse aurora fields, film grain and a soft
-     vignette. Low-contrast on purpose so content stays readable;
-     the light theme overrides the washes below. */
   --bg-aurora-1: hsl(30 92% 58% / 0.07);
   --bg-aurora-2: hsl(190 55% 48% / 0.07);
   --bg-aurora-3: hsl(260 48% 58% / 0.05);
@@ -154,12 +115,7 @@
   --bg-vignette: hsl(220 35% 2% / 0.52);
 }
 
-/* ── Light theme override ────────────────────────────────────
- * Activated by setting `data-theme="light"` on <html> (see
- * AppLayout.astro init script + AppShell toggle button). Keeps
- * the same variable names as the dark default so every component
- * switches automatically. The accent remains warm and restrained on
- * both surfaces. */
+/* ── Light theme override ── */
 [data-theme="light"] {
   --color-bg: #F5F7F5;
   --color-surface: #FFFFFF;
@@ -170,13 +126,7 @@
   --color-text: #172018;
   --color-text-secondary: #4C5A4E;
   --color-muted: #68766A;
-  /* Accent + state colors stay the same — they have enough contrast
-     on either surface to remain readable. The accent stays warm and the success fill stays
-     #22C55E, so the dark-green foreground reads on it unchanged. */
   --color-success-foreground: hsl(150 90% 10%);
-
-  /* Stat hues flip darker/less saturated so they keep contrast on the
-     near-white surfaces; tinted backgrounds get a lighter wash. */
   --color-stat-volume: hsl(152 55% 35%);
   --color-stat-volume-bg: hsl(152 55% 35% / 0.10);
   --color-stat-pr: hsl(270 50% 45%);
@@ -185,9 +135,6 @@
   --color-stat-streak-bg: hsl(38 85% 40% / 0.10);
   --color-stat-sessions: hsl(200 70% 40%);
   --color-stat-sessions-bg: hsl(200 70% 40% / 0.10);
-
-  /* Muscle category hues flip darker/less saturated so they keep
-     contrast on the near-white surfaces. */
   --color-cat-chest: hsl(345 60% 40%);
   --color-cat-chest-bg: hsl(345 60% 40% / 0.10);
   --color-cat-back: hsl(240 50% 42%);
@@ -200,8 +147,6 @@
   --color-cat-legs-bg: hsl(170 50% 34% / 0.10);
   --color-cat-core: hsl(265 45% 44%);
   --color-cat-core-bg: hsl(265 45% 44% / 0.10);
-
-  /* Superset group hues flip darker so they stay readable on white. */
   --color-superset-g1: hsl(38 85% 40%);
   --color-superset-g1-bg: hsl(38 85% 40% / 0.10);
   --color-superset-g2: hsl(198 85% 42%);
@@ -212,9 +157,6 @@
   --color-superset-g4-bg: hsl(142 65% 36% / 0.10);
   --color-superset-g5: hsl(329 80% 55%);
   --color-superset-g5-bg: hsl(329 80% 55% / 0.10);
-
-  /* Alpha overlays flip from white-on-dark to black-on-light so the
-     nested surfaces / hovers / borders keep their contrast. */
   --alpha-bg-subtle: hsl(0 0% 0% / 0.03);
   --alpha-bg-soft: hsl(0 0% 0% / 0.05);
   --alpha-bg-hover: hsl(0 0% 0% / 0.07);
@@ -222,14 +164,8 @@
   --alpha-border: hsl(0 0% 0% / 0.14);
   --alpha-text-faint: hsl(0 0% 0% / 0.22);
   --alpha-highlight: hsl(0 0% 100% / 0.0);
-
-  /* Softer shadows in light mode — pure black shadows read heavy
-     on a white surface. */
   --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.08);
   --shadow-2: 0 6px 14px hsl(0 0% 0% / 0.08);
-
-  /* Aurora washes flip to lighter, lower-contrast pastels so the
-     glow stays airy on the near-white surfaces. */
   --bg-aurora-1: hsl(30 78% 46% / 0.08);
   --bg-aurora-2: hsl(190 45% 42% / 0.06);
   --bg-aurora-3: hsl(260 42% 52% / 0.05);

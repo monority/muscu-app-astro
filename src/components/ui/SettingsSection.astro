@@ -1,6 +1,6 @@
 ---
-import Icon from './Icon/Icon.astro';
-import Card from './Card/Card.astro';
+import Icon from './Icon.astro';
+import Card from './Card.astro';
 import CardHeader from './CardHeader.astro';
 import CardTitle from './CardTitle.astro';
 import CardContent from './CardContent.astro';
@@ -17,16 +17,16 @@ interface Props {
 const { icon, title, description, id, class: className = '' } = Astro.props;
 ---
 
-<section class:list={['set__section', className]} id={id}>
+<section class:list={['settings-section', className]} id={id}>
   <Card>
     <CardHeader>
-      <div class="flex items-center gap-4 min-w-0">
-        <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] max-sm:w-[3.2rem] max-sm:h-[3.2rem] shrink-0 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)]" aria-hidden="true">
+      <div class="settings-section__heading">
+        <span class="settings-section__icon" aria-hidden="true">
           <Icon name={icon} size={24} />
         </span>
         <CardTitle>{title}</CardTitle>
       </div>
-      {description && <p class="text-[1.2rem] text-[var(--color-muted)] m-0 leading-[1.4]">{description}</p>}
+      {description && <p class="settings-section__desc">{description}</p>}
     </CardHeader>
     <CardContent>
       <slot />
@@ -35,8 +35,42 @@ const { icon, title, description, id, class: className = '' } = Astro.props;
 </section>
 
 <style>
-  .set__heading-icon :global(svg) {
+  .settings-section__heading {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+    min-width: 0;
+  }
+
+  .settings-section__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  }
+
+  .settings-section__icon :global(svg) {
     width: 1.8rem;
     height: 1.8rem;
+  }
+
+  .settings-section__desc {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 480px) {
+    .settings-section__icon {
+      width: 3.2rem;
+      height: 3.2rem;
+    }
   }
 </style>

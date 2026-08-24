@@ -1,25 +1,12 @@
 ---
 /**
- * Session reminders â€” settings card + notification watcher.
- *
- * Follows the settings page conventions (Card primitives, CSS vars,
- * auto-save via `updateSettings`). The Alpine data registered below
- * both drives the form AND runs the reminder watcher: an immediate
- * check on page load plus a 30s interval. A reminder fires only when
- * the current day + minute match a configured slot, no session has
- * been completed today, and the same slot wasn't already notified
- * (cooldown persisted in localStorage + module-level fallback).
- *
- * Notification permission is requested ONLY when the user clicks the
- * explicit "Activer les notifications" button â€” never on page load.
- * When permission is not granted, the reminder falls back to the
- * in-app toast (`window.showToast`).
+ * Session reminders — settings card + notification watcher.
  */
-import Card from '../ui/Card/Card.astro';
+import Card from '../ui/Card.astro';
 import CardHeader from '../ui/CardHeader.astro';
 import CardTitle from '../ui/CardTitle.astro';
 import CardContent from '../ui/CardContent.astro';
-import Button from '../ui/Button/Button.astro';
+import Button from '../ui/Button.astro';
 import Toggle from '../ui/Toggle.astro';
 import { t } from '../../i18n';
 import { icons } from '../../lib/icons';
@@ -28,7 +15,7 @@ const L = t();
 ---
 
 <section
-  class="scroll-mt-[calc(var(--topbar-height,6.4rem)+1rem)]"
+  class="rem"
   id="set-reminder"
   x-data="reminderSettings()"
   x-init="init()"
@@ -36,24 +23,24 @@ const L = t();
 >
   <Card>
     <CardHeader>
-      <div class="flex items-center gap-4 min-w-0">
-        <span class="set__heading-icon inline-flex items-center justify-center w-[3.6rem] h-[3.6rem] shrink-0 text-[var(--color-accent)] rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--color-accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] max-[480px]:w-[3.2rem] max-[480px]:h-[3.2rem]" aria-hidden="true">
+      <div class="rem__heading">
+        <span class="rem__heading-icon" aria-hidden="true">
           <Fragment set:html={icons.bell(24, 24)} />
         </span>
         <CardTitle>{L.settings.reminders}</CardTitle>
       </div>
-      <p class="text-[1.2rem] text-[var(--color-muted)] m-0 leading-normal">{L.settings.remindersDesc}</p>
+      <p class="rem__heading-desc">{L.settings.remindersDesc}</p>
     </CardHeader>
 
     <CardContent>
-      <div class="rem__rows flex flex-col gap-0 mt-[1.2rem]" :class="{ 'rem__rows--disabled': !settings.reminders.enabled }">
-        {/* â”€â”€ Master toggle â”€â”€ */}
-        <div class="rem__row flex items-center justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
-          <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderToggleLabel}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.reminderToggleDesc}</span>
+      <div class="rem__rows" :class="{ 'rem__rows--disabled': !settings.reminders.enabled }">
+        {/* ── Master toggle ── */}
+        <div class="rem__row">
+          <div class="rem__row-label">
+            <span class="rem__row-title">{L.settings.reminderToggleLabel}</span>
+            <span class="rem__row-desc">{L.settings.reminderToggleDesc}</span>
           </div>
-          <div class="rem__row-value shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums">
+          <div class="rem__row-value">
             <Toggle
               :checked="settings.reminders.enabled"
               :aria-checked="settings.reminders.enabled ? 'true' : 'false'"
@@ -62,18 +49,18 @@ const L = t();
           </div>
         </div>
 
-        {/* â”€â”€ Day-of-week pickers â”€â”€ */}
-        <div class="rem__row rem__row--form flex items-start justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
-          <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderDaysLabel}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.reminderDaysDesc}</span>
+        {/* ── Day-of-week pickers ── */}
+        <div class="rem__row rem__row--form">
+          <div class="rem__row-label">
+            <span class="rem__row-title">{L.settings.reminderDaysLabel}</span>
+            <span class="rem__row-desc">{L.settings.reminderDaysDesc}</span>
           </div>
-          <div class="rem__row-value--days shrink-0 max-w-[24rem]">
-            <div class="rem__days flex flex-wrap gap-2 justify-end max-[480px]:justify-start" role="group" :aria-disabled="!settings.reminders.enabled">
+          <div class="rem__row-value rem__row-value--days">
+            <div class="rem__days" role="group" :aria-disabled="!settings.reminders.enabled">
               <template x-for="d in days" :key="d.v">
                 <button
                   type="button"
-                  class="rem__day appearance-none bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-pill)] text-[var(--color-muted)] text-[var(--font-body)] text-[1.1rem] font-bold tracking-[0.02em] h-[4.4rem] min-w-[4.8rem] px-[0.8rem] cursor-pointer transition-[background-color,color,border-color,transform] duration-[var(--transition-fast)]"
+                  class="rem__day"
                   :class="{ 'rem__day--active': settings.reminders.days.includes(d.v) }"
                   :aria-pressed="settings.reminders.days.includes(d.v)"
                   :disabled="!settings.reminders.enabled"
@@ -85,16 +72,16 @@ const L = t();
           </div>
         </div>
 
-        {/* â”€â”€ Time input â”€â”€ */}
-        <div class="rem__row rem__row--form flex items-start justify-between gap-8 py-[1.6rem] border-b border-[var(--alpha-bg-soft)] first:pt-0 last:border-b-0 last:pb-0">
-          <div class="rem__row-label flex flex-col gap-[var(--spacing-1)] min-w-0 flex-1">
-            <span class="text-[var(--font-display)] text-[1.4rem] font-semibold text-[var(--color-text)] leading-tight">{L.settings.reminderTimeLabel}</span>
-            <span class="text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.settings.reminderTimeDesc}</span>
+        {/* ── Time input ── */}
+        <div class="rem__row rem__row--form">
+          <div class="rem__row-label">
+            <span class="rem__row-title">{L.settings.reminderTimeLabel}</span>
+            <span class="rem__row-desc">{L.settings.reminderTimeDesc}</span>
           </div>
-          <div class="rem__row-value shrink-0 text-right text-[1.3rem] text-[var(--color-muted)] tabular-nums">
+          <div class="rem__row-value">
             <input
               type="time"
-              class="rem__time appearance-none bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-sm)] text-[var(--color-text)] text-[var(--font-display)] text-[1.4rem] font-bold tabular-nums h-[4.4rem] w-[12rem] px-[1.2rem] outline-none transition-[border-color,box-shadow] duration-[var(--transition-fast)]"
+              class="rem__time"
               :value="settings.reminders.time"
               :disabled="!settings.reminders.enabled"
               @change="setTime($event.target.value)"
@@ -103,16 +90,15 @@ const L = t();
           </div>
         </div>
 
-        {/* â”€â”€ Permission request / status (only when reminders are on) â”€â”€ */}
+        {/* ── Permission request / status ── */}
         <div
-          class="rem__status flex flex-col gap-[0.6rem] mt-[1.6rem] pt-[1.4rem] border-t border-[var(--alpha-bg-soft)]"
+          class="rem__status"
           x-show="settings.reminders.enabled"
           x-cloak
           x-transition.opacity.duration.200ms
         >
-          {/* Unsupported browser â†’ graceful info message */}
           <p
-            class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-muted)]"
+            class="rem__status-text"
             x-show="!supported"
             x-cloak
             x-text="labels.unsupported"
@@ -120,7 +106,6 @@ const L = t();
             {L.settings.reminderUnsupported}
           </p>
 
-          {/* Permission not yet asked â†’ explicit opt-in button */}
           <template x-if="supported && permission === 'default'">
             <div>
               <Button
@@ -134,9 +119,8 @@ const L = t();
             </div>
           </template>
 
-          {/* Granted */}
           <p
-            class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-success)] font-semibold"
+            class="rem__status-text rem__status-text--success"
             x-show="supported && permission === 'granted'"
             x-cloak
             x-text="labels.granted"
@@ -144,13 +128,12 @@ const L = t();
             {L.settings.reminderGranted}
           </p>
 
-          {/* Denied â†’ explain how to unblock */}
           <template x-if="supported && permission === 'denied'">
             <div>
-              <p class="rem__status-text text-[1.2rem] leading-[1.4] m-0 text-[var(--color-warning)] font-semibold" x-text="labels.denied">
+              <p class="rem__status-text rem__status-text--warning" x-text="labels.denied">
                 {L.settings.reminderDenied}
               </p>
-              <p class="text-[1.1rem] text-[var(--color-muted)] leading-[1.4] m-0" x-text="labels.deniedDesc">
+              <p class="rem__status-desc" x-text="labels.deniedDesc">
                 {L.settings.reminderDeniedDesc}
               </p>
             </div>
@@ -174,7 +157,6 @@ const L = t();
 
   const L = t();
 
-  // In-session cooldown fallback (also survives reloads via localStorage).
   let lastNotifiedSlot = '';
 
   document.addEventListener('alpine:init', () => {
@@ -183,7 +165,6 @@ const L = t();
 
     Alpine.data('reminderSettings', () => ({
       settings: getSettings(),
-      // Mon â†’ Sun UI order; values are Date#getDay() (0 = Sunday).
       days: [
         { v: 1, label: L.settings.reminderDayMon },
         { v: 2, label: L.settings.reminderDayTue },
@@ -207,15 +188,12 @@ const L = t();
       _timer: 0,
 
       init() {
-        // Re-sync in case another tab wrote defaults/settings.
         this.settings = getSettings();
         this.syncPermission();
-        // Immediate check on page load, then every 30s while open.
         this.check();
         this._timer = window.setInterval(() => this.check(), 30000);
       },
 
-      // â”€â”€ Notification permission â”€â”€
       syncPermission() {
         this.supported = typeof Notification !== 'undefined';
         this.permission = this.supported
@@ -241,7 +219,6 @@ const L = t();
         }
       },
 
-      // â”€â”€ Persistence (auto-save, unit/goal section pattern) â”€â”€
       setEnabled(checked: boolean) {
         this.settings = updateSettings({
           reminders: { ...this.settings.reminders, enabled: checked },
@@ -264,29 +241,23 @@ const L = t();
         });
       },
 
-      // â”€â”€ Reminder watcher â”€â”€
       check() {
         const r = this.settings?.reminders;
         if (!r || !r.enabled) return;
 
         const now = new Date();
-        // Day honored: only fire on configured days (getDay index).
         if (!r.days.includes(now.getDay())) return;
 
         const match = /^(\d{1,2}):(\d{2})$/.exec(r.time || '');
         if (!match) return;
         const slotMin = Number(match[1]) * 60 + Number(match[2]);
         const curMin = now.getHours() * 60 + now.getMinutes();
-        // Time honored to the minute (interval is 30s, minute equality
-        // can't be skipped).
         if (slotMin !== curMin) return;
 
-        // Cooldown: never re-notify the same slot (day + minute).
         const key = this.slotKey(now);
         if (lastNotifiedSlot === key) return;
         if (getStore<string>(STORAGE_KEYS.reminderNotified, '') === key) return;
 
-        // Skip when a session was already completed today.
         if (this.hasCompletedSessionToday(now)) return;
 
         lastNotifiedSlot = key;
@@ -314,16 +285,11 @@ const L = t();
               body: this.labels.notifBody,
               tag: 'muscu-reminder',
             });
-            // Notification created â€” a browser click focuses the app URL
-            // by default. Keeping the handle avoids an unused binding.
             void n;
             return;
           } catch {
-            // Permission type drift or blocked context â†’ toast fallback.
           }
         }
-        // In-app toast fallback when Notification API is unavailable or
-        // permission is not granted.
         if (typeof (window as { showToast?: (m: string, v?: string) => void }).showToast === 'function') {
           (window as { showToast?: (m: string, v?: string) => void }).showToast?.(
             this.labels.notifTitle,
@@ -336,14 +302,111 @@ const L = t();
 </script>
 
 <style>
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     STATE-DEPENDENT SELECTORS (cannot be Tailwind utilities)
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-  .rem__rows--disabled .rem__row-label,
-  .rem__rows--disabled .rem__row-title,
-  .rem__rows--disabled .rem__row-hint,
-  .rem__rows--disabled .rem__row-value {
-    opacity: 0.55;
+  .rem {
+    scroll-margin-top: calc(var(--topbar-height, 6.4rem) + 1rem);
+  }
+
+  .rem__heading {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+    min-width: 0;
+  }
+
+  .rem__heading-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    flex-shrink: 0;
+    color: var(--color-accent);
+    border-radius: var(--radius-md);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  }
+
+  .rem__heading-desc {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .rem__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 1.2rem;
+  }
+
+  .rem__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3.2rem;
+    padding: 1.6rem 0;
+    border-bottom: 1px solid var(--alpha-bg-soft);
+  }
+  .rem__row:first-child { padding-top: 0; }
+  .rem__row:last-child { border-bottom: 0; padding-bottom: 0; }
+
+  .rem__row-label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    min-width: 0;
+    flex: 1;
+  }
+
+  .rem__row-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .rem__row-desc {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.3;
+  }
+
+  .rem__row-value {
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 1.3rem;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rem__row-value--days {
+    max-width: 24rem;
+  }
+
+  .rem__days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: flex-end;
+  }
+
+  .rem__day {
+    appearance: none;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    height: 4.4rem;
+    min-width: 4.8rem;
+    padding: 0 0.8rem;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
   }
 
   .rem__day:hover:not(:disabled):not(.rem__day--active) {
@@ -355,7 +418,7 @@ const L = t();
     transform: scale(0.95);
   }
 
-  .rem__day.rem__day--active {
+  .rem__day--active {
     background-color: var(--color-accent);
     border-color: var(--color-accent);
     color: var(--color-accent-foreground);
@@ -370,6 +433,23 @@ const L = t();
   .rem__day:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .rem__time {
+    appearance: none;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    height: 4.4rem;
+    width: 12rem;
+    padding: 0 1.2rem;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   }
 
   .rem__time:focus:not(:disabled) {
@@ -387,9 +467,46 @@ const L = t();
     cursor: pointer;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     RESPONSIVE
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  .rem__status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1.6rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--alpha-bg-soft);
+  }
+
+  .rem__status-text {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .rem__status-text--success {
+    color: var(--color-success);
+    font-weight: 600;
+  }
+
+  .rem__status-text--warning {
+    color: var(--color-warning);
+    font-weight: 600;
+  }
+
+  .rem__status-desc {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .rem__rows--disabled .rem__row-label,
+  .rem__rows--disabled .rem__row-title,
+  .rem__rows--disabled .rem__row-desc,
+  .rem__rows--disabled .rem__row-value {
+    opacity: 0.55;
+  }
+
   @media (max-width: 640px) {
     .rem__row {
       flex-direction: column;
@@ -405,10 +522,13 @@ const L = t();
       max-width: 100%;
       width: 100%;
     }
+    .rem__days {
+      justify-content: flex-start;
+    }
+    .rem__heading-icon {
+      width: 3.2rem;
+      height: 3.2rem;
+    }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .rem__day,
-    .rem__time { transition: none; }
-  }
 </style>

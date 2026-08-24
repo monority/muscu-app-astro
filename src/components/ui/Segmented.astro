@@ -23,6 +23,9 @@ const {
   ariaLabel,
   class: className = '',
 } = Astro.props;
+
+/** Escape a string for safe injection into single-quoted Alpine expressions. */
+const escapeAlpine = (s: string) => s.replace(/'/g, "\\'");
 ---
 
 <div class:list={['seg', className]}
@@ -30,17 +33,20 @@ const {
   aria-label={ariaLabel}
 >
   {
-    items.map((item) => (
-      <button
-        type="button"
-        class="seg__btn"
-        :class={`{ 'is-active': ${model} === '${item.value}' }`}
-        @click={`${model} = '${item.value}'`}
-        :aria-pressed={`${model} === '${item.value}'`}
-      >
-        {item.label}
-      </button>
-    ))
+    items.map((item) => {
+      const escaped = escapeAlpine(item.value);
+      return (
+        <button
+          type="button"
+          class="seg__btn"
+          :class={`{ 'is-active': ${model} === '${escaped}' }`}
+          @click={`${model} = '${escaped}'`}
+          :aria-pressed={`${model} === '${escaped}'`}
+        >
+          {item.label}
+        </button>
+      );
+    })
   }
 </div>
 
@@ -100,10 +106,4 @@ const {
     }
   }
 
-  /* Respect reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .seg__btn {
-      transition: none;
-    }
-  }
 </style>

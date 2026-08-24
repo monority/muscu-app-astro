@@ -1,22 +1,21 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
-import Badge from '../../components/ui/Badge/Badge.astro';
-import Card from '../../components/ui/Card/Card.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import { icons } from '../../lib/icons';
-import Icon from '../../components/ui/Icon/Icon.astro';
+import Icon from '../../components/ui/Icon.astro';
 import { t, localizedPath } from '../../i18n';
 import BackLink from '../../components/ui/BackLink.astro';
-import Button from '../../components/ui/Button/Button.astro';
+import Button from '../../components/ui/Button.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
-import RestTimer from '../../components/workout/RestTimer.astro';
 
 const L = t();
 ---
 
 <AppLayout title={L.detail.title}>
   <div
-    class="flex flex-col gap-5 pb-24"
+    class="detail"
     x-data="sessionDetailApp()"
     x-init="init()"
     x-cloak
@@ -36,12 +35,12 @@ const L = t();
 
     {/* ── Loaded session ── */}
     <template x-if="!notFound && session">
-      <div class="flex flex-col gap-5">
+      <div class="detail__content">
         {/* Header */}
-        <header class="flex flex-col gap-2">
-          <div class="flex items-start justify-between gap-3 flex-wrap">
-            <h1 class="font-display text-[clamp(2.4rem,4.5vw,3.4rem)] font-bold leading-[1.1] text-text tracking-tight break-words" x-text="session.name"></h1>
-            <div class="inline-flex flex-col items-end gap-1 shrink-0">
+        <header class="detail__header">
+          <div class="detail__header-row">
+            <h1 class="detail__title" x-text="session.name"></h1>
+            <div class="detail__badges">
               <div x-show="session.status === 'completed'">
                 <Badge variant="success" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
               </div>
@@ -54,17 +53,17 @@ const L = t();
             </div>
           </div>
           <div
-            class="text-muted text-[1.3rem] capitalize"
+            class="detail__date"
             x-text="formatDateTime(session.date)"
           ></div>
         </header>
 
-        <div class="flex flex-col gap-2">
-          <label class="text-[1.1rem] text-muted uppercase tracking-[0.14em] font-bold leading-none" x-text="labels.statusLabel">{L.detail.statusLabel}</label>
-          <div class="grid grid-cols-1 gap-[0.6rem] min-[480px]:grid-cols-3" role="radiogroup" aria-label={L.detail.statusAria}>
+        <div class="detail__status-section">
+          <label class="detail__status-label" x-text="labels.statusLabel">{L.detail.statusLabel}</label>
+          <div class="detail__status-grid" role="group" aria-label={L.detail.statusAria}>
             <button
               type="button"
-              class="inline-flex items-center justify-center gap-[0.6rem] min-h-[4.4rem] px-3 bg-surface text-muted border border-border rounded-md font-body text-[1.3rem] font-bold tracking-[0.02em] leading-none cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] ease detail__status-btn"
+              class="detail__status-btn"
               :class="{ 'is-active': session.status === 'planned' }"
               :aria-pressed="session.status === 'planned'"
               @click="updateStatus('planned')"
@@ -74,7 +73,7 @@ const L = t();
             </button>
             <button
               type="button"
-              class="inline-flex items-center justify-center gap-[0.6rem] min-h-[4.4rem] px-3 bg-surface text-muted border border-border rounded-md font-body text-[1.3rem] font-bold tracking-[0.02em] leading-none cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] ease detail__status-btn"
+              class="detail__status-btn"
               :class="{ 'is-active': session.status === 'in-progress' }"
               :aria-pressed="session.status === 'in-progress'"
               @click="updateStatus('in-progress')"
@@ -84,7 +83,7 @@ const L = t();
             </button>
             <button
               type="button"
-              class="inline-flex items-center justify-center gap-[0.6rem] min-h-[4.4rem] px-3 bg-surface text-muted border border-border rounded-md font-body text-[1.3rem] font-bold tracking-[0.02em] leading-none cursor-pointer transition-[background-color,border-color,color,transform] duration-[140ms] ease detail__status-btn"
+              class="detail__status-btn"
               :class="{ 'is-active': session.status === 'completed' }"
               :aria-pressed="session.status === 'completed'"
               @click="updateStatus('completed')"
@@ -96,7 +95,7 @@ const L = t();
         </div>
 
         {/* Stats grid */}
-        <div class="grid grid-cols-1 gap-3 min-[640px]:grid-cols-3">
+        <div class="detail__stats-grid">
           <div class="detail__stat">
             <div class="detail__stat-label">
               <span class="detail__stat-icon" set:html={icons.clockStopwatch()} />
@@ -195,7 +194,7 @@ const L = t();
             </Button>
           </div>
 
-          <Button variant="secondary" size="md" disabled title={L.detail.comingSoon} aria-label={L.detail.editAria}>
+          <Button variant="secondary" size="md" href="#" :href="editHref()" aria-label={L.detail.editAria}>
             <Icon name="edit" size={20} />
             <span x-text="labels.edit">{L.detail.edit}</span>
           </Button>
@@ -325,17 +324,6 @@ const L = t();
                 <header class="exo-row__head">
                   <h3 class="exo-row__name" x-text="trExercise(ex.name)"></h3>
                   <div class="exo-row__head-actions">
-                    <button
-                      type="button"
-                      class="exo-row__rest"
-                      @click="startRestTimer(ex.name)"
-                      :aria-label="labels.startRestFor + ' ' + trName(ex)"
-                      :title="labels.recommendedRest + formatRestTime(getRestTime(ex.name))"
-                    >
-                      <Icon name="clock" size={20} />
-                      <span x-text="labels.startRest">{L.detail.startRest}</span>
-                      <span class="exo-row__rest-time" x-text="formatRestTime(getRestTime(ex.name))"></span>
-                    </button>
                     {/* ── Superset badge (added 2026-08-09) ──
                         Rendered from the persisted Session.supersets array.
                         Exercises sharing a group get the same colour and the
@@ -413,16 +401,22 @@ const L = t();
                               x-text="typeLabel(set.type)"
                             ></span>
                           </td>
-                          <td class="exo-row__num" x-text="formatWeight(set.weight)"></td>
-                          <td class="exo-row__num" x-text="set.reps"></td>
-                          <td x-text="formatSetRpe(set)"></td>
+                          <td class="exo-row__num exo-row__weight" x-text="formatWeight(set.weight)"></td>
+                          <td class="exo-row__num exo-row__reps" x-text="set.reps"></td>
+                          <td class="exo-row__rpe" :class="'exo-row__rpe--' + rpeTone(set.rpe)" x-text="formatSetRpe(set)"></td>
                           <td class="exo-row__td-end">
-                            <span class="exo-row__check" set:html={icons.check()} />
-                            <span
-                              x-show="!set.completed"
-                              class="exo-row__dash"
-                              aria-label={L.detail.setNotCompleted}
-                            >—</span>
+                            <template x-if="set.completed">
+                              <span
+                                class="exo-row__check"
+                                set:html={icons.check()}
+                              />
+                            </template>
+                            <template x-if="!set.completed">
+                              <span
+                                class="exo-row__dash"
+                                aria-label={L.detail.setNotCompleted}
+                              >—</span>
+                            </template>
                           </td>
                         </tr>
                       </template>
@@ -441,16 +435,6 @@ const L = t();
         </section>
       </div>
     </template>
-
-    {/* ════════════════════════════════════════════════════
-        REST TIMER WIDGET (added 2026-08-04)
-        Same widget as the session builder — pops up at the
-        bottom of the page when the user triggers a rest from
-        an exercise header. Duration is sourced from
-        `getRestTime(name)` so it matches the per-exercise
-        recommendation used elsewhere.
-        ════════════════════════════════════════════════════ */}
-    <RestTimer />
 
     <Dialog
       id="delete-session-dialog"
@@ -546,11 +530,10 @@ const L = t();
     type RpeType,
     type SetType,
   } from '../../lib/storage';
-  import { getRestTime, formatRestTime } from '../../lib/rest-times';
-  import { playBeep } from '../../lib/sound';
   import { t, localizedPath } from '../../i18n';
   import { formatDateTime, formatVolume, formatDuration } from '../../lib/format';
   import { statusLabel as statusLabelFn, type StatusLabels } from '../../lib/session-utils';
+  import { typeLabel as typeLabelFn, formatSetRpe as formatSetRpeFn, exerciseVolume as exerciseVolumeFn } from '../../lib/workout-helpers';
   import { moodSvg as moodSvgFn, moodLabel as moodLabelFn } from '../../lib/mood';
 
   const LABELS = t();
@@ -586,14 +569,14 @@ const L = t();
     return statusLabelFn(s, statusLabels);
   }
 
-  function typeLabelFn(t: SetType): string {
-    switch (t) {
-      case 'warmup': return LABELS.detail.typeWarmup;
-      case 'work':   return LABELS.detail.typeWork;
-      case 'top':    return LABELS.detail.typeTop;
-      case 'drop':   return LABELS.detail.typeDrop;
-      case 'failure': return LABELS.detail.typeFailure;
-    }
+  function typeLabelLocalized(t: SetType): string {
+    return typeLabelFn(t, {
+      warmup: LABELS.detail.typeWarmup,
+      work: LABELS.detail.typeWork,
+      top: LABELS.detail.typeTop,
+      drop: LABELS.detail.typeDrop,
+      failure: LABELS.detail.typeFailure,
+    });
   }
 
   function formatDateTimeFn(iso: string): string {
@@ -616,20 +599,6 @@ const L = t();
   function formatRpeFn(rpe: number): string {
     if (!Number.isFinite(rpe)) return '—';
     return rpe.toString();
-  }
-
-  /**
-   * Per-set RPE display label: "RPE 7.5" or "uRPE 7".
-   * Sets without a value render '—'. An absent rpeType falls back to
-   * plain RPE so sessions saved before uRPE existed render safely.
-   */
-  function formatSetRpeFn(
-    rpe: number | string | null | undefined,
-    rpeType?: RpeType,
-  ): string {
-    const v = typeof rpe === 'string' ? Number(rpe) : rpe;
-    if (v == null || !Number.isFinite(v)) return '—';
-    return (rpeType === 'urpe' ? 'uRPE ' : 'RPE ') + v.toString();
   }
 
   // ── Notes helpers (added 2026-08-04) ───────────────────────
@@ -684,20 +653,6 @@ const L = t();
       session: null as Session | null,
       sessionId: '',
       notFound: false,
-
-      // ── Rest timer (added 2026-08-04) ──
-      // User can re-trigger the per-exercise rest time from the
-      // detail view (e.g. for a live workout replay). The duration
-      // is sourced from `getRestTime(name)` so it matches the
-      // value the session builder uses.
-      restTimer: {
-        active: false,
-        exerciseName: '' as string,
-        duration: 0,
-        remaining: 0,
-        intervalId: null as number | null,
-        endTime: 0,
-      },
 
       // ── Init ──
       init() {
@@ -800,10 +755,7 @@ const L = t();
 
       // ── Helpers ──
       exerciseVolume(ex: SessionExercise): number {
-        return ex.sets.reduce(
-          (s, set) => s + (set.completed ? set.weight * set.reps : 0),
-          0,
-        );
+        return exerciseVolumeFn(ex);
       },
 
       best1RM(ex: SessionExercise): number {
@@ -870,7 +822,7 @@ const L = t();
       },
 
       typeLabel(t: SetType): string {
-        return typeLabelFn(t);
+        return typeLabelLocalized(t);
       },
 
       formatDateTime(iso: string): string {
@@ -930,111 +882,20 @@ const L = t();
         return moodLabelFn(mood);
       },
 
-      /**
-       * Rest-time helpers — re-exposed on the component so the
-       * template can bind `:title="'… ' + formatRestTime(getRestTime(ex.name))'"`
-       * without re-importing the library in the markup.
-       */
-      getRestTime(name: string): number {
-        return getRestTime(name);
-      },
-      formatRestTime(seconds: number): string {
-        return formatRestTime(seconds);
-      },
-
       // ── Actions ──
       quickSessionHref(): string {
         if (!this.session) return localizedPath('/sessions/quick');
         return `${localizedPath('/sessions/quick')}?session=${encodeURIComponent(this.session.id)}`;
       },
 
+      editHref(): string {
+        return `${localizedPath('/sessions/create')}?edit=${encodeURIComponent(this.session?.id || '')}`;
+      },
+
       updateStatus(status: SessionStatus) {
         if (!this.session) return;
         this.session.status = status;
         updateSession(this.session.id, { status });
-      },
-
-      // ── Rest timer (added 2026-08-04) ──
-      /**
-       * Starts the per-exercise rest timer. Mirrors the same logic
-       * as the session builder: the duration comes from
-       * `getRestTime(name)` and the widget label reads
-       * "Repos — <name> (M:SS)".
-       */
-      startRestTimer(exerciseName: string) {
-        this.cancelRestTimerTick();
-        const duration = getRestTime(exerciseName);
-        this.restTimer = {
-          active: true,
-          exerciseName,
-          duration,
-          remaining: duration,
-          intervalId: null,
-          endTime: Date.now() + duration * 1000,
-        };
-        this.restTimer.intervalId = window.setInterval(
-          () => this.tickRestTimer(),
-          1000,
-        );
-        this.tickRestTimer();
-      },
-
-      tickRestTimer() {
-        const remainingMs = Math.max(0, this.restTimer.endTime - Date.now());
-        const remainingSec = Math.ceil(remainingMs / 1000);
-        this.restTimer.remaining = remainingSec;
-        if (remainingMs <= 0) {
-          this.cancelRestTimerTick();
-          this.restTimer.remaining = 0;
-          if (this.isSoundEnabled()) this.beep();
-        }
-      },
-
-      cancelRestTimerTick() {
-        if (this.restTimer.intervalId != null) {
-          window.clearInterval(this.restTimer.intervalId);
-        }
-      },
-
-      dismissRestTimer() {
-        this.cancelRestTimerTick();
-        this.restTimer = {
-          active: false,
-          exerciseName: '',
-          duration: 0,
-          remaining: 0,
-          intervalId: null,
-          endTime: 0,
-        };
-      },
-
-      restTimerLabel(): string {
-        if (!this.restTimer.active) return '';
-        return `${LABELS.detail.restLabel}${this.restTimer.exerciseName} (${formatRestTime(this.restTimer.duration)})`;
-      },
-
-      restTimerDisplay(): string {
-        if (!this.restTimer.active) return '0:00';
-        return formatRestTime(this.restTimer.remaining);
-      },
-
-      get restTimerDone(): boolean {
-        return this.restTimer.active && this.restTimer.remaining <= 0;
-      },
-
-      isSoundEnabled(): boolean {
-        try {
-          const raw = localStorage.getItem('muscu-settings');
-          if (!raw) return true;
-          const parsed = JSON.parse(raw);
-          return parsed.soundAlerts !== false;
-        } catch {
-          return true;
-        }
-      },
-
-      beep(): void {
-        playBeep();
       },
 
       openDeleteDialog() {
@@ -1347,6 +1208,101 @@ const L = t();
 </script>
 
 <style>
+  /* ── Layout ── */
+  .detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 9.6rem;
+  }
+
+  .detail__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* ── Header ── */
+  .detail__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .detail__header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .detail__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 4.5vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
+    word-break: break-word;
+    margin: 0;
+  }
+
+  .detail__badges {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .detail__date {
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    text-transform: capitalize;
+  }
+
+  /* ── Status section ── */
+  .detail__status-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .detail__status-label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .detail__status-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  @media (min-width: 480px) {
+    .detail__status-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* ── Stats grid ── */
+  .detail__stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  @media (min-width: 640px) {
+    .detail__stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
   /* ════════════════════════════════════════════════════
      STATUS PICKER — Alpine dynamic states
      ════════════════════════════════════════════════════ */
@@ -1499,8 +1455,13 @@ const L = t();
      ════════════════════════════════════════════════════ */
   .detail__actions {
     display: flex;
+    align-items: center;
     gap: 0.8rem;
     flex-wrap: wrap;
+  }
+
+  .detail__actions > :global(.button) {
+    min-height: 4.4rem;
   }
 
   .detail__sheet {
@@ -1629,56 +1590,6 @@ const L = t();
     flex-wrap: wrap;
   }
 
-  .exo-row__rest {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: 4.4rem;
-    padding: 0 1.2rem;
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-    border-radius: var(--radius-pill);
-    color: var(--color-accent);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: background-color var(--transition-fast),
-                border-color var(--transition-fast),
-                color var(--transition-fast),
-                transform var(--transition-fast);
-  }
-
-  .exo-row__rest:hover {
-    background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
-    border-color: var(--color-accent);
-  }
-
-  .exo-row__rest:active {
-    transform: scale(0.97);
-  }
-
-  .exo-row__rest svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .exo-row__rest-time {
-    display: inline-flex;
-    align-items: center;
-    height: 2.2rem;
-    padding: 0 0.7rem;
-    background-color: var(--color-surface-3);
-    border-radius: var(--radius-pill);
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--color-text);
-  }
-
   /* ── Per-exercise stats ── */
   .exo-row__stats {
     display: flex;
@@ -1765,6 +1676,24 @@ const L = t();
     font-variant-numeric: tabular-nums;
     font-weight: 600;
   }
+
+  .exo-row__weight,
+  .exo-row__reps {
+    color: var(--color-text);
+    font-size: 1.4rem;
+  }
+
+  .exo-row__rpe {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .exo-row__rpe--easy { color: var(--color-success); }
+  .exo-row__rpe--moderate { color: var(--color-warning); }
+  .exo-row__rpe--hard { color: var(--color-accent); }
+  .exo-row__rpe--max { color: var(--color-destructive); }
+  .exo-row__rpe--none { color: var(--color-muted); }
 
   .exo-row__td-end {
     text-align: right;
@@ -2125,9 +2054,16 @@ const L = t();
      RESPONSIVE
      ════════════════════════════════════════════════════ */
   @media (max-width: 640px) {
-    .exo-row__table thead th:nth-child(5),
-    .exo-row__table tbody td:nth-child(5) {
-      display: none;
+    .detail__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .detail__actions > :global(.button),
+    .detail__sheet {
+      width: 100%;
+    }
+    .detail__sheet > :global(.button) {
+      flex: 1 1 0%;
     }
   }
 
@@ -2282,20 +2218,4 @@ const L = t();
     letter-spacing: 0.2em;
     font-weight: 600;
   }
-
-  /* ════════════════════════════════════════════════════
-     REDUCED MOTION
-     ════════════════════════════════════════════════════ */
-  @media (prefers-reduced-motion: reduce) {
-    .detail__error-link,
-    .notes__fatigue-icon,
-    .exo-row__rest,
-    .detail__status-btn {
-      transition: none;
-    }
-    .exo-row__rest:active,
-    .detail__status-btn:active {
-      transform: none;
-    }
-  }
-</style>
+</style>

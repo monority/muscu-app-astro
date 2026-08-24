@@ -3,10 +3,10 @@ interface Props {
   class?: string;
 }
 
-const { class: className = '' } = Astro.props;
+const { class: className = "" } = Astro.props;
 ---
 
-<h3 class:list={['card-title', className]}>
+<h3 class:list={["card-title", className]}>
   <slot />
 </h3>
 
@@ -16,6 +16,7 @@ const { class: className = '' } = Astro.props;
     gap: var(--spacing-1);
     font-family: var(--font-display);
     font-size: 1.4rem;
+    color: var(--color-text);
     font-weight: 700;
   }
 </style>

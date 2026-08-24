@@ -6,6 +6,7 @@ interface Props {
   label: string;
   title?: string;
   class?: string;
+  disabled?: boolean;
   [key: string]: unknown;
 }
 
@@ -16,6 +17,7 @@ const {
   label,
   title,
   class: className = '',
+  disabled,
   ...rest
 } = Astro.props;
 
@@ -33,11 +35,12 @@ const variantClasses = {
 ---
 
 <button
+  {...rest}
   type="button"
   class:list={['icon-btn', sizeClasses[size], variantClasses[variant], className]}
   aria-label={label}
   title={title ?? label}
-  {...rest}
+  disabled={disabled}
 >
   <Fragment set:html={icon} />
 </button>
@@ -52,6 +55,7 @@ const variantClasses = {
     background: transparent;
     color: var(--color-muted);
     cursor: pointer;
+    appearance: none;
     transition:
       background-color var(--transition-fast),
       color var(--transition-fast),
@@ -64,13 +68,17 @@ const variantClasses = {
     flex-shrink: 0;
   }
   .icon-btn--sm {
-    min-width: 3.2rem;
-    min-height: 3.2rem;
+    min-width: 4.4rem;
+    min-height: 4.4rem;
     padding: 0.4rem;
   }
+  .icon-btn--sm :global(svg) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
   .icon-btn--md {
-    min-width: 3.6rem;
-    min-height: 3.6rem;
+    min-width: 4.4rem;
+    min-height: 4.4rem;
     padding: 0.6rem;
   }
   .icon-btn:hover {
@@ -102,5 +110,9 @@ const variantClasses = {
   .icon-btn:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
+  }
+  .icon-btn.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 </style>

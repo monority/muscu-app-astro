@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,7 +16,6 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [tailwindcss()],
   legacy: {
     // Dev-only: Vite 6.0.9+ rejects HMR WebSocket upgrades whose ?token= was
     // issued by a previous dev-server instance. After a server restart, pages

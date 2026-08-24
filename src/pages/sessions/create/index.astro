@@ -1,12 +1,13 @@
-﻿---
+---
 import AppLayout from "../../../layouts/AppLayout.astro";
 import PageHeader from "../../../components/layout/PageHeader.astro";
-import Card from "../../../components/ui/Card/Card.astro";
+import Card from "../../../components/ui/Card.astro";
 import CardHeader from "../../../components/ui/CardHeader.astro";
 import CardTitle from "../../../components/ui/CardTitle.astro";
 import CardContent from "../../../components/ui/CardContent.astro";
-import Badge from "../../../components/ui/Badge/Badge.astro";
-import Button from "../../../components/ui/Button/Button.astro";
+import Badge from "../../../components/ui/Badge.astro";
+import Button from "../../../components/ui/Button.astro";
+import IconButton from "../../../components/ui/IconButton.astro";
 import Input from "../../../components/ui/Input.astro";
 import Dialog from "../../../components/ui/Dialog.astro";
 import { TRAINING_TEMPLATES } from "../../../lib/templates";
@@ -17,14 +18,11 @@ import {
   trTemplateDesc,
 } from "../../../i18n";
 import { icons } from "../../../lib/icons";
-import Icon from "../../../components/ui/Icon/Icon.astro";
-import RestTimer from "../../../components/workout/RestTimer.astro";
+import Icon from "../../../components/ui/Icon.astro";
 
 const L = t();
-/**
- * Set types (mirrors SessionSet['type'] in src/lib/storage.ts).
- * Labels are localised to French for the in-row selector.
- */
+const editId = Astro.url.searchParams.get("edit");
+const isEditMode = Boolean(editId);
 const setTypes = [
   { value: "warmup", label: L.builder.types.warmup },
   { value: "work", label: L.builder.types.work },
@@ -34,42 +32,47 @@ const setTypes = [
 ] as const;
 ---
 
-<AppLayout title={L.builder.title}>
-  <PageHeader title={L.builder.title} description={L.builder.description} />
+<AppLayout title={isEditMode ? L.builder.editTitle : L.builder.title}>
+  <PageHeader
+    title={isEditMode ? L.builder.editTitle : L.builder.title}
+    description={L.builder.description}
+  />
 
   <div
-    class="flex flex-col gap-6 pb-24"
+    class="create__main"
     x-data="sessionBuilder()"
     x-init="init()"
     x-cloak
   >
 
-    {
-      /* ──────────────────────────────────────────────────────────
-        ACTION BAR — Annuler / Enregistrer
-        ────────────────────────────────────────────────────────── */
-    }
-    <div class="flex items-center justify-end gap-2">
+    <div class="create__action-bar">
       <Button variant="secondary" @click="discard()">
         {L.common.cancel}
       </Button>
+      <Button
+        variant="ghost"
+        x-show="exercises.length > 1"
+        @click="allExpanded ? collapseAll() : expandAll()"
+        :aria-label="allExpanded ? labels.collapseAll : labels.expandAll"
+      >
+        <span x-text="allExpanded ? labels.collapseAll : labels.expandAll">
+          {L.builder.expandAll}
+        </span>
+      </Button>
       <Button variant="primary" :disabled="!canSave" @click="save()">
         <Fragment set:html={icons.save(18, 18)} />
-        <span x-text="labels.saveSession">{L.builder.saveSession}</span>
+        <span x-text="editSessionId ? labels.editSaveSession : labels.saveSession">
+          {L.builder.saveSession}
+        </span>
       </Button>
     </div>
 
-    {
-      /* ──────────────────────────────────────────────────────────
-        SESSION INFO CARD — name + date
-        ────────────────────────────────────────────────────────── */
-    }
     <Card>
       <CardHeader>
         <CardTitle>{L.builder.infoTitle}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="create__info-grid">
           <Input
             label={L.builder.name}
             id="ses-name"
@@ -90,142 +93,78 @@ const setTypes = [
       </CardContent>
     </Card>
 
-    {
-      /* ──────────────────────────────────────────────────────────
-        EMPTY STATE — no exercises added yet
-        ────────────────────────────────────────────────────────── */
-    }
     <template x-if="exercises.length === 0">
       <Card>
-        <div
-          class="flex flex-col items-center justify-center py-12 px-6 text-center"
-        >
-          <div class="text-muted mb-4" aria-hidden="true">
+        <div class="create__empty-state">
+          <div class="create__empty-icon" aria-hidden="true">
             <Fragment set:html={icons.dumbbellBox(48, 48)} />
           </div>
           <h3
-            class="text-lg font-semibold text-text mb-2"
+            class="create__empty-title"
             x-text="labels.noExoAdded"
           >
             {L.builder.noExoAdded}
           </h3>
-          <p class="text-sm text-muted mb-6" x-text="labels.noExoDesc">
+          <p class="create__empty-desc" x-text="labels.noExoDesc">
             {L.builder.noExoDesc}
           </p>
           <Button
-            class="inline-flex items-center gap-2 bg-accent text-accent-foreground hover:bg-accent-hover rounded-md px-4 py-2 text-sm font-medium transition-colors"
+            class="create__empty-add-btn"
             @click="openPicker()"
           >
-            <span class="flex items-center justify-center"
-              ><Fragment set:html={icons.plus(20, 20)} /></span
-            >
+            <Fragment set:html={icons.plus(20, 20)} />
             <span>{L.builder.addExercise}</span>
           </Button>
         </div>
       </Card>
     </template>
 
-    {/* superset offer — link icon and check/close icons */}
-
-    {
-      /* ──────────────────────────────────────────────────────────
-        EXERCISE BLOCKS — one Card per added exercise
-        Collapsible: header toggles a body that holds the sets table.
-        ────────────────────────────────────────────────────────── */
-    }
     <template
       x-for="(ex, exIdx) in exercises"
       :key="ex.exerciseId + '-' + exIdx"
     >
       <Card>
-        {
-          /* ── Auto superset offer (added 2026-08-09) ──
-            Shown right after the user completes a set on an exercise
-            whose previous completed set belongs to a different exercise.
-            One click groups both exercises through the existing
-            `supersetId` mechanism (persisted as Session.supersets). */
-        }
         <div
-          class="flex items-center gap-3 p-3 mx-4 mb-3 rounded-lg border border-accent bg-surface-2"
-          x-show="supersetOfferFor(exIdx) != null"
-          x-cloak
-          x-transition.opacity.duration.180ms
-          role="status"
-          aria-live="polite"
-        >
-          <Icon name="link" size={20} class="text-accent flex-shrink-0" />
-          <div class="flex-1 min-w-0">
-            <span
-              class="text-sm font-semibold text-text block"
-              x-text="labels.supersetSuggest"></span>
-            <span
-              class="text-xs text-muted block"
-              x-text="supersetOfferNames(exIdx)"></span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-accent text-accent-foreground text-sm font-medium hover:bg-accent-hover transition-colors"
-              @click="commitSupersetOffer()"
-            >
-              <Fragment set:html={icons.check(20, 20)} />
-              <span x-text="labels.supersetGroupBtn"></span>
-            </button>
-            <button
-              type="button"
-              class="p-1.5 rounded-md text-muted hover:text-text hover:bg-surface-3 transition-colors"
-              @click="dismissSupersetOffer()"
-              :aria-label="labels.supersetDismiss"
-              :title="labels.supersetDismiss"
-            >
-              <Fragment set:html={icons.closeX(20, 20)} />
-            </button>
-          </div>
-        </div>
-        <div
-          class="ses-ex-superset-bar flex items-center gap-2 px-3 py-2 rounded-md text-sm"
+          class="ses-ex-superset-bar create__superset-bar"
           x-show="ex.supersetId != null"
           x-cloak
           :class="'ses-superset-bar--g' + ex.supersetId"
         >
           <span class="ses-superset-dot" aria-hidden="true"></span>
-          <Icon name="link" size={16} class="text-[var(--ses-super-color,var(--color-muted))]" />
+          <Icon name="link" size={16} class="create__superset-bar-icon" />
           <span
-            class="font-medium text-[var(--ses-super-color,var(--color-muted))]"
+            class="create__superset-bar-label"
           >
             <span x-text="labels.supersetLabel + ' ' + ex.supersetId"
               >Superset</span
             >
             <template x-if="supersetChainFor(ex.supersetId).length > 0">
               <span
-                class="text-xs text-muted"
-                x-text="'· ' + supersetChainFor(ex.supersetId).join(' | ')"
+                class="create__superset-bar-chain"
+                x-text="'\u00A0' + supersetChainFor(ex.supersetId).join(' | ')"
               ></span>
             </template>
           </span>
-          <button
-            type="button"
-            class="p-1 rounded-md text-muted hover:text-text hover:bg-surface-3 transition-colors ml-auto"
+          <IconButton
+            variant="ghost"
+            icon={icons.closeX(18, 18)}
+            label={L.builder.supersetRemove}
+            title={L.builder.supersetRemove}
             @click="removeFromSuperset(exIdx)"
-            :aria-label="labels.supersetRemove"
-            :title="labels.supersetRemove"
-          >
-            <Fragment set:html={icons.closeX(18, 18)} />
-          </button>
+          />
         </div>
-        {/* ── Clickable header (always visible) ── */}
-        <div class="ses-ex-header flex items-center gap-2 p-3">
+        <div class="ses-ex-header create__ex-header">
           <button
             type="button"
-            class="ses-ex-toggle flex-1 flex items-center gap-2 text-left min-w-0 p-0 bg-transparent border-none cursor-pointer"
+            class="ses-ex-toggle create__ex-toggle"
             @click="toggleExpand(exIdx)"
             :aria-expanded="isExpanded(exIdx).toString()"
             :aria-controls="'ses-ex-body-' + exIdx"
           >
-            <div class="flex-1 min-w-0">
-              <div class="ses-ex-head flex items-center gap-2">
+            <div class="create__toggle-body">
+              <div class="ses-ex-head create__ex-head">
                 <h3
-                  class="text-base font-semibold text-text truncate"
+                  class="create__ex-name"
                   x-text="trExercise(ex.name)"
                 >
                 </h3>
@@ -236,7 +175,7 @@ const setTypes = [
                 />
               </div>
               <p
-                class="text-sm text-muted mt-0.5"
+                class="create__ex-summary"
                 x-show="!isExpanded(exIdx)"
                 x-cloak
                 x-text="exerciseSummary(ex)"
@@ -244,19 +183,19 @@ const setTypes = [
               </p>
             </div>
             <span
-              class="ses-chevron text-muted transition-transform"
+              class="ses-chevron create__ex-chevron"
               :class="{ 'is-open': isExpanded(exIdx) }"
               ><Fragment set:html={icons.chevronDown(20, 20)} /></span
             >
           </button>
           <select
-            class="ses-ex-superset-select bg-surface-2 border border-border rounded-md px-2 py-1 text-sm text-text max-w-[10rem]"
+            class="ses-ex-superset-select create__ex-superset-select"
             x-model.number="ex.supersetId"
             @change="onSupersetChange(exIdx)"
             :aria-label="labels.supersetFor + ' ' + ex.name"
             title={L.builder.moveToSuperset}
           >
-            <option :value="null">—</option>
+            <option :value="null">{'\u2014'}</option>
             <template x-for="gId in availableSupersetIds()" :key="gId">
               <option :value="gId" x-text="labels.supersetLabel + ' ' + gId"
               ></option>
@@ -265,30 +204,24 @@ const setTypes = [
               >+ Nouveau superset</option
             >
           </select>
-          <button
-            type="button"
-            class="p-2 rounded-md text-destructive hover:bg-[hsl(0_84%_60%/0.1)] transition-colors"
-            @click="removeExercise(exIdx)"
-            aria-label={L.builder.removeExerciseAria}
+          <IconButton
+            variant="danger"
+            icon={icons.trash(18, 18)}
+            label={L.builder.removeExerciseAria}
             title="Retirer l'exercice"
-          >
-            <span class="flex items-center justify-center"
-              ><Fragment set:html={icons.trash(18, 18)} /></span
-            >
-          </button>
+            @click="removeExercise(exIdx)"
+          />
         </div>
 
-        {/* ── Collapsible body (sets table + actions) ── */}
         <div
           :id="'ses-ex-body-' + exIdx"
-          class="border-t border-border"
+          class="create__ex-body"
           x-show="isExpanded(exIdx)"
           x-cloak
         >
           <CardContent>
-            {/* ── Sets table ── */}
             <div
-              class="overflow-x-auto"
+              class="create__sets-scroll"
               role="table"
               :aria-label="labels.setsFor + ' ' + ex.name"
             >
@@ -303,7 +236,6 @@ const setTypes = [
                 <div class="ses-cell ses-cell-num" role="columnheader">
                   Reps
                 </div>
-                <div class="ses-cell ses-cell-rpe" role="columnheader">RPE</div>
                 <div
                   class="ses-cell ses-cell-action"
                   role="columnheader"
@@ -321,7 +253,7 @@ const setTypes = [
                   </div>
                   <div class="ses-cell ses-cell-type" role="cell">
                     <select
-                      class="bg-surface-2 border border-border rounded-md px-2 py-1 text-text text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent"
+                      class="create__select"
                       x-model="set.type"
                       :aria-label="labels.setTypeLabel + ' ' + (setIdx + 1)"
                     >
@@ -333,43 +265,32 @@ const setTypes = [
                     </select>
                   </div>
                   <div class="ses-cell ses-cell-num" role="cell">
-                    <div class="flex items-center gap-1">
+                    <div class="create__weight-cell">
                       <input
                         type="number"
-                        class="bg-surface-2 border border-border rounded-md px-3 py-2 text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent w-full no-spinner ses-input-inline"
+                        class="create__input ses-input-inline"
                         min="0"
                         step="0.5"
                         x-model.number="set.weight"
                         inputmode="decimal"
                         :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
                       />
-                      {
-                        /* ── MRV — suggested load (added 2026-08-10) ──
-                          Subtle second tap target inside the weight cell.
-                          Disabled when the exercise has no useful history
-                          (title explains why). Click = confirmation: fills
-                          the weight with the suggestion + toast. Never
-                          overwrites a typed weight without this click. */
-                      }
-                      <button
-                        type="button"
-                        class="p-1 rounded-md text-accent hover:bg-[hsl(30_92%_58%/0.1)] transition-colors"
-                        :class="{ 'is-disabled': !mrvEnabled(exIdx, setIdx) }"
-                        :disabled="!mrvEnabled(exIdx, setIdx)"
-                        :title="mrvTitle(exIdx, setIdx)"
+                      <IconButton
+                        variant="accent"
+                        icon={icons.zap(16, 16)}
+                        label={L.builder.mrvSuggestFor}
                         :aria-label="labels.mrvSuggestFor + ' ' + (setIdx + 1)"
-                        @click="applyMrv(exIdx, setIdx)"
-                      >
-                        <span class="flex items-center justify-center"
-                          ><Fragment set:html={icons.zap(16, 16)} /></span
-                        >
-                      </button>
+                        :title="mrvTitle(exIdx, setIdx)"
+                        :aria-disabled="(!mrvEnabled(exIdx, setIdx)).toString()"
+                        :class="{ 'is-disabled': !mrvEnabled(exIdx, setIdx) }"
+                        @click="mrvEnabled(exIdx, setIdx) && applyMrv(exIdx, setIdx)"
+                      />
                     </div>
                   </div>
                   <div class="ses-cell ses-cell-num" role="cell">
                     <input
                       type="number"
-                      class="bg-surface-2 border border-border rounded-md px-3 py-2 text-text text-sm focus:outline-none focus:ring-2 focus:ring-accent w-full no-spinner ses-input-inline"
+                      class="create__input ses-input-inline"
                       min="0"
                       step="1"
                       x-model.number="set.reps"
@@ -377,85 +298,23 @@ const setTypes = [
                       :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
                     />
                   </div>
-                  {
-                    /* ── Per-set RPE / uRPE (added 2026-08-09) ──
-                      Compact segmented RPE/uRPE toggle + 0.5-step select.
-                      Shown once the set is marked complete; the value
-                      persists on the set even if the set is later unmarked.
-                      NOT migrated to ui/Segmented.astro: this is a distinct
-                      compact pill pattern (surface-3, radius-pill, active =
-                      surface fill) and its active state is `set.rpeType
-                      !== 'urpe'` (undefined counts as active) — not a plain
-                      `model === value` match, so it is not a drop-in swap. */
-                  }
-                  <div
-                    class="ses-cell ses-cell-rpe"
-                    role="cell"
-                    x-show="set.completed"
-                    x-cloak
-                  >
-                    <div class="ses-rpe-set">
-                      <div
-                        class="inline-flex rounded-full bg-surface-2 border border-border"
-                        role="group"
-                        :aria-label="labels.rpeTypeLabel + ' ' + (setIdx + 1)"
-                      >
-                        <button
-                          type="button"
-                          class="ses-rpe-toggle-btn"
-                          :class="{ 'is-active': set.rpeType !== 'urpe' }"
-                          @click="set.rpeType = 'rpe'"
-                          :aria-pressed="set.rpeType !== 'urpe'">RPE</button
-                        >
-                        <button
-                          type="button"
-                          class="ses-rpe-toggle-btn"
-                          :class="{ 'is-active': set.rpeType === 'urpe' }"
-                          @click="set.rpeType = 'urpe'"
-                          :aria-pressed="set.rpeType === 'urpe'">uRPE</button
-                        >
-                      </div>
-                      <select
-                        class="bg-surface-2 border border-border rounded-md px-2 py-1 text-text text-sm w-full ses-rpe-select"
-                        x-model="set.rpe"
-                        :aria-label="labels.rpeForSet + ' ' + (setIdx + 1)"
-                      >
-                        <option :value="null">—</option>
-                        <template x-for="v in rpeValues" :key="v">
-                          <option :value="v" x-text="v"></option>
-                        </template>
-                      </select>
-                    </div>
-                  </div>
                   <div class="ses-cell ses-cell-action" role="cell">
-                    <button
-                      type="button"
-                      class="ses-set-complete flex items-center justify-center w-8 h-8 rounded-full border-2 border-border text-muted hover:border-success hover:text-success transition-colors"
-                      :class="{ 'is-complete': set.completed }"
-                      @click="toggleSetComplete(exIdx, setIdx)"
-                      :aria-label="(set.completed ? labels.markUndone + ' ' + (setIdx + 1) : labels.markDone + ' ' + (setIdx + 1) + ' ' + labels.andStartRest)"
-                      :aria-pressed="set.completed"
-                      :title="set.completed ? labels.unmarkTitle : labels.markTitle"
-                    >
-                      <Fragment set:html={icons.check(24, 24)} />
-                    </button>
-                    <button
-                      type="button"
-                      class="p-1 rounded-md text-destructive hover:bg-[hsl(0_84%_60%/0.1)] transition-colors"
-                      @click="removeSet(exIdx, setIdx)"
+                    <IconButton
+                      variant="danger"
+                      size="sm"
+                      icon={icons.closeX(18, 18)}
+                      label={L.builder.deleteSet}
                       :aria-label="labels.deleteSet + ' ' + (setIdx + 1)"
                       title={L.builder.deleteSet}
-                    >
-                      <span class="flex items-center justify-center"
-                        ><Fragment set:html={icons.closeX(18, 18)} /></span
-                      >
-                    </button>
+                      :disabled="ex.sets.length <= 1"
+                      @click="removeSet(exIdx, setIdx)"
+                    />
                   </div>
                 </div>
               </template>
             </div>
 
-            <div class="ses-ex-actions flex items-center gap-2 mt-3">
+            <div class="ses-ex-actions create__ex-actions">
               <Button variant="secondary" size="sm" @click="addSet(exIdx)">
                 <Fragment set:html={icons.plus(18, 18)} />
                 <span>{L.builder.addSet}</span>
@@ -476,75 +335,61 @@ const setTypes = [
       </Card>
     </template>
 
-    {
-      /* ──────────────────────────────────────────────────────────
-        ADD EXERCISE — bottom button (shown when ≥1 exercise)
-        ────────────────────────────────────────────────────────── */
-    }
     <template x-if="exercises.length > 0">
-      <div class="flex justify-center py-4">
-        <Button class="inline-flex items-center gap-2" @click="openPicker()">
-          <span class="flex items-center justify-center"
-            ><Fragment set:html={icons.plus(20, 20)} /></span
-          >
+      <div class="create__add-wrap">
+        <Button class="create__add-btn" @click="openPicker()">
+          <Fragment set:html={icons.plus(20, 20)} />
           <span>{L.builder.addExercise}</span>
         </Button>
       </div>
     </template>
 
-    {
-      /* ──────────────────────────────────────────────────────────
-        SESSION NOTES — RPE / fatigue / mood / free text
-        ────────────────────────────────────────────────────────── */
-    }
     <template x-if="exercises.length > 0">
       <Card>
         <CardHeader>
           <CardTitle>{L.builder.notesTitle}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="flex flex-col gap-6">
-            {/* ── RPE slider ── */}
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center justify-between">
-                <label for="ses-rpe" class="text-sm font-medium text-muted"
+          <div class="create__notes">
+            <div class="create__field">
+              <div class="create__field-row">
+                <label for="ses-rpe" class="create__label"
                   >{L.builder.rpe}</label
                 >
                 <span
-                  class="ses-rpe-value"
+                  class="rpe-value"
                   :class="'tone--' + rpeTone"
                   x-text="sessionRpe"></span>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="create__rpe-slider">
                 <input
                   id="ses-rpe"
                   type="range"
                   min="1"
                   max="10"
                   step="1"
-                  class="ses-rpe-input w-full"
+                  class="ses-rpe-input create__rpe-input"
                   :class="'ses-rpe-input--' + rpeTone"
                   x-model.number="sessionRpe"
                   aria-label={L.builder.rpeAria}
                 />
-                <div class="text-sm text-muted">
+                <div class="create__rpe-label">
                   <span x-text="rpeLabel"></span>
                 </div>
               </div>
             </div>
 
-            {/* ── Fatigue (1–5) ── */}
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-muted">Fatigue</label>
+            <div class="create__field">
+              <label class="create__label">Fatigue</label>
               <div
-                class="flex items-center gap-2"
+                class="create__fatigue-group"
                 role="radiogroup"
                 aria-label="Niveau de fatigue"
               >
                 <template x-for="i in 5" :key="'fat-' + i">
                   <button
                     type="button"
-                    class="ses-fatigue-btn p-2 rounded-full border border-border bg-transparent text-muted hover:text-accent hover:border-accent transition-colors"
+                    class="ses-fatigue-btn create__fatigue-btn"
                     :class="{ 'is-active': sessionFatigue >= i }"
                     :aria-pressed="sessionFatigue >= i"
                     :aria-label="labels.fatigueOn + ' ' + i + ' ' + labels.fatigueOutOf5"
@@ -556,17 +401,16 @@ const setTypes = [
               </div>
             </div>
 
-            {/* ── Mood ── */}
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-muted">Humeur</label>
+            <div class="create__field">
+              <label class="create__label">Humeur</label>
               <div
-                class="flex items-center gap-2"
+                class="create__mood-group"
                 role="radiogroup"
                 aria-label={L.builder.moodAria}
               >
                 <button
                   type="button"
-                  class="ses-mood-btn p-2 rounded-full border border-border bg-transparent text-muted hover:text-accent hover:border-accent transition-colors"
+                  class="ses-mood-btn create__mood-btn"
                   :class="{ 'is-active': sessionMood === 'great' }"
                   :aria-pressed="sessionMood === 'great'"
                   :aria-label="labels.moodLabel + ' : ' + labels.moodGreat"
@@ -576,7 +420,7 @@ const setTypes = [
                 </button>
                 <button
                   type="button"
-                  class="ses-mood-btn p-2 rounded-full border border-border bg-transparent text-muted hover:text-accent hover:border-accent transition-colors"
+                  class="ses-mood-btn create__mood-btn"
                   :class="{ 'is-active': sessionMood === 'good' }"
                   :aria-pressed="sessionMood === 'good'"
                   :aria-label="labels.moodLabel + ' : ' + labels.moodGood"
@@ -586,7 +430,7 @@ const setTypes = [
                 </button>
                 <button
                   type="button"
-                  class="ses-mood-btn p-2 rounded-full border border-border bg-transparent text-muted hover:text-accent hover:border-accent transition-colors"
+                  class="ses-mood-btn create__mood-btn"
                   :class="{ 'is-active': sessionMood === 'ok' }"
                   :aria-pressed="sessionMood === 'ok'"
                   :aria-label="labels.moodLabel + ' : ' + labels.moodOk"
@@ -596,7 +440,7 @@ const setTypes = [
                 </button>
                 <button
                   type="button"
-                  class="ses-mood-btn p-2 rounded-full border border-border bg-transparent text-muted hover:text-accent hover:border-accent transition-colors"
+                  class="ses-mood-btn create__mood-btn"
                   :class="{ 'is-active': sessionMood === 'tired' }"
                   :aria-pressed="sessionMood === 'tired'"
                   :aria-label="labels.moodLabel + ' : ' + labels.moodTired"
@@ -606,7 +450,7 @@ const setTypes = [
                 </button>
                 <button
                   type="button"
-                  class="ses-mood-btn p-2 rounded-full border border-border bg-transparent text-muted hover:text-accent hover:border-accent transition-colors"
+                  class="ses-mood-btn create__mood-btn"
                   :class="{ 'is-active': sessionMood === 'bad' }"
                   :aria-pressed="sessionMood === 'bad'"
                   :aria-label="labels.moodLabel + ' : ' + labels.moodBad"
@@ -617,14 +461,13 @@ const setTypes = [
               </div>
             </div>
 
-            {/* ── Free-text notes ── */}
-            <div class="flex flex-col gap-2">
-              <label for="ses-notes" class="text-sm font-medium text-muted"
+            <div class="create__field">
+              <label for="ses-notes" class="create__label"
                 >Notes</label
               >
               <textarea
                 id="ses-notes"
-                class="bg-surface-2 border border-border rounded-md px-3 py-2 text-text text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent w-full"
+                class="create__textarea"
                 x-model="sessionNotes"
                 placeholder={L.builder.notesPlaceholder}
                 rows="3"
@@ -635,13 +478,8 @@ const setTypes = [
       </Card>
     </template>
 
-    {
-      /* ──────────────────────────────────────────────────────────
-        VALIDATION HINT — context-aware error message
-        ────────────────────────────────────────────────────────── */
-    }
     <div
-      class="text-destructive text-sm text-center py-2"
+      class="create__validation"
       x-show="!canSave && (sessionName.trim() || exercises.length > 0)"
       x-cloak
     >
@@ -651,24 +489,20 @@ const setTypes = [
       <template x-if="sessionName.trim() && exercises.length === 0">
         <span x-text="labels.needExo">{L.builder.needExo}</span>
       </template>
+      <template x-if="sessionName.trim() && exercises.length > 0 && exercises.some((exercise) => exercise.sets.length === 0)">
+        <span x-text="labels.needSets">{L.builder.needSets}</span>
+      </template>
     </div>
 
-    {
-      /* ──────────────────────────────────────────────────────────
-        EXERCISE PICKER DIALOG
-        ────────────────────────────────────────────────────────── */
-    }
     <Dialog id="ses-picker-dialog" title="Choisir un exercice">
-      <div class="flex flex-col max-h-[80vh]">
-        <div
-          class="relative flex items-center border-b border-border px-4 py-2"
-        >
-          <span class="text-muted mr-2"
+      <div class="create__picker">
+        <div class="create__picker-search">
+          <span class="create__picker-search-icon"
             ><Fragment set:html={icons.searchLine(20, 20)} /></span
           >
           <Input
             type="search"
-            class="bg-transparent border-none outline-none text-text text-sm flex-1 ses-search-input"
+            class="create__picker-input ses-search-input"
             placeholder={L.builder.searchPlaceholder}
             x-model="exerciseSearch"
             aria-label={L.builder.searchAria}
@@ -678,32 +512,31 @@ const setTypes = [
           />
         </div>
 
-        {/* ── Templates (added 2026-08-04) ── */}
         <div
-          class="border-b border-border px-4 py-3"
+          class="create__picker-templates"
           x-show="exerciseSearch.trim() === ''"
         >
-          <div class="flex items-baseline gap-2 mb-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-muted"
+          <div class="create__picker-templates-head">
+            <span class="create__picker-templates-title"
               >Templates</span
             >
-            <span class="text-xs text-muted">{L.builder.templateHint}</span>
+            <span class="create__picker-templates-hint">{L.builder.templateHint}</span>
           </div>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="create__picker-templates-grid">
             {
               TRAINING_TEMPLATES.map((tpl) => (
                 <button
                   type="button"
-                  class="flex flex-col gap-1 p-3 rounded-lg border border-border bg-surface-2 text-left hover:border-accent transition-colors"
+                  class="create__picker-tpl"
                   @click={`loadTemplate('${tpl.id}')`}
                 >
-                  <span class="text-sm font-semibold text-text">
+                  <span class="create__picker-tpl-name">
                     {trTemplateName(tpl.name)}
                   </span>
-                  <span class="text-xs text-muted line-clamp-2">
+                  <span class="create__picker-tpl-desc">
                     {trTemplateDesc(tpl.id)}
                   </span>
-                  <span class="text-xs text-muted mt-1">
+                  <span class="create__picker-tpl-count">
                     {tpl.exercises.length} {L.builder.exercisesWord}
                   </span>
                 </button>
@@ -712,14 +545,13 @@ const setTypes = [
           </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto" role="list">
-          {/* ── Library empty ── */}
+        <div class="create__picker-list" role="list">
           <template x-if="availableExercises.length === 0">
-            <div class="px-4 py-8 text-center text-sm text-muted">
+            <div class="create__picker-empty">
               <p x-text="labels.emptyLibrary">{L.builder.emptyLibrary}</p>
               <a
                 href={localizedPath("/exercises")}
-                class="text-accent underline"
+                class="create__picker-empty-link"
                 x-text="labels.createExoLink"
               >
                 {L.builder.createExoLink}
@@ -727,37 +559,34 @@ const setTypes = [
             </div>
           </template>
 
-          {/* ── All exercises already added ── */}
           <template
             x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() === ''"
           >
-            <div class="px-4 py-8 text-center text-sm text-muted">
+            <div class="create__picker-empty">
               <p x-text="labels.allAdded">{L.builder.allAdded}</p>
             </div>
           </template>
 
-          {/* ── No match for search ── */}
           <template
             x-if="availableExercises.length > 0 && filteredExercises.length === 0 && exerciseSearch.trim() !== ''"
           >
-            <div class="px-4 py-8 text-center text-sm text-muted">
+            <div class="create__picker-empty">
               <p x-text="labels.noSearchMatch">{L.builder.noSearchMatch}</p>
             </div>
           </template>
 
-          {/* ── Picker items ── */}
           <template x-for="ex in filteredExercises" :key="ex.id">
             <div
-              class="flex items-center border-b border-border"
+              class="create__picker-item"
               role="listitem"
             >
               <button
                 type="button"
-                class="flex-1 flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-2 transition-colors"
+                class="create__picker-item-btn"
                 @click="addExercise(ex)"
                 :aria-label="labels.addExoAria + ' ' + ex.name + ' ' + labels.toSession"
               >
-                <span class="text-sm text-text" x-text="trExercise(ex.name)"
+                <span class="create__picker-item-name" x-text="trExercise(ex.name)"
                 ></span>
                 <Badge
                   variant="category"
@@ -768,7 +597,7 @@ const setTypes = [
               </button>
               <button
                 type="button"
-                class="p-2 text-muted hover:text-text transition-colors"
+                class="create__picker-tip-toggle"
                 @click="toggleTip(ex.id)"
                 :aria-expanded="isTipOpen(ex.id).toString()"
                 :aria-label="labels.showTipAria + ' ' + ex.name"
@@ -778,13 +607,13 @@ const setTypes = [
                 <Fragment set:html={icons.infoCircle(18, 18)} />
               </button>
               <p
-                class="px-4 py-3 text-sm text-muted bg-surface-2 border-t border-border ses-picker-tip"
+                class="create__picker-tip ses-picker-tip"
                 x-show="isTipOpen(ex.id) && hasTip(ex.name)"
                 x-cloak
               >
                 <span x-text="getTip(ex.name)"></span>
                 <a
-                  class="inline-flex items-center gap-1 text-accent text-xs mt-2 ses-tip-video"
+                  class="create__picker-tip-video ses-tip-video"
                   :href="getVideoUrl(ex.name)"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -804,20 +633,6 @@ const setTypes = [
         <Button variant="secondary" data-dialog-close> Fermer </Button>
       </div>
     </Dialog>
-
-    {
-      /* ──────────────────────────────────────────────────────────
-        REST TIMER WIDGET (added 2026-08-04)
-        Sticky bar that appears when the user marks a set as
-        complete. The duration is sourced per-exercise from
-        `getRestTime(name)` so each lift gets a tailored rest
-        (compound lifts rest longer, isolation work rests
-        shorter). The label shows "Repos — <name> (M:SS)" and
-        the countdown ticks down every second; a Skip button
-        dismisses the widget before the timer elapses.
-        ────────────────────────────────────────────────────────── */
-    }
-    <RestTimer />
   </div>
 </AppLayout>
 
@@ -825,9 +640,10 @@ const setTypes = [
   import {
     getExercises,
     getSessions,
+    getSessionById,
     saveExercise,
     saveSession,
-    RPE_OPTIONS,
+    updateSession,
     type Exercise,
     type Session,
     type SessionExercise,
@@ -840,21 +656,15 @@ const setTypes = [
     type TemplateExercise,
   } from "../../../lib/templates";
   import { getExerciseTip } from "../../../lib/exercise-tips";
-  import { getRestTime, formatRestTime } from "../../../lib/rest-times";
-  import { playBeep } from "../../../lib/sound";
   import { suggestLoadSuggestion } from "../../../lib/mrv";
   import { t, getLocale, localizedPath } from "../../../i18n";
 
   const LABELS = t();
 
-  // Default set type for newly created sets (mirrors spec).
   const DEFAULT_SET_TYPE: SetType = "work";
 
-  // Fallback category when a template exercise carries no category.
-  // Kept in sync with the "Autre" option on the exercices page.
   const TEMPLATE_FALLBACK_CATEGORY = "Autre";
 
-  // RPE colour tone buckets — drive both the big number and the slider thumb.
   function rpeToneFn(rpe: number): "easy" | "moderate" | "hard" | "max" {
     if (rpe <= 3) return "easy";
     if (rpe <= 6) return "moderate";
@@ -870,12 +680,6 @@ const setTypes = [
     return LABELS.builder.rpeMax;
   }
 
-  /**
-   * In-builder shape: each exercise has an optional `supersetId`
-   * (1-based, contiguous) used to visually group exercises. On save,
-   * we collapse these into the `supersets: Superset[]` shape stored
-   * on `Session`.
-   */
   type BuilderExercise = SessionExercise & { supersetId: number | null };
 
   document.addEventListener("alpine:init", () => {
@@ -883,66 +687,33 @@ const setTypes = [
     const Alpine = (window as any).Alpine;
 
     Alpine.data("sessionBuilder", () => ({
-      // ── State ──
       sessionName: "",
       sessionDate: new Date().toISOString().split("T")[0],
       exercises: [] as BuilderExercise[],
       availableExercises: [] as Exercise[],
-      // Completed sessions snapshot read once at init — the MRV engine reads
-      // from it (never from localStorage) so row bindings stay cheap.
       allSessions: [] as Session[],
       exerciseSearch: "",
-      // Per-set RPE values (10 → 4 by 0.5) used by each set's select.
-      rpeValues: RPE_OPTIONS,
+      _mrvCache: new Map<string, ReturnType<typeof suggestLoadSuggestion>>(),
 
-      // ── Notes state (added 2026-08-04) ──
       sessionRpe: 5,
-      sessionFatigue: 0, // 0 = not set, 1-5 = level
+      sessionFatigue: 0,
       sessionMood: "" as SessionMood | "",
       sessionNotes: "",
 
-      // ── Collapse state (added 2026-08-04) ──
-      expandedExercises: [] as number[],
+      expandedExercises: [] as string[],
 
-      // ── Auto-superset detection (added 2026-08-09) ──
-      // Remembers the exercise whose set was completed just before the
-      // current action, so completing sets on two different exercises
-      // in a row can be offered as a one-click superset. `supersetOffer`
-      // carries the pending pair indices + display names.
-      lastCompletedExerciseId: null as string | null,
-      supersetOffer: null as {
-        currentIdx: number;
-        otherIdx: number;
-        currentName: string;
-        otherName: string;
-      } | null,
-
-      // ── Picker tips (added 2026-08-04) ──
-      // Set of exercise ids whose tip is currently expanded.
       openTips: [] as string[],
 
-      // ── Rest timer (added 2026-08-04) ──
-      // Sticky widget that appears when a set is marked complete.
-      // Duration is sourced from `getRestTime(ex.name)` so each
-      // exercise gets a tailored default (compound lifts rest
-      // longer, isolation work rests shorter). User can Skip the
-      // timer to dismiss it before it elapses.
-      restTimer: {
-        active: false,
-        exerciseName: "" as string,
-        duration: 0, // total seconds for the current run
-        remaining: 0, // seconds left
-        intervalId: null as number | null,
-        endTime: 0,
-      },
-
-      // ── i18n labels (dynamic strings used in the template) ──
       labels: {
         saveSession: LABELS.builder.saveSession,
+        editSaveSession: LABELS.builder.editSaveSession,
+        collapseAll: LABELS.builder.collapseAll,
+        expandAll: LABELS.builder.expandAll,
         noExoAdded: LABELS.builder.noExoAdded,
         noExoDesc: LABELS.builder.noExoDesc,
         needName: LABELS.builder.needName,
         needExo: LABELS.builder.needExo,
+        needSets: LABELS.builder.needSets,
         emptyLibrary: LABELS.builder.emptyLibrary,
         createExoLink: LABELS.builder.createExoLink,
         allAdded: LABELS.builder.allAdded,
@@ -953,33 +724,18 @@ const setTypes = [
         seeTechnique: LABELS.builder.seeTechnique,
         videoAria: LABELS.builder.videoAria,
         onYoutube: LABELS.builder.onYoutube,
-        closeRest: LABELS.builder.closeRest,
-        skipRest: LABELS.builder.skipRest,
-        close: LABELS.builder.close,
-        skip: LABELS.builder.skip,
         supersetLabel: LABELS.builder.supersetLabel,
         supersetFor: LABELS.builder.supersetFor,
         newSuperset: LABELS.builder.newSuperset,
-        supersetSuggest: LABELS.builder.supersetSuggest,
-        supersetGroupBtn: LABELS.builder.supersetGroupBtn,
-        supersetWith: LABELS.builder.supersetWith,
-        supersetDismiss: LABELS.builder.supersetDismiss,
         supersetRemove: LABELS.builder.supersetRemove,
         setsFor: LABELS.builder.setsFor,
         setTypeLabel: LABELS.builder.setTypeLabel,
         weightForSet: LABELS.builder.weightForSet,
         repsForSet: LABELS.builder.repsForSet,
-        rpeForSet: LABELS.builder.rpeForSet,
-        rpeTypeLabel: LABELS.builder.rpeTypeLabel,
         deleteSet: LABELS.builder.deleteSet,
         noSets: LABELS.builder.noSets,
         setsPlural: LABELS.builder.setsPlural,
         setsSingular: LABELS.builder.setsSingular,
-        markUndone: LABELS.builder.markUndone,
-        markDone: LABELS.builder.markDone,
-        andStartRest: LABELS.builder.andStartRest,
-        unmarkTitle: LABELS.builder.unmarkTitle,
-        markTitle: LABELS.builder.markTitle,
         warmupTitle: LABELS.builder.warmupTitle,
         warmupHint: LABELS.builder.warmupHint,
         warmupBtn: LABELS.builder.warmupBtn,
@@ -994,9 +750,7 @@ const setTypes = [
         discardConfirm: LABELS.builder.discardConfirm,
         top: LABELS.builder.top,
         units: LABELS.builder.units,
-        rest: LABELS.builder.rest,
         discardTitle: LABELS.builder.discardTitle,
-        // ── MRV — suggested load (added 2026-08-10) ──
         mrvSuggestFor: LABELS.builder.mrvSuggestFor,
         mrvNoHistory: LABELS.builder.mrvNoHistory,
         mrvFromHistory: LABELS.builder.mrvFromHistory,
@@ -1004,13 +758,34 @@ const setTypes = [
         mrvToast: LABELS.builder.mrvToast,
       },
 
-      // ── Init ──
+      editSessionId: null as string | null,
+
       init() {
         this.availableExercises = getExercises();
         this.allSessions = getSessions();
+        const requestedId = new URLSearchParams(window.location.search).get("edit");
+        if (!requestedId) return;
+        const session = getSessionById(requestedId);
+        if (!session) return;
+        const supersetIds = new Map<string, number>();
+        session.supersets?.forEach((group, index) => {
+          group.exercises.forEach((exerciseId) => supersetIds.set(exerciseId, index + 1));
+        });
+        this.editSessionId = session.id;
+        this.sessionName = session.name;
+        this.sessionDate = session.date.slice(0, 10);
+        this.sessionRpe = session.rpe ?? 5;
+        this.sessionFatigue = session.fatigue ?? 0;
+        this.sessionMood = session.mood ?? "";
+        this.sessionNotes = session.notes ?? "";
+        this.exercises = session.exercises.map((exercise) => ({
+          ...exercise,
+          sets: exercise.sets.map((set) => ({ ...set, completed: false })),
+          supersetId: supersetIds.get(exercise.exerciseId) ?? null,
+        }));
+        this.expandAll();
       },
 
-      // ── Derived ──
       get filteredExercises(): Exercise[] {
         const q = this.exerciseSearch.trim().toLowerCase();
         const addedIds = new Set(this.exercises.map((se) => se.exerciseId));
@@ -1021,7 +796,6 @@ const setTypes = [
               if (q && !e.name.toLowerCase().includes(q)) return false;
               return true;
             })
-            // Favorites first, then alphabetical.
             .sort((a, b) => {
               if (Boolean(a.favorite) !== Boolean(b.favorite)) {
                 return a.favorite ? -1 : 1;
@@ -1032,7 +806,8 @@ const setTypes = [
       },
 
       get canSave(): boolean {
-        return Boolean(this.sessionName.trim()) && this.exercises.length > 0;
+        return Boolean(this.sessionName.trim()) && this.exercises.length > 0 &&
+          this.exercises.every((exercise) => exercise.sets.length > 0);
       },
 
       get rpeTone(): "easy" | "moderate" | "hard" | "max" {
@@ -1043,23 +818,25 @@ const setTypes = [
         return rpeLabelFn(this.sessionRpe);
       },
 
-      // ── Collapse / expand (added 2026-08-04) ──
       isExpanded(exerciseIndex: number): boolean {
-        return this.expandedExercises.includes(exerciseIndex);
+        const ex = this.exercises[exerciseIndex];
+        return ex ? this.expandedExercises.includes(ex.exerciseId) : false;
       },
 
       toggleExpand(exerciseIndex: number) {
+        const ex = this.exercises[exerciseIndex];
+        if (!ex) return;
         if (this.isExpanded(exerciseIndex)) {
           this.expandedExercises = this.expandedExercises.filter(
-            (i) => i !== exerciseIndex,
+            (id) => id !== ex.exerciseId,
           );
         } else {
-          this.expandedExercises = [...this.expandedExercises, exerciseIndex];
+          this.expandedExercises = [...this.expandedExercises, ex.exerciseId];
         }
       },
 
       expandAll() {
-        this.expandedExercises = this.exercises.map((_, i) => i);
+        this.expandedExercises = this.exercises.map((ex) => ex.exerciseId);
       },
 
       collapseAll() {
@@ -1073,11 +850,6 @@ const setTypes = [
         );
       },
 
-      /**
-       * One-line summary shown when an exercise is collapsed:
-       * "X séries · Y kg · top set Z kg × N reps".
-       * Returns '' if the exercise has no sets.
-       */
       exerciseSummary(exercise: SessionExercise): string {
         if (exercise.sets.length === 0) return this.labels.noSets;
         const totalReps = exercise.sets.reduce(
@@ -1088,7 +860,6 @@ const setTypes = [
           (sum, s) => sum + (s.weight || 0) * (s.reps || 0),
           0,
         );
-        // Find the heaviest set as the "top set" hint.
         const top = exercise.sets.reduce(
           (best, s) => (s.weight > (best?.weight || 0) ? s : best),
           exercise.sets[0],
@@ -1100,16 +871,14 @@ const setTypes = [
         const volume = Math.round(totalVolume);
         const topLine =
           top && top.weight > 0
-            ? ` · ${this.labels.top} ${top.weight} kg × ${top.reps}`
+            ? ` \u2014 ${this.labels.top} ${top.weight} kg \u2014 ${top.reps}`
             : "";
-        return `${exercise.sets.length} ${setLabel} · ${totalReps} reps · ${volume} kg${topLine}`;
+        return `${exercise.sets.length} ${setLabel} \u2014 ${totalReps} reps \u2014 ${volume} kg${topLine}`;
       },
 
-      // ── Actions ──
       openPicker() {
         this.exerciseSearch = "";
         this.openDialogById("ses-picker-dialog");
-        // Focus the search input once the dialog has opened.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ref = (this as any).$refs?.pickerSearch as
           HTMLInputElement | undefined;
@@ -1125,7 +894,6 @@ const setTypes = [
           weight: 0,
           reps: 0,
           type: DEFAULT_SET_TYPE,
-          rpeType: "rpe",
           completed: false,
         };
         const newEx: BuilderExercise = {
@@ -1136,43 +904,34 @@ const setTypes = [
           supersetId: null,
         };
         this.exercises.push(newEx);
-        // Auto-expand the new exercise so the user can adjust sets right away.
         this.expandedExercises = [
           ...this.expandedExercises,
-          this.exercises.length - 1,
+          newEx.exerciseId,
         ];
         this.exerciseSearch = "";
         this.closeDialogById("ses-picker-dialog");
       },
 
-      // ── Templates (added 2026-08-04) ──
-      /**
-       * Inserts every exercise from the template at the bottom of the
-       * current session. Any referenced exercise missing from the user's
-       * library is auto-created (from the template data) first, so a
-       * template always loads — even when defaults were renamed/deleted.
-       */
       loadTemplate(templateId: string) {
         const tpl = getTemplateById(templateId);
         if (!tpl) return;
-        const added: number[] = [];
+        const added: string[] = [];
         for (const te of tpl.exercises) {
           let ex = this.findExerciseByName(te.name);
           if (!ex) {
-            // Auto-create the missing exercise in the library, then use it.
-            ex = saveExercise({
+            ex = {
+              id: `template:${te.name}`,
               name: te.name,
               muscle: te.muscle,
               category: TEMPLATE_FALLBACK_CATEGORY,
-            });
-            // Keep the picker in sync so the new exercise is available later.
+              createdAt: new Date().toISOString(),
+            };
             this.availableExercises = [...this.availableExercises, ex];
           }
           const newEx = this.buildBuilderExercise(ex, te);
           this.exercises.push(newEx);
-          added.push(this.exercises.length - 1);
+          added.push(newEx.exerciseId);
         }
-        // Auto-expand the newly added exercises so the user can see them.
         if (added.length > 0) {
           this.expandedExercises = [...this.expandedExercises, ...added];
         }
@@ -1192,7 +951,6 @@ const setTypes = [
             weight: 0,
             reps: te.defaultReps,
             type: DEFAULT_SET_TYPE,
-            rpeType: "rpe",
             completed: false,
           });
         }
@@ -1209,7 +967,6 @@ const setTypes = [
         return this.availableExercises.find((e) => e.name === name);
       },
 
-      // ── Tips (added 2026-08-04) ──
       hasTip(name: string): boolean {
         return getExerciseTip(name) != null;
       },
@@ -1230,11 +987,6 @@ const setTypes = [
         }
       },
 
-      // ── Supersets (added 2026-08-04) ──
-      /**
-       * List of currently used superset ids (1-based, sorted). Used
-       * to populate the per-exercise superset dropdown.
-       */
       availableSupersetIds(): number[] {
         const ids = new Set<number>();
         for (const ex of this.exercises) {
@@ -1243,23 +995,12 @@ const setTypes = [
         return Array.from(ids).sort((a, b) => a - b);
       },
 
-      /**
-       * Returns the next free superset id (= max + 1, or 1 if none).
-       * Used to seed the "+ Nouveau superset" option.
-       */
       nextSupersetId(): number {
         const used = this.availableSupersetIds();
         if (used.length === 0) return 1;
         return Math.max(...used) + 1;
       },
 
-      /**
-       * Triggered when the user changes the superset select. We do
-       * not need to do much because x-model.number already wrote
-       * the new id onto the exercise, but we normalise the value
-       * (NaN → null) for the "no superset" case and drop any pending
-       * auto-offer that involves this exercise.
-       */
       onSupersetChange(exIdx: number) {
         const ex = this.exercises[exIdx];
         if (!ex) return;
@@ -1269,27 +1010,14 @@ const setTypes = [
         ) {
           ex.supersetId = null;
         }
-        this.dropOfferForExercise(exIdx);
       },
 
-      /**
-       * Pulls an exercise out of its current superset (if any). No
-       * effect on the other exercises in the group — they keep
-       * referencing the same supersetId; orphaned ids are pruned
-       * at save time.
-       */
       removeFromSuperset(exIdx: number) {
         const ex = this.exercises[exIdx];
         if (!ex) return;
         ex.supersetId = null;
-        this.dropOfferForExercise(exIdx);
       },
 
-      // ── Auto supersets (added 2026-08-09) ──
-      /**
-       * Translated exercise name, deferring to the global `trExercise`
-       * helper exposed by AppLayout (falls back to the raw name).
-       */
       trName(ex: BuilderExercise): string {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fn = (window as any).trExercise as
@@ -1297,112 +1025,11 @@ const setTypes = [
         return fn ? fn(ex.name) : ex.name;
       },
 
-      /**
-       * Display names of every exercise sharing the given superset id.
-       * Drives the group badge chain, e.g. "· Développé couché | Rowing".
-       */
       supersetChainFor(gid: number | null): string[] {
         if (gid == null) return [];
         return this.exercises
           .filter((e) => e.supersetId === gid)
           .map((e) => this.trName(e));
-      },
-
-      /**
-       * Returns the pending auto-offer when it targets the given
-       * exercise index (the one whose set was just completed), else null.
-       */
-      supersetOfferFor(exerciseIndex: number): {
-        currentIdx: number;
-        otherIdx: number;
-        currentName: string;
-        otherName: string;
-      } | null {
-        if (
-          this.supersetOffer &&
-          this.supersetOffer.currentIdx === exerciseIndex
-        ) {
-          return this.supersetOffer;
-        }
-        return null;
-      },
-
-      /**
-       * Offer copy: "<previous exercise> avec <current exercise>".
-       */
-      supersetOfferNames(exerciseIndex: number): string {
-        const o = this.supersetOfferFor(exerciseIndex);
-        if (!o) return "";
-        return `${o.otherName} ${this.labels.supersetWith} ${o.currentName}`;
-      },
-
-      /**
-       * Detection rule (auto): after marking a set complete on
-       * `exerciseIndex`, if the most recent previously-completed set
-       * belongs to a DIFFERENT exercise, offer a one-click superset
-       * group. Skipped when the two exercises already share a group
-       * id (manual grouping via the dropdown already happened).
-       */
-      maybeOfferSuperset(exerciseIndex: number) {
-        const cur = this.exercises[exerciseIndex];
-        if (!cur) return;
-        const prevId = this.lastCompletedExerciseId;
-        this.lastCompletedExerciseId = cur.exerciseId;
-        if (!prevId || prevId === cur.exerciseId) return;
-        const otherIdx = this.exercises.findIndex(
-          (e) => e.exerciseId === prevId,
-        );
-        if (otherIdx === -1) return;
-        const other = this.exercises[otherIdx];
-        if (!other) return;
-        if (cur.supersetId != null && cur.supersetId === other.supersetId)
-          return;
-        this.supersetOffer = {
-          currentIdx: exerciseIndex,
-          otherIdx,
-          currentName: this.trName(cur),
-          otherName: this.trName(other),
-        };
-      },
-
-      /**
-       * One-click commit: groups the two offered exercises through the
-       * existing `supersetId` mechanism (reuses a group if either side
-       * already has one, otherwise allocates a fresh id). Both blocks
-       * are expanded so the group badge is immediately visible.
-       */
-      commitSupersetOffer() {
-        const o = this.supersetOffer;
-        this.dismissSupersetOffer();
-        if (!o) return;
-        const cur = this.exercises[o.currentIdx];
-        const other = this.exercises[o.otherIdx];
-        if (!cur || !other) return;
-        const target =
-          cur.supersetId ?? other.supersetId ?? this.nextSupersetId();
-        cur.supersetId = target;
-        other.supersetId = target;
-        this.expandedExercises = [
-          ...new Set([...this.expandedExercises, o.currentIdx, o.otherIdx]),
-        ];
-      },
-
-      dismissSupersetOffer() {
-        this.supersetOffer = null;
-      },
-
-      /**
-       * Clears any pending offer that references the given exercise
-       * index (used when the user edits a superset manually).
-       */
-      dropOfferForExercise(exerciseIndex: number) {
-        if (
-          this.supersetOffer &&
-          (this.supersetOffer.currentIdx === exerciseIndex ||
-            this.supersetOffer.otherIdx === exerciseIndex)
-        ) {
-          this.supersetOffer = null;
-        }
       },
 
       addSet(exerciseIndex: number) {
@@ -1415,7 +1042,6 @@ const setTypes = [
           weight: last ? last.weight : 0,
           reps: last ? last.reps : 0,
           type: DEFAULT_SET_TYPE,
-          rpeType: "rpe",
           completed: false,
         };
         ex.sets.push(next);
@@ -1423,23 +1049,19 @@ const setTypes = [
 
       removeSet(exerciseIndex: number, setIndex: number) {
         const ex = this.exercises[exerciseIndex];
-        if (!ex) return;
+        if (!ex || ex.sets.length <= 1) return;
         ex.sets.splice(setIndex, 1);
-        // Re-number remaining sets so the displayed # stays 1..N.
         ex.sets.forEach((s, i) => {
           s.setNumber = i + 1;
         });
       },
 
       hasWorkingWeight(exercise: SessionExercise): boolean {
-        return exercise.sets.some((s) => s.type === "work" && s.weight > 0);
+        return exercise.sets.some(
+          (s) => (s.type === "work" || s.type === "top") && s.weight > 0,
+        );
       },
 
-      // ── MRV — suggested load (added 2026-08-10) ──
-      // V1 prog. linéaire (src/lib/mrv.ts) : la charge proposée pour une
-      // série est calculée depuis l'historique des séances terminées
-      // (top set récent, ajustement reps/RPE, plafond 1RM Epley, arrondi
-      // 2,5 kg). Jamais appliquée sans clic explicite — clic = confirmation.
       mrvSuggestion(
         exerciseIndex: number,
         setIndex: number,
@@ -1447,19 +1069,21 @@ const setTypes = [
         const ex = this.exercises[exerciseIndex];
         const set = ex?.sets[setIndex];
         if (!ex || !set) return null;
-        return suggestLoadSuggestion(ex.exerciseId, this.allSessions, {
+        const key = `${ex.exerciseId}:${setIndex}:${set.reps}:${set.weight}`;
+        if (this._mrvCache.has(key)) return this._mrvCache.get(key)!;
+        const result = suggestLoadSuggestion(ex.exerciseId, this.allSessions, {
           targetReps: set.reps > 0 ? set.reps : undefined,
           lastLoad: set.weight > 0 ? set.weight : undefined,
         });
+        this._mrvCache.set(key, result);
+        return result;
       },
 
-      /** True quand le bouton ⚡ est cliquable (une suggestion existe). */
       mrvEnabled(exerciseIndex: number, setIndex: number): boolean {
         const s = this.mrvSuggestion(exerciseIndex, setIndex);
         return Boolean(s && s.weight != null);
       },
 
-      /** Raison localisée de la suggestion (tooltip du bouton ⚡). */
       mrvTitle(exerciseIndex: number, setIndex: number): string {
         const s = this.mrvSuggestion(exerciseIndex, setIndex);
         if (!s || s.reason === "none") return this.labels.mrvNoHistory;
@@ -1467,11 +1091,6 @@ const setTypes = [
         return this.labels.mrvFromHistory;
       },
 
-      /**
-       * Click = confirmation : remplit le poids de la série avec la charge
-       * suggérée + toast. Ne fait rien quand aucune suggestion n'existe (le
-       * bouton est désactivé) — et n'écrit JAMAIS de poids sans ce clic.
-       */
       applyMrv(exerciseIndex: number, setIndex: number) {
         const ex = this.exercises[exerciseIndex];
         const set = ex?.sets[setIndex];
@@ -1492,7 +1111,6 @@ const setTypes = [
         );
       },
 
-      /** Wraps the global Toast.astro API (window.showToast, if mounted). */
       showToast(message: string, variant = "info") {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fn = (window as any).showToast as
@@ -1504,15 +1122,13 @@ const setTypes = [
         const ex = this.exercises[exerciseIndex];
         if (!ex) return;
 
-        // Find the max working weight from existing sets.
         const workingSets = ex.sets.filter(
-          (s) => s.type === "work" && s.weight > 0,
+          (s) => (s.type === "work" || s.type === "top") && s.weight > 0,
         );
         if (workingSets.length === 0) return;
 
         const maxWeight = Math.max(...workingSets.map((s) => s.weight));
 
-        // Generate warmup sets: 40%, 60%, 80% of working weight.
         const warmupPercents = [0.4, 0.6, 0.8] as const;
         const warmupReps = [12, 8, 5] as const;
         const warmups: SessionSet[] = warmupPercents.map((p, i) => ({
@@ -1521,11 +1137,9 @@ const setTypes = [
           type: "warmup",
           weight: Math.round(maxWeight * p),
           reps: warmupReps[i],
-          rpeType: "rpe",
           completed: false,
         }));
 
-        // Prepend warmups and re-number all sets so the displayed # stays 1..N.
         ex.sets = [
           ...warmups,
           ...ex.sets.map((s, i) => ({
@@ -1536,140 +1150,16 @@ const setTypes = [
       },
 
       removeExercise(exerciseIndex: number) {
+        const ex = this.exercises[exerciseIndex];
+        if (ex) {
+          this.expandedExercises = this.expandedExercises.filter(
+            (id) => id !== ex.exerciseId,
+          );
+        }
         this.exercises.splice(exerciseIndex, 1);
       },
 
-      // ── Set completion (added 2026-08-04) ──
-      /**
-       * Toggle a set's `completed` flag. When the set becomes complete
-       * we start the rest timer using the per-exercise default from
-       * `getRestTime(name)` (longer for compound lifts, shorter for
-       * isolation). Unchecking stops the timer only if it was started
-       * for that same set — otherwise the timer keeps running.
-       */
-      toggleSetComplete(exerciseIndex: number, setIndex: number) {
-        const ex = this.exercises[exerciseIndex];
-        if (!ex) return;
-        const set = ex.sets[setIndex];
-        if (!set) return;
-        set.completed = !set.completed;
-        if (set.completed) {
-          this.startRestTimer(ex.name);
-          this.maybeOfferSuperset(exerciseIndex);
-        } else {
-          // Unmarking breaks the "two back-to-back completes" premise.
-          this.dropOfferForExercise(exerciseIndex);
-        }
-      },
-
-      // ── Rest timer (added 2026-08-04) ──
-      /**
-       * Starts (or restarts) the rest timer for the given exercise.
-       * Duration is computed from `getRestTime(name)` so the user
-       * doesn't have to configure anything. Cancels any previous
-       * timer first so the widget always reflects the latest action.
-       */
-      startRestTimer(exerciseName: string) {
-        this.cancelRestTimerTick();
-        const duration = getRestTime(exerciseName);
-        this.restTimer = {
-          active: true,
-          exerciseName,
-          duration,
-          remaining: duration,
-          intervalId: null,
-          endTime: Date.now() + duration * 1000,
-        };
-        this.restTimer.intervalId = window.setInterval(
-          () => this.tickRestTimer(),
-          1000,
-        );
-        // First tick happens immediately so the display updates from
-        // the very first second instead of waiting up to a full second.
-        this.tickRestTimer();
-      },
-
-      /**
-       * Internal — decrements the remaining seconds and stops the
-       * interval when the timer hits zero. Beep on completion if
-       * the user enabled sound alerts in their settings (we re-read
-       * the flag at tick time so a settings change is picked up).
-       */
-      tickRestTimer() {
-        const remainingMs = Math.max(0, this.restTimer.endTime - Date.now());
-        const remainingSec = Math.ceil(remainingMs / 1000);
-        this.restTimer.remaining = remainingSec;
-        if (remainingMs <= 0) {
-          this.cancelRestTimerTick();
-          this.restTimer.remaining = 0;
-          if (this.isSoundEnabled()) this.beep();
-        }
-      },
-
-      cancelRestTimerTick() {
-        if (this.restTimer.intervalId != null) {
-          window.clearInterval(this.restTimer.intervalId);
-        }
-      },
-
-      dismissRestTimer() {
-        this.cancelRestTimerTick();
-        this.restTimer = {
-          active: false,
-          exerciseName: "",
-          duration: 0,
-          remaining: 0,
-          intervalId: null,
-          endTime: 0,
-        };
-      },
-
-      /**
-       * "Repos — <name> (<mm:ss>)" label for the timer widget.
-       * Returns the empty string when the timer is not active so
-       * the binding is always safe to render.
-       */
-      restTimerLabel(): string {
-        if (!this.restTimer.active) return "";
-        return `${this.labels.rest} — ${this.restTimer.exerciseName} (${formatRestTime(this.restTimer.duration)})`;
-      },
-
-      restTimerDisplay(): string {
-        if (!this.restTimer.active) return "0:00";
-        return formatRestTime(this.restTimer.remaining);
-      },
-
-      get restTimerDone(): boolean {
-        return this.restTimer.active && this.restTimer.remaining <= 0;
-      },
-
-      /**
-       * Mirrors the sound-alert flag from settings (default true
-       * when the user hasn't saved settings yet). Read on every
-       * tick so the change is picked up without a full reload.
-       */
-      isSoundEnabled(): boolean {
-        try {
-          const raw = localStorage.getItem("muscu-settings");
-          if (!raw) return true;
-          const parsed = JSON.parse(raw);
-          return parsed.soundAlerts !== false;
-        } catch {
-          return true;
-        }
-      },
-
-      /**
-       * Rest is over. Silent fallback if the WebAudio API
-       * is unavailable.
-       */
-      beep(): void {
-        playBeep();
-      },
-
-      // ── Notes actions ──
       setFatigue(level: number) {
-        // Toggle: clicking the currently active level unsets fatigue.
         if (this.sessionFatigue === level) {
           this.sessionFatigue = 0;
         } else {
@@ -1678,7 +1168,6 @@ const setTypes = [
       },
 
       setMood(mood: SessionMood) {
-        // Toggle: clicking the active mood unsets it.
         this.sessionMood = this.sessionMood === mood ? "" : mood;
       },
 
@@ -1692,17 +1181,34 @@ const setTypes = [
 
       save() {
         if (!this.canSave) return;
-        // Strip the builder-only `supersetId` from each exercise and
-        // build the persisted `supersets` array (only groups with 2+
-        // members are saved; orphan groups are dropped).
+        const transientExercises = this.exercises.filter((exercise) =>
+          exercise.exerciseId.startsWith("template:"),
+        );
+        const persistedIds = new Map<string, string>();
+        for (const exercise of transientExercises) {
+          if (persistedIds.has(exercise.exerciseId)) continue;
+          const created = saveExercise({
+            name: exercise.name,
+            muscle: exercise.muscle,
+            category: TEMPLATE_FALLBACK_CATEGORY,
+          });
+          persistedIds.set(exercise.exerciseId, created.id);
+        }
         const cleanExercises: SessionExercise[] = this.exercises.map(
-          ({ supersetId: _supersetId, ...ex }) => ex,
+          ({ supersetId: _supersetId, ...ex }) => ({
+            ...ex,
+            exerciseId: persistedIds.get(ex.exerciseId) ?? ex.exerciseId,
+            sets: ex.sets.map((set) => ({
+              ...set,
+              exerciseId: persistedIds.get(set.exerciseId) ?? set.exerciseId,
+            })),
+          }),
         );
         const groupMap = new Map<number, string[]>();
         for (const ex of this.exercises) {
           if (ex.supersetId == null) continue;
           const list = groupMap.get(ex.supersetId) ?? [];
-          list.push(ex.exerciseId);
+          list.push(persistedIds.get(ex.exerciseId) ?? ex.exerciseId);
           groupMap.set(ex.supersetId, list);
         }
         const supersets: { exercises: string[] }[] = [];
@@ -1710,14 +1216,12 @@ const setTypes = [
           if (ids.length >= 2) supersets.push({ exercises: ids });
         }
 
-        // Build the payload; only attach a field when meaningful so older
-        // sessions stored before this feature stay clean.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const payload: any = {
           name: this.sessionName.trim(),
           date: this.sessionDate,
           exercises: cleanExercises,
-          status: "planned" as const,
+          status: (this.editSessionId ? getSessionById(this.editSessionId)?.status : null) ?? ("planned" as const),
         };
         if (this.sessionRpe) payload.rpe = this.sessionRpe;
         if (this.sessionFatigue > 0) payload.fatigue = this.sessionFatigue;
@@ -1725,11 +1229,16 @@ const setTypes = [
         if (this.sessionNotes.trim() !== "")
           payload.notes = this.sessionNotes.trim();
         if (supersets.length > 0) payload.supersets = supersets;
-        saveSession(payload);
+        if (this.editSessionId) {
+          const existing = getSessionById(this.editSessionId);
+          if (existing?.sourceSessionId) payload.sourceSessionId = existing.sourceSessionId;
+          updateSession(this.editSessionId, payload);
+        } else {
+          saveSession(payload);
+        }
         window.location.href = localizedPath("/sessions");
       },
 
-      // ── Dialog helpers (wrap the global Dialog API) ──
       openDialogById(id: string) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fn = (window as any).openDialog as
@@ -1747,17 +1256,14 @@ const setTypes = [
 </script>
 
 <style>
-  /* ── Alpine cloak ── */
   [x-cloak] {
     display: none !important;
   }
 
-  /* ── Date input: dark color-scheme ── */
   .ses-date-input {
     color-scheme: dark;
   }
 
-  /* ── Number input spinner hiding ── */
   .ses-input-inline::-webkit-outer-spin-button,
   .ses-input-inline::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -1767,17 +1273,16 @@ const setTypes = [
     -moz-appearance: textfield;
   }
 
-  /* ── Sets table ── */
   .ses-table-head,
   .ses-table-row {
     display: grid;
     grid-template-columns: 3.2rem minmax(0, 1.3fr) minmax(0, 1fr) minmax(
         0,
         0.8fr
-      ) minmax(0, 1fr) 9.6rem;
+      ) 5.2rem;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0 1rem;
+    gap: 0.8rem;
+    padding: 0 1.2rem;
   }
   .ses-table-head {
     height: 3.2rem;
@@ -1789,7 +1294,7 @@ const setTypes = [
     color: var(--color-muted);
   }
   .ses-table-row {
-    min-height: 4rem;
+    min-height: 5.6rem;
     border-top: 1px solid var(--color-border);
     transition: background-color var(--transition-fast);
   }
@@ -1821,39 +1326,6 @@ const setTypes = [
     gap: 0.4rem;
   }
 
-  /* ── RPE toggle ── */
-  .ses-rpe-toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4.4rem;
-    padding: 0 0.8rem;
-    background-color: transparent;
-    border: none;
-    border-radius: var(--radius-pill);
-    color: var(--color-muted);
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    font-weight: 700;
-    line-height: 1;
-    cursor: pointer;
-    appearance: none;
-    transition:
-      background-color var(--transition-fast),
-      color var(--transition-fast),
-      box-shadow var(--transition-fast);
-  }
-  .ses-rpe-toggle-btn.is-active {
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    box-shadow: var(--shadow-1);
-  }
-  .ses-rpe-toggle-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  /* ── RPE slider thumbs ── */
   .ses-rpe-input::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -1910,7 +1382,6 @@ const setTypes = [
     background-color: var(--color-destructive);
   }
 
-  /* ── Superset bar color variants ── */
   .ses-superset-bar--g1 {
     --ses-super-color: var(--color-superset-g1);
     background-color: var(--color-superset-g1-bg);
@@ -1939,28 +1410,11 @@ const setTypes = [
     flex-shrink: 0;
   }
 
-  /* ── Chevron open state ── */
   .ses-chevron.is-open {
     transform: rotate(180deg);
     color: var(--color-accent);
   }
 
-  /* ── Set complete state ── */
-  .ses-set-complete.is-complete {
-    background-color: var(--color-success);
-    border-color: var(--color-success);
-    color: var(--color-bg);
-  }
-  .ses-set-complete.is-complete:hover {
-    background-color: var(--color-success);
-    border-color: var(--color-success);
-  }
-  .ses-set-complete svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  /* ── Fatigue / mood active states ── */
   .ses-fatigue-btn.is-active {
     filter: none;
     background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
@@ -1978,7 +1432,6 @@ const setTypes = [
       color-mix(in srgb, var(--color-accent) 18%, transparent);
   }
 
-  /* ── Tip callout disc ── */
   .ses-picker-tip::before {
     content: "";
     display: inline-block;
@@ -1990,7 +1443,6 @@ const setTypes = [
     background-color: var(--color-accent);
   }
 
-  /* ── Tip video SVG ── */
   .ses-tip-video svg {
     width: 1.3rem;
     height: 1.3rem;
@@ -2003,13 +1455,608 @@ const setTypes = [
     stroke: none;
   }
 
-  /* ── Search input cancel button ── */
   .ses-search-input::-webkit-search-cancel-button {
     -webkit-appearance: none;
     appearance: none;
   }
 
-  /* ── Narrow-phone exercise header grid (480px) ── */
+  .create__main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-bottom: 6rem;
+  }
+
+  .create__action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .create__info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .create__empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
+  .create__empty-icon {
+    color: var(--color-muted);
+    margin-bottom: 1rem;
+  }
+
+  .create__empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+  }
+
+  .create__empty-desc {
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .create__empty-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color var(--transition-fast);
+  }
+  .create__empty-add-btn:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  .create__superset-offer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    margin: 0 1rem 0.75rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-accent);
+    background-color: var(--color-surface-2);
+  }
+
+  .create__superset-offer-icon {
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .create__superset-offer-text {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  .create__superset-offer-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    display: block;
+  }
+
+  .create__superset-offer-names {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    display: block;
+  }
+
+  .create__superset-offer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .create__superset-offer-confirm {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-md);
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color var(--transition-fast);
+  }
+  .create__superset-offer-confirm:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  .create__superset-offer-dismiss {
+    padding: 0.375rem;
+    border-radius: var(--radius-md);
+    color: var(--color-muted);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+  }
+  .create__superset-offer-dismiss:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface-3);
+  }
+
+  .create__superset-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+  }
+
+  .create__superset-bar-icon {
+    color: var(--ses-super-color, var(--color-muted));
+  }
+
+  .create__superset-bar-label {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--ses-super-color, var(--color-muted));
+  }
+
+  .create__superset-bar-chain {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+
+
+  .create__ex-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1.2rem;
+  }
+
+  .create__ex-toggle {
+    flex: 1 1 0%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: left;
+    min-width: 0;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .create__toggle-body {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  .create__ex-head {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .create__ex-name {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .create__ex-summary {
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    margin-top: 0.125rem;
+  }
+
+  .create__ex-chevron {
+    color: var(--color-muted);
+    transition: transform var(--transition-fast);
+  }
+
+  .create__ex-superset-select {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 4.4rem;
+    padding: 0.8rem 1rem;
+    font-size: 1.3rem;
+    color: var(--color-text);
+    max-width: 10rem;
+  }
+
+  .create__ex-body {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .create__sets-scroll {
+    overflow-x: auto;
+  }
+
+  .create__select {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 4.4rem;
+    padding: 0.8rem 1rem;
+    color: var(--color-text);
+    font-size: 1.3rem;
+    font-family: var(--font-body);
+    width: 100%;
+    outline: none;
+  }
+  .create__select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  .create__weight-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .create__input {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 4.4rem;
+    padding: 0.8rem 1rem;
+    color: var(--color-text);
+    font-size: 1.3rem;
+    font-family: var(--font-body);
+    width: 100%;
+    outline: none;
+  }
+  .create__input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  .create__ex-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .create__add-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .create__add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .create__notes {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .create__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .create__field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .create__label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  .create__rpe-slider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .create__rpe-input {
+    width: 100%;
+  }
+
+  .create__rpe-label {
+    min-width: 4.4rem;
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    text-align: right;
+  }
+
+  .create__fatigue-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .create__fatigue-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.4rem;
+    min-height: 4.4rem;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background-color: transparent;
+    color: var(--color-muted);
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+  }
+  .create__fatigue-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .create__mood-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .create__mood-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.4rem;
+    min-height: 4.4rem;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background-color: transparent;
+    color: var(--color-muted);
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+  }
+  .create__mood-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .create__textarea {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 10rem;
+    padding: 1rem 1.2rem;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    resize: none;
+    width: 100%;
+    outline: none;
+  }
+  .create__textarea:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  .create__validation {
+    color: var(--color-destructive);
+    font-size: 1.3rem;
+    font-weight: 500;
+    text-align: center;
+    padding: 0.5rem 0;
+  }
+
+  .create__picker {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+  }
+
+  .create__picker-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.8rem 1.2rem;
+  }
+
+  .create__picker-search-icon {
+    color: var(--color-muted);
+    margin-right: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .create__picker-input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    color: var(--color-text);
+    font-size: 1.4rem;
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  .create__picker-templates {
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.2rem;
+  }
+
+  .create__picker-templates-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .create__picker-templates-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+
+  .create__picker-templates-hint {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+  }
+
+  .create__picker-templates-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+
+  .create__picker-tpl {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-2);
+    text-align: left;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  }
+  .create__picker-tpl:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-surface-3);
+  }
+
+  .create__picker-tpl-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .create__picker-tpl-desc {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+  }
+
+  .create__picker-tpl-count {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin-top: 0.2rem;
+  }
+
+  .create__picker-list {
+    flex: 1 1 0%;
+    overflow-y: auto;
+  }
+
+  .create__picker-empty {
+    padding: 2.4rem 1.2rem;
+    text-align: center;
+    font-size: 1.3rem;
+    color: var(--color-muted);
+  }
+
+  .create__picker-empty-link {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .create__picker-item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .create__picker-item-btn {
+    flex: 1 1 0%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding: 1rem 1.2rem;
+    min-height: 4.8rem;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+  }
+  .create__picker-item-btn:hover {
+    background-color: var(--alpha-bg-subtle);
+  }
+  .create__picker-item-btn:active {
+    background-color: var(--alpha-bg-soft);
+  }
+  .create__picker-item-btn:focus-visible {
+    outline: none;
+    box-shadow: inset var(--focus-ring);
+  }
+
+  .create__picker-item-name {
+    font-size: 1.3rem;
+    color: var(--color-text);
+  }
+
+  .create__picker-tip-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.4rem;
+    min-height: 4.4rem;
+    padding: 0.6rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+  .create__picker-tip-toggle:hover {
+    color: var(--color-text);
+  }
+  .create__picker-tip-toggle:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .create__picker-tip {
+    padding: 1rem 1.2rem;
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    background-color: var(--color-surface-2);
+    border-top: 1px solid var(--color-border);
+    line-height: 1.5;
+  }
+
+  .create__picker-tip-video {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    margin-top: 0.6rem;
+  }
+
   @media (max-width: 480px) {
     .ses-ex-header {
       display: grid;
@@ -2028,9 +2075,10 @@ const setTypes = [
       max-width: none;
       margin-top: 0.2rem;
     }
-    .ses-ex-header > .ses-delete-btn {
+    .ses-ex-header > .icon-btn {
       grid-column: 2;
       grid-row: 1;
+      justify-self: end;
     }
     .ses-ex-head {
       align-items: flex-start;
@@ -2046,14 +2094,13 @@ const setTypes = [
     }
   }
 
-  /* ── Sets table responsive (640px) ── */
   @media (max-width: 640px) {
     .ses-table-head {
       display: none;
     }
     .ses-table-row {
       grid-template-columns: 1fr 1fr;
-      grid-template-areas: "num type" "weight reps" "rpe rpe" "action action";
+      grid-template-areas: "num type" "weight reps" "action action";
       gap: 0.6rem;
       padding: 1rem;
       min-height: 0;
@@ -2076,37 +2123,6 @@ const setTypes = [
       padding-top: 0.4rem;
       border-top: 1px dashed var(--color-border);
     }
-    .ses-table-row .ses-cell-rpe {
-      grid-area: rpe;
-      justify-content: stretch;
-      padding-top: 0.4rem;
-    }
-    .ses-rpe-set {
-      justify-content: stretch;
-    }
-    .ses-rpe-select {
-      flex: 1 1 auto;
-      width: auto;
-    }
   }
 
-  /* ── Narrow-phone overrides (360px) ── */
-  @media (max-width: 360px) {
-    .ses-rpe-toggle-btn {
-      padding-inline: 0.65rem;
-    }
-  }
-
-  /* ── Reduced motion ── */
-  @media (prefers-reduced-motion: reduce) {
-    .ses-fatigue-btn,
-    .ses-mood-btn,
-    .ses-set-complete,
-    .ses-chevron,
-    .ses-rpe-input,
-    .ses-rpe-value,
-    [class*="transition"] {
-      transition: none !important;
-    }
-  }
 </style>

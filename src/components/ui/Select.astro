@@ -1,6 +1,6 @@
 ---
 import FormField from './FormField.astro';
-import Icon from './Icon/Icon.astro';
+import Icon from './Icon.astro';
 import { buildDescribedBy } from '../../lib/form-utils';
 
 interface Option {
@@ -19,7 +19,7 @@ interface Props {
   id?: string;
   value?: string;
   placeholder?: string;
-  options: Option[];
+  options?: Option[];
   class?: string;
   [key: string]: unknown;
 }
@@ -47,7 +47,6 @@ const describedBy = buildDescribedBy(id, hint, error);
     <select
       id={id}
       name={name}
-      value={value}
       disabled={disabled}
       required={required}
       aria-invalid={error ? "true" : undefined}
@@ -60,11 +59,12 @@ const describedBy = buildDescribedBy(id, hint, error);
           {placeholder}
         </option>
       )}
-      {options.map((opt) => (
+      {options?.map((opt) => (
         <option value={opt.value} disabled={opt.disabled} selected={opt.value === value}>
           {opt.label}
         </option>
       ))}
+      <slot />
     </select>
 
     <span class="select__chevron">

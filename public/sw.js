@@ -50,7 +50,6 @@ const APP_SHELL = [
   "/en/login",
   "/manifest.json",
   "/favicon.svg",
-  "/input-stepper.css",
 ];
 
 // Inline offline fallback. Kept tiny and dependency-free so it

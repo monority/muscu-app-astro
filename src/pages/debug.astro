@@ -2,14 +2,15 @@
 import '../styles/global.css';
 
 // Dev-only tool page: generates/clears demo data in localStorage.
-// Ships as a static /debug page (client-side only, no server logic).
+// Only renders during `astro dev`; production build outputs a 404 shell.
+const isDev = import.meta.env.DEV;
 ---
 
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Données de test — muscu.app</title>
+    <title>{isDev ? 'Données de test' : '404'} — muscu.app</title>
 
     {/* ── Styling decision (E2) ─────────────────────────────
         Kept fully self-contained on purpose: this dev-only page
@@ -99,6 +100,7 @@ import '../styles/global.css';
     </style>
   </head>
   <body>
+    {isDev && (
     <div class="card" x-data="debugApp()" x-init="init()">
       <h1>Données de test</h1>
       <p>
@@ -122,7 +124,16 @@ import '../styles/global.css';
       <div class="status" x-show="message" x-text="message"></div>
       <pre x-show="summary" x-text="summary"></pre>
     </div>
+    )}
 
+    {!isDev && (
+    <div class="card">
+      <h1>404</h1>
+      <p>Cette page n'existe pas en production.</p>
+    </div>
+    )}
+
+    {isDev && (
     <script>
       import { generateDemoData, resetAllData, currentCounts } from '../lib/seed';
 
@@ -157,7 +168,7 @@ import '../styles/global.css';
                 `Lien démo comparaison : /sessions/compare?id1=${s.compareId1}&id2=${s.compareId2}`;
               this.refresh();
               this.busy = false;
-              this.message = 'OK — données de test générées. Parcours l’app depuis le dashboard.';
+              this.message = 'OK — données de test générées. Parcours l\'app depuis le dashboard.';
             }, 30);
           },
 
@@ -172,7 +183,7 @@ import '../styles/global.css';
         }));
       });
     </script>
-    <!-- Alpine.js CDN — MUST be AFTER the app script (type="module" runs before defer) -->
     <script is:inline defer src="/vendor/alpinejs-3.14.1.min.js"></script>
+    )}
   </body>
 </html>

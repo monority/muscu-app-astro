@@ -1,5 +1,5 @@
 ---
-import Badge from '../ui/Badge/Badge.astro';
+import Badge from '../ui/Badge.astro';
 import SetRow from './SetRow.astro';
 import { t } from '../../i18n';
 
@@ -15,41 +15,113 @@ interface Props {
 
 const { name, muscle, sets, expanded = false, class: className = '' } = Astro.props as Props;
 const completedCount = sets.filter((set) => set.completed).length;
-const classes = ['workout-exercise', completedCount === sets.length && sets.length > 0 && 'workout-exercise--complete', className].filter(Boolean).join(' ');
+const isComplete = completedCount === sets.length && sets.length > 0;
 ---
 
-<article class:list={['flex flex-col gap-[1.4rem] py-8 border-b-separator', classes]}>
-  <header class="flex items-start justify-between gap-[1.2rem]">
-    <div class="flex items-start gap-4 min-w-0">
-      <span class="workout-exercise__marker w-2 h-[3.8rem] shrink-0 bg-[var(--color-border-strong)]" aria-hidden="true"></span>
+<article class:list={['exercise-card', isComplete && 'exercise-card--complete', className]}>
+  <header class="exercise-card__header">
+    <div class="exercise-card__title-group">
+      <span class="exercise-card__marker" aria-hidden="true"></span>
       <div>
-        <h3 class="m-0 text-[var(--color-text)] text-[1.9rem] tracking-tight">{name}</h3>
-        <span class="block mt-1 text-[var(--color-muted)] text-[1.1rem] font-bold tracking-[0.12em] uppercase">{muscle}</span>
+        <h3 class="exercise-card__name">{name}</h3>
+        <span class="exercise-card__muscle">{muscle}</span>
       </div>
     </div>
-    <Badge variant={completedCount === sets.length && sets.length > 0 ? 'success' : 'default'} size="sm">
+    <Badge variant={isComplete ? 'success' : 'default'} size="sm">
       {completedCount}/{sets.length}
     </Badge>
   </header>
 
   {sets.length > 0 && (
-    <div class="flex gap-[0.8rem] text-[var(--color-muted)] text-[1.2rem]" aria-label={`${sets.length} sets`}>
+    <div class="exercise-card__summary" aria-label={`${sets.length} sets`}>
       <span>{sets.length} {L.common.sets}</span>
-      <span class="text-[var(--color-accent)]" aria-hidden="true">/</span>
+      <span class="exercise-card__sep" aria-hidden="true">/</span>
       <span>{completedCount} {L.sessions.completed.toLowerCase()}</span>
     </div>
   )}
 
   {expanded && sets.length > 0 && (
-    <div class="border-t border-[var(--color-border-strong)]" role="list" aria-label={name}>
-      <div class="set-row-grid px-4 py-[0.8rem] text-[var(--color-muted)] text-[0.9rem] font-extrabold tracking-[0.14em] max-[480px]:px-[0.4rem]" aria-hidden="true"><span>SET</span><span>LOAD</span><span></span><span>REPS</span><span>TYPE</span><span></span></div>
+    <div class="exercise-card__sets" role="list" aria-label={name}>
+      <div class="set-row-grid exercise-card__sets-header" aria-hidden="true"><span>SET</span><span>LOAD</span><span></span><span>REPS</span><span>TYPE</span><span></span></div>
       {sets.map((set, i) => <SetRow index={i + 1} weight={set.weight} reps={set.reps} completed={set.completed} type={set.type} />)}
     </div>
   )}
 </article>
 
 <style>
-  .workout-exercise { padding: 2rem 0; }
-  .workout-exercise--complete .workout-exercise__marker { background: var(--color-accent); }
-  @media (max-width: 480px) { .workout-exercise { padding: 1.6rem 0; } }
+  .exercise-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .exercise-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.2rem;
+  }
+
+  .exercise-card__title-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.6rem;
+    min-width: 0;
+  }
+
+  .exercise-card__marker {
+    width: 0.8rem;
+    height: 3.8rem;
+    flex-shrink: 0;
+    background: var(--color-border-strong);
+    border-radius: 2px;
+  }
+  .exercise-card--complete .exercise-card__marker { background: var(--color-accent); }
+
+  .exercise-card__name {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.9rem;
+    letter-spacing: -0.02em;
+  }
+
+  .exercise-card__muscle {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .exercise-card__summary {
+    display: flex;
+    gap: 0.8rem;
+    color: var(--color-muted);
+    font-size: 1.2rem;
+  }
+
+  .exercise-card__sep {
+    color: var(--color-accent);
+  }
+
+  .exercise-card__sets {
+    border-top: 1px solid var(--color-border-strong);
+  }
+
+  .exercise-card__sets-header {
+    padding: 0.8rem 1.6rem;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+  }
+
+  @media (max-width: 480px) {
+    .exercise-card { padding: 1.6rem 0; }
+    .exercise-card__sets-header { padding: 0.8rem 0.4rem; }
+  }
 </style>

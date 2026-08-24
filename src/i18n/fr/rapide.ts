@@ -48,4 +48,8 @@ export default {
   setsShort: 'séries',
   repsUnit: 'reps',
   completeSetAria: 'Marquer la série comme terminée',
+  rpeLabel: 'Effort perçu',
+  rpeTypeLabel: 'Type d’effort perçu',
+  rpeUnset: '— Non renseigné —',
+  partialFinishConfirm: 'Terminer séance avant toutes séries ? La progression sera enregistrée.',
 };

@@ -11,13 +11,27 @@ interface Props {
 const { href, label, class: className = '', ...rest } = Astro.props;
 ---
 
-<a {href} class:list={['inline-flex items-center gap-[0.6rem] text-[var(--color-muted)] text-[1.4rem] font-medium no-underline transition-colors duration-[var(--transition-fast)] mb-[1.2rem] hover:text-[var(--color-text)]', className]} {...rest}>
+<a {href} class:list={['back-link', className]} {...rest}>
   <Fragment set:html={icons.arrowLeft(20, 20)} />
   <span>{label}</span>
 </a>
 
 <style>
-  a :global(svg) {
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-muted);
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 1.2rem;
+    transition: color var(--transition-fast);
+  }
+  .back-link:hover {
+    color: var(--color-text);
+  }
+  .back-link :global(svg) {
     flex-shrink: 0;
   }
 </style>

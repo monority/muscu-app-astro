@@ -48,4 +48,8 @@ export default {
   setsShort: 'sets',
   repsUnit: 'reps',
   completeSetAria: 'Mark set as completed',
+  rpeLabel: 'Perceived effort',
+  rpeTypeLabel: 'Perceived effort type',
+  rpeUnset: '— Not set —',
+  partialFinishConfirm: 'Finish session before all sets? Progress will be saved.',
 };

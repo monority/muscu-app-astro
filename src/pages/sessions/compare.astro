@@ -3,12 +3,12 @@
 import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import Card from '../../components/ui/Card/Card.astro';
+import Card from '../../components/ui/Card.astro';
 import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
-import Badge from '../../components/ui/Badge/Badge.astro';
-import Icon from '../../components/ui/Icon/Icon.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Icon from '../../components/ui/Icon.astro';
 import { icons } from '../../lib/icons';
 import BackLink from '../../components/ui/BackLink.astro';
 const L = t();
@@ -16,7 +16,7 @@ const L = t();
 
 <AppLayout title={L.comparer.title}>
   <div
-    class="flex flex-col gap-[var(--spacing-5)] pb-24"
+    class="comp"
     x-data="comparisonApp()"
     x-init="init()"
     x-cloak
@@ -30,16 +30,16 @@ const L = t();
 
     {/* ═══════════════════════════════════════════════════
         SESSION PICKERS
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ═══════════════════════════════════════════════════ */}
     <Card>
       <CardHeader>
         <CardTitle>{L.comparer.selection}</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="comp__pickers">
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0">
-            <label for="comp-s1" class="font-[family-name:var(--font-body)] text-[1.1rem] text-[var(--color-muted)] uppercase tracking-[0.12em] font-bold leading-[1.2]">{L.comparer.session1Ref}</label>
-            <div class="relative">
+          <div class="comp__picker-field">
+            <label for="comp-s1" class="comp__picker-label">{L.comparer.session1Ref}</label>
+            <div class="comp__picker-wrap">
               <Fragment set:html={icons.dumbbellBox(18, 18)} />
               <select
                 class="comp__select"
@@ -59,13 +59,13 @@ const L = t();
             </div>
           </div>
 
-          <div class="flex items-center justify-center h-[4.8rem] self-end" aria-hidden="true">
-            <span class="inline-flex items-center justify-center min-w-[4.8rem] h-[4.8rem] px-[1.4rem] rounded-full bg-gradient-to-br from-[color-mix(in_srgb,var(--color-accent)_18%,transparent)] to-[color-mix(in_srgb,var(--color-accent)_5%,transparent)] border border-[color-mix(in_srgb,var(--color-accent)_35%,transparent)] text-[var(--color-accent)] font-[family-name:var(--font-display)] text-[1.8rem] font-bold tracking-[0.04em] leading-none">{L.comparer.vs}</span>
+          <div class="comp__vs" aria-hidden="true">
+            <span class="comp__vs-badge">{L.comparer.vs}</span>
           </div>
 
-          <div class="flex flex-col gap-[var(--spacing-1)] min-w-0">
-            <label for="comp-s2" class="font-[family-name:var(--font-body)] text-[1.1rem] text-[var(--color-muted)] uppercase tracking-[0.12em] font-bold leading-[1.2]">{L.comparer.session2}</label>
-            <div class="relative">
+          <div class="comp__picker-field">
+            <label for="comp-s2" class="comp__picker-label">{L.comparer.session2}</label>
+            <div class="comp__picker-wrap">
               <Fragment set:html={icons.dumbbellBox(18, 18)} />
               <select
                 id="comp-s2"
@@ -89,18 +89,18 @@ const L = t();
       </CardContent>
     </Card>
 
-    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    {/* ═══════════════════════════════════════════════════
         HINT — show "select both" message
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ═══════════════════════════════════════════════════ */}
     <template x-if="allSessions.length < 2">
       <Card>
-        <div class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] text-[var(--color-muted)] text-[1.3rem] leading-[1.5]">
-          <div class="inline-flex items-center justify-center w-[3.4rem] h-[3.4rem] shrink-0 rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)] text-[var(--color-accent)]" aria-hidden="true">
+        <div class="comp__hint">
+          <div class="comp__hint-icon" aria-hidden="true">
             <Fragment set:html={icons.infoCircle(18, 18)} />
           </div>
           <p>
             {L.comparer.needTwo}
-            <a href={localizedPath("/sessions/create")} class="text-[var(--color-accent)] font-bold ml-[0.4rem] focus-visible:outline-none focus-visible:box-shadow-[var(--focus-ring)] focus-visible:rounded-[var(--radius-sm)]">{L.comparer.createSession}</a>
+            <a href={localizedPath("/sessions/create")} class="comp__hint-link">{L.comparer.createSession}</a>
           </p>
         </div>
       </Card>
@@ -108,8 +108,8 @@ const L = t();
 
     <template x-if="allSessions.length >= 2 && (!session1 || !session2)">
       <Card>
-        <div class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] text-[var(--color-muted)] text-[1.3rem] leading-[1.5]">
-          <div class="inline-flex items-center justify-center w-[3.4rem] h-[3.4rem] shrink-0 rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)] text-[var(--color-accent)]" aria-hidden="true">
+        <div class="comp__hint">
+          <div class="comp__hint-icon" aria-hidden="true">
             <Fragment set:html={icons.trendingUpLine(18, 18)} />
           </div>
           <p>{L.comparer.selectBoth}</p>
@@ -117,33 +117,33 @@ const L = t();
       </Card>
     </template>
 
-    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    {/* ═══════════════════════════════════════════════════
         COMPARISON COLUMNS
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ═══════════════════════════════════════════════════ */}
     <template x-if="session1 && session2">
-      <div class="flex flex-col gap-[var(--spacing-5)]">
-        {/* â”€â”€ Summary deltas at the top â”€â”€ */}
-        <div class="flex flex-col">
-          <h2 class="font-[family-name:var(--font-display)] text-[1.1rem] font-bold uppercase tracking-[0.16em] text-[var(--color-muted)] mb-[var(--spacing-3)]">{L.comparer.summaryTitle}</h2>
+      <div class="comp__results">
+        {/* ── Summary deltas at the top ── */}
+        <div class="comp__summary-section">
+          <h2 class="comp__summary-title">{L.comparer.summaryTitle}</h2>
           <div class="comp__summary-grid">
             {/* Volume delta */}
-            <article class="flex flex-col gap-[var(--spacing-3)] p-[var(--spacing-4)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)]">
-              <div class="inline-flex items-center gap-[var(--spacing-2)]">
+            <article class="comp__summary-card">
+              <div class="comp__summary-header">
                 <Fragment set:html={icons.volumeBox(20, 20)} />
-                <span class="font-[family-name:var(--font-display)] text-[1.1rem] uppercase tracking-[0.14em] font-bold text-[var(--color-muted)]">{L.comparer.volume}</span>
+                <span class="comp__summary-label">{L.comparer.volume}</span>
               </div>
               <div class="comp__summary-body">
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session1Ref}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="formatVolume(totalVolume(session1))"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session1Ref}</div>
+                  <div class="comp__summary-col-value" x-text="formatVolume(totalVolume(session1))"></div>
                 </div>
                 <div
                   class="comp__summary-delta"
                   :class="'comp__summary-delta--' + volumeDelta.direction"
                 >
-                  <span class="inline-flex items-center justify-center shrink-0" aria-hidden="true">
+                  <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="volumeDelta.direction === 'up'">
-                      <span class="inline-flex rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
+                      <span class="comp__rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="volumeDelta.direction === 'down'">
                       <Fragment set:html={icons.arrowDown(18, 18)} />
@@ -154,31 +154,31 @@ const L = t();
                   </span>
                   <span x-text="volumeDelta.label"></span>
                 </div>
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session2}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="formatVolume(totalVolume(session2))"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session2}</div>
+                  <div class="comp__summary-col-value" x-text="formatVolume(totalVolume(session2))"></div>
                 </div>
               </div>
             </article>
 
             {/* Exercises delta */}
-            <article class="flex flex-col gap-[var(--spacing-3)] p-[var(--spacing-4)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)]">
-              <div class="inline-flex items-center gap-[var(--spacing-2)]">
+            <article class="comp__summary-card">
+              <div class="comp__summary-header">
                 <Fragment set:html={icons.list(20, 20)} />
-                <span class="font-[family-name:var(--font-display)] text-[1.1rem] uppercase tracking-[0.14em] font-bold text-[var(--color-muted)]">{L.comparer.exercises}</span>
+                <span class="comp__summary-label">{L.comparer.exercises}</span>
               </div>
               <div class="comp__summary-body">
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session1Ref}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="session1.exercises.length"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session1Ref}</div>
+                  <div class="comp__summary-col-value" x-text="session1.exercises.length"></div>
                 </div>
                 <div
                   class="comp__summary-delta"
                   :class="'comp__summary-delta--' + exercisesDelta.direction"
                 >
-                  <span class="inline-flex items-center justify-center shrink-0" aria-hidden="true">
+                  <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="exercisesDelta.direction === 'up'">
-                      <span class="inline-flex rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
+                      <span class="comp__rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="exercisesDelta.direction === 'down'">
                       <Fragment set:html={icons.arrowDown(18, 18)} />
@@ -189,31 +189,31 @@ const L = t();
                   </span>
                   <span x-text="exercisesDelta.label"></span>
                 </div>
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session2}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="session2.exercises.length"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session2}</div>
+                  <div class="comp__summary-col-value" x-text="session2.exercises.length"></div>
                 </div>
               </div>
             </article>
 
             {/* Sets delta */}
-            <article class="flex flex-col gap-[var(--spacing-3)] p-[var(--spacing-4)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)]">
-              <div class="inline-flex items-center gap-[var(--spacing-2)]">
+            <article class="comp__summary-card">
+              <div class="comp__summary-header">
                 <Fragment set:html={icons.list(20, 20)} />
-                <span class="font-[family-name:var(--font-display)] text-[1.1rem] uppercase tracking-[0.14em] font-bold text-[var(--color-muted)]">{L.comparer.sets}</span>
+                <span class="comp__summary-label">{L.comparer.sets}</span>
               </div>
               <div class="comp__summary-body">
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session1Ref}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="totalSets(session1)"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session1Ref}</div>
+                  <div class="comp__summary-col-value" x-text="totalSets(session1)"></div>
                 </div>
                 <div
                   class="comp__summary-delta"
                   :class="'comp__summary-delta--' + setsDelta.direction"
                 >
-                  <span class="inline-flex items-center justify-center shrink-0" aria-hidden="true">
+                  <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="setsDelta.direction === 'up'">
-                      <span class="inline-flex rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
+                      <span class="comp__rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="setsDelta.direction === 'down'">
                       <Fragment set:html={icons.arrowDown(18, 18)} />
@@ -224,31 +224,31 @@ const L = t();
                   </span>
                   <span x-text="setsDelta.label"></span>
                 </div>
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session2}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="totalSets(session2)"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session2}</div>
+                  <div class="comp__summary-col-value" x-text="totalSets(session2)"></div>
                 </div>
               </div>
             </article>
 
             {/* Best 1RM delta */}
-            <article class="flex flex-col gap-[var(--spacing-3)] p-[var(--spacing-4)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)]">
-              <div class="inline-flex items-center gap-[var(--spacing-2)]">
+            <article class="comp__summary-card">
+              <div class="comp__summary-header">
                 <Fragment set:html={icons.dumbbell(20, 20)} />
-                <span class="font-[family-name:var(--font-display)] text-[1.1rem] uppercase tracking-[0.14em] font-bold text-[var(--color-muted)]">{L.comparer.best1RM}</span>
+                <span class="comp__summary-label">{L.comparer.best1RM}</span>
               </div>
               <div class="comp__summary-body">
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session1Ref}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="formatVolume(bestSet(session1))"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session1Ref}</div>
+                  <div class="comp__summary-col-value" x-text="formatVolume(bestSet(session1))"></div>
                 </div>
                 <div
                   class="comp__summary-delta"
                   :class="'comp__summary-delta--' + bestSetDelta.direction"
                 >
-                  <span class="inline-flex items-center justify-center shrink-0" aria-hidden="true">
+                  <span class="comp__summary-delta-icon" aria-hidden="true">
                     <template x-if="bestSetDelta.direction === 'up'">
-                      <span class="inline-flex rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
+                      <span class="comp__rotate-180"><Fragment set:html={icons.arrowDown(18, 18)} /></span>
                     </template>
                     <template x-if="bestSetDelta.direction === 'down'">
                       <Fragment set:html={icons.arrowDown(18, 18)} />
@@ -259,45 +259,45 @@ const L = t();
                   </span>
                   <span x-text="bestSetDelta.label"></span>
                 </div>
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <div class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.session2}</div>
-                  <div class="font-[family-name:var(--font-display)] text-[2.0rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1] tracking-[-0.01em]" x-text="formatVolume(bestSet(session2))"></div>
+                <div class="comp__summary-col">
+                  <div class="comp__summary-col-label">{L.comparer.session2}</div>
+                  <div class="comp__summary-col-value" x-text="formatVolume(bestSet(session2))"></div>
                 </div>
               </div>
             </article>
           </div>
         </div>
 
-        {/* â€”â€” Per-session columns â€”â€” */}
+        {/* ── Per-session columns ── */}
         <div class="comp__columns">
           {/* Session 1 column */}
-          <section class="flex flex-col gap-[var(--spacing-4)] p-[var(--spacing-4)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)]" aria-label={L.comparer.detailsAria1}>
-            <header class="flex flex-col gap-[var(--spacing-2)] pb-[var(--spacing-3)] border-b border-[var(--color-border)]">
-              <span class="inline-flex items-center self-start h-[2.4rem] px-[1.0rem] bg-[var(--alpha-bg-soft)] border border-[var(--color-border)] rounded-full text-[var(--color-muted)] font-[family-name:var(--font-display)] text-[1.0rem] font-bold uppercase tracking-[0.10em]">{L.comparer.session1Ref}</span>
-              <h3 class="font-[family-name:var(--font-display)] text-[2.2rem] font-bold text-[var(--color-text)] leading-[1.15] tracking-[-0.01em] break-words m-0" x-text="session1.name"></h3>
-              <div class="flex items-center gap-[var(--spacing-2)] flex-wrap">
+          <section class="comp__session-col" aria-label={L.comparer.detailsAria1}>
+            <header class="comp__session-header">
+              <span class="comp__session-badge">{L.comparer.session1Ref}</span>
+              <h3 class="comp__session-name" x-text="session1.name"></h3>
+              <div class="comp__session-meta">
                 <span
                   class="comp__status"
                   :class="'comp__status--' + session1.status"
                   x-text="statusLabel(session1.status)"
                 ></span>
-                <span class="text-[1.2rem] text-[var(--color-muted)] leading-[1.3]" x-text="formatDate(session1.date)"></span>
+                <span class="comp__session-date" x-text="formatDate(session1.date)"></span>
               </div>
-              <div class="flex gap-[var(--spacing-4)] pt-[var(--spacing-1)] flex-wrap">
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <span class="text-[1.05rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.duration}</span>
-                  <span class="font-[family-name:var(--font-display)] text-[1.6rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatDuration(session1.duration)"></span>
+              <div class="comp__session-stats">
+                <div class="comp__stat">
+                  <span class="comp__stat-label">{L.comparer.duration}</span>
+                  <span class="comp__stat-value" x-text="formatDuration(session1.duration)"></span>
                 </div>
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <span class="text-[1.05rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.sessions.volume}</span>
-                  <span class="font-[family-name:var(--font-display)] text-[1.6rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatVolume(totalVolume(session1))"></span>
+                <div class="comp__stat">
+                  <span class="comp__stat-label">{L.sessions.volume}</span>
+                  <span class="comp__stat-value" x-text="formatVolume(totalVolume(session1))"></span>
                 </div>
               </div>
             </header>
 
-            <div class="flex flex-col gap-[var(--spacing-3)]">
+            <div class="comp__exercises">
               <template x-if="unionExercises.length === 0">
-                <p class="text-center text-[var(--color-muted)] text-[1.3rem] py-[var(--spacing-4)]">{L.comparer.noExercises}</p>
+                <p class="comp__no-exercises">{L.comparer.noExercises}</p>
               </template>
 
               <template x-for="item in unionExercises" :key="item.exerciseId">
@@ -305,53 +305,53 @@ const L = t();
                   class="comp__exo"
                   :class="{ 'comp__exo--missing': !item.session1Ex }"
                 >
-                  <header class="flex items-start justify-between gap-[var(--spacing-3)] flex-wrap">
-                    <div class="flex flex-col gap-[0.4rem] min-w-0 flex-[1_1_auto]">
-                      <h4 class="font-[family-name:var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] leading-[1.2] break-words m-0" x-text="trExercise(item.name)"></h4>
+                  <header class="comp__exo-header">
+                    <div class="comp__exo-info">
+                      <h4 class="comp__exo-name" x-text="trExercise(item.name)"></h4>
                       <Badge
                         variant="category"
                         size="sm"
                         :class="'badge--cat-' + muscleHue(item.muscle)"
-                        class="self-start"
+                        class="comp__exo-badge"
                         x-text="trMuscle(item.muscle)"
                       ></Badge>
                     </div>
-                    <div class="flex flex-col items-end gap-[0.2rem] shrink-0" x-show="item.session1Ex">
-                      <span class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold leading-none">{L.sessions.volume}</span>
+                    <div class="comp__exo-volume" x-show="item.session1Ex">
+                      <span class="comp__stat-label">{L.sessions.volume}</span>
                       <span
-                        class="font-[family-name:var(--font-display)] text-[1.7rem] font-bold text-[var(--color-accent)] tabular-nums leading-[1.1] tracking-[-0.01em]"
+                        class="comp__exo-volume-value"
                         x-text="formatVolume(exerciseVolume(item.session1Ex))"
                       ></span>
                     </div>
-                    <div class="inline-flex items-center h-[3.0rem] px-[1.2rem] bg-[var(--alpha-bg-subtle)] border border-dashed border-[var(--color-border)] rounded-full text-[var(--color-muted)] text-[1.1rem] font-bold uppercase tracking-[0.08em] shrink-0" x-show="!item.session1Ex">
+                    <div class="comp__exo-missing" x-show="!item.session1Ex">
                       <span>{L.comparer.notPerformed}</span>
                     </div>
                   </header>
 
                   <div class="comp__exo-table" x-show="item.session1Ex">
                     <div class="comp__exo-thead">
-                      <div class="flex items-center min-w-0 justify-center">#</div>
-                      <div class="flex items-center min-w-0">{L.builder.type}</div>
-                      <div class="flex items-center min-w-0 justify-center">{L.common.weight}</div>
-                      <div class="flex items-center min-w-0 justify-center">{L.common.reps}</div>
-                      <div class="flex items-center min-w-0 justify-end">{L.sessions.volume}</div>
+                      <div class="comp__exo-th">#</div>
+                      <div class="comp__exo-th">{L.builder.type}</div>
+                      <div class="comp__exo-th">{L.common.weight}</div>
+                      <div class="comp__exo-th">{L.common.reps}</div>
+                      <div class="comp__exo-th comp__exo-th--end">{L.sessions.volume}</div>
                     </div>
                     <template x-for="set in (item.session1Ex ? item.session1Ex.sets : [])" :key="set.setNumber">
                       <div
                         class="comp__exo-row"
                         :class="{ 'is-completed': set.completed }"
                       >
-                        <div class="flex items-center justify-center min-w-0 font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="set.setNumber"></div>
-                        <div class="flex items-center justify-center min-w-0">
+                        <div class="comp__exo-td comp__exo-td--num" x-text="set.setNumber"></div>
+                        <div class="comp__exo-td">
                           <span
                             class="type-pill"
                             :class="'type-pill--' + set.type"
                             x-text="typeLabel(set.type)"
                           ></span>
                         </div>
-                        <div class="flex items-center justify-center min-w-0 font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="formatWeight(set.weight)"></div>
-                        <div class="flex items-center justify-center min-w-0 font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="set.reps"></div>
-                        <div class="flex items-center justify-center min-w-0 justify-end font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="formatVolume(set.weight * set.reps)"></div>
+                        <div class="comp__exo-td" x-text="formatWeight(set.weight)"></div>
+                        <div class="comp__exo-td" x-text="set.reps"></div>
+                        <div class="comp__exo-td comp__exo-td--end" x-text="formatVolume(set.weight * set.reps)"></div>
                       </div>
                     </template>
                   </div>
@@ -361,33 +361,33 @@ const L = t();
           </section>
 
           {/* Session 2 column */}
-          <section class="flex flex-col gap-[var(--spacing-4)] p-[var(--spacing-4)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)]" aria-label={L.comparer.detailsAria2}>
-            <header class="flex flex-col gap-[var(--spacing-2)] pb-[var(--spacing-3)] border-b border-[var(--color-border)]">
-              <span class="inline-flex items-center self-start h-[2.4rem] px-[1.0rem] bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] border border-[color-mix(in_srgb,var(--color-accent)_30%,transparent)] rounded-full text-[var(--color-accent)] font-[family-name:var(--font-display)] text-[1.0rem] font-bold uppercase tracking-[0.10em]">{L.comparer.session2}</span>
-              <h3 class="font-[family-name:var(--font-display)] text-[2.2rem] font-bold text-[var(--color-text)] leading-[1.15] tracking-[-0.01em] break-words m-0" x-text="session2.name"></h3>
-              <div class="flex items-center gap-[var(--spacing-2)] flex-wrap">
+          <section class="comp__session-col" aria-label={L.comparer.detailsAria2}>
+            <header class="comp__session-header">
+              <span class="comp__session-badge comp__session-badge--accent">{L.comparer.session2}</span>
+              <h3 class="comp__session-name" x-text="session2.name"></h3>
+              <div class="comp__session-meta">
                 <span
                   class="comp__status"
                   :class="'comp__status--' + session2.status"
                   x-text="statusLabel(session2.status)"
                 ></span>
-                <span class="text-[1.2rem] text-[var(--color-muted)] leading-[1.3]" x-text="formatDate(session2.date)"></span>
+                <span class="comp__session-date" x-text="formatDate(session2.date)"></span>
               </div>
-              <div class="flex gap-[var(--spacing-4)] pt-[var(--spacing-1)] flex-wrap">
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <span class="text-[1.05rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.comparer.duration}</span>
-                  <span class="font-[family-name:var(--font-display)] text-[1.6rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatDuration(session2.duration)"></span>
+              <div class="comp__session-stats">
+                <div class="comp__stat">
+                  <span class="comp__stat-label">{L.comparer.duration}</span>
+                  <span class="comp__stat-value" x-text="formatDuration(session2.duration)"></span>
                 </div>
-                <div class="flex flex-col gap-[0.2rem] min-w-0">
-                  <span class="text-[1.05rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold">{L.sessions.volume}</span>
-                  <span class="font-[family-name:var(--font-display)] text-[1.6rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatVolume(totalVolume(session2))"></span>
+                <div class="comp__stat">
+                  <span class="comp__stat-label">{L.sessions.volume}</span>
+                  <span class="comp__stat-value" x-text="formatVolume(totalVolume(session2))"></span>
                 </div>
               </div>
             </header>
 
-            <div class="flex flex-col gap-[var(--spacing-3)]">
+            <div class="comp__exercises">
               <template x-if="unionExercises.length === 0">
-                <p class="text-center text-[var(--color-muted)] text-[1.3rem] py-[var(--spacing-4)]">{L.comparer.noExercises}</p>
+                <p class="comp__no-exercises">{L.comparer.noExercises}</p>
               </template>
 
               <template x-for="item in unionExercises" :key="item.exerciseId + '-s2'">
@@ -395,53 +395,53 @@ const L = t();
                   class="comp__exo"
                   :class="{ 'comp__exo--missing': !item.session2Ex }"
                 >
-                  <header class="flex items-start justify-between gap-[var(--spacing-3)] flex-wrap">
-                    <div class="flex flex-col gap-[0.4rem] min-w-0 flex-[1_1_auto]">
-                      <h4 class="font-[family-name:var(--font-display)] text-[1.5rem] font-bold text-[var(--color-text)] leading-[1.2] break-words m-0" x-text="trExercise(item.name)"></h4>
+                  <header class="comp__exo-header">
+                    <div class="comp__exo-info">
+                      <h4 class="comp__exo-name" x-text="trExercise(item.name)"></h4>
                       <Badge
                         variant="category"
                         size="sm"
                         :class="'badge--cat-' + muscleHue(item.muscle)"
-                        class="self-start"
+                        class="comp__exo-badge"
                         x-text="trMuscle(item.muscle)"
                       ></Badge>
                     </div>
-                    <div class="flex flex-col items-end gap-[0.2rem] shrink-0" x-show="item.session2Ex">
-                      <span class="text-[1.0rem] text-[var(--color-muted)] uppercase tracking-[0.10em] font-bold leading-none">{L.sessions.volume}</span>
+                    <div class="comp__exo-volume" x-show="item.session2Ex">
+                      <span class="comp__stat-label">{L.sessions.volume}</span>
                       <span
-                        class="font-[family-name:var(--font-display)] text-[1.7rem] font-bold text-[var(--color-accent)] tabular-nums leading-[1.1] tracking-[-0.01em]"
+                        class="comp__exo-volume-value"
                         x-text="formatVolume(exerciseVolume(item.session2Ex))"
                       ></span>
                     </div>
-                    <div class="inline-flex items-center h-[3.0rem] px-[1.2rem] bg-[var(--alpha-bg-subtle)] border border-dashed border-[var(--color-border)] rounded-full text-[var(--color-muted)] text-[1.1rem] font-bold uppercase tracking-[0.08em] shrink-0" x-show="!item.session2Ex">
+                    <div class="comp__exo-missing" x-show="!item.session2Ex">
                       <span>{L.comparer.notPerformed}</span>
                     </div>
                   </header>
 
                   <div class="comp__exo-table" x-show="item.session2Ex">
                     <div class="comp__exo-thead">
-                      <div class="flex items-center min-w-0 justify-center">#</div>
-                      <div class="flex items-center min-w-0">{L.builder.type}</div>
-                      <div class="flex items-center min-w-0 justify-center">{L.common.weight}</div>
-                      <div class="flex items-center min-w-0 justify-center">{L.common.reps}</div>
-                      <div class="flex items-center min-w-0 justify-end">{L.sessions.volume}</div>
+                      <div class="comp__exo-th">#</div>
+                      <div class="comp__exo-th">{L.builder.type}</div>
+                      <div class="comp__exo-th">{L.common.weight}</div>
+                      <div class="comp__exo-th">{L.common.reps}</div>
+                      <div class="comp__exo-th comp__exo-th--end">{L.sessions.volume}</div>
                     </div>
                     <template x-for="set in (item.session2Ex ? item.session2Ex.sets : [])" :key="set.setNumber">
                       <div
                         class="comp__exo-row"
                         :class="{ 'is-completed': set.completed }"
                       >
-                        <div class="flex items-center justify-center min-w-0 font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="set.setNumber"></div>
-                        <div class="flex items-center justify-center min-w-0">
+                        <div class="comp__exo-td comp__exo-td--num" x-text="set.setNumber"></div>
+                        <div class="comp__exo-td">
                           <span
                             class="type-pill"
                             :class="'type-pill--' + set.type"
                             x-text="typeLabel(set.type)"
                           ></span>
                         </div>
-                        <div class="flex items-center justify-center min-w-0 font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="formatWeight(set.weight)"></div>
-                        <div class="flex items-center justify-center min-w-0 font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="set.reps"></div>
-                        <div class="flex items-center justify-center min-w-0 justify-end font-[family-name:var(--font-display)] text-[1.2rem] font-bold text-[var(--color-text)] tabular-nums" x-text="formatVolume(set.weight * set.reps)"></div>
+                        <div class="comp__exo-td" x-text="formatWeight(set.weight)"></div>
+                        <div class="comp__exo-td" x-text="set.reps"></div>
+                        <div class="comp__exo-td comp__exo-td--end" x-text="formatVolume(set.weight * set.reps)"></div>
                       </div>
                     </template>
                   </div>
@@ -468,7 +468,6 @@ const L = t();
 
   const LABELS = t();
 
-  // â€"â€" Pure helpers (module scope) â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"
   function statusLabelFn(s: SessionStatus): string {
     if (s === 'completed') return LABELS.comparer.completed;
     if (s === 'in-progress') return LABELS.comparer.inProgress;
@@ -497,11 +496,11 @@ const L = t();
       hour: '2-digit',
       minute: '2-digit',
     });
-    return date + ' Â· ' + time;
+    return date + ' · ' + time;
   }
 
   function formatDurationFn(seconds?: number): string {
-    if (!seconds || seconds <= 0) return 'â€"';
+    if (!seconds || seconds <= 0) return '—';
     const total = Math.floor(seconds);
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
@@ -547,8 +546,6 @@ const L = t();
     return best;
   }
 
-  // â€"â€" Delta computation â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"â€"
-  // Direction is from session2's perspective: "up" if session2 > session1.
   type Direction = 'up' | 'down' | 'equal';
   function deltaFn(
     a: number,
@@ -570,7 +567,7 @@ const L = t();
     }
     return {
       direction: 'down',
-      label: downLabel + ' (\u2212' + formatter(a - b) + ')',
+      label: downLabel + ' (−' + formatter(a - b) + ')',
       diff: a - b,
     };
   }
@@ -580,14 +577,12 @@ const L = t();
     const Alpine = (window as any).Alpine;
 
     Alpine.data('comparisonApp', () => ({
-      // â€"â€" State â€"â€"
       allSessions: [] as Session[],
       session1Id: '' as string,
       session2Id: '' as string,
       session1: null as Session | null,
       session2: null as Session | null,
 
-      // â€"â€" Init â€"â€"
       init() {
         this.allSessions = getSessions().sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -611,7 +606,6 @@ const L = t();
         }
       },
 
-      // â€"â€" Computed â€"â€"
       get unionExercises(): Array<{
         exerciseId: string;
         name: string;
@@ -662,7 +656,7 @@ const L = t();
 
       get volumeDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: 'â€"', diff: 0 };
+          return { direction: 'equal' as Direction, label: '—', diff: 0 };
         }
         return deltaFn(
           this.totalVolume(this.session1),
@@ -676,7 +670,7 @@ const L = t();
 
       get exercisesDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: 'â€"', diff: 0 };
+          return { direction: 'equal' as Direction, label: '—', diff: 0 };
         }
         return deltaFn(
           this.session1.exercises.length,
@@ -690,7 +684,7 @@ const L = t();
 
       get setsDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: 'â€"', diff: 0 };
+          return { direction: 'equal' as Direction, label: '—', diff: 0 };
         }
         return deltaFn(
           this.totalSets(this.session1),
@@ -704,7 +698,7 @@ const L = t();
 
       get bestSetDelta() {
         if (!this.session1 || !this.session2) {
-          return { direction: 'equal' as Direction, label: 'â€"', diff: 0 };
+          return { direction: 'equal' as Direction, label: '—', diff: 0 };
         }
         return deltaFn(
           this.bestSet(this.session1),
@@ -716,10 +710,9 @@ const L = t();
         );
       },
 
-      // â€"â€" Helpers â€"â€"
       formatOption(s: Session) {
         const date = formatDateFn(s.date);
-        return s.name + ' â€" ' + date;
+        return s.name + ' — ' + date;
       },
 
       statusLabel(s: SessionStatus) {
@@ -766,7 +759,6 @@ const L = t();
         return bestSetFn(session);
       },
 
-      // â€"â€" Actions â€"â€"
       onSession1Change(id: string) {
         this.session1 = id ? this.allSessions.find((s) => s.id === id) || null : null;
         this.syncUrl();
@@ -792,58 +784,176 @@ const L = t();
   });
 </script>
 
-
 <style>
+  /* ═════════════════════════════════════════════════════
+     Compare page scoped styles (BEM: comp__*)
+     ═════════════════════════════════════════════════════ */
 
-  /* ── Pickers responsive grid ── */
+  .comp {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+    padding-bottom: 6rem;
+  }
+
+  /* ── Pickers ── */
   .comp__pickers {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--spacing-3);
     align-items: end;
   }
-
-  @media (min-width: 720px) {
-    .comp__pickers {
-      grid-template-columns: 1fr auto 1fr;
-      gap: var(--spacing-4);
-    }
+  .comp__picker-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    min-width: 0;
   }
-
-  /* ── Select with custom chevron ── */
-  .comp__select {
-    width: 100%;
-    height: 4.8rem;
-    padding: 0 4.4rem 0 4.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
+  .comp__picker-label {
     font-family: var(--font-body);
-    font-size: 1.4rem;
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
     line-height: 1.2;
-    cursor: pointer;
+  }
+  .comp__picker-wrap {
+    position: relative;
+  }
+  .comp__vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 4.8rem;
+    align-self: end;
+  }
+  .comp__vs-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.8rem;
+    height: 4.8rem;
+    padding: 0 1.4rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 18%, transparent), color-mix(in srgb, var(--color-accent) 5%, transparent));
+    border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  /* ── Hint ── */
+  .comp__hint {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+  .comp__hint-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    color: var(--color-accent);
+  }
+  .comp__hint-link {
+    color: var(--color-accent);
+    font-weight: 700;
+    margin-left: 0.4rem;
+  }
+  .comp__hint-link:focus-visible {
     outline: none;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-    -webkit-appearance: none;
-    appearance: none;
-    background-image:
-      linear-gradient(45deg, transparent 50%, var(--color-muted) 50%),
-      linear-gradient(135deg, var(--color-muted) 50%, transparent 50%);
-    background-position:
-      calc(100% - 1.8rem) 50%,
-      calc(100% - 1.2rem) 50%;
-    background-size: 0.6rem 0.6rem, 0.6rem 0.6rem;
-    background-repeat: no-repeat;
-  }
-
-  .comp__select:focus,
-  .comp__select:focus-visible {
-    border-color: var(--color-accent);
     box-shadow: var(--focus-ring);
+    border-radius: var(--radius-sm);
   }
 
-  /* ── Summary delta pill color-mix() ── */
+  /* ── Results ── */
+  .comp__results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+  }
+
+  /* ── Summary section ── */
+  .comp__summary-section {
+    display: flex;
+    flex-direction: column;
+  }
+  .comp__summary-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-muted);
+    margin-bottom: var(--spacing-3);
+  }
+  .comp__summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  .comp__summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .comp__summary-header {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+  .comp__summary-label {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+  .comp__summary-body {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--spacing-3);
+  }
+  .comp__summary-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .comp__summary-col-label {
+    font-size: 1.0rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+  }
+  .comp__summary-col-value {
+    font-family: var(--font-display);
+    font-size: 2.0rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
   .comp__summary-delta {
     display: inline-flex;
     align-items: center;
@@ -858,104 +968,125 @@ const L = t();
     letter-spacing: 0.04em;
     white-space: nowrap;
   }
-
+  .comp__summary-delta-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
   .comp__summary-delta--up {
     background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
     border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
   }
-
   .comp__summary-delta--down {
     background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
     color: var(--color-destructive);
     border: 1px solid color-mix(in srgb, var(--color-destructive) 30%, transparent);
   }
-
   .comp__summary-delta--equal {
     background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
   }
-
-  /* ── Summary body grid ── */
-  .comp__summary-body {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: var(--spacing-3);
+  .comp__rotate-180 {
+    display: inline-flex;
+    transform: rotate(180deg);
   }
 
-  /* ── Summary grid responsive ── */
-  .comp__summary-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--spacing-3);
-  }
-
-  @media (min-width: 720px) {
-    .comp__summary-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1100px) {
-    .comp__summary-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  /* ── Columns responsive ── */
+  /* ── Session columns ── */
   .comp__columns {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--spacing-5);
   }
-
-  @media (min-width: 960px) {
-    .comp__columns {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  /* ── Exercise table grid ── */
-  .comp__exo-table {
+  .comp__session-col {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background-color: var(--color-surface-3);
-  }
-
-  .comp__exo-thead,
-  .comp__exo-row {
-    display: grid;
-    grid-template-columns: 3.4rem minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 0.7fr) minmax(0, 1.1fr);
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0 1.0rem;
-  }
-
-  .comp__exo-thead {
-    height: 3.4rem;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
     background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .comp__session-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .comp__session-badge {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    height: 2.4rem;
+    padding: 0 1.0rem;
+    background-color: var(--alpha-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: 9999px;
+    color: var(--color-muted);
+    font-family: var(--font-display);
     font-size: 1.0rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-muted);
+    letter-spacing: 0.10em;
   }
-
-  .comp__exo-row {
-    min-height: 3.8rem;
-    border-top: 1px solid var(--color-border);
+  .comp__session-badge--accent {
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    color: var(--color-accent);
   }
-
-  .comp__exo-row.is-completed {
+  .comp__session-name {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 700;
     color: var(--color-text);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    word-break: break-word;
+    margin: 0;
+  }
+  .comp__session-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+  }
+  .comp__session-date {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    line-height: 1.3;
+  }
+  .comp__session-stats {
+    display: flex;
+    gap: var(--spacing-4);
+    padding-top: var(--spacing-1);
+    flex-wrap: wrap;
+  }
+  .comp__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .comp__stat-label {
+    font-size: 1.05rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-weight: 700;
+  }
+  .comp__stat-value {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
   }
 
-  /* ── Status badge (dynamic via Alpine :class) ── */
+  /* ── Status badge ── */
   .comp__status {
     display: inline-flex;
     align-items: center;
@@ -970,26 +1101,36 @@ const L = t();
     text-transform: uppercase;
     flex-shrink: 0;
   }
-
   .comp__status--completed {
     background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
     border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
   }
-
   .comp__status--in-progress {
     background-color: color-mix(in srgb, var(--color-info) 12%, transparent);
     color: var(--color-info);
     border: 1px solid color-mix(in srgb, var(--color-info) 30%, transparent);
   }
-
   .comp__status--planned {
     background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
   }
 
-  /* ── Exercise card (dynamic missing state via Alpine :class) ── */
+  /* ── Exercises ── */
+  .comp__exercises {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+  .comp__no-exercises {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 1.3rem;
+    padding: var(--spacing-4) 0;
+  }
+
+  /* ── Exercise card ── */
   .comp__exo {
     display: flex;
     flex-direction: column;
@@ -999,20 +1140,153 @@ const L = t();
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
   }
-
   .comp__exo--missing {
     background-color: var(--alpha-bg-subtle);
     border-style: dashed;
   }
+  .comp__exo-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-3);
+    flex-wrap: wrap;
+  }
+  .comp__exo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .comp__exo-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+    word-break: break-word;
+    margin: 0;
+  }
+  .comp__exo-badge {
+    align-self: flex-start;
+  }
+  .comp__exo-volume {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    flex-shrink: 0;
+  }
+  .comp__exo-volume-value {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .comp__exo-missing {
+    display: inline-flex;
+    align-items: center;
+    height: 3.0rem;
+    padding: 0 1.2rem;
+    background-color: var(--alpha-bg-subtle);
+    border: 1px dashed var(--color-border);
+    border-radius: 9999px;
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
 
-  /* ── Responsive: small screens ── */
+  /* ── Exercise table ── */
+  .comp__exo-table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: var(--color-surface-3);
+  }
+  .comp__exo-thead,
+  .comp__exo-row {
+    display: grid;
+    grid-template-columns: 3.4rem minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 0.7fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.0rem;
+  }
+  .comp__exo-thead {
+    height: 3.4rem;
+    background-color: var(--color-surface);
+    font-size: 1.0rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+  .comp__exo-th {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .comp__exo-th--end {
+    justify-content: flex-end;
+  }
+  .comp__exo-row {
+    min-height: 3.8rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .comp__exo-row.is-completed {
+    color: var(--color-text);
+  }
+  .comp__exo-td {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+  .comp__exo-td--num {
+    justify-content: center;
+  }
+  .comp__exo-td--end {
+    justify-content: flex-end;
+  }
+
+  /* ── Responsive ── */
+  @media (min-width: 720px) {
+    .comp__pickers {
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--spacing-4);
+    }
+    .comp__summary-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 960px) {
+    .comp__columns {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 1100px) {
+    .comp__summary-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
   @media (max-width: 480px) {
     .comp__summary-delta {
       font-size: 0.95rem;
       padding: 0.5rem 0.7rem;
     }
   }
-
   @media (max-width: 400px) {
     .comp__exo-thead,
     .comp__exo-row {
@@ -1027,12 +1301,5 @@ const L = t();
   /* ── Wider page for side-by-side comparison ── */
   :global(.page-content) {
     max-width: 140rem;
-  }
-
-  /* ── Reduced motion ── */
-  @media (prefers-reduced-motion: reduce) {
-    .comp__select {
-      transition: none;
-    }
   }
 </style>

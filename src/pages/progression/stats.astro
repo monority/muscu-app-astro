@@ -2,7 +2,7 @@
 import { t, localizedPath } from '../../i18n';
 import AppLayout from '../../layouts/AppLayout.astro';
 import PageHeader from '../../components/layout/PageHeader.astro';
-import Card from '../../components/ui/Card/Card.astro';
+import Card from '../../components/ui/Card.astro';
 import PanelHeader from '../../components/ui/PanelHeader.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import Segmented from '../../components/ui/Segmented.astro';
@@ -17,59 +17,59 @@ const L = t();
   />
 
   <div
-    class="pb-24 flex flex-col gap-[1.8rem]"
+    class="stats__page"
     x-data="statsApp()"
     x-init="init()"
     x-cloak
   >
     <div
-      class="flex flex-col items-start gap-2 py-8 border-y border-[var(--color-border)]"
+      class="stats__empty-state"
       x-show="!hasCompletedSessions"
       x-cloak
       role="status"
     >
-      <span class="text-display text-[clamp(2rem,4vw,3rem)] font-bold text-[var(--color-text)]">{L.stats.noData}</span>
-      <p class="max-w-42rem m-0 text-[var(--color-muted)] text-[1.4rem]">{L.stats.empty}</p>
+      <span class="stats__empty-title">{L.stats.noData}</span>
+      <p class="stats__empty-text">{L.stats.empty}</p>
       <a
         href={localizedPath("/sessions/create")}
-        class="inline-flex items-center min-h-[4.4rem] mt-2 px-[1.8rem] rounded-[var(--radius-sm)] bg-[var(--color-accent)] text-[var(--color-accent-foreground)] text-[1.3rem] font-bold no-underline"
+        class="stats__empty-cta"
       >{L.common.startSession}</a>
     </div>
 
-    <div class="flex flex-col gap-0" x-show="hasCompletedSessions" x-cloak>
+    <div class="stats__content" x-show="hasCompletedSessions" x-cloak>
     {/* ═══ Top summary row ═══ */}
-    <div class="stats__summary grid grid-cols-2 gap-0 border-y border-[var(--color-border)] md:grid-cols-4">
-      <div class="stats__sum stats__sum--hero flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
-        <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.volumeTotal}</span>
-        <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value text-display text-[2.6rem] font-bold text-[var(--color-accent)] tabular-nums leading-[1.1]" x-text="formatNumber(totalVolume12w)"></span>
-          <span class="stats__sum-unit font-[var(--font-body)] text-[1.3rem] text-[var(--color-muted)] font-semibold">{L.common.kg}</span>
+    <div class="stats__summary">
+      <div class="stats__sum stats__sum--hero">
+        <span class="stats__sum-label">{L.stats.volumeTotal}</span>
+        <div class="stats__sum-value-row">
+          <span class="stats__sum-value" x-text="formatNumber(totalVolume12w)"></span>
+          <span class="stats__sum-unit">{L.common.kg}</span>
         </div>
-        <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]" x-text="sessions12w + ' ' + labels.sessionSingular + (sessions12w > 1 ? 's' : '') + ' ' + labels.completed"></span>
+        <span class="stats__sum-foot" x-text="sessions12w + ' ' + labels.sessionSingular + (sessions12w > 1 ? 's' : '') + ' ' + labels.completed"></span>
       </div>
 
-      <div class="stats__sum flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
-        <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.sessions12w}</span>
-        <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="sessions12w"></span>
+      <div class="stats__sum">
+        <span class="stats__sum-label">{L.stats.sessions12w}</span>
+        <div class="stats__sum-value-row">
+          <span class="stats__sum-value" x-text="sessions12w"></span>
         </div>
-        <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]">{L.stats.completed}</span>
+        <span class="stats__sum-foot">{L.stats.completed}</span>
       </div>
 
-      <div class="stats__sum flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
-        <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.avgDuration}</span>
-        <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="formatDuration(avgDuration)"></span>
+      <div class="stats__sum">
+        <span class="stats__sum-label">{L.stats.avgDuration}</span>
+        <div class="stats__sum-value-row">
+          <span class="stats__sum-value" x-text="formatDuration(avgDuration)"></span>
         </div>
-        <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]" x-text="durationSessionCount > 0 ? labels.on + durationSessionCount + ' ' + labels.sessionSingular + (durationSessionCount > 1 ? 's' : '') : labels.noTimed"></span>
+        <span class="stats__sum-foot" x-text="durationSessionCount > 0 ? labels.on + durationSessionCount + ' ' + labels.sessionSingular + (durationSessionCount > 1 ? 's' : '') : labels.noTimed"></span>
       </div>
 
-      <div class="stats__sum flex flex-col gap-1 min-w-0 py-[1.6rem] px-[1.8rem] bg-transparent border-0 border-b border-[var(--color-border)] rounded-none max-md:[&:nth-child(even)]:border-l max-md:border-[var(--color-border)] md:border-b-0 md:[&+*]:border-l md:border-[var(--color-border)]">
-        <span class="stats__sum-label text-[1.0rem] uppercase tracking-[0.14em] text-[var(--color-muted)] font-bold">{L.stats.regularity}</span>
-        <div class="stats__sum-value-row flex items-baseline gap-1">
-          <span class="stats__sum-value text-display text-[2.4rem] font-bold text-[var(--color-text)] tabular-nums leading-[1.1]" x-text="consistencyPct + '%'"></span>
+      <div class="stats__sum">
+        <span class="stats__sum-label">{L.stats.regularity}</span>
+        <div class="stats__sum-value-row">
+          <span class="stats__sum-value" x-text="consistencyPct + '%'"></span>
         </div>
-          <span class="stats__sum-foot text-[1.1rem] text-[var(--color-muted)]" x-text="activeWeeks + ' ' + (activeWeeks > 1 ? labels.activeWeeks : labels.activeWeek) + ' / 12'"></span>
+          <span class="stats__sum-foot" x-text="activeWeeks + ' ' + (activeWeeks > 1 ? labels.activeWeeks : labels.activeWeek) + ' / 12'"></span>
       </div>
     </div>
 
@@ -77,17 +77,17 @@ const L = t();
     <Card>
       <PanelHeader title={L.stats.volumeChart} meta={L.stats.last12wKg} />
       <CardContent>
-        <div class="stats__chart-wrap w-full overflow-x-auto" x-html="renderVolumeChart()"></div>
+        <div class="stats__chart-wrap" x-html="renderVolumeChart()"></div>
       </CardContent>
     </Card>
 
     {/* ═══ Two-col: muscle distribution + training frequency ═══ */}
-    <div class="stats__grid grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="stats__grid">
       <Card>
-        <div class="flex items-baseline justify-between gap-4 flex-wrap">
+        <div class="stats__card-header">
           <PanelHeader title={L.stats.volumeByMuscle} />
-          <div class="flex items-center gap-4 flex-wrap">
-              <span class="stats__chart-meta text-[1.1rem] uppercase tracking-[0.10em] text-[var(--color-muted)] font-bold" x-text="periodMeta"></span>
+          <div class="stats__card-controls">
+              <span class="stats__chart-meta" x-text="periodMeta"></span>
               <Segmented
                 items={[
                   { value: 'week', label: L.stats.volumePeriodWeek },
@@ -99,14 +99,14 @@ const L = t();
             </div>
           </div>
         <CardContent>
-          <div class="stats__chart-wrap w-full overflow-x-auto" x-html="renderMuscleChart()"></div>
+          <div class="stats__chart-wrap" x-html="renderMuscleChart()"></div>
         </CardContent>
       </Card>
 
       <Card>
         <PanelHeader title={L.stats.freqChart} meta={L.stats.last8w} />
         <CardContent>
-          <div class="stats__chart-wrap w-full overflow-x-auto" x-html="renderFrequencyChart()"></div>
+          <div class="stats__chart-wrap" x-html="renderFrequencyChart()"></div>
         </CardContent>
       </Card>
     </div>
@@ -115,7 +115,7 @@ const L = t();
     <Card>
       <PanelHeader title={L.stats.topExercises} meta={L.stats.volumeTotalMeta} />
       <CardContent>
-        <div class="stats__top-wrap w-full" x-html="renderTopExercises()"></div>
+        <div class="stats__top-wrap" x-html="renderTopExercises()"></div>
       </CardContent>
     </Card>
 
@@ -123,13 +123,13 @@ const L = t();
     <Card>
       <PanelHeader title={L.stats.benchmarksTitle} meta={`${L.stats.benchmarksThresholdHeader} · ${L.common.kg}`} />
       <CardContent>
-        <p class="stats__bench-desc text-[1.2rem] text-[var(--color-muted)] m-0 mb-1 leading-[1.4]">{L.stats.benchmarksDesc}</p>
+        <p class="stats__bench-desc">{L.stats.benchmarksDesc}</p>
 
         {/* ── Opt-in : enregistre l'INTENTION, ne déclenche AUCUN appel réseau ── */}
-        <div class="stats__bench-optin flex items-center justify-between gap-8 py-[1.4rem] px-[1.6rem] my-[1.2rem] mb-[1.6rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] max-md:flex-col max-md:items-start max-md:gap-2">
-          <div class="stats__bench-optin-label flex flex-col gap-[0.3rem] min-w-0">
-            <span class="stats__bench-optin-title text-display text-[1.4rem] font-semibold text-[var(--color-text)] leading-[1.2]">{L.stats.benchmarksOptInLabel}</span>
-            <span class="stats__bench-optin-hint text-[1.1rem] text-[var(--color-muted)] leading-[1.3]">{L.stats.benchmarksOptInDesc}</span>
+        <div class="stats__bench-optin">
+          <div class="stats__bench-optin-label">
+            <span class="stats__bench-optin-title">{L.stats.benchmarksOptInLabel}</span>
+            <span class="stats__bench-optin-hint">{L.stats.benchmarksOptInDesc}</span>
           </div>
           <Toggle
             :checked="settings.benchmarksOptIn"
@@ -139,10 +139,10 @@ const L = t();
         </div>
 
         {/* ── Table des benchmarks (1RM Epley vs références) ── */}
-        <div class="stats__chart-wrap w-full overflow-x-auto" x-html="renderBenchmarksTable()"></div>
+        <div class="stats__chart-wrap" x-html="renderBenchmarksTable()"></div>
 
         {/* ── Honnêteté des données : source étiquetée, non-communautaire ── */}
-        <p class="stats__bench-note text-[1.05rem] text-[var(--color-muted)] mt-[1.3rem] mb-0 leading-[1.4]">{L.stats.benchmarksSourceNote}</p>
+        <p class="stats__bench-note">{L.stats.benchmarksSourceNote}</p>
       </CardContent>
     </Card>
     </div>
@@ -800,7 +800,7 @@ function benchmarkBadge(band: PercentileBand | null): string {
                 <div class="stats__top-main">
                   <div class="stats__top-head">
                     <span class="stats__top-name">${svgEscape(trExercise(item.name))}</span>
-                    <span class="badge--category badge--cat-${muscleHue(item.muscle)} inline-flex items-center font-semibold whitespace-nowrap rounded-[var(--radius-pill)] px-2 py-0.5 text-[1.0rem] uppercase tracking-wider self-start">${svgEscape(trMuscle(item.muscle))}</span>
+                    <span class="badge--category badge--cat-${muscleHue(item.muscle)} stats__muscle-badge">${svgEscape(trMuscle(item.muscle))}</span>
                     <span class="stats__top-value">${formatNumber(item.volume)} ${LABELS.common.kg}</span>
                   </div>
                   <div class="stats__top-bar" role="presentation">
@@ -877,7 +877,249 @@ function benchmarkBadge(band: PercentileBand | null): string {
 </script>
 
 <style>
-  /* ── SVG donut chart: stroke-dasharray / dashoffset arcs ── */
+  .stats__page {
+    padding-bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+  }
+
+  .stats__empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .stats__empty-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .stats__empty-text {
+    max-width: 42rem;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 1.4rem;
+  }
+
+  .stats__empty-cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 4.4rem;
+    margin-top: 0.5rem;
+    padding-left: 1.8rem;
+    padding-right: 1.8rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .stats__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .stats__summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 768px) {
+    .stats__summary {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .stats__sum {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    padding-top: 1.6rem;
+    padding-bottom: 1.6rem;
+    padding-left: 1.8rem;
+    padding-right: 1.8rem;
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+  }
+
+  @media (max-width: 767px) {
+    .stats__sum:nth-child(even) {
+      border-left: 1px solid var(--color-border);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .stats__sum {
+      border-bottom: 0;
+    }
+
+    .stats__sum + .stats__sum {
+      border-left: 1px solid var(--color-border);
+    }
+  }
+
+  .stats__sum--hero .stats__sum-value {
+    font-size: 2.6rem;
+    color: var(--color-accent);
+  }
+
+  .stats__sum-label {
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+
+  .stats__sum-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  .stats__sum-value {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .stats__sum-unit {
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    color: var(--color-muted);
+    font-weight: 600;
+  }
+
+  .stats__sum-foot {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+  }
+
+  .stats__chart-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .stats__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 1024px) {
+    .stats__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .stats__card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .stats__card-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .stats__chart-meta {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+
+  .stats__top-wrap {
+    width: 100%;
+  }
+
+  .stats__bench-desc {
+    font-size: 1.2rem;
+    color: var(--color-muted);
+    margin: 0;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+  }
+
+  .stats__bench-optin {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-top: 1.4rem;
+    padding-bottom: 1.4rem;
+    padding-left: 1.6rem;
+    padding-right: 1.6rem;
+    margin-top: 1.2rem;
+    margin-bottom: 1.6rem;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  @media (max-width: 767px) {
+    .stats__bench-optin {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+
+  .stats__bench-optin-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .stats__bench-optin-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .stats__bench-optin-hint {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.3;
+  }
+
+  .stats__bench-note {
+    font-size: 1.05rem;
+    color: var(--color-muted);
+    margin-top: 1.3rem;
+    margin-bottom: 0;
+    line-height: 1.4;
+  }
+
   .stats__donut-svg circle {
     fill: none;
   }
@@ -886,7 +1128,6 @@ function benchmarkBadge(band: PercentileBand | null): string {
     outline-offset: 2px;
   }
 
-  /* ── Benchmarks table (thead / tbody) ── */
   .stats__bench-table {
     width: 100%;
     border-collapse: collapse;
@@ -960,29 +1201,16 @@ function benchmarkBadge(band: PercentileBand | null): string {
     white-space: nowrap;
   }
 
-  /* ── Top-fill gradient (color-mix) ── */
   .stats__top-fill {
     background: linear-gradient(90deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 80%, white));
   }
 
-  /* ── Reduced motion ── */
-  @media (prefers-reduced-motion: reduce) {
-    .stats__top-fill {
-      transition: none;
-    }
-  }
-
-  /* ── Data canvas: charts in document flow, not stacked cards ── */
   :global(.stats__content > .surface),
   :global(.stats__grid > .surface) { background: transparent; border: 0; border-top: 1px solid var(--color-border); border-radius: 0; }
   :global(.stats__content > .surface:last-child) { border-bottom: 1px solid var(--color-border); }
 </style>
 
 <style is:global>
-  /* Top-5 muscle badges (renderTopExercises) are injected via Alpine
-     `x-html`, so Astro-scoped styles — including Badge.astro's own
-     scoped rules — never match them. Unscoped mirror of the category
-     badge look, same design tokens as Badge.astro (no new colors). */
   .badge--category {
     background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
@@ -1014,5 +1242,17 @@ function benchmarkBadge(band: PercentileBand | null): string {
   .badge--cat-other {
     background-color: var(--alpha-bg-soft);
     color: var(--color-muted);
+  }
+  .stats__muscle-badge {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: var(--radius-pill);
+    padding: 0.125rem 0.5rem;
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    align-self: flex-start;
   }
 </style>
