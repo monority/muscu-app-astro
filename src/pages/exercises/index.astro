@@ -98,12 +98,7 @@ const categories = [
     <template x-if="filtered.length > 0">
       <div class="exo__grid">
         <template x-for="ex in filtered" :key="ex.id">
-          <Card
-            variant="interactive"
-            hover
-            clickable
-            class="exo__card-body"
-          >
+          <Card variant="interactive" hover clickable class="exo__card-body">
             <span class="exo__card-head">
               <span class="exo__card-icon" set:html={icons.dumbbellBox()} />
               <h3 class="exo__card-name" x-text="trExercise(ex.name)"></h3>
@@ -113,8 +108,7 @@ const categories = [
                 x-cloak
                 x-transition.opacity.duration.200ms
                 :title="getSetCount(ex.id) + ' ' + labels.sets"
-                x-text="getSetCount(ex.id)"
-              ></span>
+                x-text="getSetCount(ex.id)"></span>
               <div class="exo__card-actions">
                 <IconButton
                   variant="ghost"
@@ -234,10 +228,11 @@ const categories = [
         <div class="exo__empty-cta">
           <button
             type="button"
-            class="exo__add-btn exo__add-btn--centered"
+            class="exo__add-btn"
             @click="openAdd()"
+            aria-label={L.exercices.add}
           >
-            <Icon name="plus" size={20} class="exo__add-icon" />
+            <Icon name="plus" size={16} class="exo__add-icon" />
             <span>{L.exercices.add}</span>
           </button>
         </div>
@@ -255,21 +250,22 @@ const categories = [
         <div class="exo__empty-cta">
           <button
             type="button"
-            class="exo__add-btn exo__add-btn--centered"
+            class="exo__add-btn"
             @click="openAdd()"
+            aria-label={L.exercices.add}
           >
-            <Icon name="plus" size={18} class="exo__add-icon" />
+            <span class="exo__add-icon" set:html={icons.plus()} />
             <span>{L.exercices.add}</span>
           </button>
         </div>
         <button
-            type="button"
-            class="exo__reset-btn"
-            @click="search = ''; muscleFilter = ''; favFilter = false"
-            x-show="hasFilters"
-          >
-            {L.common.reset}
-          </button>
+          type="button"
+          class="exo__reset-btn"
+          @click="search = ''; muscleFilter = ''; favFilter = false"
+          x-show="hasFilters"
+        >
+          {L.common.reset}
+        </button>
       </Card>
     </template>
 
@@ -552,7 +548,7 @@ const categories = [
               :disabled="!hasWorkingWeight()"
               :title="hasWorkingWeight() ? labels.warmupTitle : labels.warmupHint"
             >
-            <Icon name="plus" size={20} class="exo__add-icon" />
+              <Icon name="plus" size={20} class="exo__add-icon" />
               <span>{L.builder.warmupBtn}</span>
             </button>
             <button
@@ -1195,10 +1191,12 @@ const categories = [
 
     .exo__add-icon {
       display: inline-flex;
+      width: 1.6rem !important;
+      height: 1.6rem !important;
     }
     .exo__add-icon svg {
-      width: 1.6rem;
-      height: 1.6rem;
+      width: 1.6rem !important;
+      height: 1.6rem !important;
     }
 
     .exo__add-btn--centered {

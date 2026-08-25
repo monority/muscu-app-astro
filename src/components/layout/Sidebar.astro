@@ -376,7 +376,7 @@ const L = t();
     align-items: center;
     min-height: 4.4rem;
     padding: 0.8rem 1.2rem;
-    color: var(--color-muted);
+    color: var(--color-text);
     text-decoration: none;
     font-family: var(--font-body);
     font-size: 1.3rem;
@@ -391,7 +391,7 @@ const L = t();
 
   .nav-child:hover {
     color: var(--color-text);
-    background-color: var(--alpha-bg-subtle);
+    background-color: var(--alpha-bg-soft);
   }
 
   .nav-child.is-active {
@@ -623,7 +623,7 @@ const L = t();
   .nav-item.is-active, .nav-child.is-active { position: relative; background: var(--alpha-bg-soft); color: var(--color-text); box-shadow: none; }
   .nav-item.is-active::before, .nav-child.is-active::before { content: ""; position: absolute; left: 0; top: 0.8rem; bottom: 0.8rem; width: 0.3rem; background: var(--color-accent); border-radius: 0 2px 2px 0; }
   .nav-item--parent-active { color: var(--color-accent); }
-  .nav-child { min-height: 3.8rem; font-size: 1.2rem; border-radius: var(--radius-sm); }
+  .nav-child { min-height: 3.8rem; font-size: 1.2rem; border-radius: var(--radius-sm); color: var(--color-text); }
   .sidebar__footer { margin: 1rem; padding: 1.2rem 0; border-top: 1px solid var(--color-border); }
 
   @media (max-width: 640px) {
