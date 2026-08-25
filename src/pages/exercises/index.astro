@@ -1037,49 +1037,7 @@ const categories = [
       width: 100%;
     }
 
-    .exo__search-icon {
-      position: absolute;
-      top: 50%;
-      left: 1.4rem;
-      transform: translateY(-50%);
-      width: 1.8rem;
-      height: 1.8rem;
-      color: var(--color-muted);
-      pointer-events: none;
-    }
 
-    .exo__search-input {
-      width: 100%;
-      height: 4.8rem;
-      padding: 0 1.6rem 0 4.4rem;
-      background-color: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      color: var(--color-text);
-      font-family: var(--font-body);
-      font-size: 1.4rem;
-      line-height: 1.2;
-      outline: none;
-      transition:
-        border-color var(--transition-fast),
-        box-shadow var(--transition-fast);
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    .exo__search-input::placeholder {
-      color: var(--alpha-text-faint);
-    }
-
-    .exo__search-input::-webkit-search-cancel-button {
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    .exo__search-input:focus {
-      border-color: var(--color-accent);
-      box-shadow: var(--focus-ring);
-    }
 
     /* ── Filter pills ── */
     .exo__filters {
@@ -1191,17 +1149,11 @@ const categories = [
 
     .exo__add-icon {
       display: inline-flex;
-      width: 1.6rem !important;
-      height: 1.6rem !important;
-    }
-    .exo__add-icon svg {
-      width: 1.6rem !important;
-      height: 1.6rem !important;
+      width: 1.6rem;
+      height: 1.6rem;
     }
 
-    .exo__add-btn--centered {
-      margin: 1.6rem auto 0;
-    }
+
 
     /* ════════════════════════════════════════════════════
      GRID — 1 col → 2 col → 3 col
@@ -1274,17 +1226,7 @@ const categories = [
       flex-shrink: 0;
     }
 
-    .exo__set-icon {
-      width: 1.3rem;
-      height: 1.3rem;
-      flex-shrink: 0;
-    }
 
-    .exo__set-label {
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
 
     .exo__card-name {
       font-family: var(--font-display);
@@ -1295,40 +1237,7 @@ const categories = [
       min-width: 0;
     }
 
-    /* ── Tip toggle + tip body (added 2026-08-04) ── */
-    .exo__tip-toggle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 3rem;
-      height: 3rem;
-      background-color: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: 50%;
-      color: var(--color-muted);
-      cursor: pointer;
-      flex-shrink: 0;
-      transition:
-        background-color var(--transition-fast),
-        border-color var(--transition-fast),
-        color var(--transition-fast),
-        transform var(--transition-fast);
-    }
 
-    .exo__tip-toggle:hover {
-      background-color: var(--color-surface-3);
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-    }
-
-    .exo__tip-toggle:active {
-      transform: scale(0.94);
-    }
-
-    .exo__tip-toggle svg {
-      width: 1.5rem;
-      height: 1.5rem;
-    }
 
     .exo__tip {
       margin: 0;

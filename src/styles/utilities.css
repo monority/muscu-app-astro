@@ -171,10 +171,6 @@
 }
 
 /* ── Grid responsive utilities ──────────────────────────── */
-.anim-fade-in {
-  animation: fadeIn 350ms ease both;
-}
-
 .grid-responsive-2 {
   display: grid;
   grid-template-columns: 1fr;
