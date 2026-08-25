@@ -249,6 +249,22 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
       }
     }
 
+    /** Auto-expand groups containing the active page. */
+    function expandActiveGroups(collapsed: string[]): string[] {
+      const groups = document.querySelectorAll<HTMLElement>("[data-nav-group]");
+      const next = [...collapsed];
+      groups.forEach((el) => {
+        if (el.querySelector(".is-active")) {
+          const id = el.getAttribute("data-nav-group");
+          if (id) {
+            const i = next.indexOf(id);
+            if (i >= 0) next.splice(i, 1);
+          }
+        }
+      });
+      return next;
+    }
+
     Alpine.data("themeApp", () => ({
       theme: "dark" as "dark" | "light",
       collapsed: [] as string[],
@@ -257,7 +273,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
         const current =
           document.documentElement.getAttribute("data-theme") || "dark";
         this.theme = current === "light" ? "light" : "dark";
-        this.collapsed = readCollapsed();
+        this.collapsed = expandActiveGroups(readCollapsed());
       },
 
       toggleTheme() {
