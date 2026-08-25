@@ -10,8 +10,8 @@
  * settings page. Settings auto-save on change, so this bar is navigation
  * only.
  *
- * The bar sits at z-index `2` (sticky in the settings page flow, below the
- * mobile drawer at `z-index: 60`) and uses the shared design tokens so it
+ * The bar sits at z-index 3 (sticky in the settings page flow, below the
+ * mobile drawer at z-index 6) and uses the shared design tokens so it
  * adapts to dark/light themes.
  */
 interface Props {
@@ -191,7 +191,7 @@ const { sections, activeSection = "profile" } = Astro.props as Props;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 2;
+    z-index: 3; /* level 3: sticky bars */
     height: var(--bottom-nav-height, 5.6rem);
     display: flex;
     align-items: center;

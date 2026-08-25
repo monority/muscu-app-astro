@@ -292,7 +292,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
       left: 0;
       height: 100vh;
       width: var(--sidebar-width);
-      z-index: 40;
+      z-index: 4;
     }
 
     :global(.topbar) {
@@ -301,7 +301,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
       left: var(--sidebar-width);
       right: 0;
       height: var(--topbar-height);
-      z-index: 50;
+      z-index: 5;
       background-color: color-mix(in srgb, var(--color-bg) 78%, transparent);
       -webkit-backdrop-filter: blur(16px) saturate(1.4);
       backdrop-filter: blur(16px) saturate(1.4);
@@ -319,7 +319,7 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
   .drawer {
     position: fixed;
     inset: 0;
-    z-index: 60;
+    z-index: 6;
   }
 
   .drawer[hidden] {

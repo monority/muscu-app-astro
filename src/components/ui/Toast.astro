@@ -27,14 +27,10 @@ interface Props {
 }
 
 const { duration = 3000 } = Astro.props;
-import Icon from './Icon.astro';
+import Icon from "./Icon.astro";
 ---
 
-<div
-  x-data="toastApp()"
-  data-duration={duration}
-  class="toast-root"
->
+<div x-data="toastApp()" data-duration={duration} class="toast-root">
   <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Toast container Ã¢â€â‚¬Ã¢â€â‚¬ -->
   <div
     x-show="open"
@@ -47,22 +43,47 @@ import Icon from './Icon.astro';
     :class="`toast--${variant}`"
   >
     <!-- Variant icons -->
-    <span class="toast__icon" x-show="variant === 'success'" x-cloak aria-hidden="true">
+    <span
+      class="toast__icon"
+      x-show="variant === 'success'"
+      x-cloak
+      aria-hidden="true"
+    >
       <Icon name="check" size={18} />
     </span>
-    <span class="toast__icon" x-show="variant === 'error'" x-cloak aria-hidden="true">
+    <span
+      class="toast__icon"
+      x-show="variant === 'error'"
+      x-cloak
+      aria-hidden="true"
+    >
       <Icon name="closeX" size={18} />
     </span>
-    <span class="toast__icon" x-show="variant === 'info'" x-cloak aria-hidden="true">
+    <span
+      class="toast__icon"
+      x-show="variant === 'info'"
+      x-cloak
+      aria-hidden="true"
+    >
       <Icon name="infoCircle" size={18} />
     </span>
-    <span class="toast__icon" x-show="variant === 'warning'" x-cloak aria-hidden="true">
+    <span
+      class="toast__icon"
+      x-show="variant === 'warning'"
+      x-cloak
+      aria-hidden="true"
+    >
       <Icon name="alertTriangle" size={18} />
     </span>
 
     <p class="toast__message" x-text="message"></p>
 
-    <button type="button" class="toast__close" @click="dismiss()" aria-label="Close">
+    <button
+      type="button"
+      class="toast__close"
+      @click="dismiss()"
+      aria-label="Close"
+    >
       <Icon name="closeX" size={16} />
     </button>
   </div>
@@ -76,7 +97,7 @@ import Icon from './Icon.astro';
     position: fixed;
     bottom: calc(var(--bottom-nav-height, 5.6rem) + 1.2rem);
     right: 2.4rem;
-    z-index: 1000;
+    z-index: 8; /* level 8: toasts */
     max-width: 42rem;
     font-family: var(--font-body);
   }
@@ -125,7 +146,9 @@ import Icon from './Icon.astro';
     border-radius: var(--radius-sm);
     color: var(--color-muted);
     cursor: pointer;
-    transition: color var(--transition-fast), background-color var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background-color var(--transition-fast);
   }
 
   .toast__close svg {
@@ -139,10 +162,18 @@ import Icon from './Icon.astro';
   }
 
   /* Ã¢â€â‚¬Ã¢â€â‚¬ Variant accent colors Ã¢â€â‚¬Ã¢â€â‚¬ */
-  .toast--success .toast__icon { color: var(--color-success); }
-  .toast--error .toast__icon { color: var(--color-destructive); }
-  .toast--info .toast__icon { color: var(--color-info); }
-  .toast--warning .toast__icon { color: var(--color-warning); }
+  .toast--success .toast__icon {
+    color: var(--color-success);
+  }
+  .toast--error .toast__icon {
+    color: var(--color-destructive);
+  }
+  .toast--info .toast__icon {
+    color: var(--color-info);
+  }
+  .toast--warning .toast__icon {
+    color: var(--color-warning);
+  }
 
   /* Ã¢â€â‚¬Ã¢â€â‚¬ Responsive: < 640px Ã¢â‚¬â€ raise above the bottom nav,
         reduce the right margin Ã¢â€â‚¬Ã¢â€â‚¬ */
@@ -158,14 +189,14 @@ import Icon from './Icon.astro';
   // Register the Alpine data store. Mirrors the pattern used across the
   // app (exercices, timer, Ã¢â‚¬Â¦): a plain script listens for `alpine:init`
   // and registers Alpine.data so any page using the CDN build picks it up.
-  document.addEventListener('alpine:init', () => {
+  document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
 
-    Alpine.data('toastApp', () => ({
+    Alpine.data("toastApp", () => ({
       open: false,
-      message: '',
-      variant: 'info',
+      message: "",
+      variant: "info",
       defaultDuration: 3000,
       _timer: 0,
 
@@ -174,20 +205,21 @@ import Icon from './Icon.astro';
         // Astro prop rendered (avoids inlining expressions into inline
         // scripts, which Astro deliberately leaves unevaluated).
         const root = (this as unknown as { $el: HTMLElement }).$el;
-        const attr = root.getAttribute('data-duration');
+        const attr = root.getAttribute("data-duration");
         const parsed = attr ? Number(attr) : NaN;
-        if (Number.isFinite(parsed) && parsed > 0) this.defaultDuration = parsed;
+        if (Number.isFinite(parsed) && parsed > 0)
+          this.defaultDuration = parsed;
 
         // Expose the global API: window.showToast(message, variant?)
         const win = window as Window & {
           showToast?: (message: string, variant?: string) => void;
         };
-        win.showToast = (message: string, variant: string = 'info') => {
+        win.showToast = (message: string, variant: string = "info") => {
           this.show(message, variant);
         };
       },
 
-      show(message: string, variant: string = 'info') {
+      show(message: string, variant: string = "info") {
         this.message = message;
         this.variant = variant;
         this.open = true;
