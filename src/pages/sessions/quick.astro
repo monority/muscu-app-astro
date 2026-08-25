@@ -1015,14 +1015,14 @@ const L = t();
 
 <style>
   .quick {
-    position: fixed;
-    inset: 0;
-    z-index: 7;
     color: var(--color-text);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
     font-family: var(--font-body);
+    max-width: 96rem;
+    margin: 0 auto;
+    padding-bottom: 6rem;
   }
 
   .quick__header {

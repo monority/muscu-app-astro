@@ -232,18 +232,32 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
     window.location.replace("/login");
   }
 
-  // Theme Alpine data factory
+  // Theme + nav accordion Alpine data factory
   document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
 
+    const ACCORDION_KEY = "muscu:nav:collapsed";
+
+    function readCollapsed(): string[] {
+      try {
+        const raw = window.localStorage.getItem(ACCORDION_KEY);
+        const saved = raw ? JSON.parse(raw) : [];
+        return Array.isArray(saved) ? saved : [];
+      } catch {
+        return [];
+      }
+    }
+
     Alpine.data("themeApp", () => ({
       theme: "dark" as "dark" | "light",
+      collapsed: [] as string[],
 
       init() {
         const current =
           document.documentElement.getAttribute("data-theme") || "dark";
         this.theme = current === "light" ? "light" : "dark";
+        this.collapsed = readCollapsed();
       },
 
       toggleTheme() {
@@ -256,6 +270,19 @@ const classes = ["app-shell", className].filter(Boolean).join(" ");
 
       isDark(): boolean {
         return this.theme === "dark";
+      },
+
+      isExpanded(id: string): boolean {
+        return !this.collapsed.includes(id);
+      },
+
+      toggleNav(id: string) {
+        const i = this.collapsed.indexOf(id);
+        if (i >= 0) this.collapsed.splice(i, 1);
+        else this.collapsed.push(id);
+        try {
+          window.localStorage.setItem(ACCORDION_KEY, JSON.stringify(this.collapsed));
+        } catch {}
       },
     }));
   });
