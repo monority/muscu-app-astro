@@ -1,11 +1,8 @@
 ---
 interface Props {
-  variant?: "primary" | "secondary" | "destructive" | "ghost";
+  variant?: "primary" | "secondary" | "destructive" | "ghost" | "link";
   size?: "sm" | "md" | "lg";
-  /** When true, applies an accent-tinted "selected" treatment on top of
-   *  the current variant. Used by segmented presets / toggles. */
   active?: boolean;
-  /** Pill shape (fully rounded). Defaults to the system's subtle radius. */
   pill?: boolean;
   disabled?: boolean;
   loading?: boolean;
@@ -13,8 +10,10 @@ interface Props {
   href?: string;
   type?: "button" | "submit" | "reset";
   class?: string;
-  /** Allow arbitrary HTML attributes to flow through to the underlying
-   *  element (target, rel, data-*, aria-*, Alpine x-*, etc.). */
+  /** Accessible label for icon-only mode (use with slot name="icon" only). */
+  iconLabel?: string;
+  /** Override default min-height. */
+  minHeight?: string;
   [key: string]: unknown;
 }
 
@@ -29,10 +28,13 @@ const {
   href,
   type = "button",
   class: className = "",
+  iconLabel,
+  minHeight,
   ...rest
 } = Astro.props as Props & Record<string, unknown>;
 
 const isInactive = disabled || loading;
+
 const classes = [
   "button",
   `button--${variant}`,
@@ -43,19 +45,28 @@ const classes = [
   isInactive && "is-inactive",
   className,
 ].filter(Boolean).join(" ");
+
+const style = minHeight ? `--button-min-height: ${minHeight}` : undefined;
+
+const hasIconLeft = Astro.slots.has("icon-left");
+const hasIconRight = Astro.slots.has("icon-right");
+const hasIconOnly = Astro.slots.has("icon");
 ---
 
 {href ? (
   <a
     {...rest}
     href={isInactive ? undefined : href}
-    class={classes}
+    class:list={[classes, hasIconOnly && "button--icon-only"]}
+    style={style}
+    aria-label={hasIconOnly ? iconLabel : undefined}
     aria-disabled={isInactive ? "true" : undefined}
     aria-busy={loading ? "true" : undefined}
     tabindex={isInactive ? -1 : undefined}
   >
     {loading && <span class="button__spinner" aria-hidden="true"></span>}
     <span class={loading ? "button__label button__label--loading" : "button__label"}>
+      <slot name="icon" />
       <slot />
     </span>
   </a>
@@ -63,13 +74,17 @@ const classes = [
   <button
     {...rest}
     type={type}
-    class={classes}
+    class:list={[classes, hasIconOnly && "button--icon-only"]}
+    style={style}
     disabled={isInactive}
+    aria-label={hasIconOnly ? iconLabel : undefined}
     aria-busy={loading ? "true" : undefined}
   >
     {loading && <span class="button__spinner" aria-hidden="true"></span>}
     <span class={loading ? "button__label button__label--loading" : "button__label"}>
+      {hasIconLeft && <slot name="icon-left" />}
       <slot />
+      {hasIconRight && <slot name="icon-right" />}
     </span>
   </button>
 )}

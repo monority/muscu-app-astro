@@ -38,6 +38,9 @@ interface Props {
   value?: string;
   autocomplete?: string;
   maxlength?: number;
+  /** Renders input without FormField wrapper. */
+  bare?: boolean;
+  size?: "sm" | "md" | "lg";
   class?: string;
   [key: string]: unknown;
 }
@@ -53,14 +56,17 @@ const {
   name,
   id,
   value,
+  bare = false,
+  size = "md",
   class: className = "",
   ...rest
 } = Astro.props;
 
 const describedBy = buildDescribedBy(id, hint, error);
+const isBare = bare || (!label && !hint && !error);
 ---
 
-<FormField id={id} label={label} hint={hint} error={error} required={required}>
+{isBare ? (
   <input
     {...rest}
     type={type}
@@ -72,20 +78,52 @@ const describedBy = buildDescribedBy(id, hint, error);
     required={required}
     aria-invalid={error ? "true" : undefined}
     aria-describedby={describedBy}
-    class:list={['input', error && 'input--error', className]}
+    class:list={['input', `input--${size}`, error && 'input--error', className]}
   />
-</FormField>
+) : (
+  <FormField id={id} label={label} hint={hint} error={error} required={required}>
+    <input
+      {...rest}
+      type={type}
+      id={id}
+      name={name}
+      value={value}
+      placeholder={placeholder}
+      disabled={disabled}
+      required={required}
+      aria-invalid={error ? "true" : undefined}
+      aria-describedby={describedBy}
+      class:list={['input', `input--${size}`, error && 'input--error', className]}
+    />
+  </FormField>
+)}
 
 <style>
   .input {
     width: 100%;
-    padding: 0.8rem 1.2rem;
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     outline: none;
     transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .input--sm {
+    height: 3.6rem;
+    padding: 0 1rem;
+    font-size: 1.3rem;
+  }
+
+  .input--md {
+    padding: 0.8rem 1.2rem;
+    font-size: 1.4rem;
+  }
+
+  .input--lg {
+    height: 5.2rem;
+    padding: 0 1.6rem;
+    font-size: 1.5rem;
   }
 
   .input::placeholder {

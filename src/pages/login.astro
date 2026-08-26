@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
+import Button from '../components/ui/Button.astro';
 import Icon from '../components/ui/Icon.astro';
 import { t } from '../i18n';
 
@@ -38,18 +39,17 @@ const L = t();
         </div>
 
         <div class="login__nav-side login__nav-side--end">
-          <button
-            type="button"
-            class="login__lang-btn"
+          <Button
+            variant="secondary"
+            size="md"
             @click="toggleLocale()"
             :aria-label="switchLocaleAria"
             :title="switchLocaleAria"
+            class="login__lang-btn"
           >
-            <span class="login__lang-icon" aria-hidden="true">
-              <Icon name="globe" size={18} />
-            </span>
+            <Icon name="globe" size={18} slot="icon-left" />
             <span x-text="langTarget">EN</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -107,17 +107,21 @@ const L = t();
           role="alert"
         ></p>
 
-        <button
+        <Button
           type="submit"
-          class="login__submit"
+          variant="primary"
+          fullWidth
+          minHeight="5.2rem"
           :disabled="loading"
+          @click="submit"
+          class="login__submit"
         >
           <span class="login__submit-label" x-text="labels.submit">{L.login.submit}</span>
           <span class="login__submit-loading" x-show="loading" x-cloak>
             <span class="login__spinner"><Icon name="spinner" size={18} /></span>
             <span x-text="labels.loading">{L.login.loading}</span>
           </span>
-        </button>
+        </Button>
       </form>
 
       {/* ── Divider ── */}
@@ -139,14 +143,15 @@ const L = t();
           </span>
           {L.login.devWarning}
         </p>
-        <button
-          type="button"
-          class="login__dev-btn"
+        <Button
+          variant="secondary"
+          fullWidth
           @click="devLogin()"
+          class="login__dev-btn"
         >
-          <Icon name="zap" size={18} class="login__dev-btn-icon" />
+          <Icon name="zap" size={18} class="login__dev-btn-icon" slot="icon-left" />
           <span>{L.login.devLogin}</span>
-        </button>
+        </Button>
       </section>
 
       {/* ── Signup link ── */}
@@ -369,45 +374,14 @@ const L = t();
   }
 
   .login__lang-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    height: 4.4rem;
-    padding: 0 1.2rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-2);
-    color: var(--color-text);
     font-family: var(--font-display);
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    line-height: 1;
-    cursor: pointer;
-    appearance: none;
-    transition: all 140ms ease;
-  }
-  .login__lang-btn:hover {
-    background: var(--color-surface-3);
-    border-color: var(--alpha-border);
-  }
-  .login__lang-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
+    gap: 0.6rem;
   }
   .login__lang-btn:active {
     transform: scale(0.97);
-  }
-
-  .login__lang-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.8rem;
-    height: 1.8rem;
-    color: var(--color-accent);
-    flex-shrink: 0;
   }
 
   /* ── Title ── */
@@ -527,28 +501,10 @@ const L = t();
 
   /* ── Submit ── */
   .login__submit {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    width: 100%;
-    min-width: 0;
-    height: 5.2rem;
-    padding: 0 1.6rem;
     margin-top: 0.4rem;
-    background: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    cursor: pointer;
-    appearance: none;
     box-shadow: 0 6px 18px color-mix(in srgb, var(--color-accent) 30%, transparent);
-    transition: all 140ms ease;
   }
   .login__submit:hover:not(:disabled) {
     filter: brightness(1.08);
@@ -557,12 +513,7 @@ const L = t();
   .login__submit:active:not(:disabled) {
     transform: scale(0.985);
   }
-  .login__submit:disabled {
-    opacity: 0.7;
-    cursor: progress;
-  }
   .login__submit:focus-visible {
-    outline: none;
     box-shadow: var(--focus-ring), 0 6px 18px color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
@@ -676,36 +627,11 @@ const L = t();
   }
 
   .login__dev-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    width: 100%;
-    height: 4.6rem;
-    padding: 0 1.6rem;
-    background: transparent;
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
     font-size: 1.3rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
-    cursor: pointer;
-    appearance: none;
-    transition: all 140ms ease;
-  }
-  .login__dev-btn:hover {
-    background: var(--alpha-bg-soft);
-    border-color: var(--alpha-border);
-    color: var(--color-text);
   }
   .login__dev-btn:active {
     transform: scale(0.985);
-  }
-  .login__dev-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
   }
 
   .login__dev-btn-icon {
@@ -772,6 +698,7 @@ const L = t();
   }
 
   /* ── Theme icon visibility ── */
+  .login__theme-icon--moon { display: none; }
   :global([data-theme="light"]) .login__theme-icon--sun { display: none; }
   :global([data-theme="light"]) .login__theme-icon--moon { display: inline-flex; }
 

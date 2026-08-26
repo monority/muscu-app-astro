@@ -11,7 +11,6 @@ import Button from '../../components/ui/Button.astro';
 import Icon from '../../components/ui/Icon.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import SettingsSection from '../../components/ui/SettingsSection.astro';
-import SettingsBottomBar from '../../components/layout/SettingsBottomBar.astro';
 import ReminderSettings from '../../components/workout/ReminderSettings.astro';
 import Segmented from '../../components/ui/Segmented.astro';
 import Toggle from '../../components/ui/Toggle.astro';
@@ -30,17 +29,6 @@ const restOptions = REST_PRESETS.map((s) => {
 });
 
 const APP_VERSION = '0.0.1';
-
-const SETTINGS_SECTIONS = [
-  { id: 'set-profile', label: L.settings.profile },
-  { id: 'set-units', label: L.settings.units },
-  { id: 'set-goals', label: L.settings.goals },
-  { id: 'set-timer', label: L.settings.timerSettings },
-  { id: 'set-reminder', label: L.settings.reminders },
-  { id: 'set-data', label: L.settings.data },
-  { id: 'set-sync', label: L.settings.sync.title },
-  { id: 'set-about', label: L.settings.about },
-];
 ---
 
 <AppLayout title={L.settings.title}>
@@ -55,8 +43,6 @@ const SETTINGS_SECTIONS = [
     x-init="init()"
     x-cloak
   >
-    <div class="set__layout">
-    <div class="set__main">
     {/* ═════════════════════════════════════════════════════
         1. PROFIL
         ═════════════════════════════════════════════════════ */}
@@ -602,13 +588,6 @@ const SETTINGS_SECTIONS = [
       </div>
     </Dialog>
 
-    </div>{/* end set__main */}
-    </div>{/* end set__layout */}
-
-    <SettingsBottomBar
-      sections={SETTINGS_SECTIONS}
-      activeSection="set-profile"
-    />
   </div>
 </AppLayout>
 
@@ -1034,20 +1013,6 @@ const SETTINGS_SECTIONS = [
   .set {
     padding-bottom: calc(var(--bottom-nav-height, 5.6rem) + 2rem);
     scroll-padding-top: calc(var(--topbar-height, 5.6rem) + 1rem);
-  }
-
-  .set__layout {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-  }
-
-  .set__main {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
   }
 
   /* ── Rows ── */
@@ -1568,9 +1533,6 @@ const SETTINGS_SECTIONS = [
   @media (max-width: 640px) {
     .set {
       gap: 1.4rem;
-    }
-    .set__layout {
-      flex-direction: column;
     }
     .set__row {
       flex-direction: column;
