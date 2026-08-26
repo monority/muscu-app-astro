@@ -79,14 +79,19 @@ const L = t();
             <span class="rem__row-desc">{L.settings.reminderTimeDesc}</span>
           </div>
           <div class="rem__row-value">
-            <input
-              type="time"
-              class="rem__time"
-              :value="settings.reminders.time"
-              :disabled="!settings.reminders.enabled"
-              @change="setTime($event.target.value)"
-              aria-label={L.settings.reminderTimeLabel}
-            />
+            <div class="rem__time-wrap">
+              <span class="rem__time-icon" aria-hidden="true">
+                <Fragment set:html={icons.clockStopwatch(18, 18)} />
+              </span>
+              <input
+                type="time"
+                class="rem__time"
+                :value="settings.reminders.time"
+                :disabled="!settings.reminders.enabled"
+                @change="setTime($event.target.value)"
+                aria-label={L.settings.reminderTimeLabel}
+              />
+            </div>
           </div>
         </div>
 
@@ -435,36 +440,74 @@ const L = t();
     cursor: not-allowed;
   }
 
-  .rem__time {
-    appearance: none;
+  .rem__time-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 4.4rem;
+    padding: 0 1.2rem;
     background: var(--color-surface-2);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .rem__time-wrap:hover {
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .rem__time-wrap:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+    background-color: var(--color-surface-2);
+  }
+
+  .rem__time-wrap:has(.rem__time:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .rem__time-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-muted);
+    flex-shrink: 0;
+  }
+
+  .rem__time {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 0;
     color: var(--color-text);
     font-family: var(--font-display);
     font-size: 1.4rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    height: 4.4rem;
-    width: 12rem;
-    padding: 0 1.2rem;
     outline: none;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    width: 8rem;
+    cursor: pointer;
+    transition: color var(--transition-fast);
   }
 
-  .rem__time:focus:not(:disabled) {
-    border-color: var(--color-accent);
-    box-shadow: var(--focus-ring);
+  .rem__time:focus {
+    color: var(--color-accent);
   }
 
   .rem__time:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
   }
 
   .rem__time::-webkit-calendar-picker-indicator {
     filter: invert(0.6);
     cursor: pointer;
+    margin-left: 0.4rem;
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+  }
+
+  .rem__time::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
   }
 
   .rem__status {

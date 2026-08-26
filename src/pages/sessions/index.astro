@@ -5,9 +5,11 @@ import EmptyState from '../../components/ui/EmptyState.astro';
 import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import Badge from '../../components/ui/Badge.astro';
+import StatusBadge from '../../components/ui/StatusBadge.astro';
 import Button from '../../components/ui/Button.astro';
 import SearchInput from '../../components/ui/SearchInput.astro';
 import IconButton from '../../components/ui/IconButton.astro';
+import DialogFooter from '../../components/ui/DialogFooter.astro';
 import { icons } from '../../lib/icons';
 import { t, localizedPath } from '../../i18n';
 
@@ -80,15 +82,7 @@ const L = t();
                 </div>
               </div>
               <div class="sess__card-badges">
-                <div x-show="session.status === 'completed'">
-                  <Badge variant="success" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
-                </div>
-                <div x-show="session.status === 'in-progress'">
-                  <Badge variant="info" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
-                </div>
-                <div x-show="session.status !== 'completed' && session.status !== 'in-progress'">
-                  <Badge variant="default" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
-                </div>
+                <StatusBadge statusExpr="session.status" />
               </div>
             </header>
 
@@ -242,21 +236,12 @@ const L = t();
         />
       </label>
       <div slot="footer">
-        <button
-          type="button"
-          data-dialog-close
-          class="sess-list__dialog-cancel"
-        >
-          {L.common.cancel}
-        </button>
-        <button
-          type="button"
-          class="sess-list__dialog-confirm"
-          :disabled="!moveDate"
-          @click="confirmMove()"
-        >
-          {L.sessions.move}
-        </button>
+        <DialogFooter
+          cancelLabel={L.common.cancel}
+          confirmLabel={L.sessions.move}
+          confirmDisabled="!moveDate"
+          confirmClick="confirmMove()"
+        />
       </div>
     </Dialog>
   </div>

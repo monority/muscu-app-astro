@@ -6,11 +6,16 @@ import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import Select from '../../components/ui/Select.astro';
+import Input from '../../components/ui/Input.astro';
 import Button from '../../components/ui/Button.astro';
+import Icon from '../../components/ui/Icon.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import SettingsSection from '../../components/ui/SettingsSection.astro';
 import SettingsBottomBar from '../../components/layout/SettingsBottomBar.astro';
 import ReminderSettings from '../../components/workout/ReminderSettings.astro';
+import Segmented from '../../components/ui/Segmented.astro';
+import Toggle from '../../components/ui/Toggle.astro';
+import DialogFooter from '../../components/ui/DialogFooter.astro';
 import { t } from '../../i18n';
 import { icons } from '../../lib/icons';
 
@@ -50,6 +55,8 @@ const SETTINGS_SECTIONS = [
     x-init="init()"
     x-cloak
   >
+    <div class="set__layout">
+    <div class="set__main">
     {/* ═════════════════════════════════════════════════════
         1. PROFIL
         ═════════════════════════════════════════════════════ */}
@@ -61,7 +68,9 @@ const SETTINGS_SECTIONS = [
             <span class="set__label-desc">{L.settings.pseudoDesc}</span>
           </div>
           <div class="set__control">
-            <input
+            <Input
+              bare
+              size="md"
               type="text"
               id="set-pseudo"
               class="set__sync-input"
@@ -70,7 +79,7 @@ const SETTINGS_SECTIONS = [
               :placeholder="labels.pseudoPlaceholder"
               maxlength="40"
               autocomplete="nickname"
-              aria-label={L.settings.pseudo}
+              :aria-label="labels.pseudoPlaceholder"
             />
           </div>
         </div>
@@ -80,7 +89,9 @@ const SETTINGS_SECTIONS = [
             <span class="set__label-desc">{L.settings.emailDesc}</span>
           </div>
           <div class="set__control">
-            <input
+            <Input
+              bare
+              size="md"
               type="email"
               id="set-email"
               class="set__sync-input"
@@ -88,7 +99,7 @@ const SETTINGS_SECTIONS = [
               @change="saveEmail()"
               :placeholder="labels.emailPlaceholder"
               autocomplete="email"
-              aria-label={L.settings.email}
+              :aria-label="labels.emailPlaceholder"
             />
           </div>
         </div>
@@ -105,26 +116,14 @@ const SETTINGS_SECTIONS = [
             <span class="set__label-title">{L.settings.weightUnit}</span>
             <span class="set__label-desc">{L.settings.weightUnitDesc}</span>
           </div>
-          <div class="set__seg-group" role="group" aria-label={L.settings.weightUnit}>
-            <button
-              type="button"
-              class="set__seg-btn"
-              :class="{ 'is-active': display.unit === 'kg' }"
-              :aria-pressed="display.unit === 'kg'"
-              @click="setUnit('kg')"
-            >
-              kg
-            </button>
-            <button
-              type="button"
-              class="set__seg-btn"
-              :class="{ 'is-active': display.unit === 'lbs' }"
-              :aria-pressed="display.unit === 'lbs'"
-              @click="setUnit('lbs')"
-            >
-              lbs
-            </button>
-          </div>
+          <Segmented
+            items={[
+              { value: 'kg', label: 'kg' },
+              { value: 'lbs', label: 'lbs' },
+            ]}
+            model="display.unit"
+            ariaLabel={L.settings.weightUnit}
+          />
         </div>
 
         <div class="set__row">
@@ -168,14 +167,14 @@ const SETTINGS_SECTIONS = [
           </div>
           <div class="set__control set__control--right">
             <div class="set__goal-wrap">
-              <button
-                type="button"
-                class="set__goal-btn"
-                aria-label={L.settings.weeklyGoalDecrease}
+              <Button
+                variant="ghost"
+                iconLabel={L.settings.weeklyGoalDecrease}
                 @click="setWeeklyGoal(display.weeklyGoal - 1)"
+                class="set__goal-btn"
               >
-                <Fragment set:html={icons.minus(24, 24)} />
-              </button>
+                <Icon name="minus" size={24} slot="icon" />
+              </Button>
               <input
                 id="set-weekly-goal"
                 type="number"
@@ -188,14 +187,14 @@ const SETTINGS_SECTIONS = [
                 @change="setWeeklyGoal(parseInt($event.target.value, 10))"
                 aria-label={L.settings.weeklyGoalCount}
               />
-              <button
-                type="button"
-                class="set__goal-btn"
-                aria-label={L.settings.weeklyGoalIncrease}
+              <Button
+                variant="ghost"
+                iconLabel={L.settings.weeklyGoalIncrease}
                 @click="setWeeklyGoal(display.weeklyGoal + 1)"
+                class="set__goal-btn"
               >
-                <Fragment set:html={icons.plus(24, 24)} />
-              </button>
+                <Icon name="plus" size={24} slot="icon" />
+              </Button>
             </div>
           </div>
         </div>
@@ -248,19 +247,11 @@ const SETTINGS_SECTIONS = [
             <span class="set__label-desc">{L.settings.soundAlertsDesc}</span>
           </div>
           <div class="set__control set__control--right">
-            <label class="set__toggle">
-              <input
-                type="checkbox"
-                class="set__toggle-input sr-only"
-                role="switch"
-                :checked="display.soundAlerts"
-                :aria-checked="display.soundAlerts ? 'true' : 'false'"
-                @change="saveSoundAlerts($event.target.checked)"
-              />
-              <span class="set__toggle-track">
-                <span class="set__toggle-thumb"></span>
-              </span>
-            </label>
+            <Toggle
+              :checked="display.soundAlerts"
+              :aria-checked="display.soundAlerts ? 'true' : 'false'"
+              @change="saveSoundAlerts($event.target.checked)"
+            />
           </div>
         </div>
       </div>
@@ -288,15 +279,16 @@ const SETTINGS_SECTIONS = [
               </p>
             </div>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            fullWidth
             class="set__data-tile-btn"
             @click="exportData()"
             :disabled="exporting"
           >
             <span x-show="!exporting" x-cloak x-text="labels.download">{L.settings.download}</span>
             <span x-show="exporting" x-cloak x-text="labels.preparing">{L.settings.preparing}</span>
-          </button>
+          </Button>
         </div>
 
         <div class="set__data-tile">
@@ -311,15 +303,16 @@ const SETTINGS_SECTIONS = [
               </p>
             </div>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            fullWidth
             class="set__data-tile-btn"
             @click="exportCSV()"
             :disabled="exportingCsv"
           >
             <span x-show="!exportingCsv" x-cloak x-text="labels.download">{L.settings.download}</span>
             <span x-show="exportingCsv" x-cloak x-text="labels.preparing">{L.settings.preparing}</span>
-          </button>
+          </Button>
         </div>
 
         <div class="set__data-tile">
@@ -334,15 +327,16 @@ const SETTINGS_SECTIONS = [
               </p>
             </div>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            fullWidth
             class="set__data-tile-btn"
             @click="triggerImport()"
             :disabled="importing"
           >
             <span x-show="!importing" x-cloak>{L.settings.chooseFile}</span>
             <span x-show="importing" x-cloak x-text="labels.importing">{L.settings.importing}</span>
-          </button>
+          </Button>
           <input
             type="file"
             accept="application/json,.json"
@@ -363,13 +357,13 @@ const SETTINGS_SECTIONS = [
             <p class="set__danger-desc">
               {L.settings.resetDesc}
             </p>
-            <button
-              type="button"
+            <Button
+              variant="destructive"
               class="set__danger-btn"
               @click="askReset()"
             >
               {L.settings.resetAction}
-            </button>
+            </Button>
           </div>
     </SettingsSection>
 
@@ -398,7 +392,9 @@ const SETTINGS_SECTIONS = [
                   <span class="set__label-desc" x-text="labels.syncConflict">{L.settings.sync.conflict}</span>
                 </div>
                 <div class="set__control set__control--right">
-                  <input
+                  <Input
+                    bare
+                    size="md"
                     type="text"
                     id="set-sync-url"
                     class="set__sync-input"
@@ -407,7 +403,7 @@ const SETTINGS_SECTIONS = [
                     :placeholder="labels.syncUrlPlaceholder"
                     autocomplete="url"
                     spellcheck="false"
-                    aria-label={L.settings.sync.url}
+                    :aria-label="labels.syncUrl"
                   />
                 </div>
               </div>
@@ -417,7 +413,9 @@ const SETTINGS_SECTIONS = [
                   <label class="set__label-title" for="set-sync-username">{L.settings.sync.username}</label>
                 </div>
                 <div class="set__control set__control--right">
-                  <input
+                  <Input
+                    bare
+                    size="md"
                     type="text"
                     id="set-sync-username"
                     class="set__sync-input"
@@ -426,7 +424,7 @@ const SETTINGS_SECTIONS = [
                     :placeholder="labels.syncUsernamePlaceholder"
                     autocomplete="username"
                     spellcheck="false"
-                    aria-label={L.settings.sync.username}
+                    :aria-label="labels.syncUrl"
                   />
                 </div>
               </div>
@@ -437,7 +435,9 @@ const SETTINGS_SECTIONS = [
                   <span class="set__label-desc">{L.settings.sync.passwordNote}</span>
                 </div>
                 <div class="set__control set__control--right">
-                  <input
+                  <Input
+                    bare
+                    size="md"
                     type="password"
                     id="set-sync-password"
                     class="set__sync-input"
@@ -445,7 +445,7 @@ const SETTINGS_SECTIONS = [
                     @change="saveSyncFields()"
                     :placeholder="labels.syncPasswordPlaceholder"
                     autocomplete="off"
-                    aria-label={L.settings.sync.password}
+                    :aria-label="labels.syncUrl"
                   />
                 </div>
               </div>
@@ -551,32 +551,25 @@ const SETTINGS_SECTIONS = [
         {L.settings.resetIrreversible}
       </p>
       <div class="set__dialog-input-wrap">
-        <input
+        <Input
+          bare
+          size="md"
           type="text"
           class="set__confirm-input"
           placeholder="SUPPRIMER"
           x-model="resetConfirmText"
           autocomplete="off"
-          aria-label={L.settings.resetConfirm}
+          :aria-label="labels.resetConfirm"
         />
       </div>
 
       <div slot="footer">
-        <Button
-          variant="secondary"
-          data-dialog-close
-          type="button"
-        >
-          {L.common.cancel}
-        </Button>
-        <Button
-          variant="destructive"
-          type="button"
-          x-bind:disabled="resetConfirmText !== 'SUPPRIMER'"
-          @click="confirmReset()"
-        >
-          {L.settings.resetPermanent}
-        </Button>
+        <DialogFooter
+          cancelLabel={L.common.cancel}
+          confirmLabel={L.settings.resetPermanent}
+          confirmDisabled="resetConfirmText !== 'SUPPRIMER'"
+          confirmClick="confirmReset()"
+        />
       </div>
     </Dialog>
 
@@ -608,6 +601,9 @@ const SETTINGS_SECTIONS = [
         </Button>
       </div>
     </Dialog>
+
+    </div>{/* end set__main */}
+    </div>{/* end set__layout */}
 
     <SettingsBottomBar
       sections={SETTINGS_SECTIONS}
@@ -704,6 +700,7 @@ const SETTINGS_SECTIONS = [
         syncLastSync: LABELS.settings.sync.lastSync,
         syncNever: LABELS.settings.sync.never,
         syncError: LABELS.settings.sync.error,
+        resetConfirm: LABELS.settings.resetConfirm,
       },
 
       init() {
@@ -1036,6 +1033,18 @@ const SETTINGS_SECTIONS = [
 
   .set {
     padding-bottom: calc(var(--bottom-nav-height, 5.6rem) + 2rem);
+    scroll-padding-top: calc(var(--topbar-height, 5.6rem) + 1rem);
+  }
+
+  .set__layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  .set__main {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -1105,26 +1114,13 @@ const SETTINGS_SECTIONS = [
     white-space: nowrap;
   }
 
-  /* ── Sync input (used for pseudo, email, webdav fields) ── */
+  /* ── Sync input (font + placeholder overrides) ── */
   .set__sync-input {
-    width: 100%;
-    height: 4.4rem;
-    padding: 0 0.75rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
     font-family: var(--font-body);
     font-size: 1.3rem;
-    outline: none;
-    transition: border-color 140ms ease, box-shadow 140ms ease;
   }
   .set__sync-input::placeholder {
     color: var(--color-muted);
-  }
-  .set__sync-input:focus {
-    border-color: var(--color-accent);
-    box-shadow: var(--focus-ring);
   }
 
   /* ── Segmented control ── */
@@ -1185,29 +1181,23 @@ const SETTINGS_SECTIONS = [
     box-shadow: var(--focus-ring);
   }
   .set__goal-btn {
-    appearance: none;
-    background-color: transparent;
-    border: 0;
-    color: var(--color-muted);
-    width: 4.4rem;
-    flex-shrink: 0;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 140ms ease, color 140ms ease;
+    border: 0 !important;
+    background: transparent !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 1 !important;
   }
   .set__goal-btn:hover {
-    background-color: var(--alpha-bg-subtle);
-    color: var(--color-text);
-  }
-  .set__goal-btn:active {
-    background-color: var(--alpha-bg-hover);
+    background-color: var(--alpha-bg-subtle) !important;
+    color: var(--color-text) !important;
   }
   .set__goal-input {
     -webkit-appearance: textfield;
     appearance: textfield;
     width: 5.2rem;
+    height: 100%;
     flex-shrink: 0;
     border: 0;
     border-left: 1px solid var(--color-border);
@@ -1221,7 +1211,7 @@ const SETTINGS_SECTIONS = [
     font-variant-numeric: tabular-nums;
     outline: none;
     padding: 0;
-    line-height: 1;
+    line-height: 4.4rem;
   }
   .set__goal-input::-webkit-outer-spin-button,
   .set__goal-input::-webkit-inner-spin-button {
@@ -1267,48 +1257,6 @@ const SETTINGS_SECTIONS = [
     font-size: 1.1rem;
     color: var(--color-muted);
     font-weight: 500;
-    margin-left: 0.3rem;
-  }
-
-  /* ── Toggle switch ── */
-  .set__toggle {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    min-height: 4.4rem;
-  }
-  .set__toggle-track {
-    position: relative;
-    width: 4.4rem;
-    height: 2.4rem;
-    border-radius: 9999px;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    transition: background-color 200ms ease, border-color 200ms ease;
-    flex-shrink: 0;
-    display: inline-block;
-  }
-  .set__toggle-thumb {
-    position: absolute;
-    top: 2px;
-    left: 3px;
-    width: 1.8rem;
-    height: 1.8rem;
-    border-radius: 9999px;
-    background-color: white;
-    transition: transform 200ms ease;
-    box-shadow: var(--shadow-1);
-    display: inline-block;
-  }
-  .set__toggle-input:checked + .set__toggle-track {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .set__toggle-input:checked + .set__toggle-track .set__toggle-thumb {
-    transform: translateX(20px);
-  }
-  .set__toggle-input:focus-visible + .set__toggle-track {
-    box-shadow: var(--focus-ring);
   }
 
   /* ── Data tiles ── */
@@ -1374,30 +1322,8 @@ const SETTINGS_SECTIONS = [
     line-height: 1.4;
   }
   .set__data-tile-btn {
-    appearance: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 4.4rem;
-    padding: 0 1rem;
-    background-color: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
-  }
-  .set__data-tile-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .set__data-tile-btn:hover:not(:disabled) {
-    background-color: var(--alpha-bg-soft);
-    border-color: var(--alpha-border);
   }
 
   /* ── Danger zone ── */
@@ -1441,28 +1367,11 @@ const SETTINGS_SECTIONS = [
     margin-bottom: 1.4rem;
   }
   .set__danger-btn {
-    appearance: none;
-    display: inline-flex;
-    align-items: center;
-    height: 4.4rem;
-    padding: 0 1.8rem;
-    background-color: transparent;
-    color: var(--color-destructive);
-    border: 1px solid color-mix(in srgb, var(--color-destructive) 50%, transparent);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: background-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
   }
   .set__danger-btn:active {
     transform: scale(0.97);
-  }
-  .set__danger-btn:hover {
-    background-color: color-mix(in srgb, var(--color-destructive) 12%, transparent);
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-destructive) 25%, transparent);
   }
 
   /* ── Sync section ── */
@@ -1616,20 +1525,10 @@ const SETTINGS_SECTIONS = [
     margin-top: 1.2rem;
   }
   .set__confirm-input {
-    width: 100%;
-    height: 4.4rem;
-    padding: 0 1.4rem;
     background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-align: center;
-    outline: none;
-    transition: border-color 140ms ease, box-shadow 140ms ease;
   }
   .set__confirm-input::placeholder {
     color: var(--alpha-text-faint);
@@ -1669,6 +1568,9 @@ const SETTINGS_SECTIONS = [
   @media (max-width: 640px) {
     .set {
       gap: 1.4rem;
+    }
+    .set__layout {
+      flex-direction: column;
     }
     .set__row {
       flex-direction: column;

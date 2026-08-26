@@ -1,6 +1,7 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import Badge from '../../components/ui/Badge.astro';
+import StatusBadge from '../../components/ui/StatusBadge.astro';
 import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
 import { icons } from '../../lib/icons';
@@ -8,6 +9,7 @@ import Icon from '../../components/ui/Icon.astro';
 import { t, localizedPath } from '../../i18n';
 import BackLink from '../../components/ui/BackLink.astro';
 import Button from '../../components/ui/Button.astro';
+import DialogFooter from '../../components/ui/DialogFooter.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
 
 const L = t();
@@ -41,15 +43,7 @@ const L = t();
           <div class="detail__header-row">
             <h1 class="detail__title" x-text="session.name"></h1>
             <div class="detail__badges">
-              <div x-show="session.status === 'completed'">
-                <Badge variant="success" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
-              </div>
-              <div x-show="session.status === 'in-progress'">
-                <Badge variant="info" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
-              </div>
-              <div x-show="session.status !== 'completed' && session.status !== 'in-progress'">
-                <Badge variant="default" size="sm"><span x-text="statusLabel(session.status)"></span></Badge>
-              </div>
+              <StatusBadge statusExpr="session.status" />
             </div>
           </div>
           <div
@@ -447,12 +441,11 @@ const L = t();
       </p>
 
       <div slot="footer">
-        <Button variant="secondary" size="md" data-dialog-close>
-          {L.common.cancel}
-        </Button>
-        <Button variant="destructive" size="md" @click="confirmDelete">
-          {L.detail.deletePermanently}
-        </Button>
+        <DialogFooter
+          cancelLabel={L.common.cancel}
+          confirmLabel={L.detail.deletePermanently}
+          confirmClick="confirmDelete"
+        />
       </div>
     </Dialog>
 

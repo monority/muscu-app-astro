@@ -11,6 +11,7 @@ import SearchInput from "../../components/ui/SearchInput.astro";
 import IconButton from "../../components/ui/IconButton.astro";
 import EmptyState from "../../components/ui/EmptyState.astro";
 import Button from "../../components/ui/Button.astro";
+import DialogFooter from "../../components/ui/DialogFooter.astro";
 import { icons } from "../../lib/icons";
 
 const L = t();
@@ -396,12 +397,11 @@ const categories = [
       </p>
 
       <div slot="footer">
-        <Button variant="secondary" size="md" data-dialog-close>
-          {L.common.cancel}
-        </Button>
-        <Button variant="destructive" size="md" @click="confirmDelete()">
-          {L.common.delete}
-        </Button>
+        <DialogFooter
+          cancelLabel={L.common.cancel}
+          confirmLabel={L.common.delete}
+          confirmClick="confirmDelete()"
+        />
       </div>
     </Dialog>
 
@@ -564,22 +564,14 @@ const categories = [
       </div>
 
       <div slot="footer" class="exo__add-actions">
-        <Button
-          variant="secondary"
-          size="md"
-          data-dialog-close
-          @click="closeAddToSession()"
-        >
-          {L.common.cancel}
-        </Button>
-        <Button
-          variant="primary"
-          size="md"
-          @click="submitAddToSession()"
-          :disabled="!addToSessionId"
-        >
-          {L.exercices.addToSession}
-        </Button>
+        <DialogFooter
+          cancelLabel={L.common.cancel}
+          cancelClick="closeAddToSession()"
+          confirmLabel={L.exercices.addToSession}
+          confirmVariant="primary"
+          confirmDisabled="!addToSessionId"
+          confirmClick="submitAddToSession()"
+        />
       </div>
     </Dialog>
 

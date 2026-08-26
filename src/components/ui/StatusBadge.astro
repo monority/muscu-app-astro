@@ -1,0 +1,37 @@
+---
+/**
+ * StatusBadge — session status badge with automatic variant mapping.
+ *
+ * Maps status to badge variant: completed → success, in-progress → info, else → default.
+ * Accepts Alpine.js expressions for dynamic status display.
+ *
+ * Props:
+ *   statusExpr - Alpine expression evaluating to status string (e.g. "session.status")
+ *   labelExpr  - Alpine expression for label (defaults to "statusLabel({statusExpr})")
+ */
+import Badge from './Badge.astro';
+
+interface Props {
+  statusExpr: string;
+  labelExpr?: string;
+  class?: string;
+}
+
+const {
+  statusExpr,
+  labelExpr = `statusLabel(${statusExpr})`,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['status-badge-wrapper', className]}>
+  <div x-show={`${statusExpr} === 'completed'`}>
+    <Badge variant="success" size="sm"><span x-text={labelExpr}></span></Badge>
+  </div>
+  <div x-show={`${statusExpr} === 'in-progress'`}>
+    <Badge variant="info" size="sm"><span x-text={labelExpr}></span></Badge>
+  </div>
+  <div x-show={`${statusExpr} !== 'completed' && ${statusExpr} !== 'in-progress'`}>
+    <Badge variant="default" size="sm"><span x-text={labelExpr}></span></Badge>
+  </div>
+</div>

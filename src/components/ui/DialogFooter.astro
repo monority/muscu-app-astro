@@ -1,0 +1,59 @@
+---
+/**
+ * DialogFooter — Cancel + Confirm button pair for dialogs.
+ *
+ * Renders a footer slot with Cancel (secondary, closes dialog) + Confirm button.
+ * Uses named slots for maximum flexibility.
+ */
+import Button from './Button.astro';
+
+interface Props {
+  cancelLabel?: string;
+  cancelClick?: string;
+  confirmLabel?: string;
+  confirmVariant?: 'primary' | 'destructive';
+  confirmDisabled?: string;
+  confirmClick?: string;
+  class?: string;
+}
+
+const {
+  cancelLabel = 'Annuler',
+  cancelClick,
+  confirmLabel = 'Confirmer',
+  confirmVariant = 'destructive',
+  confirmDisabled,
+  confirmClick,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['dialog-footer', className]}>
+  <Button
+    variant="secondary"
+    size="md"
+    type="button"
+    data-dialog-close
+    {...cancelClick && { '@click': cancelClick }}
+  >
+    {cancelLabel}
+  </Button>
+  <Button
+    variant={confirmVariant}
+    size="md"
+    type="button"
+    {...confirmDisabled && { ':disabled': confirmDisabled }}
+    {...confirmClick && { '@click': confirmClick }}
+  >
+    {confirmLabel}
+  </Button>
+</div>
+
+<style>
+  .dialog-footer {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: flex-end;
+    width: 100%;
+  }
+</style>
