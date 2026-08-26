@@ -1,0 +1,68 @@
+---
+/**
+ * KpiItem — single KPI card for dashboard metric display.
+ *
+ * Icon + label + value + unit + optional subtitle.
+ * Supports Alpine.js expressions via props.
+ */
+import Icon from './Icon.astro';
+import type { IconName } from '../../lib/icons';
+
+interface Props {
+  icon: IconName;
+  label: string;
+  valueExpr?: string;
+  value?: string;
+  unitExpr?: string;
+  unit?: string;
+  subExpr?: string;
+  sub?: string;
+  class?: string;
+}
+
+const {
+  icon,
+  label,
+  valueExpr,
+  value = '',
+  unitExpr,
+  unit = '',
+  subExpr,
+  sub,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['kpi-item', className]}>
+  <div class="kpi-item__content">
+    <div class="kpi-item__head">
+      <span class="kpi-item__icon" aria-hidden="true">
+        <Icon name={icon} size={16} />
+      </span>
+      <span class="kpi-item__label">{label}</span>
+    </div>
+    <div class="kpi-item__row">
+      {valueExpr ? (
+        <span class="kpi-item__value" x-text={valueExpr}></span>
+      ) : (
+        <span class="kpi-item__value">{value}</span>
+      )}
+      {unitExpr ? (
+        <span class="kpi-item__unit" x-text={unitExpr}></span>
+      ) : (
+        <span class="kpi-item__unit">{unit}</span>
+      )}
+    </div>
+    {subExpr ? (
+      <div class="kpi-item__sub" x-text={subExpr}></div>
+    ) : sub ? (
+      <div class="kpi-item__sub">{sub}</div>
+    ) : null}
+  </div>
+</div>
+
+<style>
+  .kpi-item {
+    /* inherit from parent .dash__kpi styles */
+  }
+</style>

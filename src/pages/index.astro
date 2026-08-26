@@ -1,11 +1,12 @@
 ---import AppLayout from "../layouts/AppLayout.astro";
 import PageHeader from "../components/layout/PageHeader.astro";
 import Badge from "../components/ui/Badge.astro";
+import StatusBadge from "../components/ui/StatusBadge.astro";
 import Button from "../components/ui/Button.astro";
 import Icon from "../components/ui/Icon.astro";
-import { t, setLocale, defaultLocale, localizedPath } from "../i18n";
+import KpiItem from "../components/ui/KpiItem.astro";
+import { t, localizedPath } from "../i18n";
 
-setLocale(Astro.currentLocale ?? defaultLocale);
 const L = t();
 ---
 
@@ -147,95 +148,36 @@ title={L.dashboard.title}
 
       {/* ── KPI band ── */}
       <section class="dash__kpis" aria-label={L.dashboard.kpisAria}>
-        {/* Volume */}
-        <div class="dash__kpi dash__kpi--volume">
-          <div class="dash__kpi-content">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
-                <Icon name="dumbbell" size={16} />
-              </span>
-              <span class="dash__kpi-label">{L.dashboard.totalVolume}</span>
-            </div>
-            <div class="dash__kpi-row">
-              <span
-                class="dash__kpi-value"
-                x-text="formatVolume(kpis.totalVolume)"></span>
-              <span class="dash__kpi-unit">{L.common.kg}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Séances */}
-        <div class="dash__kpi dash__kpi--sessions">
-          <div class="dash__kpi-content">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
-                <Icon name="calendar" size={16} />
-              </span>
-              <span class="dash__kpi-label">{L.dashboard.totalSessions}</span>
-            </div>
-            <div class="dash__kpi-row">
-              <span class="dash__kpi-value" x-text="kpis.totalSessions"></span>
-              <span
-                class="dash__kpi-unit"
-                x-text="kpis.totalSessions === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
-                >{L.dashboard.sessionsUnit}</span
-              >
-            </div>
-          </div>
-        </div>
-
-        {/* Meilleurs PRs */}
-        <div class="dash__kpi dash__kpi--pr">
-          <div class="dash__kpi-content">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
-                <Icon name="award" size={16} />
-              </span>
-              <span class="dash__kpi-label">{L.dashboard.bestPRs}</span>
-            </div>
-            <div class="dash__kpi-row">
-              <span class="dash__kpi-value" x-text="kpis.bestPRs"></span>
-              <span
-                class="dash__kpi-unit"
-                x-text="kpis.bestPRs === 1 ? labels.exoSingular.trim() : labels.exercisesUnit"
-                >{L.dashboard.exercisesUnit}</span
-              >
-            </div>
-            <div
-              class="dash__kpi-sub"
-              x-show="kpis.top1RM > 0"
-              x-text="labels.top1RM + ' ' + formatVolume(kpis.top1RM) + ' ' + labels.kg"
-            >
-            </div>
-          </div>
-        </div>
-
-        {/* Série en cours */}
-        <div class="dash__kpi dash__kpi--streak">
-          <div class="dash__kpi-content">
-            <div class="dash__kpi-head">
-              <span class="dash__kpi-icon" aria-hidden="true">
-                <Icon name="flame" size={16} />
-              </span>
-              <span class="dash__kpi-label">{L.dashboard.streak}</span>
-            </div>
-            <div class="dash__kpi-row">
-              <span class="dash__kpi-value" x-text="kpis.streak"></span>
-              <span
-                class="dash__kpi-unit"
-                x-text="kpis.streak === 1 ? labels.daysSingular : labels.daysUnit"
-                >{L.dashboard.daysUnit}</span
-              >
-            </div>
-            <div
-              class="dash__kpi-sub"
-              x-show="kpis.streak === 0 && kpis.totalSessions > 0"
-              x-text="labels.noRecent"
-            >
-            </div>
-          </div>
-        </div>
+        <KpiItem
+          icon="dumbbell"
+          label={L.dashboard.totalVolume}
+          valueExpr="formatVolume(kpis.totalVolume)"
+          unit={L.common.kg}
+          class="dash__kpi dash__kpi--volume"
+        />
+        <KpiItem
+          icon="calendar"
+          label={L.dashboard.totalSessions}
+          valueExpr="kpis.totalSessions"
+          unitExpr="kpis.totalSessions === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
+          class="dash__kpi dash__kpi--sessions"
+        />
+        <KpiItem
+          icon="award"
+          label={L.dashboard.bestPRs}
+          valueExpr="kpis.bestPRs"
+          unitExpr="kpis.bestPRs === 1 ? labels.exoSingular.trim() : labels.exercisesUnit"
+          subExpr="kpis.top1RM > 0 ? labels.top1RM + ' ' + formatVolume(kpis.top1RM) + ' ' + labels.kg : ''"
+          class="dash__kpi dash__kpi--pr"
+        />
+        <KpiItem
+          icon="flame"
+          label={L.dashboard.streak}
+          valueExpr="kpis.streak"
+          unitExpr="kpis.streak === 1 ? labels.daysSingular : labels.daysUnit"
+          subExpr="kpis.streak === 0 && kpis.totalSessions > 0 ? labels.noRecent : ''"
+          class="dash__kpi dash__kpi--streak"
+        />
       </section>
 
       {/* ── Weekly volume trend ── */}
@@ -309,23 +251,7 @@ title={L.dashboard.title}
                   <h3 class="dash__session-name" x-text="s.name"></h3>
                 </div>
                 <div class="dash__session-badge">
-                  <div x-show="s.status === 'completed'">
-                    <Badge variant="success" size="sm"
-                      ><span x-text="statusLabel(s.status)"></span></Badge
-                    >
-                  </div>
-                  <div x-show="s.status === 'in-progress'">
-                    <Badge variant="info" size="sm"
-                      ><span x-text="statusLabel(s.status)"></span></Badge
-                    >
-                  </div>
-                  <div
-                    x-show="s.status !== 'completed' && s.status !== 'in-progress'"
-                  >
-                    <Badge variant="default" size="sm"
-                      ><span x-text="statusLabel(s.status)"></span></Badge
-                    >
-                  </div>
+                  <StatusBadge statusExpr="s.status" />
                 </div>
               </div>
 
