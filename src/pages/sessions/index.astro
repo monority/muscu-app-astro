@@ -10,6 +10,7 @@ import Button from '../../components/ui/Button.astro';
 import SearchInput from '../../components/ui/SearchInput.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import DialogFooter from '../../components/ui/DialogFooter.astro';
+import EmptyFilterState from '../../components/ui/EmptyFilterState.astro';
 import { icons } from '../../lib/icons';
 import { t, localizedPath } from '../../i18n';
 
@@ -198,22 +199,11 @@ const L = t();
 
     {/* ── Empty state: no results matching search ── */}
     <template x-if="hasSessions && filtered.length === 0">
-      <Card>
-        <div class="sess-list__empty">
-          <h3 class="sess-list__empty-title" x-text="labels.noResult">{L.sessions.noResult}</h3>
-          <p class="sess-list__empty-text" x-text="labels.noMatchPrefix + ' « ' + search + ' ».'">
-            {L.sessions.noMatchPrefix} « <span x-text="search"></span> ».
-          </p>
-          <button
-            type="button"
-            class="sess-list__empty-reset"
-            @click="search = ''"
-            x-text="labels.resetSearch"
-          >
-            {L.sessions.resetSearch}
-          </button>
-        </div>
-      </Card>
+      <EmptyFilterState
+        titleExpr="labels.noResult"
+        textExpr="labels.noMatchPrefix + ' &laquo; ' + search + ' &raquo;.'"
+        resetLabel={L.sessions.resetSearch}
+      />
     </template>
 
     {/* ── Backdrop for the quick-actions menu ── */}
@@ -748,62 +738,6 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     EMPTY STATES
-     ════════════════════════════════════════════════════ */
-  .sess-list__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.2rem;
-    padding: 1.6rem 0.8rem;
-  }
-
-  .sess-list__empty-title {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0;
-  }
-
-  .sess-list__empty-text {
-    color: var(--color-muted);
-    font-size: 1.3rem;
-    text-align: center;
-  }
-
-  .sess-list__empty-text :global(span) {
-    color: var(--color-text);
-    font-weight: 600;
-  }
-
-  .sess-list__empty-reset {
-    display: inline-flex;
-    align-items: center;
-    min-height: 4.4rem;
-    padding: 0 1.6rem;
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-muted);
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 140ms ease;
-  }
-
-  .sess-list__empty-reset:hover {
-    background: var(--color-surface-2);
-    color: var(--color-text);
-    border-color: var(--alpha-border);
-  }
-
-  .sess-list__empty-reset:active {
-    transform: scale(0.97);
-  }
-
-  /* ════════════════════════════════════════════════════
      BACKDROP
      ════════════════════════════════════════════════════ */
   .sess-list__backdrop {
@@ -847,89 +781,6 @@ const L = t();
     box-shadow: var(--focus-ring);
   }
 
-  .sess-list__dialog-cancel {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    transition: all 160ms ease;
-    user-select: none;
-    white-space: nowrap;
-    background: transparent;
-    color: var(--color-muted);
-    border: 1px solid var(--color-border);
-    height: 4.8rem;
-    padding: 0 2rem;
-    font-size: 1.3rem;
-    min-width: 8rem;
-  }
-
-  .sess-list__dialog-cancel:hover {
-    color: white;
-    border-color: rgb(255 255 255 / 0.2);
-  }
-
-  .sess-list__dialog-cancel:active {
-    transform: scale(0.97);
-  }
-
-  .sess-list__dialog-confirm {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    transition: all 160ms ease;
-    user-select: none;
-    white-space: nowrap;
-    background: var(--color-accent);
-    color: var(--color-accent-foreground);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
-    height: 4.8rem;
-    padding: 0 2rem;
-    font-size: 1.3rem;
-    min-width: 8rem;
-  }
-
-  .sess-list__dialog-confirm:hover {
-    background: var(--color-accent-hover);
-    filter: brightness(1.1);
-  }
-
-  .sess-list__dialog-confirm:active {
-    transform: scale(0.97);
-  }
-
-  /* ════════════════════════════════════════════════════
-     SEARCH — :global() overrides for child component
-     ════════════════════════════════════════════════════ */
-  .sess__search :global(.sess__search-input) {
-    width: 100%;
-    height: 4.8rem;
-    padding: 0 1.6rem 0 4.4rem;
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    line-height: 1.2;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .sess__search :global(.sess__search-input)::placeholder {
-    color: var(--alpha-text-faint);
-  }
-
-  .sess__search :global(.sess__search-input)::-webkit-search-cancel-button {
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
   /* ════════════════════════════════════════════════════
      CARD — hover arrow pseudo-element + :has() guard
      ════════════════════════════════════════════════════ */
@@ -968,34 +819,5 @@ const L = t();
   .sess__card:focus-visible::after {
     opacity: 0.7;
     transform: translateX(0);
-  }
-
-  /* ════════════════════════════════════════════════════
-     RESPONSIVE — small screens
-     ════════════════════════════════════════════════════ */
-  @media (max-width: 480px) {
-    .sess__search :global(.sess__search-input) {
-      height: 4.4rem;
-      font-size: 1.3rem;
-    }
-  }
-
-  /* ════════════════════════════════════════════════════
-     WORKOUT LOG COMPOSITION — list-style layout override
-     ════════════════════════════════════════════════════ */
-  .sess__grid { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--color-border); }
-  .sess__card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem 2rem; padding: 2.2rem 0; background: transparent; border: 0; border-bottom: 1px solid var(--color-border); border-radius: 0; box-shadow: none; }
-  .sess__card::after { content: '↗'; top: 2.1rem; right: 0; opacity: 0.45; transform: none; color: var(--color-accent); }
-  .sess__card:hover:not(:has(.sess__menu)) { background: var(--alpha-bg-subtle); border-color: var(--color-border); box-shadow: none; transform: none; }
-  .sess__card:hover::after, .sess__card:focus-visible::after { opacity: 1; transform: none; }
-  .sess__card-head { grid-column: 1 / -1; }
-  .sess__card-date { grid-column: 1; grid-row: 2; }
-  .sess__card-meta { grid-column: 1; grid-row: 3; padding-top: 0.4rem; }
-  .sess__card-icon { display: none; }
-  .sess__card-name { font-size: 2.2rem; letter-spacing: -0.04em; }
-  .sess__volume-badge { border-radius: var(--radius-sm); }
-  @media (max-width: 640px) {
-    .sess__card { grid-template-columns: minmax(0, 1fr) auto; padding: 1.8rem 0; }
-    .sess__card-name { font-size: 1.8rem; }
   }
 </style>
