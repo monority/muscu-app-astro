@@ -104,7 +104,7 @@ const L = t();
 
           <template x-if="availableSessions.length === 0">
             <p class="quick__empty-text">
-              {L.rapide.emptyDesc}
+              {L.rapide.emptyDesc}{' '}
               <a
                 class="quick__empty-link"
                 href={localizedPath("/sessions/create")}>{L.rapide.restart}</a
