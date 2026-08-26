@@ -15,22 +15,27 @@
   line-height: 1;
   white-space: nowrap;
 }
+
 .type-pill--warmup {
   background-color: color-mix(in srgb, var(--color-info) 14%, transparent);
   color: var(--color-info);
 }
+
 .type-pill--work {
   background-color: var(--alpha-bg-soft);
   color: var(--color-text);
 }
+
 .type-pill--top {
   background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
   color: var(--color-accent);
 }
+
 .type-pill--drop {
   background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
   color: var(--color-warning);
 }
+
 .type-pill--failure {
   background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
   color: var(--color-destructive);
@@ -44,41 +49,49 @@
   color: var(--color-info);
   border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
 }
+
 .tone--work {
   background-color: var(--alpha-bg-soft);
   color: var(--color-text);
   border-color: var(--alpha-border);
 }
+
 .tone--top {
   background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
   color: var(--color-accent);
   border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
+
 .tone--drop {
   background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
   color: var(--color-warning);
   border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
 }
+
 .tone--failure {
   background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
   color: var(--color-destructive);
   border-color: color-mix(in srgb, var(--color-destructive) 30%, transparent);
 }
+
 .tone--easy {
   background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
   color: var(--color-success);
   border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
 }
+
 .tone--moderate {
   background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
   color: var(--color-warning);
   border-color: color-mix(in srgb, var(--color-warning) 32%, transparent);
 }
+
 .tone--hard {
   background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
   color: var(--color-accent);
   border-color: color-mix(in srgb, var(--color-accent) 34%, transparent);
 }
+
 .tone--max {
   background-color: color-mix(in srgb, var(--color-destructive) 14%, transparent);
   color: var(--color-destructive);
@@ -175,19 +188,28 @@
   display: grid;
   grid-template-columns: 1fr;
 }
+
 @media (min-width: 640px) {
-  .grid-responsive-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-responsive-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .grid-responsive-3 {
   display: grid;
   grid-template-columns: 1fr;
 }
+
 @media (min-width: 640px) {
-  .grid-responsive-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-responsive-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
+
 @media (min-width: 1024px) {
-  .grid-responsive-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-responsive-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* ════ RPE value display ═══════════════════════════════════════
@@ -196,7 +218,10 @@
  * Add /10 separator manually or use .rpe-value__sep child. */
 .rpe-value {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  border-radius: 1.5rem;
+  justify-content: center;
+  padding: 1rem;
   min-width: 3.2rem;
   font-family: var(--font-display);
   font-size: 1.8rem;
@@ -204,21 +229,38 @@
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
+
 .rpe-value--sm {
   font-size: 1.4rem;
   min-width: 2.4rem;
 }
+
 .rpe-value__sep {
   font-size: 0.7em;
   font-weight: 400;
   color: var(--color-muted);
   margin-left: 0.15em;
 }
-.rpe-value.tone--easy { color: var(--color-success); }
-.rpe-value.tone--moderate { color: var(--color-warning); }
-.rpe-value.tone--hard { color: var(--color-accent); }
-.rpe-value.tone--max { color: var(--color-destructive); }
-.rpe-value.tone--none { color: var(--color-muted); }
+
+.rpe-value.tone--easy {
+  color: var(--color-success);
+}
+
+.rpe-value.tone--moderate {
+  color: var(--color-warning);
+}
+
+.rpe-value.tone--hard {
+  color: var(--color-accent);
+}
+
+.rpe-value.tone--max {
+  color: var(--color-destructive);
+}
+
+.rpe-value.tone--none {
+  color: var(--color-muted);
+}
 
 /* ════ Status badge ════════════════════════════════════════════
  * Unified status indicator replacing inline check/dash double-icons. */
@@ -229,6 +271,15 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.status-dot--completed { background-color: var(--color-success); }
-.status-dot--in-progress { background-color: var(--color-accent); }
-.status-dot--planned { background-color: var(--color-muted); }
+
+.status-dot--completed {
+  background-color: var(--color-success);
+}
+
+.status-dot--in-progress {
+  background-color: var(--color-accent);
+}
+
+.status-dot--planned {
+  background-color: var(--color-muted);
+}

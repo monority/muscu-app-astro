@@ -250,11 +250,11 @@ const L = t();
                   <div class="notes__label" x-text="labels.rpe">{L.detail.rpe}</div>
                   <div class="notes__value">
                     <span
-                      class="notes__rpe"
-                      :class="'notes__rpe--' + rpeTone(session.rpe)"
+                      class="rpe-value"
+                      :class="'tone--' + rpeTone(session.rpe)"
                     >
-                      <span class="notes__rpe-num" x-text="session.rpe"></span>
-                      <span class="notes__rpe-sep">/ 10</span>
+                      <span x-text="session.rpe"></span>
+                      <span class="rpe-value__sep">/10</span>
                     </span>
                     <span
                       class="notes__rpe-label"
@@ -1885,55 +1885,6 @@ const L = t();
     gap: 1.0rem;
     flex-wrap: wrap;
     min-width: 0;
-  }
-
-  /* ── RPE badge ── */
-  .notes__rpe {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    height: 4.2rem;
-    padding: 0 1.4rem;
-    border-radius: var(--radius-md);
-    font-family: var(--font-display);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
-    color: var(--color-success);
-    border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
-  }
-
-  .notes__rpe-num {
-    font-size: 2.4rem;
-    font-weight: 700;
-  }
-
-  .notes__rpe-sep {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--color-muted);
-    letter-spacing: 0.04em;
-  }
-
-  .notes__rpe--easy {
-    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
-    color: var(--color-success);
-    border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
-  }
-  .notes__rpe--moderate {
-    background-color: var(--color-stat-sessions-bg);
-    color: var(--color-stat-sessions);
-    border-color: color-mix(in srgb, var(--color-stat-sessions) 30%, transparent);
-  }
-  .notes__rpe--hard {
-    background-color: var(--color-superset-g1-bg);
-    color: var(--color-superset-g1);
-    border-color: color-mix(in srgb, var(--color-superset-g1) 32%, transparent);
-  }
-  .notes__rpe--max {
-    background-color: var(--color-stat-pr-bg);
-    color: var(--color-stat-pr);
-    border-color: color-mix(in srgb, var(--color-stat-pr) 32%, transparent);
   }
 
   .notes__rpe-label {

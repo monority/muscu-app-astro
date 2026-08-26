@@ -84,6 +84,13 @@ const L = t();
                           class:list={["nav-child", child.active && "is-active"]}
                           aria-current={child.active ? "page" : undefined}
                         >
+                          {child.icon && (
+                            <span
+                              class="nav-child__icon"
+                              aria-hidden="true"
+                              set:html={renderIcon(child.icon)}
+                            />
+                          )}
                           <span class="nav-child__label">{child.label}</span>
                         </a>
                       ))}
@@ -310,13 +317,14 @@ const L = t();
   .nav-child {
     display: flex;
     align-items: center;
+    gap: 1rem;
     min-height: 4.4rem;
     padding: 0.8rem 1.2rem;
-    color: var(--color-text);
+    color: var(--color-muted);
     text-decoration: none;
     font-family: var(--font-body);
     font-size: 1.3rem;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.2;
     border-radius: var(--radius-md);
     transition:
@@ -334,6 +342,20 @@ const L = t();
     background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
     color: var(--color-accent);
     box-shadow: 0 1px 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  }
+
+  .nav-child__icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: currentColor;
+  }
+
+  .nav-child__icon :global(svg) {
+    display: block;
   }
 
   .nav-child__label {
@@ -399,7 +421,7 @@ const L = t();
   .nav-item.is-active, .nav-child.is-active { position: relative; background: var(--alpha-bg-soft); color: var(--color-text); box-shadow: none; }
   .nav-item.is-active::before, .nav-child.is-active::before { content: ""; position: absolute; left: 0; top: 0.8rem; bottom: 0.8rem; width: 0.3rem; background: var(--color-accent); border-radius: 0 2px 2px 0; }
   .nav-item--parent-active { color: var(--color-accent); }
-  .nav-child { min-height: 3.8rem; font-size: 1.2rem; border-radius: var(--radius-sm); color: var(--color-text); }
+  .nav-child { min-height: 3.8rem; font-size: 1.2rem; border-radius: var(--radius-sm); color: var(--color-muted); }
   .sidebar__footer { margin: 1rem; padding: 1.2rem 0; border-top: 1px solid var(--color-border); }
 
   @media (max-width: 640px) {

@@ -37,10 +37,7 @@ const L = t();
               x-text="currentExerciseIndex + 1"></strong>/<span
               x-text="totalExercises"></span>
           </span>
-          <div
-            class="quick__progress-bar"
-            aria-hidden="true"
-          >
+          <div class="quick__progress-bar" aria-hidden="true">
             <div
               class="quick__progress-fill"
               :style="`width: ${progressPercent}%`"
@@ -63,10 +60,7 @@ const L = t();
     <template x-if="state === 'selecting'">
       <section class="quick__selecting">
         <div class="quick__selecting-inner">
-          <div
-            class="quick__zap-icon"
-            aria-hidden="true"
-          >
+          <div class="quick__zap-icon" aria-hidden="true">
             <Fragment set:html={icons.zap(64, 64)} />
           </div>
           <h1 class="quick__title">
@@ -77,9 +71,8 @@ const L = t();
           </p>
 
           <div class="quick__form">
-            <label
-              class="quick__label"
-              for="qs-session">{L.rapide.session}</label
+            <label class="quick__label" for="qs-session"
+              >{L.rapide.session}</label
             >
             <select
               id="qs-session"
@@ -137,17 +130,10 @@ const L = t();
             aria-atomic="true"
           >
           </div>
-          <div
-            class="quick__muscle"
-            x-text="trMuscle(currentExercise?.muscle)"
-          >
+          <div class="quick__muscle" x-text="trMuscle(currentExercise?.muscle)">
           </div>
 
-          <div
-            class="quick__set-info"
-            aria-live="polite"
-            aria-atomic="true"
-          >
+          <div class="quick__set-info" aria-live="polite" aria-atomic="true">
             {L.rapide.setProgress}
             <span x-text="currentSet.setNumber"></span>
             <span
@@ -156,31 +142,19 @@ const L = t();
               x-text="typeLabel(currentSet.type)"></span>
           </div>
 
-           <div class="quick__values">
+          <div class="quick__values">
             <div class="quick__value-col">
               <span
                 class="quick__value-number"
                 x-text="formatWeight(currentSet.weight)"></span>
-              <span
-                class="quick__value-unit"
-                x-text="weightUnit()"></span>
+              <span class="quick__value-unit" x-text="weightUnit()"></span>
             </div>
-            <div
-              class="quick__x-separator"
-              aria-hidden="true"
-            >
-              ×
-            </div>
+            <div class="quick__x-separator" aria-hidden="true">×</div>
             <div class="quick__value-col">
-              <span
-                class="quick__value-number"
-                x-text="currentSet.reps"></span>
-              <span
-                class="quick__value-unit"
-                >{L.rapide.repsUnit}</span
-              >
+              <span class="quick__value-number" x-text="currentSet.reps"></span>
+              <span class="quick__value-unit">{L.rapide.repsUnit}</span>
             </div>
-           </div>
+          </div>
 
           <div class="quick__rpe-control">
             <span class="quick__label">{L.rapide.rpeLabel}</span>
@@ -210,7 +184,7 @@ const L = t();
             @click="completeSet()"
             aria-label={L.rapide.completeSetAria}
           >
-            <Fragment set:html={icons.check(36, 36)} />
+            <Fragment set:html={icons.check(24, 24)} />
             <span>{L.rapide.done}</span>
           </Button>
 
@@ -254,11 +228,7 @@ const L = t();
     <template x-if="state === 'resting'">
       <section class="quick__resting">
         <div class="quick__resting-inner">
-          <div
-            class="quick__recorded-label"
-            role="status"
-            aria-live="polite"
-          >
+          <div class="quick__recorded-label" role="status" aria-live="polite">
             {L.rapide.setRecorded}
           </div>
           <div class="quick__resting-title">
@@ -327,16 +297,8 @@ const L = t();
           >
             <Fragment set:html={icons.checkCircle(80, 80)} />
           </div>
-          <h1
-            class="quick__done-title"
-            x-text="completionTitle"
-          >
-          </h1>
-          <p
-            class="quick__done-name"
-            x-text="session?.name"
-          >
-          </p>
+          <h1 class="quick__done-title" x-text="completionTitle"></h1>
+          <p class="quick__done-name" x-text="session?.name"></p>
           <p
             class="quick__done-message"
             x-text="completionMessage"
@@ -595,10 +557,12 @@ const L = t();
         );
         this.currentExerciseIndex = firstPending >= 0 ? firstPending : 0;
         const current = this.session.exercises[this.currentExerciseIndex];
-        this.currentSetIndex = current?.sets.findIndex((set) => !set.completed) ?? 0;
+        this.currentSetIndex =
+          current?.sets.findIndex((set) => !set.completed) ?? 0;
         if (this.currentSetIndex < 0) this.currentSetIndex = 0;
         this.completedSets = this.session.exercises.reduce(
-          (total, exercise) => total + exercise.sets.filter((set) => set.completed).length,
+          (total, exercise) =>
+            total + exercise.sets.filter((set) => set.completed).length,
           0,
         );
         this.startTime = Date.now();
@@ -623,7 +587,8 @@ const L = t();
       },
       set currentRpe(value: number | string | null) {
         if (this.currentSet) {
-          this.currentSet.rpe = value === "" || value == null ? null : Number(value);
+          this.currentSet.rpe =
+            value === "" || value == null ? null : Number(value);
         }
       },
       get currentRpeType(): "rpe" | "urpe" {
@@ -856,7 +821,11 @@ const L = t();
       },
 
       confirmStop() {
-        if (this.recordedSets < this.totalSets && !window.confirm(LABELS.rapide.partialFinishConfirm)) return;
+        if (
+          this.recordedSets < this.totalSets &&
+          !window.confirm(LABELS.rapide.partialFinishConfirm)
+        )
+          return;
         this._finishSession();
       },
 
@@ -1058,6 +1027,8 @@ const L = t();
 
   .quick__progress-text {
     font-size: 1.4rem;
+    display: flex;
+    gap: 0.5rem;
     color: var(--color-muted);
     font-weight: 600;
     text-align: center;
@@ -1334,23 +1305,24 @@ const L = t();
   .quick__done-btn {
     width: 100%;
     max-width: 60rem;
-    min-height: 8rem;
+    min-height: 5.2rem;
     padding: 0 1.5rem;
     background-color: var(--color-success);
     color: var(--color-success-foreground);
     border: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     font-family: var(--font-body);
-    font-size: 2.2rem;
-    font-weight: 800;
+    font-size: 1.6rem;
+    font-weight: 700;
     letter-spacing: 0.02em;
     cursor: pointer;
     appearance: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-success) 30%, transparent);
+    gap: 0.6rem;
+    box-shadow: 0 2px 8px
+      color-mix(in srgb, var(--color-success) 20%, transparent);
     transition: all 140ms var(--transition-fast);
   }
   .quick__done-btn:hover {
@@ -1365,8 +1337,8 @@ const L = t();
   }
 
   .quick__undo-working {
-    min-height: 4.8rem;
-    font-size: 1.4rem;
+    min-height: 4.4rem;
+    font-size: 1.3rem;
     color: var(--color-muted);
   }
   .quick__undo-working:disabled {
@@ -1386,14 +1358,14 @@ const L = t();
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    min-height: 5.6rem;
+    min-height: 4.4rem;
     padding: 0 1rem;
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     color: var(--color-text);
     font-family: var(--font-body);
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 600;
     cursor: pointer;
     appearance: none;
@@ -1490,8 +1462,8 @@ const L = t();
 
   .quick__undo {
     grid-column: 1 / -1;
-    min-height: 4.8rem;
-    font-size: 1.4rem;
+    min-height: 4.4rem;
+    font-size: 1.3rem;
   }
 
   .quick__completed {
@@ -1599,13 +1571,13 @@ const L = t();
     flex: 1;
   }
   .quick__resting-grid :global(.button) {
-    min-height: 6.4rem;
-    font-size: 1.6rem;
+    min-height: 4.8rem;
+    font-size: 1.4rem;
   }
   .quick__resting-grid :global(.quick__undo) {
     grid-column: 1 / -1;
-    min-height: 4.8rem;
-    font-size: 1.4rem;
+    min-height: 4.4rem;
+    font-size: 1.3rem;
   }
   .quick__done-actions :global(.button) {
     flex: 1;

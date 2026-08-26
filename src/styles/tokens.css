@@ -7,7 +7,7 @@
   --color-surface-3: #1A232D;
   --color-text: #F2F5F4;
   --color-muted: #8C9898;
-  --color-accent: hsl(30 92% 58%);
+  --color-accent: hsl(30, 100%, 66%);
   --color-accent-hover: hsl(30 92% 50%);
   --color-accent-foreground: #1B1005;
   --color-border-strong: hsl(0 0% 100% / 0.16);
