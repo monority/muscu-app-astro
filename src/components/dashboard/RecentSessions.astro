@@ -1,0 +1,207 @@
+---
+/**
+ * RecentSessions — list of 5 recent sessions.
+ *
+ * Renders inside Alpine x-data scope (dashboardApp).
+ */
+import Badge from '../ui/Badge.astro';
+import StatusBadge from '../ui/StatusBadge.astro';
+import { t, localizedPath } from '../../i18n';
+
+const L = t();
+---
+
+<section class="dash__recent" aria-label={L.dashboard.recentAria}>
+  <header class="dash__section-head">
+    <h2 x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
+    <a href={localizedPath("/sessions")} class="dash__see-all" x-text="labels.viewAll">{L.dashboard.viewAll} →</a>
+  </header>
+
+  <div class="dash__sessions">
+    <template x-for="s in recentSessions" :key="s.id">
+      <a
+        :href="localizedPath('/sessions/detail?id=' + s.id)"
+        class="dash__session"
+        :class="'dash__session--' + s.status"
+      >
+        <div class="dash__session-head">
+          <div class="dash__session-title">
+            <span class="dash__session-dot" aria-hidden="true"></span>
+            <h3 class="dash__session-name" x-text="s.name"></h3>
+          </div>
+          <div class="dash__session-badge">
+            <StatusBadge statusExpr="s.status" />
+          </div>
+        </div>
+
+        <div class="dash__session-meta">
+          <span class="dash__session-date" x-text="formatDate(s.date)"></span>
+          <span class="dash__session-sep" aria-hidden="true">·</span>
+          <span>
+            <span x-text="sessionExercisesCount(s)"></span>
+            <span x-text="sessionExercisesCount(s) > 1 ? labels.exoPlural : labels.exoSingular"></span>
+          </span>
+          <span class="dash__session-sep" aria-hidden="true">·</span>
+          <span class="dash__session-volume" x-text="formatVolume(sessionVolume(s)) + ' ' + labels.kg"></span>
+          <div class="dash__session-muscle" x-show="sessionPrimaryMuscle(s)">
+            <Badge variant="default" size="sm">
+              <span x-text="muscleLabel(sessionPrimaryMuscle(s))"></span>
+            </Badge>
+          </div>
+        </div>
+      </a>
+    </template>
+  </div>
+</section>
+
+<style>
+  .dash__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .dash__section-head h2 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .dash__see-all {
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-base);
+  }
+
+  .dash__see-all:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .dash__see-all:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .dash__sessions {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dash__session {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.6rem 0;
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    text-decoration: none;
+    color: inherit;
+    transition:
+      background-color var(--transition-base),
+      color var(--transition-base);
+  }
+
+  .dash__session:hover {
+    color: inherit;
+    background-color: var(--alpha-bg-subtle);
+  }
+
+  .dash__session:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .dash__session-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .dash__session-dot {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: var(--color-muted);
+    flex-shrink: 0;
+  }
+
+  .dash__session--completed .dash__session-dot {
+    background-color: var(--color-success);
+  }
+
+  .dash__session--in-progress .dash__session-dot {
+    background-color: var(--color-info);
+  }
+
+  .dash__session--planned .dash__session-dot {
+    background-color: var(--color-muted);
+  }
+
+  .dash__session-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.2rem;
+    min-width: 0;
+  }
+
+  .dash__session-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .dash__session-name {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .dash__session-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+    color: var(--color-muted);
+  }
+
+  .dash__session-date {
+    font-weight: 500;
+  }
+
+  .dash__session-sep {
+    color: var(--alpha-text-faint);
+  }
+
+  .dash__session-volume {
+    color: var(--color-text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash__session-muscle {
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

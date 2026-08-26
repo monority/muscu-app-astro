@@ -9,7 +9,7 @@
 /* Padding variants */
 .card--pad-none { padding: 0; }
 .card--pad-sm { padding: 1.2rem; }
-.card--pad-md { padding: 1.6rem; }
+.card--pad-md { padding: 2rem; }
 .card--pad-lg { padding: 2.4rem; }
 
 /* Elevated variant */

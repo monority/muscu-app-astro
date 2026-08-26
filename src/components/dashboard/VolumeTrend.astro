@@ -1,0 +1,194 @@
+---
+/**
+ * VolumeTrend — bar chart for weekly volume by day.
+ *
+ * Renders inside Alpine x-data scope (dashboardApp).
+ */
+import { t } from '../../i18n';
+
+const L = t();
+---
+
+<section class="dash__trend" aria-label={L.dashboard.weeklyVolumeTrend}>
+  <div class="dash__trend-panel">
+    <header class="dash__section-head dash__trend-head">
+      <h2>{L.dashboard.weeklyVolumeTrend}</h2>
+    </header>
+    <div class="dash__trend-content">
+      <div class="dash__trend-chart" x-show="weeklyVolumeTotal > 0">
+        <template x-for="(v, i) in weeklyVolumeByDay" :key="i">
+          <div
+            class="dash__trend-col"
+            :class="{ 'dash__trend-col--today': i === todayIdx }"
+            role="img"
+            :aria-label="`${dayLabels[i]}: ${formatVolume(v)} ${labels.kg}`"
+          >
+            <div class="dash__trend-bar-wrap">
+              <div
+                class="dash__trend-bar"
+                :class="i === todayIdx ? 'dash__trend-bar--today' : (v > 0 && i < todayIdx ? 'dash__trend-bar--past' : 'dash__trend-bar--empty')"
+                :style="`height: ${v > 0 ? Math.round((v / maxVol) * 100) : 0}%`"
+              ></div>
+            </div>
+            <span
+              class="dash__trend-day"
+              x-text="dayLabels[i]"
+              :aria-current="i === todayIdx ? 'date' : undefined"
+            ></span>
+          </div>
+        </template>
+      </div>
+      {/* Visually hidden table for screen readers */}
+      <table class="sr-only">
+        <caption x-text="labels.weeklyVolumeTrend">{L.dashboard.weeklyVolumeTrend}</caption>
+        <thead>
+          <tr>
+            <template x-for="(label, i) in dayLabels" :key="i">
+              <th scope="col" x-text="label"></th>
+            </template>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <template x-for="(v, i) in weeklyVolumeByDay" :key="i">
+              <td x-text="`${formatVolume(v)} ${labels.kg}`"></td>
+            </template>
+          </tr>
+        </tbody>
+      </table>
+      <div class="dash__trend-empty" x-show="weeklyVolumeTotal <= 0" x-cloak role="status">
+        <strong x-text="labels.noWeeklyVolume">{L.dashboard.noWeeklyVolume}</strong>
+        <span x-text="labels.noWeeklyVolumeHint">{L.dashboard.noWeeklyVolumeHint}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dash__trend {
+    margin-bottom: 4rem;
+  }
+
+  .dash__trend-panel {
+    padding: 1.8rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .dash__trend-head {
+    margin-bottom: 1.2rem;
+  }
+
+  .dash__trend-head h2 {
+    font-size: 1.2rem;
+  }
+
+  .dash__trend-content {
+    min-height: 7.2rem;
+  }
+
+  .dash__trend-chart {
+    display: flex;
+    gap: 0.8rem;
+    align-items: stretch;
+  }
+
+  .dash__trend-empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 7.2rem;
+    gap: 0.4rem;
+    color: var(--color-muted);
+  }
+
+  .dash__trend-empty strong {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+  }
+
+  .dash__trend-empty span {
+    font-size: 1.2rem;
+  }
+
+  .dash__trend-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .dash__trend-bar-wrap {
+    display: flex;
+    align-items: flex-end;
+    height: 6rem;
+  }
+
+  .dash__trend-bar {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    transition:
+      height var(--transition-base),
+      background-color var(--transition-base),
+      opacity var(--transition-base);
+  }
+
+  .dash__trend-bar--past {
+    background-color: var(--color-stat-volume);
+    opacity: 0.4;
+  }
+
+  .dash__trend-bar--today {
+    background-color: var(--color-stat-volume);
+  }
+
+  .dash__trend-bar--empty {
+    background-color: var(--color-surface-3);
+    min-height: 6px;
+  }
+
+  .dash__trend-day {
+    font-size: 1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .dash__trend-col--today .dash__trend-day {
+    color: var(--color-text);
+  }
+
+  .dash__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .dash__section-head h2 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>

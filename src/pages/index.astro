@@ -1,10 +1,14 @@
----import AppLayout from "../layouts/AppLayout.astro";
+---
+import AppLayout from "../layouts/AppLayout.astro";
 import PageHeader from "../components/layout/PageHeader.astro";
-import Badge from "../components/ui/Badge.astro";
-import StatusBadge from "../components/ui/StatusBadge.astro";
 import Button from "../components/ui/Button.astro";
 import Icon from "../components/ui/Icon.astro";
 import KpiItem from "../components/ui/KpiItem.astro";
+import HeroSection from "../components/dashboard/HeroSection.astro";
+import WeeklyGoal from "../components/dashboard/WeeklyGoal.astro";
+import NextSession from "../components/dashboard/NextSession.astro";
+import VolumeTrend from "../components/dashboard/VolumeTrend.astro";
+import RecentSessions from "../components/dashboard/RecentSessions.astro";
 import { t, localizedPath } from "../i18n";
 
 const L = t();
@@ -12,138 +16,19 @@ const L = t();
 
 <AppLayout title={L.dashboard.title}>
   <PageHeader 
-title={L.dashboard.title}
-   description={L.dashboard.description} 
+    title={L.dashboard.title}
+    description={L.dashboard.description} 
     actionLabel={L.dashboard.newSession}
     actionHref={localizedPath("/sessions/create")}
- />
+  />
 
   <div class="dash" x-data="dashboardApp()" x-init="init()" x-cloak>
     {/* ── Main dashboard (once training has started) ── */}
     <div x-show="hasSessions">
       <div class="dash__overview dash__signal">
-        {/* ── Hero: today's volume ── */}
-        <section class="dash__hero" aria-label={L.dashboard.todayVolume}>
-          <div class="dash__hero-icon" aria-hidden="true">
-            <Icon name="trendingUp" size={16} />
-          </div>
-          <span class="dash__hero-label">{L.dashboard.todayVolume}</span>
-          <div class="dash__hero-value">
-            <span class="dash__hero-number" x-text="formatVolume(todayVolume)"
-            ></span>
-            <span
-              class="dash__hero-unit"
-              x-text="todayVolume > 0 ? labels.kg : ''"></span>
-          </div>
-          <div class="dash__hero-context" x-show="todaySessions > 0">
-            <span
-              x-text="todaySessions === 1 ? labels.sessionCount.replace('{count}', todaySessions) : todaySessions + ' ' + labels.sessionsUnit"
-            ></span>
-            <span class="dash__hero-context-sep" aria-hidden="true">·</span>
-            <span
-              x-text="todayExercises === 1 ? labels.exerciseCount.replace('{count}', todayExercises) : todayExercises + ' ' + labels.exercisesUnit"
-            ></span>
-          </div>
-        </section>
-
-        {/* ── Weekly goal card ── */}
-        <section class="dash__goal" aria-label={L.dashboard.goalCardAria}>
-          <div class="dash__goal-ring" aria-hidden="true">
-            <svg viewBox="0 0 44 44" class="dash__goal-ring-svg">
-              <circle cx="22" cy="22" r="18" class="dash__goal-ring-track"
-              ></circle>
-              <circle
-                cx="22"
-                cy="22"
-                r="18"
-                class="dash__goal-ring-fill"
-                :class="{ 'dash__goal-ring-fill--complete': weeklyDone >= settings.weeklyGoal }"
-                :stroke-dasharray="`${weeklyProgress * 113.1} 113.1`"></circle>
-            </svg>
-            <span
-              class="dash__goal-ring-pct"
-              x-text="`${Math.round(weeklyProgress * 100)}%`"></span>
-          </div>
-
-          <div class="dash__goal-text">
-            <span class="dash__goal-eyebrow" x-text="labels.weeklyGoalEyebrow"
-              >{L.dashboard.weeklyGoalEyebrow}</span
-            >
-            <h2 class="dash__goal-title">
-              <span class="dash__goal-done" x-text="weeklyDone"></span>
-              <span class="dash__goal-sep" aria-hidden="true">/</span>
-              <span class="dash__goal-target" x-text="settings.weeklyGoal"
-                >3</span
-              >
-              <span
-                class="dash__goal-unit"
-                x-text="weeklyDone === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
-                >{L.dashboard.sessionsUnit}</span
-              >
-            </h2>
-
-            <div
-              class="dash__goal-bar"
-              role="progressbar"
-              aria-label={L.dashboard.goalCardAria}
-              aria-valuemin="0"
-              :aria-valuenow="weeklyDone"
-              :aria-valuemax="settings.weeklyGoal"
-            >
-              <div
-                class="dash__goal-bar-fill"
-                :class="{ 'dash__goal-bar-fill--complete': weeklyDone >= settings.weeklyGoal }"
-                :style="`width: ${Math.min(100, weeklyProgress * 100)}%`"
-              >
-              </div>
-            </div>
-
-            <p
-              class="dash__goal-hint"
-              x-show="weeklyDone >= settings.weeklyGoal"
-              x-transition.opacity
-              x-cloak
-              x-text="labels.weeklyGoalDone"
-            >
-            </p>
-            <p
-              class="dash__goal-hint dash__goal-hint--muted"
-              x-show="weeklyDone < settings.weeklyGoal && settings.weeklyGoal > 0"
-              x-text="remainingHintText()"
-            >
-            </p>
-          </div>
-        </section>
-
-        {/* ── Next session: actionable data, not a decorative card ── */}
-        <section
-          class="dash__next"
-          x-show="nextSession"
-          aria-label={L.dashboard.nextSession}
-        >
-          <div class="dash__next-kicker" x-text="labels.nextSession">
-            {L.dashboard.nextSession}
-          </div>
-          <div class="dash__next-main">
-            <div class="dash__next-copy">
-              <h2 class="dash__next-name" x-text="nextSession?.name"></h2>
-              <p
-                class="dash__next-hint"
-                x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.plannedWorkoutHint"
-              >
-              </p>
-            </div>
-            <a
-              class="dash__next-action"
-              :href="localizedPath('/sessions/quick?session=' + nextSession?.id)"
-            >
-              <span
-                x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.startWorkout"
-              ></span>
-              <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-        </section>
+        <HeroSection />
+        <WeeklyGoal />
+        <NextSession />
       </div>
 
       {/* ── KPI band ── */}
@@ -181,109 +66,10 @@ title={L.dashboard.title}
       </section>
 
       {/* ── Weekly volume trend ── */}
-      <section class="dash__trend" aria-label={L.dashboard.weeklyVolumeTrend}>
-        <div class="dash__trend-panel">
-          <header class="dash__section-head dash__trend-head">
-            <h2>{L.dashboard.weeklyVolumeTrend}</h2>
-          </header>
-          <div class="dash__trend-content">
-            <div class="dash__trend-chart" x-show="weeklyVolumeTotal > 0">
-              <template x-for="(v, i) in weeklyVolumeByDay" :key="i">
-                <div
-                  class="dash__trend-col"
-                  :class="{ 'dash__trend-col--today': i === todayIdx }"
-                  role="img"
-                  :aria-label="`${dayLabels[i]}: ${formatVolume(v)} ${labels.kg}`"
-                >
-                  <div class="dash__trend-bar-wrap">
-                    <div
-                      class="dash__trend-bar"
-                      :class="i === todayIdx ? 'dash__trend-bar--today' : (v > 0 && i < todayIdx ? 'dash__trend-bar--past' : 'dash__trend-bar--empty')"
-                      :style="`height: ${v > 0 ? Math.round((v / maxVol) * 100) : 0}%`"
-                    >
-                    </div>
-                  </div>
-                  <span
-                    class="dash__trend-day"
-                    x-text="dayLabels[i]"
-                    :aria-current="i === todayIdx ? 'date' : undefined"></span>
-                </div>
-              </template>
-            </div>
-            <div
-              class="dash__trend-empty"
-              x-show="weeklyVolumeTotal <= 0"
-              x-cloak
-              role="status"
-            >
-              <strong x-text="labels.noWeeklyVolume"
-                >{L.dashboard.noWeeklyVolume}</strong
-              >
-              <span x-text="labels.noWeeklyVolumeHint"
-                >{L.dashboard.noWeeklyVolumeHint}</span
-              >
-            </div>
-          </div>
-        </div>
-      </section>
+      <VolumeTrend />
 
       {/* ── Recent sessions ── */}
-      <section class="dash__recent" aria-label={L.dashboard.recentAria}>
-        <header class="dash__section-head">
-          <h2 x-text="labels.recentSessions">{L.dashboard.recentSessions}</h2>
-          <a
-            href={localizedPath("/sessions")}
-            class="dash__see-all"
-            x-text="labels.viewAll">{L.dashboard.viewAll} →</a
-          >
-        </header>
-
-        <div class="dash__sessions">
-          <template x-for="s in recentSessions" :key="s.id">
-            <a
-              :href="localizedPath('/sessions/detail?id=' + s.id)"
-              class="dash__session"
-              :class="'dash__session--' + s.status"
-            >
-              <div class="dash__session-head">
-                <div class="dash__session-title">
-                  <span class="dash__session-dot" aria-hidden="true"></span>
-                  <h3 class="dash__session-name" x-text="s.name"></h3>
-                </div>
-                <div class="dash__session-badge">
-                  <StatusBadge statusExpr="s.status" />
-                </div>
-              </div>
-
-              <div class="dash__session-meta">
-                <span class="dash__session-date" x-text="formatDate(s.date)"
-                ></span>
-                <span class="dash__session-sep" aria-hidden="true">·</span>
-                <span>
-                  <span x-text="sessionExercisesCount(s)"></span>
-                  <span
-                    x-text="sessionExercisesCount(s) > 1 ? labels.exoPlural : labels.exoSingular"
-                  ></span>
-                </span>
-                <span class="dash__session-sep" aria-hidden="true">·</span>
-                <span
-                  class="dash__session-volume"
-                  x-text="formatVolume(sessionVolume(s)) + ' ' + labels.kg"
-                ></span>
-                <div
-                  class="dash__session-muscle"
-                  x-show="sessionPrimaryMuscle(s)"
-                >
-                  <Badge variant="default" size="sm"
-                    ><span x-text="muscleLabel(sessionPrimaryMuscle(s))"
-                    ></span></Badge
-                  >
-                </div>
-              </div>
-            </a>
-          </template>
-        </div>
-      </section>
+      <RecentSessions />
     </div>
 
     {/* ── Empty (first run: no sessions yet) — decorative, no zeros ── */}
@@ -299,7 +85,7 @@ title={L.dashboard.title}
         </div>
       </div>
 
-      <h1 class="dash__empty-title">{L.dashboard.emptyTitle}</h1>
+      <h2 class="dash__empty-title">{L.dashboard.emptyTitle}</h2>
       <p class="dash__empty-desc">{L.dashboard.emptyDesc}</p>
 
       <div class="dash__empty-actions">
@@ -325,44 +111,30 @@ title={L.dashboard.title}
     getExercises,
     getSessionsThisWeek,
     getSettings,
-    calculate1RM,
     type Session,
-    type SessionStatus,
   } from "../lib/storage";
   import { t, getLocale, localizedPath } from "../i18n";
+  import {
+    computeSessionVolume,
+    computeTodayVolume,
+    computeTodaySessions,
+    computeTodayExercises,
+    computeTotalVolume,
+    computeBestPRs,
+    computeTop1RM,
+    computeStreak,
+    computeWeeklyVolumeByDay,
+    computeSessionPrimaryMuscle,
+  } from "../lib/dashboard-stats";
+  import { formatDateShort } from "../lib/format";
 
   const LABELS = t();
 
-  // ── Pure helpers (module scope) ────────────────────────────
-  function statusLabel(status: SessionStatus): string {
-    if (status === "completed") return LABELS.sessions.completed;
-    if (status === "in-progress") return LABELS.sessions.inProgress;
-    return LABELS.sessions.planned;
-  }
-
   const DATE_LOCALE = getLocale() === "fr" ? "fr-FR" : "en-US";
 
-  function formatDate(iso: string): string {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString(DATE_LOCALE, {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  }
-
-  function formatVolume(volume: number): string {
+  function formatVolumeNum(volume: number): string {
     if (!Number.isFinite(volume) || volume <= 0) return "0";
     return Math.round(volume).toLocaleString(DATE_LOCALE);
-  }
-
-  /** ISO date key YYYY-MM-DD (local-tz) — used for day-level comparisons. */
-  function dateKey(d: Date): string {
-    const y = d.getFullYear();
-    const m = (d.getMonth() + 1).toString().padStart(2, "0");
-    const day = d.getDate().toString().padStart(2, "0");
-    return `${y}-${m}-${day}`;
   }
 
   document.addEventListener("alpine:init", () => {
@@ -407,7 +179,7 @@ title={L.dashboard.title}
 
       // ── Init ──
       init() {
-        // Touch the storage so the exercise seed is created on first load.
+        // Seed exercises on first load (side effect).
         getExercises();
         this.sessions = getSessions().sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -425,7 +197,6 @@ title={L.dashboard.title}
         return this.sessions.slice(0, 5);
       },
 
-      /** The first unfinished session is the only honest "next" action. */
       get nextSession(): Session | null {
         return (
           this.sessions.find(
@@ -434,7 +205,6 @@ title={L.dashboard.title}
         );
       },
 
-      /** Progress as a 0-1 ratio. Returns 0 when the target is invalid. */
       get weeklyProgress(): number {
         const target = this.settings.weeklyGoal;
         if (!Number.isFinite(target) || target <= 0) return 0;
@@ -442,48 +212,23 @@ title={L.dashboard.title}
       },
 
       // ── Today ──
-      /** Sum of weight × reps over completed sets of today's sessions. */
       get todayVolume(): number {
-        const key = dateKey(new Date());
-        return this.sessions
-          .filter((s) => dateKey(new Date(s.date)) === key)
-          .reduce((sum, s) => sum + this.sessionVolume(s), 0);
+        return computeTodayVolume(this.sessions);
       },
 
       get todaySessions(): number {
-        const key = dateKey(new Date());
-        return this.sessions.filter((s) => dateKey(new Date(s.date)) === key)
-          .length;
+        return computeTodaySessions(this.sessions);
       },
 
-      /** Count of distinct exercises across today's sessions. */
       get todayExercises(): number {
-        const key = dateKey(new Date());
-        const seen = new Set<string>();
-        for (const s of this.sessions) {
-          if (dateKey(new Date(s.date)) !== key) continue;
-          for (const ex of s.exercises) seen.add(ex.exerciseId);
-        }
-        return seen.size;
+        return computeTodayExercises(this.sessions);
       },
 
       // ── Weekly trend ──
-      /** Per-day volume sums (index = getDay(), 0 = Sunday), this week. */
       get weeklyVolumeByDay(): number[] {
-        const arr = new Array(7).fill(0);
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-        startOfWeek.setHours(0, 0, 0, 0);
-        for (const s of this.sessions) {
-          const d = new Date(s.date);
-          if (d < startOfWeek) continue;
-          arr[d.getDay()] += this.sessionVolume(s);
-        }
-        return arr;
+        return computeWeeklyVolumeByDay(this.sessions);
       },
 
-      /** Today's weekday index (getDay(): 0 = Sunday … 6 = Saturday). */
       get todayIdx(): number {
         return new Date().getDay();
       },
@@ -492,26 +237,24 @@ title={L.dashboard.title}
         return this.weeklyVolumeByDay.reduce((sum, volume) => sum + volume, 0);
       },
 
-      /** Scale for the trend bars — never 0 so empty weeks render 0%. */
       get maxVol(): number {
         return Math.max(...this.weeklyVolumeByDay, 1);
       },
 
-      /** Locale-aware day labels, Sun → Sat. */
       get dayLabels(): string[] {
         return getLocale() === "fr"
           ? ["D", "L", "M", "M", "J", "V", "S"]
           : ["S", "M", "T", "W", "T", "F", "S"];
       },
 
-      // ── KPIs (recomputed on demand; Alpine caches via getters) ──
+      // ── KPIs ──
       get kpis() {
         return {
           totalSessions: this.sessions.length,
-          totalVolume: this.totalVolume(),
-          bestPRs: this.bestPRs(),
-          top1RM: this.top1RM(),
-          streak: this.streak(),
+          totalVolume: computeTotalVolume(this.sessions),
+          bestPRs: computeBestPRs(this.sessions),
+          top1RM: computeTop1RM(this.sessions),
+          streak: computeStreak(this.sessions),
         };
       },
 
@@ -530,141 +273,27 @@ title={L.dashboard.title}
           .replace("{unit}", unit);
       },
 
-      totalVolume(): number {
-        return this.sessions.reduce((sum, s) => {
-          return (
-            sum +
-            s.exercises.reduce((eSum, ex) => {
-              return (
-                eSum +
-                ex.sets.reduce((sSum, set) => {
-                  return sSum + (set.completed ? set.weight * set.reps : 0);
-                }, 0)
-              );
-            }, 0)
-          );
-        }, 0);
-      },
-
-      /**
-       * "Best PRs" = number of unique exercises for which the user has
-       * completed at least one set. Each one is a personal record of
-       * having been performed; the top 1RM across all is reported
-       * separately via `top1RM()`.
-       */
-      bestPRs(): number {
-        const trained = new Set<string>();
-        for (const s of this.sessions) {
-          for (const ex of s.exercises) {
-            if (ex.sets.some((set) => set.completed)) {
-              trained.add(ex.exerciseId);
-            }
-          }
-        }
-        return trained.size;
-      },
-
-      /**
-       * Highest estimated 1RM across all completed sets.
-       * Also seeds the progress log for any new PRs encountered.
-       */
-      top1RM(): number {
-        let best = 0;
-        for (const s of this.sessions) {
-          for (const ex of s.exercises) {
-            for (const set of ex.sets) {
-              if (!set.completed) continue;
-              const oneRM = calculate1RM(set.weight, set.reps);
-              if (oneRM > best) best = oneRM;
-            }
-          }
-        }
-        return best;
-      },
-
-      /**
-       * Consecutive-day streak ending today (or yesterday if today has
-       * no session yet). Returns 0 if the user has no completed
-       * sessions or if the most recent training day is older than
-       * yesterday.
-       */
-      streak(): number {
-        const completedDays = new Set(
-          this.sessions
-            .filter((s) => s.status === "completed")
-            .map((s) => dateKey(new Date(s.date))),
-        );
-        if (completedDays.size === 0) return 0;
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const cursor = new Date(today);
-
-        if (!completedDays.has(dateKey(cursor))) {
-          // Today has no session — try yesterday as the streak anchor
-          cursor.setDate(cursor.getDate() - 1);
-          if (!completedDays.has(dateKey(cursor))) return 0;
-        }
-
-        let count = 0;
-        while (completedDays.has(dateKey(cursor))) {
-          count++;
-          cursor.setDate(cursor.getDate() - 1);
-        }
-        return count;
-      },
-
-      // ── Per-session computations ──
+      // ── Per-session ──
       sessionVolume(s: Session): number {
-        return s.exercises.reduce((sum, ex) => {
-          return (
-            sum +
-            ex.sets.reduce((sSum, set) => {
-              return sSum + (set.completed ? set.weight * set.reps : 0);
-            }, 0)
-          );
-        }, 0);
+        return computeSessionVolume(s);
       },
 
-      sessionExercisesCount(s: Session): number {
-        return s.exercises.length;
-      },
-
-      /** Most frequent muscle across the session's exercises ('' when none). */
       sessionPrimaryMuscle(s: Session): string {
-        const counts = new Map<string, number>();
-        for (const ex of s.exercises) {
-          if (!ex.muscle) continue;
-          counts.set(ex.muscle, (counts.get(ex.muscle) ?? 0) + 1);
-        }
-        let best = "";
-        let bestCount = 0;
-        for (const [muscle, count] of counts) {
-          if (count > bestCount) {
-            best = muscle;
-            bestCount = count;
-          }
-        }
-        return best;
+        return computeSessionPrimaryMuscle(s);
       },
 
-      /** Translated stored muscle group for display (FR stays as-is). */
       muscleLabel(name: string): string {
         const tr = (window as { trMuscle?: (m: string) => string }).trMuscle;
         return tr ? tr(name) : name;
       },
 
-      // ── Formatters / helpers exposed to the template ──
-      statusLabel(status: SessionStatus): string {
-        return statusLabel(status);
-      },
-
+      // ── Formatters ──
       formatDate(iso: string): string {
-        return formatDate(iso);
+        return formatDateShort(iso);
       },
 
       formatVolume(volume: number): string {
-        return formatVolume(volume);
+        return formatVolumeNum(volume);
       },
     }));
   });
@@ -693,233 +322,6 @@ title={L.dashboard.title}
 
   .dash__signal {
     border-top: 1px solid var(--color-border);
-  }
-
-  /* ════════════════════════════════════════════════════
-     HERO — today's volume
-     ════════════════════════════════════════════════════ */
-  .dash__hero {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    margin-bottom: 0;
-    padding: 1.6rem 0 2.4rem;
-    /* The primary metric is an open data anchor, not another card. */
-    background-color: transparent;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .dash__hero-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    background-color: var(--color-stat-volume-bg);
-    color: var(--color-stat-volume);
-    flex-shrink: 0;
-  }
-
-  .dash__hero-icon svg {
-    display: block;
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .dash__hero-label {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-  }
-
-  .dash__hero-value {
-    display: flex;
-    align-items: baseline;
-    gap: 0.8rem;
-  }
-
-  .dash__hero-number {
-    font-family: var(--font-display);
-    font-size: clamp(3rem, 6vw, 4.2rem);
-    font-weight: 700;
-    line-height: 1;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__hero-unit {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .dash__hero-context {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.6rem;
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: var(--color-muted);
-  }
-
-  .dash__hero-context-sep {
-    color: var(--alpha-text-faint);
-  }
-
-  /* ════════════════════════════════════════════════════
-     WEEKLY GOAL CARD
-     ════════════════════════════════════════════════════ */
-  .dash__goal {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 2.2rem;
-    margin-bottom: 0;
-    padding: 2.4rem;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-
-  .dash__goal-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .dash__goal-eyebrow {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-  }
-
-  .dash__goal-title {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    font-family: var(--font-display);
-    font-size: clamp(2.2rem, 4.5vw, 3rem);
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0;
-    line-height: 1.1;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__goal-done {
-    color: var(--color-accent);
-  }
-
-  .dash__goal-sep {
-    color: var(--color-muted);
-    margin: 0 0.2rem;
-  }
-
-  .dash__goal-target {
-    color: var(--color-text);
-  }
-
-  .dash__goal-unit {
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: var(--color-muted);
-    margin-left: 0.8rem;
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  .dash__goal-ring {
-    position: relative;
-    flex-shrink: 0;
-    width: 7.2rem;
-    height: 7.2rem;
-  }
-
-  .dash__goal-ring-svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-    overflow: visible;
-  }
-
-  .dash__goal-ring-track {
-    fill: none;
-    stroke: var(--color-surface-3);
-    stroke-width: 4;
-  }
-
-  .dash__goal-ring-fill {
-    fill: none;
-    stroke: var(--color-accent);
-    stroke-width: 4;
-    stroke-linecap: round;
-    transition:
-      stroke var(--transition-base),
-      stroke-dasharray var(--transition-base);
-  }
-
-  .dash__goal-ring-fill--complete {
-    stroke: var(--color-success);
-  }
-
-  .dash__goal-ring-pct {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .dash__goal-bar {
-    height: 1rem;
-    max-width: 42rem;
-    background-color: var(--color-surface-3);
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  .dash__goal-bar-fill {
-    height: 100%;
-    background-color: var(--color-accent);
-    border-radius: 999px;
-    transition:
-      width var(--transition-base),
-      background-color var(--transition-base);
-  }
-
-  .dash__goal-bar-fill--complete {
-    background-color: var(--color-success);
-  }
-
-  .dash__goal-hint {
-    margin: 0.8rem 0 0;
-    font-size: 1.2rem;
-    color: var(--color-success);
-    font-weight: 600;
-  }
-
-  .dash__goal-hint--muted {
-    color: var(--color-muted);
-    font-weight: 500;
   }
 
   /* ════════════════════════════════════════════════════
@@ -969,393 +371,6 @@ title={L.dashboard.title}
 
   .dash__kpi:nth-child(even) {
     border-left: 1px solid var(--color-border);
-  }
-
-  .dash__kpi-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .dash__kpi-row {
-    display: flex;
-    align-items: baseline;
-  }
-
-  .dash__kpi-head {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-
-  .dash__kpi-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .dash__kpi-icon svg {
-    display: block;
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .dash__kpi-label {
-    font-size: 1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-  }
-
-  .dash__kpi-value {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(2rem, 5vw, 2.4rem);
-    line-height: 1;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__kpi-unit {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    margin-left: 0.6rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .dash__kpi-sub {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    font-weight: 500;
-    margin-top: 0.2rem;
-  }
-
-  /* One hue per stat category — tinted disc + tinted value */
-  .dash__kpi--volume .dash__kpi-icon {
-    background-color: var(--color-stat-volume-bg);
-    color: var(--color-stat-volume);
-  }
-  .dash__kpi--sessions .dash__kpi-icon {
-    background-color: var(--color-stat-sessions-bg);
-    color: var(--color-stat-sessions);
-  }
-  .dash__kpi--pr .dash__kpi-icon {
-    background-color: var(--color-stat-pr-bg);
-    color: var(--color-stat-pr);
-  }
-  .dash__kpi--streak .dash__kpi-icon {
-    background-color: var(--color-stat-streak-bg);
-    color: var(--color-stat-streak);
-  }
-
-  /* ════════════════════════════════════════════════════
-     SECTION HEAD
-     ════════════════════════════════════════════════════ */
-  .dash__section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.2rem;
-    margin-bottom: 2rem;
-  }
-
-  .dash__section-head h2 {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-  }
-
-  .dash__see-all {
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    text-decoration: none;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-base);
-  }
-
-  .dash__see-all:hover {
-    color: var(--color-accent-hover);
-  }
-
-  .dash__see-all:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  /* ════════════════════════════════════════════════════
-     WEEKLY VOLUME TREND
-     ════════════════════════════════════════════════════ */
-  .dash__next {
-    padding: 2rem 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .dash__next-kicker {
-    margin-bottom: 0.8rem;
-    color: var(--color-accent);
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-  }
-  .dash__next-main {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-  }
-  .dash__next-name {
-    margin: 0;
-    font-size: clamp(2rem, 4vw, 3rem);
-    letter-spacing: -0.04em;
-  }
-  .dash__next-hint {
-    margin: 0.6rem 0 0;
-    color: var(--color-muted);
-    font-size: 1.3rem;
-  }
-  .dash__next-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    min-height: 4.4rem;
-    padding: 0 1.4rem;
-    border: 1px solid var(--color-accent);
-    color: var(--color-accent);
-    font-size: 1.2rem;
-    font-weight: 800;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-  }
-  .dash__next-action:hover {
-    background: var(--color-accent);
-    color: var(--color-accent-foreground);
-  }
-
-  .dash__trend {
-    margin-bottom: 4rem;
-  }
-  .dash__trend-panel {
-    padding: 1.8rem 0;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .dash__trend-head {
-    margin-bottom: 1.2rem;
-  }
-
-  .dash__trend-head h2 {
-    font-size: 1.2rem;
-  }
-
-  .dash__trend-content {
-    min-height: 7.2rem;
-  }
-
-  .dash__trend-chart {
-    display: flex;
-    gap: 0.8rem;
-    align-items: stretch;
-  }
-
-  .dash__trend-empty {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 7.2rem;
-    gap: 0.4rem;
-    color: var(--color-muted);
-  }
-
-  .dash__trend-empty strong {
-    color: var(--color-text);
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-  }
-
-  .dash__trend-empty span {
-    font-size: 1.2rem;
-  }
-
-  .dash__trend-col {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .dash__trend-bar-wrap {
-    display: flex;
-    align-items: flex-end;
-    height: 6rem;
-  }
-
-  .dash__trend-bar {
-    width: 100%;
-    border-radius: var(--radius-sm);
-    transition:
-      height var(--transition-base),
-      background-color var(--transition-base),
-      opacity var(--transition-base);
-  }
-
-  .dash__trend-bar--past {
-    background-color: var(--color-stat-volume);
-    opacity: 0.4;
-  }
-
-  .dash__trend-bar--today {
-    background-color: var(--color-stat-volume);
-  }
-
-  .dash__trend-bar--empty {
-    background-color: var(--color-surface-3);
-    min-height: 6px;
-  }
-
-  .dash__trend-day {
-    font-size: 1rem;
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-    text-align: center;
-  }
-
-  .dash__trend-col--today .dash__trend-day {
-    color: var(--color-text);
-  }
-
-  /* ════════════════════════════════════════════════════
-     SESSIONS LIST
-     ════════════════════════════════════════════════════ */
-  .dash__sessions {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Recent sessions are a readable timeline, not a stack of cards. */
-  .dash__session {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    padding: 1.6rem 0;
-    background-color: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-    text-decoration: none;
-    color: inherit;
-    transition:
-      background-color var(--transition-base),
-      color var(--transition-base);
-  }
-
-  .dash__session:hover {
-    color: inherit;
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  .dash__session:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  /* Status signaled via badge + inline dot (no border stripe) */
-  .dash__session-title {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .dash__session-dot {
-    width: 1rem;
-    height: 1rem;
-    border-radius: 50%;
-    background-color: var(--color-muted);
-    flex-shrink: 0;
-  }
-
-  .dash__session--completed .dash__session-dot {
-    background-color: var(--color-success);
-  }
-  .dash__session--in-progress .dash__session-dot {
-    background-color: var(--color-info);
-  }
-  .dash__session--planned .dash__session-dot {
-    background-color: var(--color-muted);
-  }
-
-  .dash__session-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.2rem;
-    min-width: 0;
-  }
-
-  .dash__session-badge {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.4rem;
-    flex-shrink: 0;
-  }
-
-  .dash__session-name {
-    font-family: var(--font-display);
-    font-size: 1.8rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-text);
-    margin: 0;
-    word-break: break-word;
-  }
-
-  .dash__session-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    font-size: 1.2rem;
-    color: var(--color-muted);
-  }
-
-  .dash__session-date {
-    font-weight: 500;
-  }
-
-  .dash__session-sep {
-    color: var(--alpha-text-faint);
-  }
-
-  .dash__session-volume {
-    color: var(--color-text);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .dash__session-muscle {
-    display: inline-flex;
-    align-items: center;
   }
 
   /* ════════════════════════════════════════════════════
@@ -1472,25 +487,6 @@ title={L.dashboard.title}
     .dash__overview {
       grid-template-columns: minmax(0, 1.25fr) minmax(28rem, 0.75fr);
       align-items: stretch;
-    }
-    .dash__next {
-      grid-column: 1 / -1;
-    }
-
-    .dash__hero {
-      justify-content: center;
-      padding: 2.4rem 3.2rem 2.4rem 0;
-      border-bottom: 0;
-      border-right: 1px solid var(--color-border);
-    }
-
-    .dash__hero-number {
-      font-size: clamp(4.8rem, 8vw, 7.2rem);
-      letter-spacing: -0.05em;
-    }
-
-    .dash__goal {
-      min-height: 100%;
     }
   }
 

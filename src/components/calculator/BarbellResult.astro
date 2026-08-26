@@ -1,0 +1,99 @@
+---
+interface Props {
+  modeBarre: string;
+  perSide: string;
+  totalPlates: string;
+  remainder: string;
+  breakdownPerSide: string;
+  kg: string;
+  noPlates: string;
+}
+
+const { modeBarre, perSide, totalPlates, remainder, breakdownPerSide, kg, noPlates } = Astro.props;
+---
+
+<div>
+  <div class="calc__result-grid">
+    <div class="calc__stat">
+      <span class="calc__stat-label">{modeBarre}</span>
+      <span class="calc__stat-value" x-text="formatKg(barWeight)"></span>
+    </div>
+    <div class="calc__stat">
+      <span class="calc__stat-label">{perSide}</span>
+      <span class="calc__stat-value" x-text="formatKg(perSide)"></span>
+    </div>
+    <div class="calc__stat">
+      <span class="calc__stat-label">{totalPlates}</span>
+      <span class="calc__stat-value calc__stat-value--accent" x-text="formatKg(target)"></span>
+    </div>
+    <div class="calc__stat">
+      <span class="calc__stat-label">{remainder}</span>
+      <span
+        class="calc__stat-value"
+        :class="remainder > 0 ? 'calc__stat-value--warning' : ''"
+        x-text="formatKg(remainder)"
+      ></span>
+    </div>
+  </div>
+
+  <div class="calc__diagram" :aria-label="barbellAria">
+    <div class="calc__diagram-side">
+      <template x-for="(p, i) in [...platesPerSide].reverse()" :key="'l-' + i">
+        <div
+          class="calc__plate"
+          :class="'calc__plate--' + plateClass(p)"
+          :style="{ height: plateHeight(p) + 'px' }"
+          :title="formatKg(p) + ' kg'"
+        >
+          <span class="calc__plate-label" x-text="p"></span>
+        </div>
+      </template>
+      <div class="calc__collar"></div>
+    </div>
+    <div class="calc__bar-shaft" :aria-hidden="true">
+      <span class="calc__bar-mark"></span>
+      <span class="calc__bar-mark"></span>
+      <span class="calc__bar-mark"></span>
+    </div>
+    <div class="calc__diagram-side">
+      <div class="calc__collar"></div>
+      <template x-for="(p, i) in platesPerSide" :key="'r-' + i">
+        <div
+          class="calc__plate"
+          :class="'calc__plate--' + plateClass(p)"
+          :style="{ height: plateHeight(p) + 'px' }"
+          :title="formatKg(p) + ' kg'"
+        >
+          <span class="calc__plate-label" x-text="p"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <div class="calc__breakdown" x-show="platesPerSide.length > 0">
+    <h3 class="calc__breakdown-title">{breakdownPerSide}</h3>
+    <ul class="calc__breakdown-list">
+      <template x-for="entry in plateBreakdown" :key="entry.weight">
+        <li class="calc__breakdown-item">
+          <span
+            class="calc__breakdown-plate"
+            :class="'calc__plate--' + plateClass(entry.weight)"
+          >
+            <span x-text="entry.weight"></span>
+            <span class="calc__breakdown-unit">{kg}</span>
+          </span>
+          <span class="calc__breakdown-x">×</span>
+          <span class="calc__breakdown-count" x-text="entry.count"></span>
+          <span class="calc__breakdown-total" x-text="formatKg(entry.weight * entry.count)"></span>
+        </li>
+      </template>
+    </ul>
+  </div>
+
+  <p
+    class="calc__empty"
+    x-show="platesPerSide.length === 0 && !errorMessage"
+  >
+    {noPlates}
+  </p>
+</div>

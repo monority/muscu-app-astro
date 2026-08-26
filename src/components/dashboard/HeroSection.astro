@@ -1,0 +1,118 @@
+---
+/**
+ * HeroSection — today's volume display.
+ *
+ * Renders inside Alpine x-data scope (dashboardApp).
+ * All x-* expressions reference parent Alpine state.
+ */
+import Icon from '../ui/Icon.astro';
+import { t } from '../../i18n';
+
+const L = t();
+---
+
+<section class="dash__hero" aria-label={L.dashboard.todayVolume}>
+  <div class="dash__hero-icon" aria-hidden="true">
+    <Icon name="trendingUp" size={16} />
+  </div>
+  <span class="dash__hero-label">{L.dashboard.todayVolume}</span>
+  <div class="dash__hero-value" aria-live="polite">
+    <span class="dash__hero-number" x-text="formatVolume(todayVolume)"></span>
+    <span class="dash__hero-unit" x-text="todayVolume > 0 ? labels.kg : ''"></span>
+  </div>
+  <div class="dash__hero-context" x-show="todaySessions > 0">
+    <span x-text="todaySessions === 1 ? labels.sessionCount.replace('{count}', todaySessions) : todaySessions + ' ' + labels.sessionsUnit"></span>
+    <span class="dash__hero-context-sep" aria-hidden="true">·</span>
+    <span x-text="todayExercises === 1 ? labels.exerciseCount.replace('{count}', todayExercises) : todayExercises + ' ' + labels.exercisesUnit"></span>
+  </div>
+</section>
+
+<style>
+  .dash__hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 0;
+    padding: 1.6rem 0 2.4rem;
+    background-color: transparent;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .dash__hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background-color: var(--color-stat-volume-bg);
+    color: var(--color-stat-volume);
+    flex-shrink: 0;
+  }
+
+  .dash__hero-icon :global(svg) {
+    display: block;
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .dash__hero-label {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  .dash__hero-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+  }
+
+  .dash__hero-number {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash__hero-unit {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .dash__hero-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  .dash__hero-context-sep {
+    color: var(--alpha-text-faint);
+  }
+
+  @media (min-width: 760px) {
+    .dash__hero {
+      justify-content: center;
+      padding: 2.4rem 3.2rem 2.4rem 0;
+      border-bottom: 0;
+      border-right: 1px solid var(--color-border);
+    }
+
+    .dash__hero-number {
+      font-size: clamp(4.8rem, 8vw, 7.2rem);
+      letter-spacing: -0.05em;
+    }
+  }
+</style>

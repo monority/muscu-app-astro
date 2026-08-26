@@ -9,7 +9,10 @@ import CardFooter from "../../components/ui/CardFooter.astro";
 import Dialog from "../../components/ui/Dialog.astro";
 import SearchInput from "../../components/ui/SearchInput.astro";
 import IconButton from "../../components/ui/IconButton.astro";
+import Input from "../../components/ui/Input.astro";
+import Select from "../../components/ui/Select.astro";
 import EmptyState from "../../components/ui/EmptyState.astro";
+import EmptyFilterState from "../../components/ui/EmptyFilterState.astro";
 import Button from "../../components/ui/Button.astro";
 import DialogFooter from "../../components/ui/DialogFooter.astro";
 import { icons } from "../../lib/icons";
@@ -124,32 +127,28 @@ const categories = [
                 />
               </div>
 
-              <button
-                type="button"
-                class="exo__icon-btn exo__fav-btn"
-                :class="{ 'is-fav': ex.favorite }"
-                @click.stop="toggleFav(ex)"
+              <IconButton
+                variant="default"
+                icon={icons.starFilled()}
+                class="exo__fav-btn is-fav"
+                label={L.exercices.favorites}
                 :aria-label="(ex.favorite ? labels.unfavoriteAria : labels.favoriteAria) + ' ' + ex.name"
                 :title="ex.favorite ? labels.unfavorite : labels.favorite"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  class="exo__icon"
-                  :fill="ex.favorite ? 'currentColor' : 'none'"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  height="20"
-                  width="20"
-                >
-                  <polygon
-                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-                  ></polygon>
-                </svg>
-              </button>
+                @click.stop="toggleFav(ex)"
+                x-show="ex.favorite"
+                x-cloak
+              />
+              <IconButton
+                variant="default"
+                icon={icons.star()}
+                class="exo__fav-btn"
+                label={L.exercices.favorites}
+                :aria-label="(ex.favorite ? labels.unfavoriteAria : labels.favoriteAria) + ' ' + ex.name"
+                :title="ex.favorite ? labels.unfavorite : labels.favorite"
+                @click.stop="toggleFav(ex)"
+                x-show="!ex.favorite"
+                x-cloak
+              />
             </span>
 
             <p
@@ -240,34 +239,23 @@ const categories = [
       </Card>
     </template>
 
+    {/* ── Empty state: favFilter active, no favorites ── */}
+    <template x-if="exercises.length > 0 && favFilter && filtered.length === 0">
+      <EmptyFilterState
+        title={L.exercices.favorites}
+        text={L.exercices.noResults}
+        hideReset
+      />
+    </template>
+
     {/* ── Empty state: search/filters match nothing ── */}
-    <template x-if="exercises.length > 0 && filtered.length === 0">
-      <Card>
-        <EmptyState
-          iconName="chart"
-          title={L.common.noResult}
-          description={L.exercices.noResults}
-        />
-        <div class="exo__empty-cta">
-          <button
-            type="button"
-            class="exo__add-btn"
-            @click="openAdd()"
-            aria-label={L.exercices.add}
-          >
-            <span class="exo__add-icon" set:html={icons.plus()} />
-            <span>{L.exercices.add}</span>
-          </button>
-        </div>
-        <button
-          type="button"
-          class="exo__reset-btn"
-          @click="search = ''; muscleFilter = ''; favFilter = false"
-          x-show="hasFilters"
-        >
-          {L.common.reset}
-        </button>
-      </Card>
+    <template x-if="exercises.length > 0 && !favFilter && filtered.length === 0">
+      <EmptyFilterState
+        title={L.common.noResult}
+        text={L.exercices.noResults}
+        resetLabel={L.common.reset}
+        resetClick="search = ''; muscleFilter = ''; favFilter = false"
+      />
     </template>
 
     {
@@ -280,85 +268,50 @@ const categories = [
       :title="editingId ? labels.editTitle : labels.addTitle"
     >
       <form class="exo__form" @submit.prevent="save()">
-        <div class="exo__field">
-          <label for="exo-name" class="exo__label">
-            {L.exercices.nameLabel}
-            <span class="exo__label-req" aria-hidden="true">*</span>
-          </label>
-          <input
-            id="exo-name"
-            type="text"
-            class="exo__input"
-            placeholder={L.exercices.namePlaceholder}
-            x-model="form.name"
-            required
-            autocomplete="off"
-          />
-        </div>
+        <Input
+          id="exo-name"
+          label={L.exercices.nameLabel}
+          required
+          placeholder={L.exercices.namePlaceholder}
+          x-model="form.name"
+          autocomplete="off"
+        />
 
-        <div class="exo__field">
-          <label for="exo-muscle" class="exo__label">
-            {L.exercices.muscleLabel}
-            <span class="exo__label-req" aria-hidden="true">*</span>
-          </label>
-          <div class="exo__select-wrap">
-            <select
-              id="exo-muscle"
-              class="exo__select"
-              x-model="form.muscle"
-              required
-            >
-              <option value="" disabled>{L.common.select}</option>
-              <template x-for="opt in muscleOptionsForSelect" :key="opt.value">
-                <option :value="opt.value" x-text="opt.label"></option>
-              </template>
-            </select>
-            <Icon name="chevronDown" size={16} class="exo__select-icon" />
-          </div>
-        </div>
+        <Select
+          id="exo-muscle"
+          label={L.exercices.muscleLabel}
+          required
+          placeholder={L.common.select}
+          x-model="form.muscle"
+        >
+          <template x-for="opt in muscleOptionsForSelect" :key="opt.value">
+            <option :value="opt.value" x-text="opt.label"></option>
+          </template>
+        </Select>
 
         <div
-          class="exo__field"
           x-show="form.muscle === '__custom__'"
           x-cloak
           x-transition.opacity.duration.200ms
         >
-          <label for="exo-muscle-custom" class="exo__label">
-            {L.exercices.customMuscleLabel}
-            <span class="exo__label-req" aria-hidden="true">*</span>
-          </label>
-          <input
+          <Input
             id="exo-muscle-custom"
-            type="text"
-            class="exo__input"
+            label={L.exercices.customMuscleLabel}
+            required
             placeholder="Ex. Mollets"
             x-model="form.customMuscle"
             autocomplete="off"
           />
         </div>
 
-        <div class="exo__field">
-          <label for="exo-category" class="exo__label">
-            {L.exercices.categoryLabel}
-            <span class="exo__label-req" aria-hidden="true">*</span>
-          </label>
-          <div class="exo__select-wrap">
-            <select
-              id="exo-category"
-              class="exo__select"
-              x-model="form.category"
-              required
-            >
-              <option value="" disabled>{L.common.select}</option>
-              {
-                categories.map((c) => (
-                  <option value={c.value}>{c.label}</option>
-                ))
-              }
-            </select>
-            <Icon name="chevronDown" size={20} class="exo__select-icon" />
-          </div>
-        </div>
+        <Select
+          id="exo-category"
+          label={L.exercices.categoryLabel}
+          required
+          placeholder={L.common.select}
+          x-model="form.category"
+          options={categories.map((c) => ({ value: c.value, label: c.label }))}
+        />
 
         <div
           class="exo__form-error"
@@ -437,44 +390,24 @@ const categories = [
           </button>
         </header>
 
-        {/* ── Session picker ── */}
-        <div class="exo__add-field">
-          <label for="exo-add-session" class="exo__label"
-            >{L.sessions.seanceSingular}</label
-          >
-          <div class="exo__select-wrap">
-            <select
-              id="exo-add-session"
-              class="exo__select"
-              x-model="addToSessionId"
-            >
-              <option value="">{L.rapide.selectSession}</option>
-              <option value="new">+ {L.exercices.newSession}</option>
-              <template x-for="s in sessions" :key="s.id">
-                <option :value="s.id" x-text="s.name + ' (' + s.date + ')'"
-                ></option>
-              </template>
-            </select>
-            <Icon name="chevronDown" size={16} class="exo__select-icon" />
-          </div>
-        </div>
-
-        {/* ── New session name (conditional) ── */}
-        <div
-          class="exo__add-field"
-          x-show="addToSessionId === 'new'"
-          x-cloak
-          x-transition.opacity.duration.180ms
+        <Select
+          id="exo-add-session"
+          label={L.sessions.seanceSingular}
+          placeholder={L.rapide.selectSession}
+          x-model="addToSessionId"
         >
-          <label for="exo-add-session-name" class="exo__label">
-            {L.builder.name}
-          </label>
-          <input
+          <option value="new">+ {L.exercices.newSession}</option>
+          <template x-for="s in sessions" :key="s.id">
+            <option :value="s.id" x-text="s.name + ' (' + s.date + ')'"></option>
+          </template>
+        </Select>
+
+        <div x-show="addToSessionId === 'new'" x-cloak x-transition.opacity.duration.180ms>
+          <Input
             id="exo-add-session-name"
-            type="text"
-            class="exo__input"
-            x-model="newSessionName"
+            label={L.builder.name}
             placeholder="Ex. Push day"
+            x-model="newSessionName"
             autocomplete="off"
           />
         </div>
@@ -574,23 +507,6 @@ const categories = [
         />
       </div>
     </Dialog>
-
-    {
-      /* ════════════════════════════════════════════════════
-        SUCCESS TOAST
-        ════════════════════════════════════════════════════ */
-    }
-    <div
-      class="exo__toast"
-      x-show="toast.visible"
-      x-cloak
-      x-transition.opacity.duration.200ms
-      role="status"
-      aria-live="polite"
-    >
-      <span class="exo__toast-icon" set:html={icons.check()} />
-      <span x-text="toast.message"></span>
-    </div>
   </div>
 
   <script>
@@ -611,8 +527,10 @@ const categories = [
       type SetType,
     } from "../../lib/storage";
     import { getExerciseTip } from "../../lib/exercise-tips";
+    import { icons } from "../../lib/icons";
 
     const LABELS = t();
+    (window as any).icons = icons;
 
     // Default muscle groups always surfaced in the filter bar
     // (mirrors the seed list in src/lib/storage.ts).
@@ -692,8 +610,6 @@ const categories = [
           { type: "work", weight: 0, reps: 0 },
           { type: "work", weight: 0, reps: 0 },
         ] as AddSetRow[],
-        toast: { visible: false, message: "" },
-        _toastTimer: 0,
 
         // ── Labels (i18n) ──
         labels: {
@@ -708,6 +624,10 @@ const categories = [
           videoAria: LABELS.exercices.videoAria,
           onYoutube: LABELS.exercices.onYoutube,
           sets: LABELS.exercices.sets,
+          favorite: LABELS.exercices.favorite,
+          unfavorite: LABELS.exercices.unfavorite,
+          favoriteAria: LABELS.exercices.favoriteAria,
+          unfavoriteAria: LABELS.exercices.unfavoriteAria,
           trendAria: LABELS.tendance.trendAria,
           trendTitle: LABELS.tendance.title,
         },
@@ -912,7 +832,7 @@ const categories = [
             (s) => s.type === "work" && s.weight > 0,
           );
           if (workingSets.length === 0) {
-            this.showToast(LABELS.builder.warmupHint);
+            showToast(LABELS.builder.warmupHint);
             return;
           }
 
@@ -929,14 +849,6 @@ const categories = [
 
           // Prepend warmups to the working sets.
           this.addSets = [...warmups, ...this.addSets];
-        },
-
-        showToast(message: string) {
-          this.toast = { visible: true, message };
-          if (this._toastTimer) window.clearTimeout(this._toastTimer);
-          this._toastTimer = window.setTimeout(() => {
-            this.toast = { visible: false, message: "" };
-          }, 2800);
         },
 
         submitAddToSession() {
@@ -983,7 +895,7 @@ const categories = [
 
           this.closeAddToSession();
           this.refresh();
-          this.showToast(LABELS.exercices.toastAdded);
+          showToast(LABELS.exercices.toastAdded);
         },
 
         // ── Dialog helpers (wrap the global Dialog API) ──
@@ -1028,8 +940,6 @@ const categories = [
       position: relative;
       width: 100%;
     }
-
-
 
     /* ── Filter pills ── */
     .exo__filters {
@@ -1145,8 +1055,6 @@ const categories = [
       height: 1.6rem;
     }
 
-
-
     /* ════════════════════════════════════════════════════
      GRID — 1 col → 2 col → 3 col
      ════════════════════════════════════════════════════ */
@@ -1168,7 +1076,7 @@ const categories = [
     .exo__card-head {
       display: flex;
       align-items: center;
-      gap: 0.8rem;
+      gap: 1rem;
     }
 
     .exo__card-actions {
@@ -1212,8 +1120,6 @@ const categories = [
       flex-shrink: 0;
     }
 
-
-
     .exo__card-name {
       font-family: var(--font-display);
       font-size: 1.7rem;
@@ -1222,8 +1128,6 @@ const categories = [
       color: var(--color-text);
       min-width: 0;
     }
-
-
 
     .exo__tip {
       margin: 0;
@@ -1298,11 +1202,11 @@ const categories = [
     .exo__card-badges {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.6rem;
+      gap: 0.8rem;
     }
 
     .exo__card-foot {
-      gap: 0.4rem;
+      gap: 0.6rem;
     }
 
     .exo__icon-btn {
@@ -1355,6 +1259,7 @@ const categories = [
 
     .exo__fav-btn.is-fav:hover {
       color: var(--color-warning);
+      background: color-mix(in srgb, var(--color-warning) 10%, transparent);
     }
 
     .exo__icon {
@@ -1377,31 +1282,6 @@ const categories = [
       padding: 0.4rem 0 0.8rem;
     }
 
-    .exo__reset-btn {
-      display: inline-flex;
-      align-items: center;
-      height: 4.4rem;
-      padding: 0 1.6rem;
-      background-color: transparent;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      color: var(--color-muted);
-      font-family: var(--font-body);
-      font-size: 1.2rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition:
-        background-color var(--transition-fast),
-        color var(--transition-fast),
-        border-color var(--transition-fast);
-    }
-
-    .exo__reset-btn:hover {
-      background-color: var(--color-surface-2);
-      color: var(--color-text);
-      border-color: var(--alpha-border);
-    }
-
     /* ════════════════════════════════════════════════════
      FORM
      ════════════════════════════════════════════════════ */
@@ -1410,24 +1290,6 @@ const categories = [
       flex-direction: column;
       gap: 1.4rem;
       margin-top: 0.8rem;
-    }
-
-    .exo__field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
-    .exo__label {
-      font-size: 1.3rem;
-      font-weight: 500;
-      color: var(--color-muted);
-      line-height: 1.2;
-    }
-
-    .exo__label-req {
-      color: var(--color-destructive);
-      margin-left: 0.2rem;
     }
 
     .exo__input,
@@ -1458,27 +1320,12 @@ const categories = [
       box-shadow: var(--focus-ring);
     }
 
-    .exo__select-wrap {
-      position: relative;
-    }
-
     .exo__select {
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
       cursor: pointer;
       padding-right: 4rem;
-    }
-
-    .exo__select-icon {
-      position: absolute;
-      right: 1.4rem;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 1.6rem;
-      height: 1.6rem;
-      color: var(--color-muted);
-      pointer-events: none;
     }
 
     .exo__form-error {
@@ -1523,11 +1370,6 @@ const categories = [
     @media (max-width: 480px) {
       .exo__toolbar {
         gap: 1.2rem;
-      }
-      .exo__filter {
-        height: 4rem;
-        font-size: 1.2rem;
-        padding: 0 1.4rem;
       }
       .exo__card-name {
         font-size: 1.5rem;
@@ -1598,12 +1440,6 @@ const categories = [
     .exo__add-close svg {
       width: 1.5rem;
       height: 1.5rem;
-    }
-
-    .exo__add-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
     }
 
     /* ════════════════════════════════════════════════════
@@ -1882,47 +1718,10 @@ const categories = [
       border-top: 1px solid var(--color-border);
     }
 
-    /* ════════════════════════════════════════════════════
-     SUCCESS TOAST
-     ════════════════════════════════════════════════════ */
-    .exo__toast {
-      position: fixed;
-      left: 50%;
-      bottom: 2.4rem;
-      transform: translateX(-50%);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.8rem;
-      max-width: calc(100vw - 3.2rem);
-      padding: 1rem 1.6rem;
-      background-color: var(--color-surface-3);
-      border: 1px solid var(--color-success);
-      border-radius: var(--radius-md);
-      color: var(--color-text);
-      font-family: var(--font-body);
-      font-size: 1.3rem;
-      font-weight: 600;
-      line-height: 1.2;
-      box-shadow:
-        0 10px 30px color-mix(in srgb, #000 50%, transparent),
-        0 0 0 1px color-mix(in srgb, var(--color-success) 15%, transparent);
-      z-index: 8;
-      pointer-events: none;
-    }
-
-    .exo__toast-icon {
-      color: var(--color-success);
-      flex-shrink: 0;
-    }
-    .exo__toast-icon svg {
-      width: 1.8rem;
-      height: 1.8rem;
-    }
-
     .exo__card-body {
       display: flex;
       flex-direction: column;
-      gap: 1.2rem;
+      gap: 1.6rem;
     }
   </style>
 </AppLayout>

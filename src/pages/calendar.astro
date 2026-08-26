@@ -8,6 +8,8 @@ import CardHeader from '../components/ui/CardHeader.astro';
 import CardTitle from '../components/ui/CardTitle.astro';
 import CardContent from '../components/ui/CardContent.astro';
 import EmptyState from '../components/ui/EmptyState.astro';
+import IconButton from '../components/ui/IconButton.astro';
+import Button from '../components/ui/Button.astro';
 import { icons } from '../lib/icons';
 const L = t();
 ---
@@ -21,29 +23,25 @@ const L = t();
   <div class="cal" x-data="calendarApp()" x-init="init()" x-cloak>
     {/* ═══ Month controls ═══ */}
     <div class="cal__controls">
-      <button
-        type="button"
-        class="cal__nav-btn"
+      <IconButton
+        variant="ghost"
+        icon={icons.chevronLeft()}
+        label={L.calendrier.prevMonth}
         @click="prevMonth()"
-        aria-label={L.calendrier.prevMonth}
-      >
-        <Fragment set:html={icons.chevronLeft()} />
-      </button>
+      />
 
       <h2 class="cal__month-name" x-text="monthName()"></h2>
 
-      <button
-        type="button"
-        class="cal__nav-btn"
+      <IconButton
+        variant="ghost"
+        icon={icons.chevronRight()}
+        label={L.calendrier.nextMonth}
         @click="nextMonth()"
-        aria-label={L.calendrier.nextMonth}
-      >
-        <Fragment set:html={icons.chevronRight()} />
-      </button>
+      />
 
-      <button type="button" class="cal__today-btn" @click="goToday()">
+      <Button variant="secondary" size="md" @click="goToday()">
         {L.calendrier.today}
-      </button>
+      </Button>
     </div>
 
     {/* ═══ Calendar grid ═══ */}
@@ -477,30 +475,6 @@ const L = t();
     padding-bottom: 1.6rem;
   }
 
-  .cal__nav-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4.4rem;
-    min-width: 4.4rem;
-    padding: 0;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    font-weight: 600;
-    cursor: pointer;
-    appearance: none;
-    transition: background-color var(--transition-fast), border-color var(--transition-fast);
-  }
-
-  .cal__nav-btn svg {
-    width: 1.8rem;
-    height: 1.8rem;
-  }
-
   .cal__month-name {
     font-family: var(--font-display);
     font-weight: 700;
@@ -512,41 +486,6 @@ const L = t();
     min-width: 12rem;
     line-height: 1.2;
     font-size: clamp(1.5rem, 2.4vw, 2rem);
-  }
-
-  .cal__today-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 4.4rem;
-    padding: 0 2.4rem;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.3rem;
-    font-weight: 600;
-    cursor: pointer;
-    appearance: none;
-    transition: background-color var(--transition-fast), border-color var(--transition-fast);
-  }
-
-  .cal__nav-btn:hover,
-  .cal__today-btn:hover {
-    background-color: var(--alpha-bg-soft);
-    border-color: var(--alpha-border);
-  }
-
-  .cal__nav-btn:focus-visible,
-  .cal__today-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .cal__nav-btn:active,
-  .cal__today-btn:active {
-    transform: scale(0.97);
   }
 
   /* ── Weekday header ── */
@@ -845,115 +784,6 @@ const L = t();
     color: var(--color-muted);
     font-weight: 600;
   }
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: var(--color-border);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
-
-  .cal__nav-btn:hover,
-  .cal__today-btn:hover {
-    background-color: var(--alpha-bg-soft);
-    border-color: var(--alpha-border);
-  }
-
-  .cal__nav-btn:focus-visible,
-  .cal__today-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .cal__nav-btn:active,
-  .cal__today-btn:active {
-    transform: scale(0.97);
-  }
-
-  .cal__nav-btn svg {
-    width: 1.8rem;
-    height: 1.8rem;
-  }
-
-  .cal__day:hover:not(:disabled) {
-    background-color: var(--color-surface-2);
-  }
-
-  .cal__day:disabled {
-    cursor: default;
-  }
-
-  .cal__day--other {
-    opacity: 0.3;
-  }
-
-  .cal__day--today {
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-  }
-
-  .cal__day--today .cal__day-num {
-    color: var(--color-accent-foreground);
-    font-weight: 700;
-  }
-
-  .cal__day--today .text-xs {
-    color: var(--color-accent-foreground);
-  }
-
-  .cal__day--selected {
-    outline: 2px solid var(--color-accent);
-    outline-offset: -2px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .cal__day--today.cal__day--selected {
-    outline-color: var(--color-text);
-  }
-
-  .cal__day:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: -2px;
-  }
-
-  .cal__dot--completed {
-    background: var(--color-success);
-  }
-
-  .cal__dot--in-progress {
-    background: var(--color-info);
-  }
-
-  .cal__dot--planned {
-    background: var(--color-muted);
-  }
-
-  .cal__session-item:hover {
-    border-color: var(--color-accent);
-    background-color: var(--alpha-bg-subtle);
-  }
-
-  .cal__session-item:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-  }
-
-  .cal__session-status--completed {
-    background-color: color-mix(in srgb, var(--color-success) 15%, transparent);
-    color: var(--color-success);
-  }
-
-  .cal__session-status--in-progress {
-    background-color: color-mix(in srgb, var(--color-info) 15%, transparent);
-    color: var(--color-info);
-  }
-
-  .cal__session-status--planned {
-    background-color: var(--alpha-bg-hover);
-    color: var(--color-muted);
-  }
 
   @media (min-width: 640px) {
     .cal__stats {
@@ -974,11 +804,6 @@ const L = t();
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
-    }
-
-    .cal__today-btn {
-      grid-column: 1 / -1;
-      width: 100%;
     }
   }
 
@@ -1004,22 +829,5 @@ const L = t();
       font-size: 1.4rem;
       min-width: 8rem;
     }
-  }
-
-  :global(.cal > .surface) {
-    background: transparent;
-    border: 0;
-    border-top: 1px solid var(--color-border);
-    border-radius: 0;
-  }
-
-  :global(.cal > .surface:last-child) {
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  :global(.cal > .surface > .p-4),
-  :global(.cal > .surface > .p-6) {
-    padding-left: 0;
-    padding-right: 0;
   }
 </style>

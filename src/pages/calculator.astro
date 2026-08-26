@@ -9,6 +9,8 @@ import CardTitle from '../components/ui/CardTitle.astro';
 import CardContent from '../components/ui/CardContent.astro';
 import Input from '../components/ui/Input.astro';
 import Select from '../components/ui/Select.astro';
+import BarbellResult from '../components/calculator/BarbellResult.astro';
+import DumbbellResult from '../components/calculator/DumbbellResult.astro';
 import { icons } from '../lib/icons';
 const L = t();
 ---
@@ -22,7 +24,6 @@ const L = t();
   <div
     class="calc"
     x-data="plateCalculator()"
-    x-init="init()"
     x-cloak
   >
     <div class="calc__tabs" role="tablist" aria-label={L.calculateur.modeAria}>
@@ -94,11 +95,11 @@ const L = t();
           </div>
           <div class="calc__shortcuts">
             <span class="calc__shortcuts-label">{L.calculateur.quickShortcuts}</span>
-            <button type="button" class="calc__shortcut" @click="target = 60">60</button>
-            <button type="button" class="calc__shortcut" @click="target = 80">80</button>
-            <button type="button" class="calc__shortcut" @click="target = 100">100</button>
-            <button type="button" class="calc__shortcut" @click="target = 120">120</button>
-            <button type="button" class="calc__shortcut" @click="target = 140">140</button>
+            <button type="button" class="calc__shortcut" @click="target = 60" aria-label="60 kg">60</button>
+            <button type="button" class="calc__shortcut" @click="target = 80" aria-label="80 kg">80</button>
+            <button type="button" class="calc__shortcut" @click="target = 100" aria-label="100 kg">100</button>
+            <button type="button" class="calc__shortcut" @click="target = 120" aria-label="120 kg">120</button>
+            <button type="button" class="calc__shortcut" @click="target = 140" aria-label="140 kg">140</button>
           </div>
         </div>
       </CardContent>
@@ -114,168 +115,27 @@ const L = t();
           <div class="calc__error" x-text="errorMessage" role="alert" aria-live="assertive"></div>
         </template>
         <template x-if="!errorMessage && mode === 'bar'">
-          <div>
-            <div class="calc__result-grid">
-              <div class="calc__stat">
-                <span class="calc__stat-label">{L.calculateur.modeBarre}</span>
-                <span class="calc__stat-value" x-text="formatKg(barWeight)"></span>
-              </div>
-              <div class="calc__stat">
-                <span class="calc__stat-label">{L.calculateur.perSide}</span>
-                <span class="calc__stat-value" x-text="formatKg(perSide)"></span>
-              </div>
-              <div class="calc__stat">
-                <span class="calc__stat-label">{L.calculateur.totalPlates}</span>
-                <span class="calc__stat-value calc__stat-value--accent" x-text="formatKg(target)"></span>
-              </div>
-              <div class="calc__stat">
-                <span class="calc__stat-label">{L.calculateur.remainder}</span>
-                <span
-                  class="calc__stat-value"
-                  :class="remainder > 0 ? 'calc__stat-value--warning' : ''"
-                  x-text="formatKg(remainder)"
-                ></span>
-              </div>
-            </div>
-
-            {/* ── Visual barbell diagram ── */}
-            <div class="calc__diagram" :aria-label="barbellAria">
-              <div class="calc__diagram-side">
-                <template x-for="(p, i) in [...platesPerSide].reverse()" :key="'l-' + i">
-                  <div
-                    class="calc__plate"
-                    :class="'calc__plate--' + plateClass(p)"
-                    :style="{ height: plateHeight(p) + 'px' }"
-                    :title="formatKg(p) + ' kg'"
-                  >
-                    <span class="calc__plate-label" x-text="p"></span>
-                  </div>
-                </template>
-                <div class="calc__collar"></div>
-              </div>
-              <div class="calc__bar-shaft" :aria-hidden="true">
-                <span class="calc__bar-mark"></span>
-                <span class="calc__bar-mark"></span>
-                <span class="calc__bar-mark"></span>
-              </div>
-              <div class="calc__diagram-side">
-                <div class="calc__collar"></div>
-                <template x-for="(p, i) in platesPerSide" :key="'r-' + i">
-                  <div
-                    class="calc__plate"
-                    :class="'calc__plate--' + plateClass(p)"
-                    :style="{ height: plateHeight(p) + 'px' }"
-                    :title="formatKg(p) + ' kg'"
-                  >
-                    <span class="calc__plate-label" x-text="p"></span>
-                  </div>
-                </template>
-              </div>
-            </div>
-
-            {/* ── Plate breakdown list ── */}
-            <div class="calc__breakdown" x-show="platesPerSide.length > 0">
-              <h3 class="calc__breakdown-title">{L.calculateur.breakdownPerSide}</h3>
-              <ul class="calc__breakdown-list">
-                <template x-for="entry in plateBreakdown" :key="entry.weight">
-                  <li class="calc__breakdown-item">
-                    <span
-                      class="calc__breakdown-plate"
-                      :class="'calc__plate--' + plateClass(entry.weight)"
-                    >
-                      <span x-text="entry.weight"></span>
-                      <span class="calc__breakdown-unit">{L.calculateur.kg}</span>
-                    </span>
-                    <span class="calc__breakdown-x">×</span>
-                    <span class="calc__breakdown-count" x-text="entry.count"></span>
-                    <span class="calc__breakdown-total" x-text="formatKg(entry.weight * entry.count)"></span>
-                  </li>
-                </template>
-              </ul>
-            </div>
-
-            <p
-              class="calc__empty"
-              x-show="platesPerSide.length === 0 && !errorMessage"
-            >
-              {L.calculateur.noPlates}
-            </p>
-          </div>
+          <BarbellResult
+            modeBarre={L.calculateur.modeBarre}
+            perSide={L.calculateur.perSide}
+            totalPlates={L.calculateur.totalPlates}
+            remainder={L.calculateur.remainder}
+            breakdownPerSide={L.calculateur.breakdownPerSide}
+            kg={L.calculateur.kg}
+            noPlates={L.calculateur.noPlates}
+          />
         </template>
 
         {/* ═══ Dumbbell mode ═══ */}
         <template x-if="!errorMessage && mode === 'dumbbell'">
-          <div>
-            <div class="calc__dumbbell-summary" x-text="dumbbellSummary"></div>
-            <div class="calc__result-grid calc__result-grid--3">
-              <div class="calc__stat">
-                <span class="calc__stat-label">{L.calculateur.perDumbbell}</span>
-                <span class="calc__stat-value calc__stat-value--accent" x-text="formatKg(dumbbellWeight)"></span>
-              </div>
-              <div class="calc__stat">
-                <span class="calc__stat-label">{L.calculateur.totalX2}</span>
-                <span class="calc__stat-value" x-text="formatKg(dumbbellWeight * 2)"></span>
-              </div>
-              <div class="calc__stat">
-                <span class="calc__stat-label">{L.calculateur.remainder}</span>
-                <span
-                  class="calc__stat-value"
-                  :class="dumbbellRemainder !== 0 ? 'calc__stat-value--warning' : ''"
-                  x-text="formatKg(dumbbellRemainder)"
-                ></span>
-              </div>
-            </div>
-
-            {/* ── Visual dumbbell(s) ── */}
-            <div
-              class="calc__dumbbells"
-              :aria-label="dumbbellsAria"
-            >
-              <template x-for="(d, i) in dumbbellsToShow" :key="'d-' + i">
-                <div class="calc__dumbbell">
-                  <span class="calc__dumbbell-weight" x-text="formatKg(d)"></span>
-                  <div class="calc__dumbbell-body">
-                    <div
-                      class="calc__dumb-head"
-                      :style="{ width: dumbbellWidth(d) + 'px', height: dumbbellHeight(d) + 'px' }"
-                      :aria-hidden="true"
-                    ></div>
-                    <div class="calc__dumb-handle" aria-hidden="true"></div>
-                    <div
-                      class="calc__dumb-head"
-                      :style="{ width: dumbbellWidth(d) + 'px', height: dumbbellHeight(d) + 'px' }"
-                      :aria-hidden="true"
-                    ></div>
-                  </div>
-                </div>
-              </template>
-            </div>
-
-            {/* ── Dumbbell breakdown list ── */}
-            <div class="calc__breakdown" x-show="dumbbellsToShow.length > 0">
-              <h3 class="calc__breakdown-title">{L.calculateur.breakdownTitle}</h3>
-              <ul class="calc__breakdown-list">
-                <template x-for="entry in dumbbellBreakdown" :key="entry.weight">
-                  <li class="calc__breakdown-item">
-                    <span class="calc__breakdown-plate calc__breakdown-plate--dumbbell">
-                      <span x-text="entry.weight"></span>
-                      <span class="calc__breakdown-unit">{L.calculateur.kg}</span>
-                    </span>
-                    <span class="calc__breakdown-x">×</span>
-                    <span class="calc__breakdown-count" x-text="entry.count"></span>
-                    <span class="calc__breakdown-total" x-text="formatKg(entry.weight * entry.count)"></span>
-                  </li>
-                </template>
-              </ul>
-            </div>
-
-            <p
-              class="calc__empty"
-              x-show="dumbbellsToShow.length === 0 && !errorMessage"
-            >
-              {L.calculateur.noDumbbells}
-            </p>
-          </div>
+          <DumbbellResult
+            perDumbbell={L.calculateur.perDumbbell}
+            totalX2={L.calculateur.totalX2}
+            remainder={L.calculateur.remainder}
+            breakdownTitle={L.calculateur.breakdownTitle}
+            kg={L.calculateur.kg}
+            noDumbbells={L.calculateur.noDumbbells}
+          />
         </template>
       </CardContent>
     </Card>
@@ -284,126 +144,34 @@ const L = t();
 
 <script>
   import { t } from '../i18n';
+  import {
+    computePlatesPerSide,
+    computeDumbbells,
+    groupPlates,
+    groupDumbbellPlates,
+    formatKg,
+    formatTemplate,
+    plateHeight,
+    plateClass,
+    dumbbellHeight,
+    dumbbellWidth,
+  } from '../lib/calculator';
+  import type { PlateCount } from '../lib/calculator';
 
   const LABELS = t();
 
-  /** Substitute `{key}` placeholders in a localized template string. */
-  function formatTemplate(tpl: string, vars: Record<string, string | number>): string {
-    return tpl.replace(/\{(\w+)\}/g, (_, key: string) => String(vars[key]));
-  }
-
-  /** Available plate weights, biggest first so we can use a greedy algo. */
-  const PLATE_INVENTORY: ReadonlyArray<number> = [25, 20, 15, 10, 5, 2.5, 2, 1.5, 1.25, 1];
-
-  /** Available dumbbell plate weights (kg), biggest first so we can use a greedy algo. */
-  const DUMBBELL_PLATE_INVENTORY: ReadonlyArray<number> = [10, 7.5, 5, 4, 3, 2.5, 2, 1.5, 1.25, 1, 0.5];
-
-  interface PlateCount {
-    weight: number;
-    count: number;
-  }
-
-  interface DumbbellResult {
-    plates: number[];
-    plateWeight: number;
-    dumbbellWeight: number;
-    remainder: number;
-    error: string | null;
-  }
-
-  function computePlatesPerSide(
-    target: number,
-    bar: number,
-  ): { plates: number[]; remainder: number; error: string | null } {
-    if (!Number.isFinite(target) || target < 0) {
-      return { plates: [], remainder: 0, error: null };
+  /** Map error keys from computePlatesPerSide/computeDumbbells to localised strings. */
+  function resolveError(key: string | null, vars?: Record<string, string | number>): string | null {
+    if (!key) return null;
+    if (key === 'targetBelowBar' && vars) {
+      return formatTemplate(LABELS.calculateur.targetBelowBar, vars);
     }
-    if (target < bar) {
-      return {
-        plates: [],
-        remainder: 0,
-        error: formatTemplate(LABELS.calculateur.targetBelowBar, { target, bar }),
-      };
+    if (key === 'targetBelowDumbbellBar' && vars) {
+      return formatTemplate(LABELS.calculateur.targetBelowDumbbellBar, vars);
     }
-    if (target === bar) {
-      return { plates: [], remainder: 0, error: null };
-    }
-    // Weight that needs to be split across the two sides.
-    const perSideTarget = (target - bar) / 2;
-    let remaining = perSideTarget;
-    const plates: number[] = [];
-    for (const p of PLATE_INVENTORY) {
-      // Use Math.floor to be conservative — leftover goes to "remainder".
-      const count = Math.floor(remaining / p);
-      for (let i = 0; i < count; i++) plates.push(p);
-      remaining = +(remaining - count * p).toFixed(4);
-    }
-    const used = plates.reduce((s, p) => s + p, 0);
-    const remainder = +(perSideTarget - used).toFixed(2);
-    return { plates, remainder, error: null };
-  }
-
-  function groupPlates(plates: number[]): PlateCount[] {
-    const map = new Map<number, number>();
-    for (const p of plates) map.set(p, (map.get(p) ?? 0) + 1);
-    return PLATE_INVENTORY.filter((p) => map.has(p)).map((p) => ({
-      weight: p,
-      count: map.get(p) ?? 0,
-    }));
-  }
-
-  /**
-   * Build a single dumbbell by greedy-picking plates from DUMBBELL_PLATE_INVENTORY
-   * to add on top of the bar. The user takes 2 identical dumbbells (one per hand).
-   * - `target` is the per-dumbbell weight the user wants to lift.
-   * - `barWeight` is the weight of the dumbbell bar/handle itself.
-   * - The plate weight to distribute = target - barWeight.
-   */
-  function computeDumbbells(
-    target: number,
-    barWeight: number,
-  ): DumbbellResult {
-    if (!Number.isFinite(target) || target < 0) {
-      return { plates: [], plateWeight: 0, dumbbellWeight: 0, remainder: 0, error: null };
-    }
-    if (!Number.isFinite(barWeight) || barWeight < 0) {
-      return {
-        plates: [],
-        plateWeight: 0,
-        dumbbellWeight: 0,
-        remainder: 0,
-        error: LABELS.calculateur.invalidBarWeight,
-      };
-    }
-    if (target === 0) {
-      return { plates: [], plateWeight: 0, dumbbellWeight: 0, remainder: 0, error: null };
-    }
-    if (target < barWeight) {
-      return {
-        plates: [],
-        plateWeight: 0,
-        dumbbellWeight: 0,
-        remainder: 0,
-        error: formatTemplate(LABELS.calculateur.targetBelowDumbbellBar, { target, bar: barWeight }),
-      };
-    }
-    if (target === barWeight) {
-      return { plates: [], plateWeight: 0, dumbbellWeight: barWeight, remainder: 0, error: null };
-    }
-    // Plate weight to distribute across the dumbbell.
-    const plateTarget = +(target - barWeight).toFixed(4);
-    let remaining = plateTarget;
-    const plates: number[] = [];
-    for (const p of DUMBBELL_PLATE_INVENTORY) {
-      // Use Math.floor to be conservative — leftover goes to "remainder".
-      const count = Math.floor(remaining / p);
-      for (let i = 0; i < count; i++) plates.push(p);
-      remaining = +(remaining - count * p).toFixed(4);
-    }
-    const plateWeight = +plates.reduce((s, p) => s + p, 0).toFixed(2);
-    const dumbbellWeight = +(barWeight + plateWeight).toFixed(2);
-    const remainder = +(dumbbellWeight - target).toFixed(2);
-    return { plates, plateWeight, dumbbellWeight, remainder, error: null };
+    if (key === 'invalidBarWeight') return LABELS.calculateur.invalidBarWeight;
+    if (key === 'invalidTarget') return LABELS.calculateur.invalidTarget;
+    return null;
   }
 
   document.addEventListener('alpine:init', () => {
@@ -417,11 +185,6 @@ const L = t();
       barWeight: 20,
       dumbbellBarWeight: 2,
 
-      // ── Init ──
-      init() {
-        // Sensible defaults; user can override via the inputs.
-      },
-
       // ── Mode-aware error ──
       get errorMessage(): string | null {
         if (!Number.isFinite(this.target) || this.target < 0) {
@@ -429,10 +192,11 @@ const L = t();
         }
         if (this.target === 0) return null;
         if (this.mode === 'dumbbell') {
-          return computeDumbbells(this.target, this.dumbbellBarWeight).error;
+          const r = computeDumbbells(this.target, this.dumbbellBarWeight);
+          return resolveError(r.error, { target: this.target, bar: this.dumbbellBarWeight });
         }
         if (this.target < this.barWeight) {
-          return formatTemplate(LABELS.calculateur.targetBelowBar, { target: this.target, bar: this.barWeight });
+          return resolveError('targetBelowBar', { target: this.target, bar: this.barWeight });
         }
         return null;
       },
@@ -489,21 +253,14 @@ const L = t();
       },
 
       get dumbbellBreakdown(): PlateCount[] {
-        const map = new Map<number, number>();
-        for (const p of this.computedDumbbells.plates) {
-          map.set(p, (map.get(p) ?? 0) + 1);
-        }
-        return DUMBBELL_PLATE_INVENTORY.filter((p) => map.has(p)).map((p) => ({
-          weight: p,
-          count: map.get(p) ?? 0,
-        }));
+        return groupDumbbellPlates(this.computedDumbbells.plates);
       },
 
       get dumbbellSummary(): string {
         if (this.errorMessage) return '—';
         const w = this.computedDumbbells.dumbbellWeight;
         if (w === 0) return '—';
-        return `${LABELS.calculateur.formulaBar} ${this.formatKg(this.dumbbellBarWeight)} + ${LABELS.calculateur.formulaPlates} ${this.formatKg(this.computedDumbbells.plateWeight)} = ${this.formatKg(w)}`;
+        return `${LABELS.calculateur.formulaBar} ${formatKg(this.dumbbellBarWeight)} + ${LABELS.calculateur.formulaPlates} ${formatKg(this.computedDumbbells.plateWeight)} = ${formatKg(w)}`;
       },
 
       // ── Display helpers ──
@@ -521,64 +278,16 @@ const L = t();
         return `${this.dumbbellsToShow.length} ${LABELS.calculateur.dumbbellsToTake}`;
       },
 
-      formatKg(value: number): string {
-        if (!Number.isFinite(value)) return '0 kg';
-        return Math.round(value * 100) / 100 + ' kg';
-      },
-
-      /**
-       * Visual scaling: 25kg plate = 160px, smallest (1.25kg) = 32px.
-       * Linear-ish mapping to keep larger plates obviously bigger.
-       */
-      plateHeight(weight: number): number {
-        const map: Record<number, number> = {
-          25: 160,
-          20: 144,
-          15: 128,
-          10: 108,
-          5: 84,
-          2.5: 60,
-          2: 55,
-          1.5: 49,
-          1.25: 44,
-          1: 40,
-        };
-        return map[weight] ?? 60;
-      },
-
-      /**
-       * CSS modifier class for each plate weight — drives the colour.
-       * Keeps the visual matching the Olympic colour convention.
-       */
-      plateClass(weight: number): string {
-        return 'calc__plate--' + weight.toString().replace('.', '_');
-      },
-
-      /**
-       * Visual scaling for a dumbbell head: 2kg = 80px, 50kg = 200px.
-       * Linear mapping (clamped) for an obvious size delta between light and heavy.
-       */
-      dumbbellHeight(weight: number): number {
-        const minW = 2, minH = 80;
-        const maxW = 50, maxH = 200;
-        const ratio = Math.max(0, Math.min(1, (weight - minW) / (maxW - minW)));
-        return Math.round(minH + ratio * (maxH - minH));
-      },
-
-      /**
-       * Width of a dumbbell head in px: 2kg = 44px, 50kg = 80px.
-       */
-      dumbbellWidth(weight: number): number {
-        const minW = 2, minWpx = 44;
-        const maxW = 50, maxWpx = 80;
-        const ratio = Math.max(0, Math.min(1, (weight - minW) / (maxW - minW)));
-        return Math.round(minWpx + ratio * (maxWpx - minWpx));
-      },
+      formatKg,
+      plateHeight,
+      plateClass,
+      dumbbellHeight,
+      dumbbellWidth,
     }));
   });
 </script>
 
-<style>
+<style is:global>
   /* ── Layout ── */
   .calc {
     display: flex;

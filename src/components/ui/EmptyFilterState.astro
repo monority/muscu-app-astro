@@ -14,6 +14,7 @@ interface Props {
   text?: string;
   resetLabel?: string;
   resetClick?: string;
+  hideReset?: boolean;
   class?: string;
 }
 
@@ -24,6 +25,7 @@ const {
   text = '',
   resetLabel = 'Réinitialiser',
   resetClick = "search = ''",
+  hideReset = false,
   class: className = '',
 } = Astro.props;
 ---
@@ -40,14 +42,15 @@ const {
     ) : text ? (
       <p class="empty-filter__text">{text}</p>
     ) : null}
-    <button
-      type="button"
-      class="empty-filter__reset"
-      @click={resetClick}
-      x-text={resetLabel}
-    >
-      {resetLabel}
-    </button>
+    {!hideReset && (
+      <button
+        type="button"
+        class="empty-filter__reset"
+        {...resetClick && { '@click': resetClick }}
+      >
+        {resetLabel}
+      </button>
+    )}
   </div>
 </Card>
 

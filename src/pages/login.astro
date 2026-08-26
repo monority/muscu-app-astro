@@ -2,6 +2,8 @@
 import AppLayout from '../layouts/AppLayout.astro';
 import Button from '../components/ui/Button.astro';
 import Icon from '../components/ui/Icon.astro';
+import IconButton from '../components/ui/IconButton.astro';
+import Input from '../components/ui/Input.astro';
 import { t } from '../i18n';
 
 const L = t();
@@ -60,42 +62,41 @@ const L = t();
       <form class="login__form" @submit.prevent="submit" novalidate>
         <div class="login__field">
           <label for="login-email" class="login__label">{L.login.email}</label>
-          <input
+          <Input
             type="email"
             id="login-email"
-            class="login__input"
             placeholder="vous@exemple.com"
             x-model="email"
             @input="error = ''"
             required
             autocomplete="email"
             spellcheck="false"
+            bare
+            class="login__input"
           />
         </div>
 
         <div class="login__field">
           <label for="login-password" class="login__label">{L.login.password}</label>
           <div class="login__pw-wrap">
-            <input
+            <Input
               :type="showPassword ? 'text' : 'password'"
               id="login-password"
-              class="login__input login__input--pw"
               placeholder="••••••••"
               x-model="password"
               @input="error = ''"
               required
               autocomplete="current-password"
+              bare
+              class="login__input login__input--pw"
             />
-            <button
-              type="button"
-              class="login__pw-toggle"
+            <IconButton
+              variant="ghost"
+              :icon="showPassword ? icons.eyeOff() : icons.eye()"
+              :label="showPassword ? labels.hidePassword : labels.showPassword"
               @click="showPassword = !showPassword"
-              :aria-label="showPassword ? labels.hidePassword : labels.showPassword"
-              :aria-pressed="showPassword ? 'true' : 'false'"
-            >
-              <span x-show="!showPassword"><Icon name="eye" size={18} /></span>
-              <span x-show="showPassword" x-cloak><Icon name="eyeOff" size={18} /></span>
-            </button>
+              class="login__pw-toggle"
+            />
           </div>
         </div>
 
@@ -157,13 +158,14 @@ const L = t();
       {/* ── Signup link ── */}
       <p class="login__signup-text">
         {L.login.createAccount}
-        <button
+        <Button
+          variant="link"
           type="button"
-          class="login__signup-link"
           @click="showSignupMessage = !showSignupMessage"
+          class="login__signup-link"
         >
           {L.login.createAccountLink}
-        </button>
+        </Button>
       </p>
 
       <p
@@ -184,6 +186,7 @@ const L = t();
 <script>
   import { setAuth, isAuthenticated } from '../lib/auth';
   import { t, localizedPath, getLocale } from '../i18n';
+  import { icons } from '../lib/icons';
 
   const LABELS = t();
 
@@ -217,6 +220,7 @@ const L = t();
       switchToLight: LABELS.layout.switchToLight,
       switchToDark: LABELS.layout.switchToDark,
       switchLocaleAria: LABELS.layout.switchLocale,
+      icons: { eye: icons.eye, eyeOff: icons.eyeOff },
       labels: {
         submit: LABELS.login.submit,
         loading: LABELS.login.loading,
@@ -428,29 +432,7 @@ const L = t();
   }
 
   .login__input {
-    width: 100%;
     height: 4.8rem;
-    padding: 0 1.4rem;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 1.4rem;
-    line-height: 1.2;
-    outline: none;
-    appearance: none;
-    transition: all 140ms ease;
-  }
-  .login__input::placeholder {
-    color: var(--alpha-text-faint);
-  }
-  .login__input:hover {
-    border-color: var(--alpha-border);
-  }
-  .login__input:focus {
-    border-color: var(--color-accent);
-    box-shadow: var(--focus-ring);
   }
 
   .login__input--pw {
@@ -466,25 +448,6 @@ const L = t();
     top: 50%;
     right: 0.4rem;
     transform: translateY(-50%);
-    width: 4.4rem;
-    height: 4.4rem;
-    background: transparent;
-    border: none;
-    color: var(--color-muted);
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 140ms ease;
-  }
-  .login__pw-toggle:hover {
-    color: var(--color-text);
-    background: var(--alpha-bg-soft);
-  }
-  .login__pw-toggle:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
   }
 
   /* ── Error ── */
@@ -649,23 +612,9 @@ const L = t();
   }
 
   .login__signup-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 4.4rem;
-    background: none;
-    border: none;
     padding: 0 0.4rem;
     margin-left: 0.4rem;
-    color: var(--color-accent);
-    font: inherit;
     font-weight: 600;
-    cursor: pointer;
-    appearance: none;
-    transition: all 140ms ease;
-  }
-  .login__signup-link:hover {
-    color: var(--color-accent-hover);
-    text-decoration: underline;
   }
   .login__signup-link:focus-visible {
     outline: none;

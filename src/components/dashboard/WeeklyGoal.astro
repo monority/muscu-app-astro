@@ -1,0 +1,209 @@
+---
+/**
+ * WeeklyGoal — ring SVG + progress bar for weekly session goal.
+ *
+ * Renders inside Alpine x-data scope (dashboardApp).
+ */
+import { t } from '../../i18n';
+
+const L = t();
+---
+
+<section class="dash__goal" aria-label={L.dashboard.goalCardAria}>
+  <div class="dash__goal-ring" aria-hidden="true">
+    <svg viewBox="0 0 44 44" class="dash__goal-ring-svg">
+      <circle cx="22" cy="22" r="18" class="dash__goal-ring-track"></circle>
+      <circle
+        cx="22"
+        cy="22"
+        r="18"
+        class="dash__goal-ring-fill"
+        :class="{ 'dash__goal-ring-fill--complete': weeklyDone >= settings.weeklyGoal }"
+        :stroke-dasharray="`${weeklyProgress * 113.1} 113.1`"
+      ></circle>
+    </svg>
+    <span class="dash__goal-ring-pct" x-text="`${Math.round(weeklyProgress * 100)}%`"></span>
+  </div>
+
+  <div class="dash__goal-text">
+    <span class="dash__goal-eyebrow" x-text="labels.weeklyGoalEyebrow">{L.dashboard.weeklyGoalEyebrow}</span>
+    <h2 class="dash__goal-title">
+      <span class="dash__goal-done" x-text="weeklyDone"></span>
+      <span class="dash__goal-sep" aria-hidden="true">/</span>
+      <span class="dash__goal-target" x-text="settings.weeklyGoal">3</span>
+      <span class="dash__goal-unit" x-text="weeklyDone === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit">{L.dashboard.sessionsUnit}</span>
+    </h2>
+
+    <div
+      class="dash__goal-bar"
+      role="progressbar"
+      aria-label={L.dashboard.goalCardAria}
+      aria-valuemin="0"
+      :aria-valuenow="weeklyDone"
+      :aria-valuemax="settings.weeklyGoal"
+    >
+      <div
+        class="dash__goal-bar-fill"
+        :class="{ 'dash__goal-bar-fill--complete': weeklyDone >= settings.weeklyGoal }"
+        :style="`width: ${Math.min(100, weeklyProgress * 100)}%`"
+      ></div>
+    </div>
+
+    <p class="dash__goal-hint" x-show="weeklyDone >= settings.weeklyGoal" x-transition.opacity x-cloak x-text="labels.weeklyGoalDone"></p>
+    <p class="dash__goal-hint dash__goal-hint--muted" x-show="weeklyDone < settings.weeklyGoal && settings.weeklyGoal > 0" x-text="remainingHintText()"></p>
+  </div>
+</section>
+
+<style>
+  .dash__goal {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2.2rem;
+    margin-bottom: 0;
+    padding: 2.4rem;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .dash__goal-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .dash__goal-eyebrow {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  .dash__goal-title {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.5vw, 3rem);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash__goal-done {
+    color: var(--color-accent);
+  }
+
+  .dash__goal-sep {
+    color: var(--color-muted);
+    margin: 0 0.2rem;
+  }
+
+  .dash__goal-target {
+    color: var(--color-text);
+  }
+
+  .dash__goal-unit {
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    margin-left: 0.8rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .dash__goal-ring {
+    position: relative;
+    flex-shrink: 0;
+    width: 7.2rem;
+    height: 7.2rem;
+  }
+
+  .dash__goal-ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    overflow: visible;
+  }
+
+  .dash__goal-ring-track {
+    fill: none;
+    stroke: var(--color-surface-3);
+    stroke-width: 4;
+  }
+
+  .dash__goal-ring-fill {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition:
+      stroke var(--transition-base),
+      stroke-dasharray var(--transition-base);
+  }
+
+  .dash__goal-ring-fill--complete {
+    stroke: var(--color-success);
+  }
+
+  .dash__goal-ring-pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .dash__goal-bar {
+    height: 1rem;
+    max-width: 42rem;
+    background-color: var(--color-surface-3);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .dash__goal-bar-fill {
+    height: 100%;
+    background-color: var(--color-accent);
+    border-radius: 999px;
+    transition:
+      width var(--transition-base),
+      background-color var(--transition-base);
+  }
+
+  .dash__goal-bar-fill--complete {
+    background-color: var(--color-success);
+  }
+
+  .dash__goal-hint {
+    margin: 0.8rem 0 0;
+    font-size: 1.2rem;
+    color: var(--color-success);
+    font-weight: 600;
+  }
+
+  .dash__goal-hint--muted {
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
+  @media (min-width: 760px) {
+    .dash__goal {
+      min-height: 100%;
+    }
+  }
+</style>
