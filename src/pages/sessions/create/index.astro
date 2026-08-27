@@ -43,6 +43,8 @@ const setTypes = [
     x-data="sessionBuilder()"
     x-init="init()"
     x-cloak
+    @builder:remove-exercise.window="removeExercise($event.detail.index)"
+    @builder:remove-superset.window="removeFromSuperset($event.detail.index)"
   >
 
     <div class="create__action-bar">
@@ -123,216 +125,203 @@ const setTypes = [
       x-for="(ex, exIdx) in exercises"
       :key="ex.exerciseId + '-' + exIdx"
     >
-      <Card>
-        <div
-          class="ses-ex-superset-bar create__superset-bar"
-          x-show="ex.supersetId != null"
-          x-cloak
-          :class="'ses-superset-bar--g' + ex.supersetId"
-        >
-          <span class="ses-superset-dot" aria-hidden="true"></span>
-          <Icon name="link" size={16} class="create__superset-bar-icon" />
-          <span
-            class="create__superset-bar-label"
+      <div x-data="exerciseCard(ex, exIdx)">
+        <Card>
+          <div
+            class="ses-ex-superset-bar create__superset-bar"
+            x-show="exercise.supersetId != null"
+            x-cloak
+            :class="'ses-superset-bar--g' + exercise.supersetId"
           >
-            <span x-text="labels.supersetLabel + ' ' + ex.supersetId"
-              >Superset</span
-            >
-            <template x-if="supersetChainFor(ex.supersetId).length > 0">
-              <span
-                class="create__superset-bar-chain"
-                x-text="'\u00A0' + supersetChainFor(ex.supersetId).join(' | ')"
-              ></span>
-            </template>
-          </span>
-          <IconButton
-            variant="ghost"
-            icon={icons.closeX(18, 18)}
-            label={L.builder.supersetRemove}
-            title={L.builder.supersetRemove}
-            @click="removeFromSuperset(exIdx)"
-          />
-        </div>
-        <div class="ses-ex-header create__ex-header">
-          <button
-            type="button"
-            class="ses-ex-toggle create__ex-toggle"
-            @click="toggleExpand(exIdx)"
-            :aria-expanded="isExpanded(exIdx).toString()"
-            :aria-controls="'ses-ex-body-' + exIdx"
-          >
-            <div class="create__toggle-body">
-              <div class="ses-ex-head create__ex-head">
-                <h3
-                  class="create__ex-name"
-                  x-text="trExercise(ex.name)"
-                >
-                </h3>
-                <Badge
-                  variant="category"
-                  :class="'badge--cat-' + muscleHue(ex.muscle)"
-                  x-text="trMuscle(ex.muscle)"
-                />
-              </div>
-              <p
-                class="create__ex-summary"
-                x-show="!isExpanded(exIdx)"
-                x-cloak
-                x-text="exerciseSummary(ex)"
+            <span class="ses-superset-dot" aria-hidden="true"></span>
+            <Icon name="link" size={16} class="create__superset-bar-icon" />
+            <span class="create__superset-bar-label">
+              <span x-text="labels.supersetLabel + ' ' + exercise.supersetId"
+                >Superset</span
               >
-              </p>
-            </div>
-            <span
-              class="ses-chevron create__ex-chevron"
-              :class="{ 'is-open': isExpanded(exIdx) }"
-              ><Fragment set:html={icons.chevronDown(20, 20)} /></span
-            >
-          </button>
-          <select
-            class="ses-ex-superset-select create__ex-superset-select"
-            x-model.number="ex.supersetId"
-            @change="onSupersetChange(exIdx)"
-            :aria-label="labels.supersetFor + ' ' + ex.name"
-            title={L.builder.moveToSuperset}
-          >
-            <option :value="null">{'\u2014'}</option>
-            <template x-for="gId in availableSupersetIds()" :key="gId">
-              <option :value="gId" x-text="labels.supersetLabel + ' ' + gId"
-              ></option>
-            </template>
-            <option :value="nextSupersetId()" x-text="labels.newSuperset"
-              >+ Nouveau superset</option
-            >
-          </select>
-          <IconButton
-            variant="danger"
-            icon={icons.trash(18, 18)}
-            label={L.builder.removeExerciseAria}
-            title="Retirer l'exercice"
-            @click="removeExercise(exIdx)"
-          />
-        </div>
+            </span>
+            <IconButton
+              variant="ghost"
+              icon={icons.closeX(18, 18)}
+              label={L.builder.supersetRemove}
+              title={L.builder.supersetRemove}
+              @click="$dispatch('builder:remove-superset', { index: exerciseIndex })"
+            />
+          </div>
 
-        <div
-          :id="'ses-ex-body-' + exIdx"
-          class="create__ex-body"
-          x-show="isExpanded(exIdx)"
-          x-cloak
-        >
-          <CardContent>
-            <div
-              class="create__sets-scroll"
-              role="table"
-              :aria-label="labels.setsFor + ' ' + ex.name"
+          <div class="ses-ex-header create__ex-header">
+            <button
+              type="button"
+              class="ses-ex-toggle create__ex-toggle"
+              @click="toggle()"
+              :aria-expanded="expanded.toString()"
+              :aria-controls="'ses-ex-body-' + exerciseIndex"
             >
-              <div class="ses-table-head" role="row">
-                <div class="ses-cell ses-cell-num" role="columnheader">#</div>
-                <div class="ses-cell ses-cell-type" role="columnheader">
-                  Type
+              <div class="create__toggle-body">
+                <div class="ses-ex-head create__ex-head">
+                  <h3 class="create__ex-name" x-text="trExercise(exercise.name)">
+                  </h3>
+                  <Badge
+                    variant="category"
+                    :class="'badge--cat-' + muscleHue(exercise.muscle)"
+                    x-text="trMuscle(exercise.muscle)"
+                  />
                 </div>
-                <div class="ses-cell ses-cell-num" role="columnheader">
-                  Poids (kg)
-                </div>
-                <div class="ses-cell ses-cell-num" role="columnheader">
-                  Reps
-                </div>
-                <div
-                  class="ses-cell ses-cell-action"
-                  role="columnheader"
-                  aria-label="Actions"
+                <p
+                  class="create__ex-summary"
+                  x-show="!expanded"
+                  x-cloak
+                  x-text="summary"
                 >
-                </div>
+                </p>
               </div>
-              <template x-for="(set, setIdx) in ex.sets" :key="setIdx">
-                <div class="ses-table-row" role="row">
+              <span
+                class="ses-chevron create__ex-chevron"
+                :class="{ 'is-open': expanded }"
+                ><Fragment set:html={icons.chevronDown(20, 20)} /></span
+              >
+            </button>
+            <select
+              class="ses-ex-superset-select create__ex-superset-select"
+              x-model.number="exercise.supersetId"
+              :aria-label="labels.supersetFor + ' ' + exercise.name"
+              title={L.builder.moveToSuperset}
+            >
+              <option :value="null">{'\u2014'}</option>
+            </select>
+            <IconButton
+              variant="danger"
+              icon={icons.trash(18, 18)}
+              label={L.builder.removeExerciseAria}
+              title="Retirer l'exercice"
+              @click="remove()"
+            />
+          </div>
+
+          <div
+            :id="'ses-ex-body-' + exerciseIndex"
+            class="create__ex-body"
+            x-show="expanded"
+            x-cloak
+          >
+            <CardContent>
+              <div
+                class="create__sets-scroll"
+                role="table"
+                :aria-label="labels.setsFor + ' ' + exercise.name"
+              >
+                <div class="ses-table-head" role="row">
+                  <div class="ses-cell ses-cell-num" role="columnheader">#</div>
+                  <div class="ses-cell ses-cell-type" role="columnheader">
+                    Type
+                  </div>
+                  <div class="ses-cell ses-cell-num" role="columnheader">
+                    Poids (kg)
+                  </div>
+                  <div class="ses-cell ses-cell-num" role="columnheader">
+                    Reps
+                  </div>
                   <div
-                    class="ses-cell ses-cell-num"
-                    role="cell"
-                    x-text="set.setNumber"
+                    class="ses-cell ses-cell-action"
+                    role="columnheader"
+                    aria-label="Actions"
                   >
                   </div>
-                  <div class="ses-cell ses-cell-type" role="cell">
-                    <select
-                      class="create__select"
-                      x-model="set.type"
-                      :aria-label="labels.setTypeLabel + ' ' + (setIdx + 1)"
+                </div>
+                <template
+                  x-for="(set, setIdx) in exercise.sets"
+                  :key="setIdx"
+                >
+                  <div class="ses-table-row" role="row">
+                    <div
+                      class="ses-cell ses-cell-num"
+                      role="cell"
+                      x-text="set.setNumber"
                     >
-                      {
-                        setTypes.map((t) => (
-                          <option value={t.value}>{t.label}</option>
-                        ))
-                      }
-                    </select>
-                  </div>
-                  <div class="ses-cell ses-cell-num" role="cell">
-                    <div class="create__weight-cell">
+                    </div>
+                    <div class="ses-cell ses-cell-type" role="cell">
+                      <select
+                        class="create__select"
+                        x-model="set.type"
+                        :aria-label="labels.setTypeLabel + ' ' + (setIdx + 1)"
+                      >
+                        {
+                          setTypes.map((t) => (
+                            <option value={t.value}>{t.label}</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                    <div class="ses-cell ses-cell-num" role="cell">
+                      <div class="create__weight-cell">
+                        <input
+                          type="number"
+                          class="create__input ses-input-inline"
+                          min="0"
+                          step="0.5"
+                          x-model.number="set.weight"
+                          inputmode="decimal"
+                          :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
+                        />
+                        <IconButton
+                          variant="accent"
+                          icon={icons.zap(16, 16)}
+                          label={L.builder.mrvSuggestFor}
+                          :aria-label="labels.mrvSuggestFor + ' ' + (setIdx + 1)"
+                          :title="mrvTitle(setIdx)"
+                          :aria-disabled="(!mrvEnabled(setIdx)).toString()"
+                          :class="{ 'is-disabled': !mrvEnabled(setIdx) }"
+                          @click="mrvEnabled(setIdx) && applyMrv(setIdx)"
+                        />
+                      </div>
+                    </div>
+                    <div class="ses-cell ses-cell-num" role="cell">
                       <input
                         type="number"
                         class="create__input ses-input-inline"
                         min="0"
-                        step="0.5"
-                        x-model.number="set.weight"
-                        inputmode="decimal"
-                        :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
+                        step="1"
+                        x-model.number="set.reps"
+                        inputmode="numeric"
+                        :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
                       />
+                    </div>
+                    <div class="ses-cell ses-cell-action" role="cell">
                       <IconButton
-                        variant="accent"
-                        icon={icons.zap(16, 16)}
-                        label={L.builder.mrvSuggestFor}
-                        :aria-label="labels.mrvSuggestFor + ' ' + (setIdx + 1)"
-                        :title="mrvTitle(exIdx, setIdx)"
-                        :aria-disabled="(!mrvEnabled(exIdx, setIdx)).toString()"
-                        :class="{ 'is-disabled': !mrvEnabled(exIdx, setIdx) }"
-                        @click="mrvEnabled(exIdx, setIdx) && applyMrv(exIdx, setIdx)"
+                        variant="danger"
+                        size="sm"
+                        icon={icons.closeX(18, 18)}
+                        label={L.builder.deleteSet}
+                        :aria-label="labels.deleteSet + ' ' + (setIdx + 1)"
+                        title={L.builder.deleteSet}
+                        :disabled="exercise.sets.length <= 1"
+                        @click="removeSet(setIdx)"
                       />
                     </div>
                   </div>
-                  <div class="ses-cell ses-cell-num" role="cell">
-                    <input
-                      type="number"
-                      class="create__input ses-input-inline"
-                      min="0"
-                      step="1"
-                      x-model.number="set.reps"
-                      inputmode="numeric"
-                      :aria-label="labels.repsForSet + ' ' + (setIdx + 1)"
-                    />
-                  </div>
-                  <div class="ses-cell ses-cell-action" role="cell">
-                    <IconButton
-                      variant="danger"
-                      size="sm"
-                      icon={icons.closeX(18, 18)}
-                      label={L.builder.deleteSet}
-                      :aria-label="labels.deleteSet + ' ' + (setIdx + 1)"
-                      title={L.builder.deleteSet}
-                      :disabled="ex.sets.length <= 1"
-                      @click="removeSet(exIdx, setIdx)"
-                    />
-                  </div>
-                </div>
-              </template>
-            </div>
+                </template>
+              </div>
 
-            <div class="ses-ex-actions create__ex-actions">
-              <Button variant="secondary" size="sm" @click="addSet(exIdx)">
-                <Fragment set:html={icons.plus(18, 18)} />
-                <span>{L.builder.addSet}</span>
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                @click="generateWarmup(exIdx)"
-                :disabled="!hasWorkingWeight(ex)"
-                :title="hasWorkingWeight(ex) ? labels.warmupTitle : labels.warmupHint"
-              >
-                <Icon name="flame" size={20} />
-                <span x-text="labels.warmupBtn">{L.builder.warmupBtn}</span>
-              </Button>
-            </div>
-          </CardContent>
-        </div>
-      </Card>
+              <div class="ses-ex-actions create__ex-actions">
+                <Button variant="secondary" size="sm" @click="addSet()">
+                  <Fragment set:html={icons.plus(18, 18)} />
+                  <span>{L.builder.addSet}</span>
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  @click="generateWarmup()"
+                  :disabled="!canWarmup"
+                  :title="canWarmup ? labels.warmupTitle : labels.warmupHint"
+                >
+                  <Icon name="flame" size={20} />
+                  <span x-text="labels.warmupBtn">{L.builder.warmupBtn}</span>
+                </Button>
+              </div>
+            </CardContent>
+          </div>
+        </Card>
+      </div>
     </template>
 
     <template x-if="exercises.length > 0">
@@ -647,44 +636,40 @@ const setTypes = [
     type Exercise,
     type Session,
     type SessionExercise,
-    type SessionSet,
     type SessionMood,
-    type SetType,
   } from "../../../lib/storage";
+  import { t, localizedPath } from "../../../i18n";
   import {
-    getTemplateById,
-    type TemplateExercise,
-  } from "../../../lib/templates";
-  import { getExerciseTip } from "../../../lib/exercise-tips";
-  import { suggestLoadSuggestion } from "../../../lib/mrv";
-  import { t, getLocale, localizedPath } from "../../../i18n";
+    rpeTone,
+    getSupersetIds,
+    getNextSupersetId,
+    supersetChain,
+    type BuilderExercise,
+  } from "../../../lib/session-builder-stats";
+  import { exerciseCard } from "../../../components/builder/exerciseCard";
+  import {
+    filterExercises,
+    buildNewExercise,
+    loadTemplate as loadPickerTemplate,
+    hasExerciseTip,
+    getExerciseTipText,
+    getExerciseTipVideoUrl,
+  } from "../../../components/builder/exercisePicker";
+  import {
+    rpeLabel as rpeLabelFn,
+    toggleFatigue,
+    toggleMood,
+  } from "../../../components/builder/sessionMeta";
 
   const LABELS = t();
 
-  const DEFAULT_SET_TYPE: SetType = "work";
-
   const TEMPLATE_FALLBACK_CATEGORY = "Autre";
-
-  function rpeToneFn(rpe: number): "easy" | "moderate" | "hard" | "max" {
-    if (rpe <= 3) return "easy";
-    if (rpe <= 6) return "moderate";
-    if (rpe <= 8) return "hard";
-    return "max";
-  }
-
-  function rpeLabelFn(rpe: number): string {
-    const tone = rpeToneFn(rpe);
-    if (tone === "easy") return LABELS.builder.rpeEasy;
-    if (tone === "moderate") return LABELS.builder.rpeModerate;
-    if (tone === "hard") return LABELS.builder.rpeHard;
-    return LABELS.builder.rpeMax;
-  }
-
-  type BuilderExercise = SessionExercise & { supersetId: number | null };
 
   document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
+
+    Alpine.data("exerciseCard", (...args: any[]) => exerciseCard(args[0], args[1]));
 
     Alpine.data("sessionBuilder", () => ({
       sessionName: "",
@@ -693,7 +678,6 @@ const setTypes = [
       availableExercises: [] as Exercise[],
       allSessions: [] as Session[],
       exerciseSearch: "",
-      _mrvCache: new Map<string, ReturnType<typeof suggestLoadSuggestion>>(),
 
       sessionRpe: 5,
       sessionFatigue: 0,
@@ -763,6 +747,20 @@ const setTypes = [
       init() {
         this.availableExercises = getExercises();
         this.allSessions = getSessions();
+        (window as any).__builderSessions = this.allSessions;
+        (window as any).__builderLabels = this.labels;
+
+        window.addEventListener("builder:exercise-toggled", ((e: CustomEvent) => {
+          const { exerciseId, expanded } = e.detail;
+          if (expanded) {
+            if (!this.expandedExercises.includes(exerciseId)) {
+              this.expandedExercises = [...this.expandedExercises, exerciseId];
+            }
+          } else {
+            this.expandedExercises = this.expandedExercises.filter((id: string) => id !== exerciseId);
+          }
+        }) as EventListener);
+
         const requestedId = new URLSearchParams(window.location.search).get("edit");
         if (!requestedId) return;
         const session = getSessionById(requestedId);
@@ -787,22 +785,8 @@ const setTypes = [
       },
 
       get filteredExercises(): Exercise[] {
-        const q = this.exerciseSearch.trim().toLowerCase();
         const addedIds = new Set(this.exercises.map((se) => se.exerciseId));
-        return (
-          this.availableExercises
-            .filter((e) => {
-              if (addedIds.has(e.id)) return false;
-              if (q && !e.name.toLowerCase().includes(q)) return false;
-              return true;
-            })
-            .sort((a, b) => {
-              if (Boolean(a.favorite) !== Boolean(b.favorite)) {
-                return a.favorite ? -1 : 1;
-              }
-              return a.name.localeCompare(b.name, "fr");
-            })
-        );
+        return filterExercises(this.availableExercises, addedIds, this.exerciseSearch);
       },
 
       get canSave(): boolean {
@@ -811,11 +795,11 @@ const setTypes = [
       },
 
       get rpeTone(): "easy" | "moderate" | "hard" | "max" {
-        return rpeToneFn(this.sessionRpe);
+        return rpeTone(this.sessionRpe);
       },
 
       get rpeLabel(): string {
-        return rpeLabelFn(this.sessionRpe);
+        return rpeLabelFn(this.sessionRpe, LABELS.builder);
       },
 
       isExpanded(exerciseIndex: number): boolean {
@@ -837,10 +821,12 @@ const setTypes = [
 
       expandAll() {
         this.expandedExercises = this.exercises.map((ex) => ex.exerciseId);
+        window.dispatchEvent(new CustomEvent("builder:expand-all"));
       },
 
       collapseAll() {
         this.expandedExercises = [];
+        window.dispatchEvent(new CustomEvent("builder:collapse-all"));
       },
 
       get allExpanded(): boolean {
@@ -848,32 +834,6 @@ const setTypes = [
           this.exercises.length > 0 &&
           this.expandedExercises.length === this.exercises.length
         );
-      },
-
-      exerciseSummary(exercise: SessionExercise): string {
-        if (exercise.sets.length === 0) return this.labels.noSets;
-        const totalReps = exercise.sets.reduce(
-          (sum, s) => sum + (s.reps || 0),
-          0,
-        );
-        const totalVolume = exercise.sets.reduce(
-          (sum, s) => sum + (s.weight || 0) * (s.reps || 0),
-          0,
-        );
-        const top = exercise.sets.reduce(
-          (best, s) => (s.weight > (best?.weight || 0) ? s : best),
-          exercise.sets[0],
-        );
-        const setLabel =
-          exercise.sets.length > 1
-            ? this.labels.setsPlural
-            : this.labels.setsSingular;
-        const volume = Math.round(totalVolume);
-        const topLine =
-          top && top.weight > 0
-            ? ` \u2014 ${this.labels.top} ${top.weight} kg \u2014 ${top.reps}`
-            : "";
-        return `${exercise.sets.length} ${setLabel} \u2014 ${totalReps} reps \u2014 ${volume} kg${topLine}`;
       },
 
       openPicker() {
@@ -888,21 +848,7 @@ const setTypes = [
       },
 
       addExercise(exercise: Exercise) {
-        const firstSet: SessionSet = {
-          exerciseId: exercise.id,
-          setNumber: 1,
-          weight: 0,
-          reps: 0,
-          type: DEFAULT_SET_TYPE,
-          completed: false,
-        };
-        const newEx: BuilderExercise = {
-          exerciseId: exercise.id,
-          name: exercise.name,
-          muscle: exercise.muscle,
-          sets: [firstSet],
-          supersetId: null,
-        };
+        const newEx = buildNewExercise(exercise);
         this.exercises.push(newEx);
         this.expandedExercises = [
           ...this.expandedExercises,
@@ -913,24 +859,13 @@ const setTypes = [
       },
 
       loadTemplate(templateId: string) {
-        const tpl = getTemplateById(templateId);
-        if (!tpl) return;
+        const result = loadPickerTemplate(templateId, this.availableExercises);
+        if (!result) return;
+        this.availableExercises = result.newAvailable;
         const added: string[] = [];
-        for (const te of tpl.exercises) {
-          let ex = this.findExerciseByName(te.name);
-          if (!ex) {
-            ex = {
-              id: `template:${te.name}`,
-              name: te.name,
-              muscle: te.muscle,
-              category: TEMPLATE_FALLBACK_CATEGORY,
-              createdAt: new Date().toISOString(),
-            };
-            this.availableExercises = [...this.availableExercises, ex];
-          }
-          const newEx = this.buildBuilderExercise(ex, te);
-          this.exercises.push(newEx);
-          added.push(newEx.exerciseId);
+        for (const ex of result.exercises) {
+          this.exercises.push(ex);
+          added.push(ex.exerciseId);
         }
         if (added.length > 0) {
           this.expandedExercises = [...this.expandedExercises, ...added];
@@ -939,42 +874,18 @@ const setTypes = [
         this.closeDialogById("ses-picker-dialog");
       },
 
-      buildBuilderExercise(
-        ex: Exercise,
-        te: TemplateExercise,
-      ): BuilderExercise {
-        const sets: SessionSet[] = [];
-        for (let i = 0; i < Math.max(1, te.defaultSets); i++) {
-          sets.push({
-            exerciseId: ex.id,
-            setNumber: i + 1,
-            weight: 0,
-            reps: te.defaultReps,
-            type: DEFAULT_SET_TYPE,
-            completed: false,
-          });
-        }
-        return {
-          exerciseId: ex.id,
-          name: ex.name,
-          muscle: ex.muscle,
-          sets,
-          supersetId: null,
-        };
-      },
-
       findExerciseByName(name: string): Exercise | undefined {
         return this.availableExercises.find((e) => e.name === name);
       },
 
       hasTip(name: string): boolean {
-        return getExerciseTip(name) != null;
+        return hasExerciseTip(name);
       },
       getTip(name: string): string {
-        return getExerciseTip(name)?.description ?? "";
+        return getExerciseTipText(name);
       },
       getVideoUrl(name: string): string {
-        return getExerciseTip(name)?.videoUrl ?? "";
+        return getExerciseTipVideoUrl(name);
       },
       isTipOpen(exId: string): boolean {
         return this.openTips.includes(exId);
@@ -987,18 +898,12 @@ const setTypes = [
         }
       },
 
-      availableSupersetIds(): number[] {
-        const ids = new Set<number>();
-        for (const ex of this.exercises) {
-          if (ex.supersetId != null) ids.add(ex.supersetId);
-        }
-        return Array.from(ids).sort((a, b) => a - b);
+      availableSupersetIds() {
+        return getSupersetIds(this.exercises);
       },
 
-      nextSupersetId(): number {
-        const used = this.availableSupersetIds();
-        if (used.length === 0) return 1;
-        return Math.max(...used) + 1;
+      nextSupersetId() {
+        return getNextSupersetId(this.exercises);
       },
 
       onSupersetChange(exIdx: number) {
@@ -1026,127 +931,7 @@ const setTypes = [
       },
 
       supersetChainFor(gid: number | null): string[] {
-        if (gid == null) return [];
-        return this.exercises
-          .filter((e) => e.supersetId === gid)
-          .map((e) => this.trName(e));
-      },
-
-      addSet(exerciseIndex: number) {
-        const ex = this.exercises[exerciseIndex];
-        if (!ex) return;
-        const last = ex.sets[ex.sets.length - 1];
-        const next: SessionSet = {
-          exerciseId: ex.exerciseId,
-          setNumber: ex.sets.length + 1,
-          weight: last ? last.weight : 0,
-          reps: last ? last.reps : 0,
-          type: DEFAULT_SET_TYPE,
-          completed: false,
-        };
-        ex.sets.push(next);
-      },
-
-      removeSet(exerciseIndex: number, setIndex: number) {
-        const ex = this.exercises[exerciseIndex];
-        if (!ex || ex.sets.length <= 1) return;
-        ex.sets.splice(setIndex, 1);
-        ex.sets.forEach((s, i) => {
-          s.setNumber = i + 1;
-        });
-      },
-
-      hasWorkingWeight(exercise: SessionExercise): boolean {
-        return exercise.sets.some(
-          (s) => (s.type === "work" || s.type === "top") && s.weight > 0,
-        );
-      },
-
-      mrvSuggestion(
-        exerciseIndex: number,
-        setIndex: number,
-      ): ReturnType<typeof suggestLoadSuggestion> | null {
-        const ex = this.exercises[exerciseIndex];
-        const set = ex?.sets[setIndex];
-        if (!ex || !set) return null;
-        const key = `${ex.exerciseId}:${setIndex}:${set.reps}:${set.weight}`;
-        if (this._mrvCache.has(key)) return this._mrvCache.get(key)!;
-        const result = suggestLoadSuggestion(ex.exerciseId, this.allSessions, {
-          targetReps: set.reps > 0 ? set.reps : undefined,
-          lastLoad: set.weight > 0 ? set.weight : undefined,
-        });
-        this._mrvCache.set(key, result);
-        return result;
-      },
-
-      mrvEnabled(exerciseIndex: number, setIndex: number): boolean {
-        const s = this.mrvSuggestion(exerciseIndex, setIndex);
-        return Boolean(s && s.weight != null);
-      },
-
-      mrvTitle(exerciseIndex: number, setIndex: number): string {
-        const s = this.mrvSuggestion(exerciseIndex, setIndex);
-        if (!s || s.reason === "none") return this.labels.mrvNoHistory;
-        if (s.reason === "epley-cap") return this.labels.mrvCapped;
-        return this.labels.mrvFromHistory;
-      },
-
-      applyMrv(exerciseIndex: number, setIndex: number) {
-        const ex = this.exercises[exerciseIndex];
-        const set = ex?.sets[setIndex];
-        const s = this.mrvSuggestion(exerciseIndex, setIndex);
-        if (!set || !s) return;
-        if (s.weight == null) {
-          this.showToast(this.labels.mrvNoHistory, "warning");
-          return;
-        }
-        set.weight = s.weight;
-        const weightLabel = s.weight.toLocaleString(
-          getLocale() === "fr" ? "fr-FR" : "en-US",
-          { maximumFractionDigits: 1 },
-        );
-        this.showToast(
-          this.labels.mrvToast.replace("{weight}", weightLabel),
-          "success",
-        );
-      },
-
-      showToast(message: string, variant = "info") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fn = (window as any).showToast as
-          ((m: string, v?: string) => void) | undefined;
-        if (fn) fn(message, variant);
-      },
-
-      generateWarmup(exerciseIndex: number) {
-        const ex = this.exercises[exerciseIndex];
-        if (!ex) return;
-
-        const workingSets = ex.sets.filter(
-          (s) => (s.type === "work" || s.type === "top") && s.weight > 0,
-        );
-        if (workingSets.length === 0) return;
-
-        const maxWeight = Math.max(...workingSets.map((s) => s.weight));
-
-        const warmupPercents = [0.4, 0.6, 0.8] as const;
-        const warmupReps = [12, 8, 5] as const;
-        const warmups: SessionSet[] = warmupPercents.map((p, i) => ({
-          exerciseId: ex.exerciseId,
-          setNumber: i + 1,
-          type: "warmup",
-          weight: Math.round(maxWeight * p),
-          reps: warmupReps[i],
-          completed: false,
-        }));
-
-        ex.sets = [
-          ...warmups,
-          ...ex.sets.map((s, i) => ({
-            ...s,
-            setNumber: i + warmups.length + 1,
-          })),
-        ];
+        return supersetChain(this.exercises, gid, (n) => this.trName({ name: n } as BuilderExercise));
       },
 
       removeExercise(exerciseIndex: number) {
@@ -1160,15 +945,11 @@ const setTypes = [
       },
 
       setFatigue(level: number) {
-        if (this.sessionFatigue === level) {
-          this.sessionFatigue = 0;
-        } else {
-          this.sessionFatigue = Math.max(1, Math.min(5, level));
-        }
+        this.sessionFatigue = toggleFatigue(this.sessionFatigue, level);
       },
 
       setMood(mood: SessionMood) {
-        this.sessionMood = this.sessionMood === mood ? "" : mood;
+        this.sessionMood = toggleMood(this.sessionMood, mood);
       },
 
       discard() {
@@ -1258,10 +1039,6 @@ const setTypes = [
 <style>
   [x-cloak] {
     display: none !important;
-  }
-
-  .ses-date-input {
-    color-scheme: dark;
   }
 
   .ses-input-inline::-webkit-outer-spin-button,
@@ -1521,73 +1298,6 @@ const setTypes = [
   }
   .create__empty-add-btn:hover {
     background-color: var(--color-accent-hover);
-  }
-
-  .create__superset-offer {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    margin: 0 1rem 0.75rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-accent);
-    background-color: var(--color-surface-2);
-  }
-
-  .create__superset-offer-icon {
-    color: var(--color-accent);
-    flex-shrink: 0;
-  }
-
-  .create__superset-offer-text {
-    flex: 1 1 0%;
-    min-width: 0;
-  }
-
-  .create__superset-offer-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text);
-    display: block;
-  }
-
-  .create__superset-offer-names {
-    font-size: 0.75rem;
-    color: var(--color-muted);
-    display: block;
-  }
-
-  .create__superset-offer-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .create__superset-offer-confirm {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.375rem 0.75rem;
-    border-radius: var(--radius-md);
-    background-color: var(--color-accent);
-    color: var(--color-accent-foreground);
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: background-color var(--transition-fast);
-  }
-  .create__superset-offer-confirm:hover {
-    background-color: var(--color-accent-hover);
-  }
-
-  .create__superset-offer-dismiss {
-    padding: 0.375rem;
-    border-radius: var(--radius-md);
-    color: var(--color-muted);
-    transition: color var(--transition-fast), background-color var(--transition-fast);
-  }
-  .create__superset-offer-dismiss:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface-3);
   }
 
   .create__superset-bar {
