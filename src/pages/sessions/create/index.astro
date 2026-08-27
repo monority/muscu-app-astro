@@ -641,9 +641,6 @@ const setTypes = [
   import { t, localizedPath } from "../../../i18n";
   import {
     rpeTone,
-    getSupersetIds,
-    getNextSupersetId,
-    supersetChain,
     type BuilderExercise,
   } from "../../../lib/session-builder-stats";
   import { exerciseCard } from "../../../components/builder/exerciseCard";
@@ -660,6 +657,12 @@ const setTypes = [
     toggleFatigue,
     toggleMood,
   } from "../../../components/builder/sessionMeta";
+  import {
+    availableSupersetIds as getAvailableSupersetIds,
+    nextSupersetId as getNextSupersetIdFn,
+    normalizeSupersetId,
+    buildSupersetChain,
+  } from "../../../components/builder/superset";
 
   const LABELS = t();
 
@@ -899,22 +902,17 @@ const setTypes = [
       },
 
       availableSupersetIds() {
-        return getSupersetIds(this.exercises);
+        return getAvailableSupersetIds(this.exercises);
       },
 
       nextSupersetId() {
-        return getNextSupersetId(this.exercises);
+        return getNextSupersetIdFn(this.exercises);
       },
 
       onSupersetChange(exIdx: number) {
         const ex = this.exercises[exIdx];
         if (!ex) return;
-        if (
-          !Number.isFinite(ex.supersetId as number) ||
-          (ex.supersetId as number) <= 0
-        ) {
-          ex.supersetId = null;
-        }
+        ex.supersetId = normalizeSupersetId(ex.supersetId);
       },
 
       removeFromSuperset(exIdx: number) {
@@ -923,15 +921,8 @@ const setTypes = [
         ex.supersetId = null;
       },
 
-      trName(ex: BuilderExercise): string {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fn = (window as any).trExercise as
-          ((n: string) => string) | undefined;
-        return fn ? fn(ex.name) : ex.name;
-      },
-
       supersetChainFor(gid: number | null): string[] {
-        return supersetChain(this.exercises, gid, (n) => this.trName({ name: n } as BuilderExercise));
+        return buildSupersetChain(this.exercises, gid, (n) => trName({ name: n } as BuilderExercise));
       },
 
       removeExercise(exerciseIndex: number) {
