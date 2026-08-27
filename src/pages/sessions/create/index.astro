@@ -630,12 +630,8 @@ const setTypes = [
     getExercises,
     getSessions,
     getSessionById,
-    saveExercise,
-    saveSession,
-    updateSession,
     type Exercise,
     type Session,
-    type SessionExercise,
     type SessionMood,
   } from "../../../lib/storage";
   import { t, localizedPath } from "../../../i18n";
@@ -662,11 +658,14 @@ const setTypes = [
     nextSupersetId as getNextSupersetIdFn,
     normalizeSupersetId,
     buildSupersetChain,
+    trName,
   } from "../../../components/builder/superset";
+  import {
+    saveSessionBuilder,
+    shouldConfirmDiscard,
+  } from "../../../components/builder/sessionSave";
 
   const LABELS = t();
-
-  const TEMPLATE_FALLBACK_CATEGORY = "Autre";
 
   document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -944,7 +943,7 @@ const setTypes = [
       },
 
       discard() {
-        if (this.exercises.length > 0 || this.sessionName.trim()) {
+        if (shouldConfirmDiscard(this.exercises.length, this.sessionName)) {
           const ok = window.confirm(this.labels.discardConfirm);
           if (!ok) return;
         }
@@ -953,61 +952,16 @@ const setTypes = [
 
       save() {
         if (!this.canSave) return;
-        const transientExercises = this.exercises.filter((exercise) =>
-          exercise.exerciseId.startsWith("template:"),
-        );
-        const persistedIds = new Map<string, string>();
-        for (const exercise of transientExercises) {
-          if (persistedIds.has(exercise.exerciseId)) continue;
-          const created = saveExercise({
-            name: exercise.name,
-            muscle: exercise.muscle,
-            category: TEMPLATE_FALLBACK_CATEGORY,
-          });
-          persistedIds.set(exercise.exerciseId, created.id);
-        }
-        const cleanExercises: SessionExercise[] = this.exercises.map(
-          ({ supersetId: _supersetId, ...ex }) => ({
-            ...ex,
-            exerciseId: persistedIds.get(ex.exerciseId) ?? ex.exerciseId,
-            sets: ex.sets.map((set) => ({
-              ...set,
-              exerciseId: persistedIds.get(set.exerciseId) ?? set.exerciseId,
-            })),
-          }),
-        );
-        const groupMap = new Map<number, string[]>();
-        for (const ex of this.exercises) {
-          if (ex.supersetId == null) continue;
-          const list = groupMap.get(ex.supersetId) ?? [];
-          list.push(persistedIds.get(ex.exerciseId) ?? ex.exerciseId);
-          groupMap.set(ex.supersetId, list);
-        }
-        const supersets: { exercises: string[] }[] = [];
-        for (const [, ids] of groupMap) {
-          if (ids.length >= 2) supersets.push({ exercises: ids });
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const payload: any = {
-          name: this.sessionName.trim(),
+        saveSessionBuilder({
+          name: this.sessionName,
           date: this.sessionDate,
-          exercises: cleanExercises,
-          status: (this.editSessionId ? getSessionById(this.editSessionId)?.status : null) ?? ("planned" as const),
-        };
-        if (this.sessionRpe) payload.rpe = this.sessionRpe;
-        if (this.sessionFatigue > 0) payload.fatigue = this.sessionFatigue;
-        if (this.sessionMood !== "") payload.mood = this.sessionMood;
-        if (this.sessionNotes.trim() !== "")
-          payload.notes = this.sessionNotes.trim();
-        if (supersets.length > 0) payload.supersets = supersets;
-        if (this.editSessionId) {
-          const existing = getSessionById(this.editSessionId);
-          if (existing?.sourceSessionId) payload.sourceSessionId = existing.sourceSessionId;
-          updateSession(this.editSessionId, payload);
-        } else {
-          saveSession(payload);
-        }
+          exercises: this.exercises,
+          rpe: this.sessionRpe,
+          fatigue: this.sessionFatigue,
+          mood: this.sessionMood,
+          notes: this.sessionNotes,
+          editSessionId: this.editSessionId,
+        });
         window.location.href = localizedPath("/sessions");
       },
 
