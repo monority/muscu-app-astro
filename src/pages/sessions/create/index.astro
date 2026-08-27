@@ -629,7 +629,6 @@ const setTypes = [
   import {
     getExercises,
     getSessions,
-    getSessionById,
     type Exercise,
     type Session,
     type SessionMood,
@@ -664,6 +663,14 @@ const setTypes = [
     saveSessionBuilder,
     shouldConfirmDiscard,
   } from "../../../components/builder/sessionSave";
+  import {
+    toggleId,
+    addId,
+    removeId,
+    isIdIn,
+    allExpanded as checkAllExpanded,
+  } from "../../../components/builder/builderState";
+  import { loadEditSession } from "../../../components/builder/editSessionLoader";
 
   const LABELS = t();
 
@@ -754,35 +761,23 @@ const setTypes = [
 
         window.addEventListener("builder:exercise-toggled", ((e: CustomEvent) => {
           const { exerciseId, expanded } = e.detail;
-          if (expanded) {
-            if (!this.expandedExercises.includes(exerciseId)) {
-              this.expandedExercises = [...this.expandedExercises, exerciseId];
-            }
-          } else {
-            this.expandedExercises = this.expandedExercises.filter((id: string) => id !== exerciseId);
-          }
+          this.expandedExercises = expanded
+            ? addId(this.expandedExercises, exerciseId)
+            : removeId(this.expandedExercises, exerciseId);
         }) as EventListener);
 
         const requestedId = new URLSearchParams(window.location.search).get("edit");
         if (!requestedId) return;
-        const session = getSessionById(requestedId);
-        if (!session) return;
-        const supersetIds = new Map<string, number>();
-        session.supersets?.forEach((group, index) => {
-          group.exercises.forEach((exerciseId) => supersetIds.set(exerciseId, index + 1));
-        });
-        this.editSessionId = session.id;
-        this.sessionName = session.name;
-        this.sessionDate = session.date.slice(0, 10);
-        this.sessionRpe = session.rpe ?? 5;
-        this.sessionFatigue = session.fatigue ?? 0;
-        this.sessionMood = session.mood ?? "";
-        this.sessionNotes = session.notes ?? "";
-        this.exercises = session.exercises.map((exercise) => ({
-          ...exercise,
-          sets: exercise.sets.map((set) => ({ ...set, completed: false })),
-          supersetId: supersetIds.get(exercise.exerciseId) ?? null,
-        }));
+        const data = loadEditSession(requestedId);
+        if (!data) return;
+        this.editSessionId = data.sessionId;
+        this.sessionName = data.name;
+        this.sessionDate = data.date;
+        this.sessionRpe = data.rpe;
+        this.sessionFatigue = data.fatigue;
+        this.sessionMood = data.mood as SessionMood | "";
+        this.sessionNotes = data.notes;
+        this.exercises = data.exercises;
         this.expandAll();
       },
 
@@ -806,19 +801,13 @@ const setTypes = [
 
       isExpanded(exerciseIndex: number): boolean {
         const ex = this.exercises[exerciseIndex];
-        return ex ? this.expandedExercises.includes(ex.exerciseId) : false;
+        return ex ? isIdIn(this.expandedExercises, ex.exerciseId) : false;
       },
 
       toggleExpand(exerciseIndex: number) {
         const ex = this.exercises[exerciseIndex];
         if (!ex) return;
-        if (this.isExpanded(exerciseIndex)) {
-          this.expandedExercises = this.expandedExercises.filter(
-            (id) => id !== ex.exerciseId,
-          );
-        } else {
-          this.expandedExercises = [...this.expandedExercises, ex.exerciseId];
-        }
+        this.expandedExercises = toggleId(this.expandedExercises, ex.exerciseId);
       },
 
       expandAll() {
@@ -832,10 +821,7 @@ const setTypes = [
       },
 
       get allExpanded(): boolean {
-        return (
-          this.exercises.length > 0 &&
-          this.expandedExercises.length === this.exercises.length
-        );
+        return checkAllExpanded(this.exercises.length, this.expandedExercises.length);
       },
 
       openPicker() {
@@ -890,14 +876,10 @@ const setTypes = [
         return getExerciseTipVideoUrl(name);
       },
       isTipOpen(exId: string): boolean {
-        return this.openTips.includes(exId);
+        return isIdIn(this.openTips, exId);
       },
       toggleTip(exId: string) {
-        if (this.isTipOpen(exId)) {
-          this.openTips = this.openTips.filter((id) => id !== exId);
-        } else {
-          this.openTips = [...this.openTips, exId];
-        }
+        this.openTips = toggleId(this.openTips, exId);
       },
 
       availableSupersetIds() {
