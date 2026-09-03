@@ -103,42 +103,6 @@
  * One class = one intent. Keep Tailwind for layout; use these for
  * shared visual tokens (text hierarchy, separators, grids). */
 
-/* ── Separator ───────────────────────────────────────────── */
-.border-b-separator {
-  border-bottom: 1px solid var(--color-border);
-}
-
-/* ── Text hierarchy ──────────────────────────────────────── */
-.text-label {
-  font-size: 1.1rem;
-  color: var(--color-muted);
-}
-
-.text-body-secondary {
-  font-size: 1.2rem;
-  color: var(--color-muted);
-}
-
-.text-caption {
-  font-size: 1.3rem;
-  color: var(--color-muted);
-}
-
-.text-settings-label {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1.2;
-}
-
-.text-stat-value {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
 /* ── Display font family (replaces Tailwind arbitrary font-[var(--font-display)]) ── */
 .text-display {
   font-family: var(--font-display);
@@ -169,49 +133,6 @@
   }
 }
 
-/* ── Page section spacing ──────────────────────────────── */
-.section-gap {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-section);
-}
-
-/* ── Card surface ──────────────────────────────────────── */
-.card-surface {
-  background: var(--surface-panel);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-/* ── Grid responsive utilities ──────────────────────────── */
-.grid-responsive-2 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 640px) {
-  .grid-responsive-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.grid-responsive-3 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 640px) {
-  .grid-responsive-3 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid-responsive-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 /* ════ RPE value display ═══════════════════════════════════════
  * Global primitive for rendering RPE/uRPE numbers with tone colours.
  * Usage: <span class="rpe-value tone--hard">7.5</span>
@@ -228,11 +149,6 @@
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-}
-
-.rpe-value--sm {
-  font-size: 1.4rem;
-  min-width: 2.4rem;
 }
 
 .rpe-value__sep {
@@ -260,26 +176,4 @@
 
 .rpe-value.tone--none {
   color: var(--color-muted);
-}
-
-/* ════ Status badge ════════════════════════════════════════════
- * Unified status indicator replacing inline check/dash double-icons. */
-.status-dot {
-  display: inline-block;
-  width: 1.0rem;
-  height: 1.0rem;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.status-dot--completed {
-  background-color: var(--color-success);
-}
-
-.status-dot--in-progress {
-  background-color: var(--color-accent);
-}
-
-.status-dot--planned {
-  background-color: var(--color-muted);
 }

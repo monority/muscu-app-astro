@@ -124,20 +124,6 @@ export function computeTotalSets(session: Session | null): number {
   return session.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
 }
 
-/** Best estimated 1RM for a single exercise. */
-export function computeBest1RM(
-  exercise: SessionExercise,
-  calculate1RM: (weight: number, reps: number) => number,
-): number {
-  let best = 0;
-  for (const set of exercise.sets) {
-    if (!set.completed) continue;
-    const e = calculate1RM(set.weight, set.reps);
-    if (e > best) best = e;
-  }
-  return best;
-}
-
 // ── Notes Check ─────────────────────────────────────────────────
 
 /** Check if session has any notes (RPE, fatigue, mood, or free text). */

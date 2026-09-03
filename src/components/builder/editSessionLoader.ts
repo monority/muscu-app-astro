@@ -5,7 +5,7 @@
  * No DOM, no Alpine dependency.
  */
 
-import { getSessionById, type Session } from "../../lib/storage";
+import { getSessionById } from "../../lib/storage";
 import { type BuilderExercise } from "../../lib/session-builder-stats";
 
 export interface EditSessionData {

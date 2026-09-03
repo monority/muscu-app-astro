@@ -22,18 +22,6 @@ import type { ReferenceLift } from './benchmarks';
 /** Statut des données chargées : toujours `'reference'` tant que le serveur n'est pas branché. */
 export const BENCHMARKS_DATA_STATUS: 'reference' | 'community' = 'reference';
 
-/** Raccourci booléen : `true` tant que les vraies données de cohorte manquent. */
-export const BENCHMARKS_IS_PENDING_REAL_DATA = true;
-
-/**
- * Note de source affichée sous le tableau (clause d'honnêteté des données).
- * Ne pas réutiliser comme libellé de la liste — l'UI a sa propre clé i18n
- * (`stats.benchmarksSourceNote`) calquée sur ce texte.
- */
-export const SOURCE_NOTE =
-  'Données de référence (standards d\u2019entraînement). Les benchmarks ' +
-  'communautaires arriveront avec la synchronisation serveur.';
-
 /**
  * Tables de référence par exercice — 1RM estimée (kg, Epley) aux percentiles
  * p25/p50/p75/p90. Les `name` correspondent EXACTEMENT aux noms du catalogue
@@ -68,22 +56,3 @@ export const REFERENCE_DATA: ReadonlyArray<ReferenceLift> = [
     bands: { p25: 0, p50: 10, p75: 20, p90: 32 },
   },
 ];
-
-// ============================================================================
-// Point de bascule futur (upload serveur)
-// ============================================================================
-
-/**
- * Fonction de bascule pour les futurs agrégats de cohorte anonymisée.
- * Quand le serveur renverra de vraies tables (par exercice), implémenter ce
- * hook : récupérer les bandes, puis retourner les `ReferenceLift`.
- * Aujourd'hui → retourne simplement `REFERENCE_DATA`.
- */
-export function getReferenceLifts(
-  data: ReadonlyArray<ReferenceLift> = REFERENCE_DATA,
-): {
-  lifts: ReadonlyArray<ReferenceLift>;
-  status: 'reference' | 'community';
-} {
-  return { lifts: data, status: BENCHMARKS_DATA_STATUS };
-}

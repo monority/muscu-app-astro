@@ -40,10 +40,6 @@ export function localizedPath(path: string): string {
 export const DATE_LOCALE = () =>
   getLocale() === 'en' ? 'en-GB' : 'fr-FR';
 
-export function getStaticPaths() {
-  return locales.map((lang) => ({ params: { lang } }));
-}
-
 export {
   trExercise,
   trMuscle,
@@ -52,4 +48,4 @@ export {
   trTemplateDesc,
 } from './exercise-translations';
 
-export default { t, setLocale, getLocale, localizedPath, getStaticPaths };
+export default { t, setLocale, getLocale, localizedPath };

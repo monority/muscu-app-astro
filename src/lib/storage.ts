@@ -525,12 +525,6 @@ export function getSessionById(id: string): Session | undefined {
   return getSessions().find((s) => s.id === id);
 }
 
-export function getSessionsByExercise(exerciseId: string): Session[] {
-  return getSessions().filter((s) =>
-    s.exercises.some((se) => se.exerciseId === exerciseId),
-  );
-}
-
 /**
  * Returns all sessions whose `date` field exactly matches the given
  * YYYY-MM-DD string. Comparison is strict (no prefix matching) — the
@@ -571,25 +565,6 @@ export function getSessionsThisWeek(): Session[] {
     const d = new Date(s.date);
     return d >= startOfWeek;
   });
-}
-
-// ============================================================================
-// Progress
-// ============================================================================
-
-export function getProgressRecords(exerciseId: string): ProgressRecord[] {
-  return getStore<ProgressRecord[]>(STORAGE_KEYS.progress, []).filter(
-    (r) => r.exerciseId === exerciseId,
-  );
-}
-
-export function addProgressRecord(
-  record: Omit<ProgressRecord, 'estimated1RM'>,
-): void {
-  const estimated1RM = calculate1RM(record.bestWeight, record.bestReps);
-  const all = getStore<ProgressRecord[]>(STORAGE_KEYS.progress, []);
-  all.push({ ...record, estimated1RM });
-  setStore(STORAGE_KEYS.progress, all);
 }
 
 // ============================================================================

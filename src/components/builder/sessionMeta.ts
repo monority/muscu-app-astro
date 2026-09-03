@@ -4,7 +4,7 @@
  * Labels passed as arg — no window dependency.
  */
 
-import { rpeTone as rpeToneFn, type RpeLevel } from "../../lib/session-builder-stats";
+import { rpeTone as rpeToneFn } from "../../lib/session-builder-stats";
 import type { SessionMood } from "../../lib/storage";
 
 export interface SessionMetaLabels {

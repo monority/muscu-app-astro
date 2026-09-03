@@ -87,27 +87,6 @@
   padding: 0;
 }
 
-/* ── Link — text-style button (no border/bg) ── */
-.button--link {
-  border: none;
-  background: none;
-  color: var(--color-accent);
-  padding: 0;
-  min-height: auto;
-  text-decoration: none;
-}
-
-.button--link:hover {
-  color: var(--color-accent-hover);
-  text-decoration: underline;
-  background: none;
-  border: none;
-}
-
-.button--link:active:not(:disabled) {
-  transform: none;
-}
-
 /* ── Active — selected/pressed state ── */
 .button.is-active {
   color: var(--color-accent);

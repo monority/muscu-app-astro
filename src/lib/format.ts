@@ -94,15 +94,6 @@ export function formatTime(iso: string): string {
   });
 }
 
-/** Time with seconds "14:30:05". */
-export function formatTimeSeconds(date: Date): string {
-  return date.toLocaleTimeString(DATE_LOCALE(), {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-}
-
 // ── Number formatters ───────────────────────────────────────────
 
 /** Locale-formatted integer: "1 234". */
