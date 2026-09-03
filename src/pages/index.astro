@@ -15,9 +15,9 @@ const L = t();
 ---
 
 <AppLayout title={L.dashboard.title}>
-  <PageHeader 
+  <PageHeader
     title={L.dashboard.title}
-    description={L.dashboard.description} 
+    description={L.dashboard.description}
     actionLabel={L.dashboard.newSession}
     actionHref={localizedPath("/sessions/create")}
   />
@@ -38,6 +38,7 @@ const L = t();
           label={L.dashboard.totalVolume}
           valueExpr="formatVolume(kpis.totalVolume)"
           unit={L.common.kg}
+          color="var(--color-stat-volume)"
           class="dash__kpi dash__kpi--volume"
         />
         <KpiItem
@@ -45,6 +46,7 @@ const L = t();
           label={L.dashboard.totalSessions}
           valueExpr="kpis.totalSessions"
           unitExpr="kpis.totalSessions === 1 ? labels.weeklyMoreSingular : labels.sessionsUnit"
+          color="var(--color-stat-sessions)"
           class="dash__kpi dash__kpi--sessions"
         />
         <KpiItem
@@ -53,6 +55,7 @@ const L = t();
           valueExpr="kpis.bestPRs"
           unitExpr="kpis.bestPRs === 1 ? labels.exoSingular.trim() : labels.exercisesUnit"
           subExpr="kpis.top1RM > 0 ? labels.top1RM + ' ' + formatVolume(kpis.top1RM) + ' ' + labels.kg : ''"
+          color="var(--color-stat-pr)"
           class="dash__kpi dash__kpi--pr"
         />
         <KpiItem
@@ -61,6 +64,7 @@ const L = t();
           valueExpr="kpis.streak"
           unitExpr="kpis.streak === 1 ? labels.daysSingular : labels.daysUnit"
           subExpr="kpis.streak === 0 && kpis.totalSessions > 0 ? labels.noRecent : ''"
+          color="var(--color-stat-streak)"
           class="dash__kpi dash__kpi--streak"
         />
       </section>
@@ -89,7 +93,11 @@ const L = t();
       <p class="dash__empty-desc">{L.dashboard.emptyDesc}</p>
 
       <div class="dash__empty-actions">
-        <Button variant="primary" size="md" href={localizedPath("/sessions/create")}>
+        <Button
+          variant="primary"
+          size="md"
+          href={localizedPath("/sessions/create")}
+        >
           <Icon name="plus" size={16} />
           <span>{L.dashboard.createFirst}</span>
         </Button>
@@ -299,8 +307,6 @@ const L = t();
   });
 </script>
 
-
-
 <style>
   /* ════════════════════════════════════════════════════
      CONTAINER
@@ -325,15 +331,13 @@ const L = t();
   }
 
   /* ════════════════════════════════════════════════════
-     KPI BAND — open data, not four floating cards
+     KPI BAND — vertical stack with dividers
      ════════════════════════════════════════════════════ */
   .dash__kpis {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
     margin-bottom: 4rem;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
   }
 
   @media (min-width: 480px) {
@@ -353,7 +357,6 @@ const L = t();
     padding: 2rem 1.6rem;
     background-color: transparent;
     border: 0;
-    border-bottom: 1px solid var(--color-border);
     border-radius: 0;
     box-shadow: none;
     transition: background-color var(--transition-base);
@@ -361,16 +364,6 @@ const L = t();
 
   .dash__kpi:hover {
     background-color: var(--alpha-bg-subtle);
-  }
-
-  @media (min-width: 480px) and (max-width: 1023px) {
-    .dash__kpi:nth-last-child(-n + 2) {
-      border-bottom: 0;
-    }
-  }
-
-  .dash__kpi:nth-child(even) {
-    border-left: 1px solid var(--color-border);
   }
 
   /* ════════════════════════════════════════════════════
@@ -499,5 +492,4 @@ const L = t();
       border-left: 1px solid var(--color-border);
     }
   }
-
 </style>

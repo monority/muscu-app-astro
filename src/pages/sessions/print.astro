@@ -178,6 +178,9 @@ const title = `${L.detail.title} — muscu.app`;
       } from '../../lib/storage';
       import { getAuth } from '../../lib/auth';
       import { t, getLocale, localizedPath, trExercise } from '../../i18n';
+      import { statusLabel as statusLabelFn, type StatusLabels } from '../../lib/session-utils';
+      import { typeLabel as typeLabelFn } from '../../lib/workout-helpers';
+      import { formatDateLong, formatDurationShort, formatVolume, formatWeight } from '../../lib/format';
 
       const LABELS = t();
 
@@ -191,62 +194,27 @@ const title = `${L.detail.title} — muscu.app`;
 
       // ── Pure helpers ─────────────────────────────────────
       const isEn = (): boolean => getLocale() === 'en';
-      const dateLocale = (): string => (isEn() ? 'en-GB' : 'fr-FR');
 
-      function statusLabelFn(s: SessionStatus): string {
-        if (s === 'completed') return LABELS.detail.completed;
-        if (s === 'in-progress') return LABELS.detail.inProgress;
-        return LABELS.detail.planned;
+      const statusLabels: StatusLabels = { completed: LABELS.detail.completed, inProgress: LABELS.detail.inProgress, planned: LABELS.detail.planned };
+
+      function statusLabelLocal(s: SessionStatus): string {
+        return statusLabelFn(s, statusLabels);
       }
 
-      function typeLabelFn(t: SetType): string {
-        switch (t) {
-          case 'warmup': return LABELS.detail.typeWarmup;
-          case 'work':   return LABELS.detail.typeWork;
-          case 'top':    return LABELS.detail.typeTop;
-          case 'drop':   return LABELS.detail.typeDrop;
-          case 'failure': return LABELS.detail.typeFailure;
-        }
+      function typeLabelLocal(t: SetType): string {
+        return typeLabelFn(t, LABELS.detail);
       }
 
-      function formatDateTimeFn(iso: string): string {
-        const d = new Date(iso);
-        if (isNaN(d.getTime())) return iso;
-        const loc = dateLocale();
-        const date = d.toLocaleDateString(loc, {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        });
-        const cap = date.charAt(0).toUpperCase() + date.slice(1);
+      function formatDateTimeLocal(iso: string): string {
+        const base = formatDateLong(iso);
         const hasTime = /\d{2}:\d{2}/.test(iso);
         if (hasTime) {
+          const d = new Date(iso);
+          const loc = isEn() ? 'en-GB' : 'fr-FR';
           const time = d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' });
-          return `${cap} ${LABELS.detail.at} ${time}`;
+          return `${base} ${LABELS.detail.at} ${time}`;
         }
-        return cap;
-      }
-
-      function formatDurationFn(seconds?: number): string {
-        if (!seconds || seconds <= 0) return '—';
-        const total = Math.floor(seconds);
-        const h = Math.floor(total / 3600);
-        const m = Math.floor((total % 3600) / 60);
-        const s = total % 60;
-        if (h > 0) return `${h}h ${m.toString().padStart(2, '0')}m`;
-        if (m > 0) return `${m}m ${s.toString().padStart(2, '0')}s`;
-        return `${s}s`;
-      }
-
-      function formatVolumeFn(v: number): string {
-        if (!Number.isFinite(v) || v <= 0) return '0 kg';
-        return Math.round(v).toLocaleString(dateLocale()) + ' kg';
-      }
-
-      function formatWeightFn(w: number): string {
-        if (!Number.isFinite(w) || w <= 0) return '0 kg';
-        return Math.round(w).toLocaleString(dateLocale()) + ' kg';
+        return base;
       }
 
       function formatSetRpeFn(
@@ -349,22 +317,22 @@ const title = `${L.detail.title} — muscu.app`;
 
           // ── Template wrappers ──
           statusLabel(s: SessionStatus): string {
-            return statusLabelFn(s);
+            return statusLabelLocal(s);
           },
           typeLabel(t: SetType): string {
-            return typeLabelFn(t);
+            return typeLabelLocal(t);
           },
           formatDateTime(iso: string): string {
-            return formatDateTimeFn(iso);
+            return formatDateTimeLocal(iso);
           },
           formatDuration(seconds?: number): string {
-            return formatDurationFn(seconds);
+            return formatDurationShort(seconds);
           },
           formatVolume(v: number): string {
-            return formatVolumeFn(v);
+            return formatVolume(v);
           },
           formatWeight(w: number): string {
-            return formatWeightFn(w);
+            return formatWeight(w);
           },
           formatSetRpe(set: { rpe?: number | null; rpeType?: RpeType }): string {
             return formatSetRpeFn(set.rpe, set.rpeType);

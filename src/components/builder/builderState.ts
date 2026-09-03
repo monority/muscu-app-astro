@@ -32,3 +32,19 @@ export function allExpanded(
 ): boolean {
   return exerciseCount > 0 && expandedCount === exerciseCount;
 }
+
+// ── Dialog helpers ────────────────────────────────────────────
+
+export function openDialogById(id: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fn = (window as any).openDialog as
+    ((i: string) => void) | undefined;
+  if (fn) fn(id);
+}
+
+export function closeDialogById(id: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fn = (window as any).closeDialog as
+    ((i: string) => void) | undefined;
+  if (fn) fn(id);
+}

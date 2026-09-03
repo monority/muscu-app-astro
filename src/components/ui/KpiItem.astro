@@ -17,6 +17,7 @@ interface Props {
   unit?: string;
   subExpr?: string;
   sub?: string;
+  color?: string;
   class?: string;
 }
 
@@ -29,15 +30,18 @@ const {
   unit = '',
   subExpr,
   sub,
+  color,
   class: className = '',
 } = Astro.props;
+
+const style = color ? `--kpi-icon-color:${color}` : '';
 ---
 
-<div class:list={['kpi-item', className]}>
+<div class:list={['kpi-item', className]} style={style || undefined}>
   <div class="kpi-item__content">
     <div class="kpi-item__head">
       <span class="kpi-item__icon" aria-hidden="true">
-        <Icon name={icon} size={16} />
+        <Icon name={icon} size={18} />
       </span>
       <span class="kpi-item__label">{label}</span>
     </div>
@@ -63,6 +67,61 @@ const {
 
 <style>
   .kpi-item {
-    /* inherit from parent .dash__kpi styles */
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .kpi-item__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .kpi-item__head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .kpi-item__icon {
+    display: inline-flex;
+    color: var(--kpi-icon-color, var(--color-muted));
+    flex-shrink: 0;
+  }
+
+  .kpi-item__label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .kpi-item__row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .kpi-item__value {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi-item__unit {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  .kpi-item__sub {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin-top: 0.1rem;
   }
 </style>

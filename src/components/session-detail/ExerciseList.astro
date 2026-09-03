@@ -1,0 +1,131 @@
+---
+import Card from '../ui/Card.astro';
+import Badge from '../ui/Badge.astro';
+import Icon from '../ui/Icon.astro';
+import { icons } from '../../lib/icons';
+import { t } from '../../i18n';
+
+const L = t();
+---
+
+<section class="detail__exercises">
+  <h2 class="detail__section-title">{L.detail.exercises}</h2>
+
+  <template x-if="session.exercises.length === 0">
+    <Card>
+      <p class="detail__no-exercises">
+        {L.detail.noExercises}
+      </p>
+    </Card>
+  </template>
+
+  <template x-for="(ex, exIdx) in session.exercises" :key="exIdx">
+    <Card>
+      <article class="exo-row" :class="supersetTint(ex)">
+        <header class="exo-row__head">
+          <h3 class="exo-row__name" x-text="trExercise(ex.name)"></h3>
+          <div class="exo-row__head-actions">
+            <span
+              class="exo-row__superset"
+              :class="'exo-row__superset--g' + (supersetGroup(ex)?.color ?? 0)"
+              :aria-label="supersetLabelFor(ex)"
+              :title="supersetMembers(ex)"
+              x-show="supersetGroup(ex) != null"
+              x-cloak
+            >
+              <Icon name="link" size={20} />
+              <span x-text="supersetLabelFor(ex)"></span>
+            </span>
+            <Badge
+              variant="category"
+              size="sm"
+              :class="'badge--cat-' + muscleHue(ex.muscle)"
+              x-text="trMuscle(ex.muscle)"
+            ></Badge>
+          </div>
+        </header>
+
+        <div class="exo-row__stats">
+          <div class="exo-row__stat">
+            <span class="exo-row__stat-label">{L.sessions.volume}</span>
+            <span
+              class="exo-row__stat-value"
+              x-text="formatVolume(exerciseVolume(ex))"
+            ></span>
+          </div>
+          <div class="exo-row__stat">
+            <span class="exo-row__stat-label">{L.detail.best1RM}</span>
+            <span
+              class="exo-row__stat-value"
+              x-text="formatVolume(best1RM(ex))"
+            ></span>
+          </div>
+          <div class="exo-row__stat">
+            <span class="exo-row__stat-label">{L.detail.sets}</span>
+            <span
+              class="exo-row__stat-value"
+              x-text="ex.sets.length"
+            ></span>
+          </div>
+        </div>
+
+        <div
+          class="exo-row__table-wrap"
+          x-show="ex.sets.length > 0"
+        >
+          <table class="exo-row__table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">{L.detail.colType}</th>
+                <th scope="col">{L.detail.colWeight}</th>
+                <th scope="col">{L.detail.colReps}</th>
+                <th scope="col">RPE</th>
+                <th scope="col" class="exo-row__th-end">{L.detail.statusLabel}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="set in ex.sets" :key="set.setNumber">
+                <tr
+                  class="exo-row__tr"
+                  :class="{ 'is-completed': set.completed }"
+                >
+                  <td class="exo-row__num" x-text="set.setNumber"></td>
+                  <td>
+                    <span
+                      class="type-pill"
+                      :class="'type-pill--' + set.type"
+                      x-text="typeLabel(set.type)"
+                    ></span>
+                  </td>
+                  <td class="exo-row__num exo-row__weight" x-text="formatWeight(set.weight)"></td>
+                  <td class="exo-row__num exo-row__reps" x-text="set.reps"></td>
+                  <td class="exo-row__rpe" :class="'exo-row__rpe--' + rpeTone(set.rpe)" x-text="formatSetRpe(set)"></td>
+                  <td class="exo-row__td-end">
+                    <template x-if="set.completed">
+                      <span
+                        class="exo-row__check"
+                        set:html={icons.check()}
+                      />
+                    </template>
+                    <template x-if="!set.completed">
+                      <span
+                        class="exo-row__dash"
+                      >—</span>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <p
+          class="exo-row__no-sets"
+          x-show="ex.sets.length === 0"
+        >
+          {L.detail.noSets}
+        </p>
+      </article>
+    </Card>
+  </template>
+</section>

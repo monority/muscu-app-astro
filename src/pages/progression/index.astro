@@ -136,24 +136,15 @@ const L = t();
 <script>
   import {
     getSessions,
-    calculate1RM,
-    type SessionExercise,
     type ProgressRecord,
   } from '../../lib/storage';
   import { formatNumPositive, formatDateShort } from '../../lib/format';
-
-  interface ExerciseProgression {
-    exerciseId: string;
-    name: string;
-    muscle: string;
-    estimated1RM: number;
-    bestWeight: number;
-    bestReps: number;
-    date: string;
-    lastSessionDate: string;
-    sessionCount: number;
-    history: ProgressRecord[];
-  }
+  import {
+    computeExerciseProgression,
+    computeMax1RM,
+    historyBarHeight as calcHistoryBarHeight,
+    type ExerciseProgression,
+  } from '../../lib/progression-stats';
 
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -171,74 +162,11 @@ const L = t();
       },
 
       get max1RM(): number {
-        let max = 0;
-        for (const stat of this.exerciseStats) {
-          if (stat.estimated1RM > max) max = stat.estimated1RM;
-        }
-        return max;
+        return computeMax1RM(this.exerciseStats);
       },
 
       recompute() {
-        const sessions = getSessions();
-        const map = new Map<string, ExerciseProgression>();
-
-        for (const session of sessions) {
-          for (const ex of session.exercises) {
-            this.accumulateExercise(map, ex, session.date);
-          }
-        }
-
-        this.exerciseStats = Array.from(map.values())
-          .filter((stat) => stat.history.length > 0)
-          .sort((a, b) => b.estimated1RM - a.estimated1RM);
-      },
-
-      accumulateExercise(
-        map: Map<string, ExerciseProgression>,
-        ex: SessionExercise,
-        sessionDate: string,
-      ) {
-        let stat = map.get(ex.exerciseId);
-        if (!stat) {
-          stat = {
-            exerciseId: ex.exerciseId,
-            name: ex.name,
-            muscle: ex.muscle,
-            estimated1RM: 0,
-            bestWeight: 0,
-            bestReps: 0,
-            date: '',
-            lastSessionDate: '',
-            sessionCount: 0,
-            history: [],
-          };
-          map.set(ex.exerciseId, stat);
-        }
-        let trackedInSession = false;
-        for (const set of ex.sets) {
-          if (!set.completed) continue;
-          trackedInSession = true;
-          const record: ProgressRecord = {
-            exerciseId: ex.exerciseId,
-            date: sessionDate,
-            estimated1RM: calculate1RM(set.weight, set.reps),
-            bestWeight: set.weight,
-            bestReps: set.reps,
-          };
-          stat.history.push(record);
-          if (record.estimated1RM > stat.estimated1RM) {
-            stat.estimated1RM = record.estimated1RM;
-            stat.bestWeight = record.bestWeight;
-            stat.bestReps = record.bestReps;
-            stat.date = record.date;
-          }
-        }
-        if (trackedInSession) {
-          stat.sessionCount += 1;
-          if (!stat.lastSessionDate || sessionDate > stat.lastSessionDate) {
-            stat.lastSessionDate = sessionDate;
-          }
-        }
+        this.exerciseStats = computeExerciseProgression(getSessions());
       },
 
       formatNumber(n: number): string {
@@ -251,11 +179,7 @@ const L = t();
       },
 
       historyBarHeight(history: ProgressRecord[], value: number): number {
-        if (history.length === 0 || value <= 0) return 0;
-        const max = history.reduce((m, r) => (r.estimated1RM > m ? r.estimated1RM : m), 0);
-        if (max <= 0) return 8;
-        const pct = (value / max) * 100;
-        return Math.max(8, Math.min(100, Math.round(pct)));
+        return calcHistoryBarHeight(history, value);
       },
 
       historyTooltip(history: ProgressRecord[]): string {

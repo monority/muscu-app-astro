@@ -196,30 +196,15 @@ const L = t();
   import { t, localizedPath } from '../i18n';
   import { formatDateLong, formatNumber as formatNumberFn } from '../lib/format';
   import { statusLabel as statusLabelFn, type StatusLabels } from '../lib/session-utils';
+  import { buildMonthDays, assignSessions, formatISO, type CalendarDay } from '../lib/calendar-grid';
 
   const LABELS = t();
   const statusLabels: StatusLabels = { completed: LABELS.sessions.completed, inProgress: LABELS.sessions.inProgress, planned: LABELS.sessions.planned };
   function statusLabel(status: string): string { return statusLabelFn(status as 'completed' | 'in-progress' | 'planned', statusLabels); }
 
-  /** Format a Date as local YYYY-MM-DD (no UTC shift). */
-  function formatISO(d: Date): string {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
-
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Alpine = (window as any).Alpine;
-
-    interface CalendarDay {
-      date: string;
-      dayNum: number;
-      isCurrentMonth: boolean;
-      isToday: boolean;
-      sessions: Session[];
-    }
 
     Alpine.data('calendarApp', () => ({
       // ── State ──
@@ -228,6 +213,7 @@ const L = t();
       selectedDate: '',
       selectedSessions: [] as Session[],
       allSessions: [] as Session[],
+      days: [] as CalendarDay[],
       weekdays: LABELS.calendrier.weekdays,
       localizedPath,
 
@@ -239,66 +225,14 @@ const L = t();
 
       // ── Calendar generation ──
       get calendarDays(): CalendarDay[] {
-        const first = new Date(this.currentYear, this.currentMonth, 1);
-        const last = new Date(this.currentYear, this.currentMonth + 1, 0);
-        const startDay = first.getDay(); // 0=Sun
-        const daysInMonth = last.getDate();
-        const today = new Date();
-        const todayStr = formatISO(today);
-
-        const days: CalendarDay[] = [];
-
-        // Previous month padding
-        const prevLast = new Date(this.currentYear, this.currentMonth, 0);
-        const prevYear = prevLast.getFullYear();
-        const prevMonthIdx = prevLast.getMonth();
-        for (let i = startDay - 1; i >= 0; i--) {
-          const d = prevLast.getDate() - i;
-          const dateStr = `${prevYear}-${String(prevMonthIdx + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          days.push({
-            date: dateStr,
-            dayNum: d,
-            isCurrentMonth: false,
-            isToday: dateStr === todayStr,
-            sessions: this.allSessions.filter((s) => s.date === dateStr),
-          });
-        }
-
-        // Current month
-        for (let d = 1; d <= daysInMonth; d++) {
-          const dateStr = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          days.push({
-            date: dateStr,
-            dayNum: d,
-            isCurrentMonth: true,
-            isToday: dateStr === todayStr,
-            sessions: this.allSessions.filter((s) => s.date === dateStr),
-          });
-        }
-
-        // Next month padding — always pad to 6 rows (42 cells) so the
-        // grid height stays constant regardless of the month layout.
-        const remaining = 42 - days.length;
-        const nextFirst = new Date(this.currentYear, this.currentMonth + 1, 1);
-        const nextYear = nextFirst.getFullYear();
-        const nextMonthIdx = nextFirst.getMonth();
-        for (let d = 1; d <= remaining; d++) {
-          const dateStr = `${nextYear}-${String(nextMonthIdx + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          days.push({
-            date: dateStr,
-            dayNum: d,
-            isCurrentMonth: false,
-            isToday: dateStr === todayStr,
-            sessions: [],
-          });
-        }
-
-        return days;
+        return this.days;
       },
 
       loadMonth() {
         this.selectedDate = '';
         this.selectedSessions = [];
+        const days = buildMonthDays(this.currentYear, this.currentMonth, new Date());
+        this.days = assignSessions(days, this.allSessions);
       },
 
       prevMonth() {

@@ -150,60 +150,26 @@ const L = t();
 </AppLayout>
 
 <script>
-  import { t, getLocale, trExercise } from '../../i18n';
+  import { t, trExercise } from '../../i18n';
   import {
     getExercises,
     getExerciseById,
     getSessions,
-    calculate1RM,
     type Exercise,
-    type Session,
   } from '../../lib/storage';
+  import { formatDateMedium, formatDateDayMonth, formatNumber } from '../../lib/format';
+  import {
+    computeTrendPoints,
+    chartMax as calcChartMax,
+    chartX as calcChartX,
+    chartY as calcChartY,
+    CHART_H,
+    type Metric,
+    type Period,
+    type TrendPoint,
+  } from '../../lib/trends-stats';
 
   const LABELS = t();
-
-  interface TrendPoint {
-    date: string;
-    value: number;
-  }
-
-  type Metric = 'volume' | 'rm';
-  type Period = 'all' | '3m' | '1y';
-
-  const CHART_W = 800;
-  const CHART_H = 300;
-
-  function monthAgo(months: number): number {
-    const d = new Date();
-    d.setMonth(d.getMonth() - months);
-    return d.getTime();
-  }
-
-  function fmtNum(n: number): string {
-    if (!Number.isFinite(n) || n <= 0) return '0';
-    return Math.round(n).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US');
-  }
-
-  function fmtDate(iso: string): string {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  }
-
-  function fmtDateShort(iso: string): string {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
-      day: 'numeric',
-      month: 'short',
-    });
-  }
 
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -241,34 +207,7 @@ const L = t();
 
       get points(): TrendPoint[] {
         if (!this.exercise) return [];
-        const sessions: Session[] = getSessions();
-        const byDate = new Map<string, { vol: number; rm: number }>();
-        for (const session of sessions) {
-          for (const ex of session.exercises) {
-            if (ex.exerciseId !== this.exercise.id) continue;
-            let vol = 0;
-            let rm = 0;
-            for (const set of ex.sets) {
-              if (!set.completed) continue;
-              vol += set.weight * set.reps;
-              const estimate = calculate1RM(set.weight, set.reps);
-              if (estimate > rm) rm = estimate;
-            }
-            const cur = byDate.get(session.date) ?? { vol: 0, rm: 0 };
-            cur.vol += vol;
-            cur.rm = Math.max(cur.rm, rm);
-            byDate.set(session.date, cur);
-          }
-        }
-        const minTime = this.period === '3m' ? monthAgo(3) : this.period === '1y' ? monthAgo(12) : null;
-        let pts = Array.from(byDate.entries()).map(([date, v]) => ({
-          date,
-          value: this.metric === 'volume' ? v.vol : v.rm,
-        }));
-        if (minTime !== null) {
-          pts = pts.filter((p) => new Date(p.date).getTime() >= minTime);
-        }
-        return pts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        return computeTrendPoints(getSessions(), this.exercise.id, this.metric, this.period);
       },
 
       get chartTitle(): string {
@@ -288,21 +227,16 @@ const L = t();
         return this.points.length === 0 ? LABELS.tendance.noSessions : LABELS.tendance.minPoints;
       },
 
-      get chartMax(): number {
-        const peak = this.points.reduce((m, d) => (d.value > m ? d.value : m), 0);
-        return Math.max(peak * 1.1, 10);
+      get _chartMax(): number {
+        return calcChartMax(this.points);
       },
 
       chartX(i: number): number {
-        const n = this.points.length;
-        if (n <= 1) return CHART_W / 2;
-        return (i / (n - 1)) * CHART_W;
+        return calcChartX(i, this.points.length);
       },
 
       chartY(v: number): number {
-        const max = this.chartMax;
-        if (max <= 0) return CHART_H;
-        return CHART_H - (v / max) * CHART_H;
+        return calcChartY(v, this._chartMax);
       },
 
       get chartLinePoints(): string {
@@ -321,20 +255,20 @@ const L = t();
         for (let i = 1; i <= 5; i++) {
           const y = (i - 1) * 75;
           s += `<line x1="0" y1="${y}" x2="800" y2="${y}" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="2 4"></line>`;
-          s += `<text x="6" y="${y - 4}" fill="var(--color-muted)" font-size="11" font-family="var(--font-body)">${this.formatNumber(this.chartMax * (1 - (i - 1) / 5))} ${LABELS.common.kg}</text>`;
+          s += `<text x="6" y="${y - 4}" fill="var(--color-muted)" font-size="11" font-family="var(--font-body)">${formatNumber(this._chartMax * (1 - (i - 1) / 5))} ${LABELS.common.kg}</text>`;
         }
         return s;
       },
 
       get chartDotsMarkup(): string {
         return this.points.map((d, i) =>
-          `<g><circle cx="${this.chartX(i)}" cy="${this.chartY(d.value)}" r="6" fill="var(--color-bg)" stroke="var(--color-accent)" stroke-width="2.5"></circle><title>${this.formatDate(d.date)} — ${this.formatNumber(d.value)} ${LABELS.common.kg}</title></g>`
+          `<g><circle cx="${this.chartX(i)}" cy="${this.chartY(d.value)}" r="6" fill="var(--color-bg)" stroke="var(--color-accent)" stroke-width="2.5"></circle><title>${formatDateMedium(d.date)} — ${formatNumber(d.value)} ${LABELS.common.kg}</title></g>`
         ).join('');
       },
 
-      formatNumber(n: number): string { return fmtNum(n); },
-      formatDate(iso: string): string { return fmtDate(iso); },
-      formatDateShort(iso: string): string { return fmtDateShort(iso); },
+      formatNumber(n: number): string { return formatNumber(n); },
+      formatDate(iso: string): string { return formatDateMedium(iso); },
+      formatDateShort(iso: string): string { return formatDateDayMonth(iso); },
     }));
   });
 </script>

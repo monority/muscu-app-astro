@@ -181,19 +181,11 @@ const setTypes = [
                 ><Fragment set:html={icons.chevronDown(20, 20)} /></span
               >
             </button>
-            <select
-              class="ses-ex-superset-select create__ex-superset-select"
-              x-model.number="exercise.supersetId"
-              :aria-label="labels.supersetFor + ' ' + exercise.name"
-              title={L.builder.moveToSuperset}
-            >
-              <option :value="null">{'\u2014'}</option>
-            </select>
             <IconButton
               variant="danger"
               icon={icons.trash(18, 18)}
               label={L.builder.removeExerciseAria}
-              title="Retirer l'exercice"
+              title={L.builder.removeExerciseTitle}
               @click="remove()"
             />
           </div>
@@ -213,10 +205,10 @@ const setTypes = [
                 <div class="ses-table-head" role="row">
                   <div class="ses-cell ses-cell-num" role="columnheader">#</div>
                   <div class="ses-cell ses-cell-type" role="columnheader">
-                    Type
+                    {L.builder.setTypeHeader}
                   </div>
                   <div class="ses-cell ses-cell-num" role="columnheader">
-                    Poids (kg)
+                    {L.builder.weightHeader}
                   </div>
                   <div class="ses-cell ses-cell-num" role="columnheader">
                     Reps
@@ -253,27 +245,15 @@ const setTypes = [
                       </select>
                     </div>
                     <div class="ses-cell ses-cell-num" role="cell">
-                      <div class="create__weight-cell">
-                        <input
-                          type="number"
-                          class="create__input ses-input-inline"
-                          min="0"
-                          step="0.5"
-                          x-model.number="set.weight"
-                          inputmode="decimal"
-                          :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
-                        />
-                        <IconButton
-                          variant="accent"
-                          icon={icons.zap(16, 16)}
-                          label={L.builder.mrvSuggestFor}
-                          :aria-label="labels.mrvSuggestFor + ' ' + (setIdx + 1)"
-                          :title="mrvTitle(setIdx)"
-                          :aria-disabled="(!mrvEnabled(setIdx)).toString()"
-                          :class="{ 'is-disabled': !mrvEnabled(setIdx) }"
-                          @click="mrvEnabled(setIdx) && applyMrv(setIdx)"
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        class="create__input ses-input-inline"
+                        min="0"
+                        step="0.5"
+                        x-model.number="set.weight"
+                        inputmode="decimal"
+                        :aria-label="labels.weightForSet + ' ' + (setIdx + 1)"
+                      />
                     </div>
                     <div class="ses-cell ses-cell-num" role="cell">
                       <input
@@ -306,16 +286,6 @@ const setTypes = [
                 <Button variant="secondary" size="sm" @click="addSet()">
                   <Fragment set:html={icons.plus(18, 18)} />
                   <span>{L.builder.addSet}</span>
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  @click="generateWarmup()"
-                  :disabled="!canWarmup"
-                  :title="canWarmup ? labels.warmupTitle : labels.warmupHint"
-                >
-                  <Icon name="flame" size={20} />
-                  <span x-text="labels.warmupBtn">{L.builder.warmupBtn}</span>
                 </Button>
               </div>
             </CardContent>
@@ -369,11 +339,11 @@ const setTypes = [
             </div>
 
             <div class="create__field">
-              <label class="create__label">Fatigue</label>
+              <label class="create__label">{L.builder.fatigueTitle}</label>
               <div
                 class="create__fatigue-group"
                 role="radiogroup"
-                aria-label="Niveau de fatigue"
+                aria-label={L.builder.fatigueAria}
               >
                 <template x-for="i in 5" :key="'fat-' + i">
                   <button
@@ -391,7 +361,7 @@ const setTypes = [
             </div>
 
             <div class="create__field">
-              <label class="create__label">Humeur</label>
+              <label class="create__label">{L.builder.moodTitle}</label>
               <div
                 class="create__mood-group"
                 role="radiogroup"
@@ -452,7 +422,7 @@ const setTypes = [
 
             <div class="create__field">
               <label for="ses-notes" class="create__label"
-                >Notes</label
+                >{L.builder.notesLabel}</label
               >
               <textarea
                 id="ses-notes"
@@ -483,7 +453,7 @@ const setTypes = [
       </template>
     </div>
 
-    <Dialog id="ses-picker-dialog" title="Choisir un exercice">
+    <Dialog id="ses-picker-dialog" title={L.builder.pickerTitle}>
       <div class="create__picker">
         <div class="create__picker-search">
           <span class="create__picker-search-icon"
@@ -590,7 +560,7 @@ const setTypes = [
                 @click="toggleTip(ex.id)"
                 :aria-expanded="isTipOpen(ex.id).toString()"
                 :aria-label="labels.showTipAria + ' ' + ex.name"
-                title="Conseils"
+                title={L.builder.tipTitle}
                 x-show="hasTip(ex.name)"
               >
                 <Fragment set:html={icons.infoCircle(18, 18)} />
@@ -607,7 +577,7 @@ const setTypes = [
                   target="_blank"
                   rel="noopener noreferrer"
                   :aria-label="labels.videoAria + ' ' + ex.name + ' ' + labels.onYoutube"
-                  title="Voir la technique sur YouTube"
+                  title={L.builder.videoTitle}
                 >
                   <Icon name="play" size={20} />
                   <span x-text="labels.seeTechnique">Voir la technique</span>
@@ -619,7 +589,7 @@ const setTypes = [
       </div>
 
       <div slot="footer">
-        <Button variant="secondary" data-dialog-close> Fermer </Button>
+        <Button variant="secondary" data-dialog-close> {L.builder.close} </Button>
       </div>
     </Dialog>
   </div>
@@ -669,8 +639,11 @@ const setTypes = [
     removeId,
     isIdIn,
     allExpanded as checkAllExpanded,
+    openDialogById,
+    closeDialogById,
   } from "../../../components/builder/builderState";
   import { loadEditSession } from "../../../components/builder/editSessionLoader";
+  import { pickBuilderLabels } from "../../../components/builder/builderLabels";
 
   const LABELS = t();
 
@@ -697,59 +670,7 @@ const setTypes = [
 
       openTips: [] as string[],
 
-      labels: {
-        saveSession: LABELS.builder.saveSession,
-        editSaveSession: LABELS.builder.editSaveSession,
-        collapseAll: LABELS.builder.collapseAll,
-        expandAll: LABELS.builder.expandAll,
-        noExoAdded: LABELS.builder.noExoAdded,
-        noExoDesc: LABELS.builder.noExoDesc,
-        needName: LABELS.builder.needName,
-        needExo: LABELS.builder.needExo,
-        needSets: LABELS.builder.needSets,
-        emptyLibrary: LABELS.builder.emptyLibrary,
-        createExoLink: LABELS.builder.createExoLink,
-        allAdded: LABELS.builder.allAdded,
-        noSearchMatch: LABELS.builder.noSearchMatch,
-        addExoAria: LABELS.builder.addExoAria,
-        toSession: LABELS.builder.toSession,
-        showTipAria: LABELS.builder.showTipAria,
-        seeTechnique: LABELS.builder.seeTechnique,
-        videoAria: LABELS.builder.videoAria,
-        onYoutube: LABELS.builder.onYoutube,
-        supersetLabel: LABELS.builder.supersetLabel,
-        supersetFor: LABELS.builder.supersetFor,
-        newSuperset: LABELS.builder.newSuperset,
-        supersetRemove: LABELS.builder.supersetRemove,
-        setsFor: LABELS.builder.setsFor,
-        setTypeLabel: LABELS.builder.setTypeLabel,
-        weightForSet: LABELS.builder.weightForSet,
-        repsForSet: LABELS.builder.repsForSet,
-        deleteSet: LABELS.builder.deleteSet,
-        noSets: LABELS.builder.noSets,
-        setsPlural: LABELS.builder.setsPlural,
-        setsSingular: LABELS.builder.setsSingular,
-        warmupTitle: LABELS.builder.warmupTitle,
-        warmupHint: LABELS.builder.warmupHint,
-        warmupBtn: LABELS.builder.warmupBtn,
-        fatigueOn: LABELS.builder.fatigueOn,
-        fatigueOutOf5: LABELS.builder.fatigueOutOf5,
-        moodLabel: LABELS.builder.moodLabel,
-        moodGreat: LABELS.builder.moodGreat,
-        moodGood: LABELS.builder.moodGood,
-        moodOk: LABELS.builder.moodOk,
-        moodTired: LABELS.builder.moodTired,
-        moodBad: LABELS.builder.moodBad,
-        discardConfirm: LABELS.builder.discardConfirm,
-        top: LABELS.builder.top,
-        units: LABELS.builder.units,
-        discardTitle: LABELS.builder.discardTitle,
-        mrvSuggestFor: LABELS.builder.mrvSuggestFor,
-        mrvNoHistory: LABELS.builder.mrvNoHistory,
-        mrvFromHistory: LABELS.builder.mrvFromHistory,
-        mrvCapped: LABELS.builder.mrvCapped,
-        mrvToast: LABELS.builder.mrvToast,
-      },
+      labels: pickBuilderLabels(LABELS),
 
       editSessionId: null as string | null,
 
@@ -947,18 +868,8 @@ const setTypes = [
         window.location.href = localizedPath("/sessions");
       },
 
-      openDialogById(id: string) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fn = (window as any).openDialog as
-          ((i: string) => void) | undefined;
-        if (fn) fn(id);
-      },
-      closeDialogById(id: string) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const fn = (window as any).closeDialog as
-          ((i: string) => void) | undefined;
-        if (fn) fn(id);
-      },
+      openDialogById,
+      closeDialogById,
     }));
   });
 </script>
@@ -1304,17 +1215,6 @@ const setTypes = [
     transition: transform var(--transition-fast);
   }
 
-  .create__ex-superset-select {
-    background-color: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    min-height: 4.4rem;
-    padding: 0.8rem 1rem;
-    font-size: 1.3rem;
-    color: var(--color-text);
-    max-width: 10rem;
-  }
-
   .create__ex-body {
     border-top: 1px solid var(--color-border);
   }
@@ -1338,12 +1238,6 @@ const setTypes = [
   .create__select:focus {
     border-color: var(--color-accent);
     box-shadow: 0 0 0 2px var(--color-accent);
-  }
-
-  .create__weight-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
   }
 
   .create__input {
@@ -1704,13 +1598,6 @@ const setTypes = [
       grid-column: 1;
       grid-row: 1;
       width: 100%;
-    }
-    .ses-ex-header > .ses-ex-superset-select {
-      grid-column: 1;
-      grid-row: 2;
-      width: 100%;
-      max-width: none;
-      margin-top: 0.2rem;
     }
     .ses-ex-header > .icon-btn {
       grid-column: 2;

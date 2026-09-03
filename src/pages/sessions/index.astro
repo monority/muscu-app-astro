@@ -252,6 +252,13 @@ const L = t();
   import { formatDateTime as formatDate, formatVolume } from '../../lib/format';
   import { statusLabel as statusLabelFn, type StatusLabels } from '../../lib/session-utils';
   import { moodSvg } from '../../lib/mood';
+  import {
+    primaryMuscle,
+    filterSessions,
+    sortByDateDesc,
+    countLabel,
+    computeSessionStats,
+  } from '../../lib/session-list-stats';
 
   const LABELS = t();
   const statusLabels: StatusLabels = { completed: LABELS.sessions.completed, inProgress: LABELS.sessions.inProgress, planned: LABELS.sessions.planned };
@@ -312,24 +319,25 @@ const L = t();
       },
 
       refresh() {
-        this.sessions = getSessions().sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-        );
+        this.sessions = sortByDateDesc(getSessions());
       },
 
       // ── Derived ──
       get filtered(): Session[] {
-        const q = this.search.trim().toLowerCase();
-        if (!q) return this.sessions;
-        return this.sessions.filter((s) =>
-          s.name.toLowerCase().includes(q),
-        );
+        return filterSessions(this.sessions, this.search);
       },
 
       get countLabel(): string {
-        const n = this.filtered.length;
-        if (n === 0) return this.sessions.length === 0 ? this.labels.noSession : this.labels.noMatch;
-        return `${n} ${this.labels.seanceSingular}${n > 1 ? this.labels.pluralS : ''}`;
+        return countLabel(
+          this.filtered.length,
+          this.sessions.length,
+          {
+            noSession: this.labels.noSession,
+            noMatch: this.labels.noMatch,
+            seanceSingular: this.labels.seanceSingular,
+            pluralS: this.labels.pluralS,
+          },
+        );
       },
 
       get hasSessions(): boolean {
@@ -338,14 +346,7 @@ const L = t();
 
       // ── Computations ──
       totalVolume(session: Session): number {
-        return session.exercises.reduce(
-          (sum, ex) =>
-            sum + ex.sets.reduce(
-              (s, set) => s + (set.completed ? set.weight * set.reps : 0),
-              0,
-            ),
-          0,
-        );
+        return computeSessionStats(session).totalVolume;
       },
 
       statusLabel(status: SessionStatus): string {
@@ -370,20 +371,7 @@ const L = t();
 
       /** Most frequent muscle across the session's exercises ('' when none). */
       primaryMuscle(session: Session): string {
-        const counts = new Map<string, number>();
-        for (const ex of session.exercises) {
-          if (!ex.muscle) continue;
-          counts.set(ex.muscle, (counts.get(ex.muscle) ?? 0) + 1);
-        }
-        let best = '';
-        let bestCount = 0;
-        for (const [muscle, count] of counts) {
-          if (count > bestCount) {
-            best = muscle;
-            bestCount = count;
-          }
-        }
-        return best;
+        return primaryMuscle(session);
       },
 
       /** Translated stored muscle group for display (FR stays as-is). */

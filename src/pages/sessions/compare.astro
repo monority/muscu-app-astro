@@ -464,60 +464,21 @@ const L = t();
     type SessionStatus,
     type SetType,
     } from '../../lib/storage';
-  import { t, getLocale } from '../../i18n';
+  import { t } from '../../i18n';
+  import { statusLabel as statusLabelFn, type StatusLabels } from '../../lib/session-utils';
+  import { typeLabel as typeLabelFn } from '../../lib/workout-helpers';
+  import { formatDateCompact, formatDurationShort, formatVolume, formatWeight } from '../../lib/format';
 
   const LABELS = t();
 
-  function statusLabelFn(s: SessionStatus): string {
-    if (s === 'completed') return LABELS.comparer.completed;
-    if (s === 'in-progress') return LABELS.comparer.inProgress;
-    return LABELS.comparer.planned;
+  const statusLabels: StatusLabels = { completed: LABELS.comparer.completed, inProgress: LABELS.comparer.inProgress, planned: LABELS.comparer.planned };
+
+  function statusLabelLocal(s: SessionStatus): string {
+    return statusLabelFn(s, statusLabels);
   }
 
-  function typeLabelFn(t: SetType): string {
-    switch (t) {
-      case 'warmup': return LABELS.rapide.typeWarmup;
-      case 'work':   return LABELS.rapide.typeWork;
-      case 'top':    return LABELS.rapide.typeTop;
-      case 'drop':   return LABELS.rapide.typeDrop;
-      case 'failure': return LABELS.rapide.typeFailure;
-    }
-  }
-
-  function formatDateFn(iso: string): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    const date = d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-    const time = d.toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    return date + ' · ' + time;
-  }
-
-  function formatDurationFn(seconds?: number): string {
-    if (!seconds || seconds <= 0) return '—';
-    const total = Math.floor(seconds);
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60;
-    if (h > 0) return `${h}h ${m.toString().padStart(2, '0')}m`;
-    if (m > 0) return `${m}m ${s.toString().padStart(2, '0')}s`;
-    return `${s}s`;
-  }
-
-  function formatVolumeFn(v: number): string {
-    if (!Number.isFinite(v) || v <= 0) return '0 kg';
-    return Math.round(v).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US') + ' kg';
-  }
-
-  function formatWeightFn(w: number): string {
-    if (!Number.isFinite(w) || w <= 0) return '0 kg';
-    return Math.round(w).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US') + ' kg';
+  function typeLabelLocal(t: SetType): string {
+    return typeLabelFn(t, LABELS.rapide);
   }
 
   function exerciseVolumeFn(ex: SessionExercise | undefined): number {
@@ -711,32 +672,32 @@ const L = t();
       },
 
       formatOption(s: Session) {
-        const date = formatDateFn(s.date);
+        const date = formatDateCompact(s.date);
         return s.name + ' — ' + date;
       },
 
       statusLabel(s: SessionStatus) {
-        return statusLabelFn(s);
+        return statusLabelLocal(s);
       },
 
       typeLabel(t: SetType) {
-        return typeLabelFn(t);
+        return typeLabelLocal(t);
       },
 
       formatDate(iso: string) {
-        return formatDateFn(iso);
+        return formatDateCompact(iso);
       },
 
       formatDuration(seconds?: number) {
-        return formatDurationFn(seconds);
+        return formatDurationShort(seconds);
       },
 
       formatVolume(v: number) {
-        return formatVolumeFn(v);
+        return formatVolume(v);
       },
 
       formatWeight(w: number) {
-        return formatWeightFn(w);
+        return formatWeight(w);
       },
 
       totalVolume(session: Session | null): number {

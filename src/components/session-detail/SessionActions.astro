@@ -1,0 +1,71 @@
+---
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import { icons } from '../../lib/icons';
+---
+
+<div class="detail__actions">
+  <Button
+    variant="ghost"
+    active
+    href="#"
+    :href="quickSessionHref()"
+    :aria-label="labels.startSession"
+  >
+    <Icon name="play" size={20} />
+    <span x-text="labels.startSession"></span>
+  </Button>
+
+  <Button
+    variant="secondary"
+    @click="generateShareCard()"
+  >
+    <Icon name="share" size={20} />
+    <span x-text="labels.share"></span>
+  </Button>
+
+  <Button
+    variant="secondary"
+    href="#"
+    :href="compareHref()"
+    :aria-disabled="!session?.id"
+  >
+    <Icon name="grid" size={20} />
+    <span x-text="labels.compare"></span>
+  </Button>
+
+  <div class="detail__sheet" role="group">
+    <span class="detail__sheet-label" aria-hidden="true"></span>
+
+    <Button
+      variant="secondary"
+      @click="downloadSessionCsv()"
+      :aria-label="labels.downloadCsvAria"
+    >
+      <Icon name="table" size={20} />
+      <span x-text="labels.downloadCsv"></span>
+    </Button>
+
+    <Button
+      variant="secondary"
+      href="#"
+      :href="printHref()"
+      target="_blank"
+      rel="noopener"
+      :aria-label="labels.printPdfAria"
+      :aria-disabled="!session"
+    >
+      <Icon name="printer" size={20} />
+      <span x-text="labels.printPdf"></span>
+    </Button>
+  </div>
+
+  <Button variant="secondary" size="md" href="#" :href="editHref()">
+    <Icon name="edit" size={20} />
+    <span x-text="labels.edit"></span>
+  </Button>
+  <Button variant="destructive" size="md" @click="openDeleteDialog">
+    <Fragment set:html={icons.trash()} />
+    <span x-text="labels.delete"></span>
+  </Button>
+</div>

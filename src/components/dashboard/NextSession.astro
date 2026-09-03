@@ -4,20 +4,35 @@
  *
  * Renders inside Alpine x-data scope (dashboardApp).
  */
-import { t, localizedPath } from '../../i18n';
+import { t, localizedPath } from "../../i18n";
 
 const L = t();
 ---
 
-<section class="dash__next" x-show="nextSession" aria-label={L.dashboard.nextSession}>
-  <div class="dash__next-kicker" x-text="labels.nextSession">{L.dashboard.nextSession}</div>
+<section
+  class="dash__next"
+  x-show="nextSession"
+  aria-label={L.dashboard.nextSession}
+>
+  <div class="dash__next-kicker" x-text="labels.nextSession">
+    {L.dashboard.nextSession}
+  </div>
   <div class="dash__next-main">
     <div class="dash__next-copy">
       <h2 class="dash__next-name" x-text="nextSession?.name"></h2>
-      <p class="dash__next-hint" x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.plannedWorkoutHint"></p>
+      <p
+        class="dash__next-hint"
+        x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.plannedWorkoutHint"
+      >
+      </p>
     </div>
-    <a class="dash__next-action" :href="localizedPath('/sessions/quick?session=' + nextSession?.id)">
-      <span x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.startWorkout"></span>
+    <a
+      class="dash__next-action"
+      :href="localizedPath('/sessions/quick?session=' + nextSession?.id)"
+    >
+      <span
+        x-text="nextSession?.status === 'in-progress' ? labels.continueWorkout : labels.startWorkout"
+      ></span>
       <span aria-hidden="true">↗</span>
     </a>
   </div>
@@ -47,6 +62,7 @@ const L = t();
 
   .dash__next-name {
     margin: 0;
+    color: var(--color-text);
     font-size: clamp(2rem, 4vw, 3rem);
     letter-spacing: -0.04em;
   }

@@ -1,16 +1,18 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
-import Badge from '../../components/ui/Badge.astro';
-import StatusBadge from '../../components/ui/StatusBadge.astro';
 import Card from '../../components/ui/Card.astro';
 import Dialog from '../../components/ui/Dialog.astro';
-import { icons } from '../../lib/icons';
 import Icon from '../../components/ui/Icon.astro';
 import { t, localizedPath } from '../../i18n';
 import BackLink from '../../components/ui/BackLink.astro';
-import Button from '../../components/ui/Button.astro';
 import DialogFooter from '../../components/ui/DialogFooter.astro';
 import EmptyState from '../../components/ui/EmptyState.astro';
+import SessionHeader from '../../components/session-detail/SessionHeader.astro';
+import StatusSection from '../../components/session-detail/StatusSection.astro';
+import StatsGrid from '../../components/session-detail/StatsGrid.astro';
+import SessionActions from '../../components/session-detail/SessionActions.astro';
+import NotesSection from '../../components/session-detail/NotesSection.astro';
+import ExerciseList from '../../components/session-detail/ExerciseList.astro';
 
 const L = t();
 ---
@@ -38,170 +40,15 @@ const L = t();
     {/* ── Loaded session ── */}
     <template x-if="!notFound && session">
       <div class="detail__content">
-        {/* Header */}
-        <header class="detail__header">
-          <div class="detail__header-row">
-            <h1 class="detail__title" x-text="session.name"></h1>
-            <div class="detail__badges">
-              <StatusBadge statusExpr="session.status" />
-            </div>
-          </div>
-          <div
-            class="detail__date"
-            x-text="formatDateTime(session.date)"
-          ></div>
-        </header>
+        <SessionHeader />
+        <StatusSection />
+        <StatsGrid />
+        <SessionActions />
 
-        <div class="detail__status-section">
-          <label class="detail__status-label" x-text="labels.statusLabel">{L.detail.statusLabel}</label>
-          <div class="detail__status-grid" role="group" aria-label={L.detail.statusAria}>
-            <button
-              type="button"
-              class="detail__status-btn"
-              :class="{ 'is-active': session.status === 'planned' }"
-              :aria-pressed="session.status === 'planned'"
-              @click="updateStatus('planned')"
-            >
-              <span class="detail__status-dot detail__status-dot--planned" aria-hidden="true"></span>
-              <span x-text="labels.planned">{L.detail.planned}</span>
-            </button>
-            <button
-              type="button"
-              class="detail__status-btn"
-              :class="{ 'is-active': session.status === 'in-progress' }"
-              :aria-pressed="session.status === 'in-progress'"
-              @click="updateStatus('in-progress')"
-            >
-              <span class="detail__status-dot detail__status-dot--in-progress" aria-hidden="true"></span>
-              <span x-text="labels.inProgress">{L.detail.inProgress}</span>
-            </button>
-            <button
-              type="button"
-              class="detail__status-btn"
-              :class="{ 'is-active': session.status === 'completed' }"
-              :aria-pressed="session.status === 'completed'"
-              @click="updateStatus('completed')"
-            >
-              <span class="detail__status-dot detail__status-dot--completed" aria-hidden="true"></span>
-              <span x-text="labels.completed">{L.detail.completed}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Stats grid */}
-        <div class="detail__stats-grid">
-          <div class="detail__stat">
-            <div class="detail__stat-label">
-              <span class="detail__stat-icon" set:html={icons.clockStopwatch()} />
-              <span x-text="labels.duration">{L.detail.duration}</span>
-            </div>
-            <div
-              class="detail__stat-value"
-              x-text="formatDuration(session.duration)"
-            ></div>
-          </div>
-          <div class="detail__stat detail__stat--volume">
-            <div class="detail__stat-label">
-              <span class="detail__stat-icon" set:html={icons.volumeBox()} />
-              <span x-text="labels.totalVolume">{L.detail.totalVolume}</span>
-            </div>
-            <div
-              class="detail__stat-value"
-              x-text="formatVolume(sessionTotalVolume)"
-            ></div>
-          </div>
-          <div class="detail__stat">
-            <div class="detail__stat-label">
-              <span class="detail__stat-icon" set:html={icons.list()} />
-              <span x-text="labels.exercises">{L.detail.exercises}</span>
-            </div>
-            <div
-              class="detail__stat-value"
-              x-text="session.exercises.length"
-            ></div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div class="detail__actions">
-          {/* ── Démarrer — primary workout action ── */}
-          <Button
-            variant="ghost"
-            active
-            href="#"
-            :href="quickSessionHref()"
-            :aria-label="labels.startSession"
-          >
-            <Icon name="play" size={20} />
-            <span x-text="labels.startSession">{L.detail.startSession}</span>
-          </Button>
-
-          {/* ── Partager (génère une image téléchargeable) ── */}
-          <Button
-            variant="secondary"
-            @click="generateShareCard()"
-            aria-label={L.detail.shareAria}
-          >
-            <Icon name="share" size={20} />
-            <span x-text="labels.share">{L.detail.share}</span>
-          </Button>
-
-          {/* ── Comparer (lien vers la page de comparaison) ── */}
-          <Button
-            variant="secondary"
-            href="#"
-            :href="compareHref()"
-            :aria-disabled="!session?.id"
-            aria-label={L.detail.compareAria}
-          >
-            <Icon name="grid" size={20} />
-            <span x-text="labels.compare">{L.detail.compare}</span>
-          </Button>
-
-          {/* ── Fiche (CSV + impression) ──
-              Exports THIS session as a CSV spreadsheet, or opens a
-              print-friendly sheet route (target=_blank) so the user's
-              browser print dialog produces the PDF. */}
-          <div class="detail__sheet" role="group" aria-label={L.detail.sheetAria}>
-            <span class="detail__sheet-label" aria-hidden="true">{L.detail.sheet}</span>
-
-            <Button
-              variant="secondary"
-              @click="downloadSessionCsv()"
-              :aria-label="labels.downloadCsvAria"
-            >
-              <Icon name="table" size={20} />
-              <span x-text="labels.downloadCsv">{L.detail.downloadCsv}</span>
-            </Button>
-
-            <Button
-              variant="secondary"
-              href="#"
-              :href="printHref()"
-              target="_blank"
-              rel="noopener"
-              :aria-label="labels.printPdfAria"
-              :aria-disabled="!session"
-            >
-              <Icon name="printer" size={20} />
-              <span x-text="labels.printPdf">{L.detail.printPdf}</span>
-            </Button>
-          </div>
-
-          <Button variant="secondary" size="md" href="#" :href="editHref()" aria-label={L.detail.editAria}>
-            <Icon name="edit" size={20} />
-            <span x-text="labels.edit">{L.detail.edit}</span>
-          </Button>
-          <Button variant="destructive" size="md" @click="openDeleteDialog" aria-label={L.detail.deleteAria}>
-            <Fragment set:html={icons.trash()} />
-            <span x-text="labels.delete">{L.detail.delete}</span>
-          </Button>
-        </div>
-
-        {/* RPE-based progression suggestions (added 2026-08-04) */}
+        {/* RPE-based progression suggestions */}
         <template x-if="session.status === 'completed' && rpeSuggestion">
           <section class="detail__suggestion">
-            <h2 class="detail__section-title" x-text="labels.suggestionTitle">{L.detail.suggestionTitle}</h2>
+            <h2 class="detail__section-title" x-text="labels.suggestionTitle"></h2>
             <Card>
               <div
                 class="suggestion"
@@ -215,15 +62,15 @@ const L = t();
                   <p class="suggestion__detail" x-text="rpeSuggestion.detail"></p>
                   <div class="suggestion__meta">
                     <span>
-                      <span x-text="labels.rpeAvg">{L.detail.rpeAvg}</span>
+                      <span x-text="labels.rpeAvg"></span>
                       <strong x-text="formatRpe(rpeStats.avg)"></strong>/10
                     </span>
                     <span>
-                      <span x-text="labels.rpeMax">{L.detail.rpeMax}</span>
+                      <span x-text="labels.rpeMax"></span>
                       <strong x-text="formatRpe(rpeStats.max)"></strong>/10
                     </span>
                     <span>
-                      <span x-text="labels.setsAnalyzed">{L.detail.setsAnalyzed}</span>
+                      <span x-text="labels.setsAnalyzed"></span>
                       <strong x-text="rpeStats.count"></strong>
                     </span>
                   </div>
@@ -233,200 +80,8 @@ const L = t();
           </section>
         </template>
 
-        {/* Session notes (RPE / fatigue / mood / free text) */}
-        <template x-if="hasNotes">
-          <section class="detail__notes">
-            <h2 class="detail__section-title" x-text="labels.notesTitle">{L.detail.notesTitle}</h2>
-            <Card>
-              <div class="notes">
-                {/* RPE badge */}
-                <div class="notes__item" x-show="session.rpe != null">
-                  <div class="notes__label" x-text="labels.rpe">{L.detail.rpe}</div>
-                  <div class="notes__value">
-                    <span
-                      class="rpe-value"
-                      :class="'tone--' + rpeTone(session.rpe)"
-                    >
-                      <span x-text="session.rpe"></span>
-                      <span class="rpe-value__sep">/10</span>
-                    </span>
-                    <span
-                      class="notes__rpe-label"
-                      x-text="rpeLabel(session.rpe)"
-                    ></span>
-                  </div>
-                </div>
-
-                {/* Fatigue */}
-                <div class="notes__item" x-show="session.fatigue && session.fatigue > 0">
-                  <div class="notes__label">{L.detail.fatigue}</div>
-                  <div class="notes__value">
-                    <div class="notes__fatigue" aria-label={L.detail.fatigueAria}>
-                      <template x-for="i in 5" :key="'d-fat-' + i">
-                          <span
-                            class="notes__fatigue-icon"
-                            :class="{ 'is-active': session.fatigue >= i }"
-                            aria-hidden="true"
-                          >
-                            <Icon name="flame" size={20} />
-                        </span>
-                      </template>
-                    </div>
-                    <span class="notes__fatigue-label" x-text="fatigueLabel(session.fatigue)"></span>
-                  </div>
-                </div>
-
-                {/* Mood */}
-                <div class="notes__item" x-show="session.mood">
-                  <div class="notes__label">{L.sessions.moodLabel}</div>
-                  <div class="notes__value">
-                    <span
-                      class="notes__mood"
-                      :class="'notes__mood--' + session.mood"
-                    >
-                      <span class="notes__mood-emoji" x-html="moodEmoji(session.mood)"></span>
-                      <span class="notes__mood-label" x-text="moodLabel(session.mood)"></span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Free-text notes */}
-                <div class="notes__item notes__item--text" x-show="session.notes && session.notes.trim() !== ''">
-                  <div class="notes__label">{L.detail.notes}</div>
-                  <p class="notes__text" x-text="session.notes"></p>
-                </div>
-              </div>
-            </Card>
-          </section>
-        </template>
-
-        {/* Exercises */}
-        <section class="detail__exercises">
-          <h2 class="detail__section-title">{L.detail.exercises}</h2>
-
-          <template x-if="session.exercises.length === 0">
-            <Card>
-              <p class="detail__no-exercises">
-                {L.detail.noExercises}
-              </p>
-            </Card>
-          </template>
-
-          <template x-for="(ex, exIdx) in session.exercises" :key="exIdx">
-            <Card>
-              <article class="exo-row" :class="supersetTint(ex)">
-                <header class="exo-row__head">
-                  <h3 class="exo-row__name" x-text="trExercise(ex.name)"></h3>
-                  <div class="exo-row__head-actions">
-                    {/* ── Superset badge (added 2026-08-09) ──
-                        Rendered from the persisted Session.supersets array.
-                        Exercises sharing a group get the same colour and the
-                        article row gets a matching background tint. */}
-                    <span
-                      class="exo-row__superset"
-                      :class="'exo-row__superset--g' + (supersetGroup(ex)?.color ?? 0)"
-                      :aria-label="supersetLabelFor(ex)"
-                      :title="supersetMembers(ex)"
-                      x-show="supersetGroup(ex) != null"
-                      x-cloak
-                    >
-                      <Icon name="link" size={20} />
-                      <span x-text="supersetLabelFor(ex)"></span>
-                    </span>
-                    <Badge
-                      variant="category"
-                      size="sm"
-                      :class="'badge--cat-' + muscleHue(ex.muscle)"
-                      x-text="trMuscle(ex.muscle)"
-                    ></Badge>
-                  </div>
-                </header>
-
-                <div class="exo-row__stats">
-                  <div class="exo-row__stat">
-                    <span class="exo-row__stat-label">{L.sessions.volume}</span>
-                    <span
-                      class="exo-row__stat-value"
-                      x-text="formatVolume(exerciseVolume(ex))"
-                    ></span>
-                  </div>
-                  <div class="exo-row__stat">
-                    <span class="exo-row__stat-label">{L.detail.best1RM}</span>
-                    <span
-                      class="exo-row__stat-value"
-                      x-text="formatVolume(best1RM(ex))"
-                    ></span>
-                  </div>
-                  <div class="exo-row__stat">
-                    <span class="exo-row__stat-label">{L.detail.sets}</span>
-                    <span
-                      class="exo-row__stat-value"
-                      x-text="ex.sets.length"
-                    ></span>
-                  </div>
-                </div>
-
-                <div
-                  class="exo-row__table-wrap"
-                  x-show="ex.sets.length > 0"
-                >
-                  <table class="exo-row__table">
-                    <thead>
-                      <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">{L.detail.colType}</th>
-                        <th scope="col">{L.detail.colWeight}</th>
-                        <th scope="col">{L.detail.colReps}</th>
-                        <th scope="col">RPE</th>
-                        <th scope="col" class="exo-row__th-end">{L.detail.statusLabel}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template x-for="set in ex.sets" :key="set.setNumber">
-                        <tr
-                          class="exo-row__tr"
-                          :class="{ 'is-completed': set.completed }"
-                        >
-                          <td class="exo-row__num" x-text="set.setNumber"></td>
-                          <td>
-                            <span
-                              class="type-pill"
-                              :class="'type-pill--' + set.type"
-                              x-text="typeLabel(set.type)"
-                            ></span>
-                          </td>
-                          <td class="exo-row__num exo-row__weight" x-text="formatWeight(set.weight)"></td>
-                          <td class="exo-row__num exo-row__reps" x-text="set.reps"></td>
-                          <td class="exo-row__rpe" :class="'exo-row__rpe--' + rpeTone(set.rpe)" x-text="formatSetRpe(set)"></td>
-                          <td class="exo-row__td-end">
-                            <template x-if="set.completed">
-                              <span
-                                class="exo-row__check"
-                                set:html={icons.check()}
-                              />
-                            </template>
-                            <template x-if="!set.completed">
-                              <span
-                                class="exo-row__dash"
-                                aria-label={L.detail.setNotCompleted}
-                              >—</span>
-                            </template>
-                          </td>
-                        </tr>
-                      </template>
-                    </tbody>
-                  </table>
-                </div>
-                <p
-                  class="exo-row__no-sets"
-                  x-show="ex.sets.length === 0"
-                >
-                  {L.detail.noSets}
-                </p>
-              </article>
-            </Card>
-          </template>
-        </section>
+        <NotesSection />
+        <ExerciseList />
       </div>
     </template>
 
@@ -528,34 +183,21 @@ const L = t();
   import { statusLabel as statusLabelFn, type StatusLabels } from '../../lib/session-utils';
   import { typeLabel as typeLabelFn, formatSetRpe as formatSetRpeFn, exerciseVolume as exerciseVolumeFn } from '../../lib/workout-helpers';
   import { moodSvg as moodSvgFn, moodLabel as moodLabelFn } from '../../lib/mood';
+  import {
+    computeRpeStats,
+    computeRpeSuggestion,
+    computeSessionTotalVolume,
+    computeTotalSets,
+    hasNotes as hasNotesFn,
+    rpeTone as rpeToneFn,
+    rpeLabel as rpeLabelFn,
+    fatigueLabel as fatigueLabelFn,
+  } from '../../lib/session-detail-stats';
+  import { generateSessionShareCard, downloadDataUrl } from '../../lib/share-card';
+  import { downloadBlob, slugify } from '../../lib/csv-export';
 
   const LABELS = t();
   const statusLabels: StatusLabels = { completed: LABELS.detail.completed, inProgress: LABELS.detail.inProgress, planned: LABELS.detail.planned };
-
-  // ── Sheet helpers (CSV download) ─────────────────────────
-  function downloadBlob(filename: string, content: string, mime: string): void {
-    const blob = new Blob([content], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    // Defer revoke so the download has time to start in Safari/Firefox.
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  /** Lowercase slug for file names: accents stripped, non-alnum → '-'. */
-  function slugify(s: string): string {
-    const slug = s
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    return slug || 'seance';
-  }
 
   // ── Pure helpers (module scope) ────────────────────────────
   function sessionStatusLabel(s: SessionStatus): string {
@@ -594,44 +236,7 @@ const L = t();
     return rpe.toString();
   }
 
-  // ── Notes helpers (added 2026-08-04) ───────────────────────
-  function rpeToneFn(rpe: number | undefined | null): 'easy' | 'moderate' | 'hard' | 'max' | 'none' {
-    if (rpe == null || !Number.isFinite(rpe)) return 'none';
-    if (rpe <= 3) return 'easy';
-    if (rpe <= 6) return 'moderate';
-    if (rpe <= 8) return 'hard';
-    return 'max';
-  }
-
-  function rpeLabelFn(rpe: number | undefined | null): string {
-    const tone = rpeToneFn(rpe);
-    if (tone === 'easy') return LABELS.detail.rpeEasy;
-    if (tone === 'moderate') return LABELS.detail.rpeModerate;
-    if (tone === 'hard') return LABELS.detail.rpeHard;
-    if (tone === 'max') return LABELS.detail.rpeMaxTone;
-    return '—';
-  }
-
-  function fatigueLabelFn(level: number | undefined | null): string {
-    if (!level || level <= 0) return '—';
-    if (level === 1) return LABELS.detail.fatigueVeryFresh;
-    if (level === 2) return LABELS.detail.fatigueFresh;
-    if (level === 3) return LABELS.detail.fatigueNormal;
-    if (level === 4) return LABELS.detail.fatigueTired;
-    return LABELS.detail.fatigueExhausted;
-  }
-
   // Mood rendering uses the centralized helpers from src/lib/mood.ts.
-
-  function hasNotesFn(s: Session | null): boolean {
-    if (!s) return false;
-    return (
-      (s.rpe != null && Number.isFinite(s.rpe)) ||
-      (s.fatigue != null && s.fatigue > 0) ||
-      s.mood != null ||
-      (s.notes != null && s.notes.trim() !== '')
-    );
-  }
 
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -665,85 +270,32 @@ const L = t();
 
       // ── Computed ──
       get sessionTotalVolume(): number {
-        if (!this.session) return 0;
-        return this.session.exercises.reduce(
-          (sum, ex) => sum + this.exerciseVolume(ex),
-          0,
-        );
+        return computeSessionTotalVolume(this.session);
       },
 
       get totalSets(): number {
-        if (!this.session) return 0;
-        return this.session.exercises.reduce(
-          (sum, ex) => sum + ex.sets.length,
-          0,
-        );
+        return computeTotalSets(this.session);
       },
 
       get hasNotes(): boolean {
         return hasNotesFn(this.session);
       },
 
-      /**
-       * Aggregates RPE values across the whole session (completed sets
-       * only). Returns count=0 when no RPE is recorded → the suggestion
-       * UI stays hidden.
-       */
       get rpeStats(): { count: number; avg: number; max: number; allTen: boolean } {
-        if (!this.session) return { count: 0, avg: 0, max: 0, allTen: false };
-        let count = 0;
-        let sum = 0;
-        let max = 0;
-        let allTen = true;
-        for (const ex of this.session.exercises) {
-          for (const set of ex.sets) {
-            if (!set.completed) continue;
-            if (set.rpe == null || !Number.isFinite(set.rpe)) continue;
-            count += 1;
-            sum += set.rpe;
-            if (set.rpe > max) max = set.rpe;
-            if (set.rpe < 10) allTen = false;
-          }
-        }
-        if (count === 0) return { count: 0, avg: 0, max: 0, allTen: false };
-        return { count, avg: sum / count, max, allTen };
+        return computeRpeStats(this.session);
       },
 
-      /**
-       * Returns the headline + detail + tone for the suggestion card,
-       * or null when no actionable advice can be given.
-       */
       get rpeSuggestion(): { headline: string; detail: string; tone: 'up' | 'maintain' | 'down' } | null {
-        const stats = this.rpeStats;
-        if (stats.count === 0) return null;
-        // Highest priority: every set hit a perfect 10 → back off.
-        if ((stats as { allTen?: boolean }).allTen) {
-          return {
-            headline: LABELS.detail.suggestionAllTenHeadline,
-            detail: LABELS.detail.suggestionAllTenDetail,
-            tone: 'down',
-          };
-        }
-        if (stats.avg < 6) {
-          return {
-            headline: LABELS.detail.suggestionIncreaseHeadline,
-            detail: LABELS.detail.suggestionIncreaseDetail,
-            tone: 'up',
-          };
-        }
-        if (stats.avg > 8) {
-          return {
-            headline: LABELS.detail.suggestionMaintainHeadline,
-            detail: LABELS.detail.suggestionMaintainDetail,
-            tone: 'maintain',
-          };
-        }
-        // Middle ground — no actionable advice.
-        return {
-          headline: LABELS.detail.suggestionContinueHeadline,
-          detail: LABELS.detail.suggestionContinueDetail,
-          tone: 'maintain',
-        };
+        return computeRpeSuggestion(this.rpeStats, {
+          allTenHeadline: LABELS.detail.suggestionAllTenHeadline,
+          allTenDetail: LABELS.detail.suggestionAllTenDetail,
+          increaseHeadline: LABELS.detail.suggestionIncreaseHeadline,
+          increaseDetail: LABELS.detail.suggestionIncreaseDetail,
+          maintainHeadline: LABELS.detail.suggestionMaintainHeadline,
+          maintainDetail: LABELS.detail.suggestionMaintainDetail,
+          continueHeadline: LABELS.detail.suggestionContinueHeadline,
+          continueDetail: LABELS.detail.suggestionContinueDetail,
+        });
       },
 
       // ── Helpers ──
@@ -860,11 +412,22 @@ const L = t();
       },
 
       rpeLabel(rpe: number | undefined | null) {
-        return rpeLabelFn(rpe);
+        return rpeLabelFn(rpe, {
+          easy: LABELS.detail.rpeEasy,
+          moderate: LABELS.detail.rpeModerate,
+          hard: LABELS.detail.rpeHard,
+          max: LABELS.detail.rpeMaxTone,
+        });
       },
 
       fatigueLabel(level: number | undefined | null) {
-        return fatigueLabelFn(level);
+        return fatigueLabelFn(level, {
+          veryFresh: LABELS.detail.fatigueVeryFresh,
+          fresh: LABELS.detail.fatigueFresh,
+          normal: LABELS.detail.fatigueNormal,
+          tired: LABELS.detail.fatigueTired,
+          exhausted: LABELS.detail.fatigueExhausted,
+        });
       },
 
       moodEmoji(mood: SessionMood | undefined | null) {
@@ -938,269 +501,38 @@ const L = t();
         }
       },
 
-      // ── Share image generation ──────────────────────
-      // Builds a 1080×1080 PNG summary of the current session
-      // and triggers a browser download. Pure canvas API — no
-      // external dependencies. Font fallback chain uses Inter
-      // (loaded via global.css) and falls back to system sans.
+      // ── Share image generation ──
       async generateShareCard(): Promise<void> {
         if (!this.session) return;
-
-        const session = this.session;
-        const W = 1080;
-        const H = 1080;
-        const PAD = 80;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = W;
-        canvas.height = H;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        // ── Palette (matches the dark theme). The accent is read from
-        // the design token (--color-accent) — canvas fillStyle accepts
-        // the raw token value directly. The literals below are the
-        // share-canvas paints (dark surface + ink) — allowed exception. ──
-        const bg = '#050505';
-        const surface = '#0F0F0F';
-        const text = '#F6F6F6';
-        const muted = '#9CA3AF';
-        const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
-        const border = 'rgba(255, 255, 255, 0.08)';
-        const accentSoft = accent
-          ? accent.replace(/\)$/, ' / 0.15)')
-          : 'transparent';
-        const fontCond = '"Inter", sans-serif';
-        const fontBody = '"Inter", sans-serif';
-
-        // ── Background ──
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, W, H);
-
-        // ── Header: logo (left) + date (right) ──
-        ctx.textBaseline = 'alphabetic';
-
-        ctx.fillStyle = accent;
-        ctx.font = `bold 42px ${fontCond}`;
-        ctx.textAlign = 'left';
-        ctx.fillText('muscu.app', PAD, 100);
-
-        ctx.fillStyle = muted;
-        ctx.font = `28px ${fontBody}`;
-        ctx.textAlign = 'right';
-        ctx.fillText(this.formatShareDate(session.date), W - PAD, 100);
-
-        // Accent underline
-        ctx.fillStyle = accent;
-        ctx.fillRect(PAD, 130, 80, 4);
-
-        // ── Title (truncated if too long) ──
-        ctx.fillStyle = text;
-        ctx.font = `bold 64px ${fontCond}`;
-        ctx.textAlign = 'left';
-        const title = this.truncateForCanvas(
-          ctx,
-          session.name,
-          W - 2 * PAD,
-        );
-        ctx.fillText(title, PAD, 220);
-
-        // ── Status badge ──
-        const statusText = this.statusLabel(session.status).toUpperCase();
-        ctx.font = `600 22px ${fontCond}`;
-        const statusW = ctx.measureText(statusText).width;
-        const badgeW = statusW + 32;
-        const badgeH = 40;
-        const badgeX = PAD;
-        const badgeY = 248;
-
-        ctx.fillStyle = accentSoft;
-        this.drawRoundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20);
-        ctx.fill();
-
-        ctx.fillStyle = accent;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(statusText, badgeX + badgeW / 2, badgeY + badgeH / 2);
-
-        // Reset alignment for the rest of the layout
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-
-        // ── Stat cards (3 across) ──
-        const statsY = 360;
-        const statsH = 150;
-        const cardGap = 20;
-        const cardW = (W - 2 * PAD - 2 * cardGap) / 3;
-
-        const stats: ReadonlyArray<{ value: string; label: string }> = [
-          { value: String(session.exercises.length), label: LABELS.detail.exercises.toUpperCase() },
-          { value: String(this.totalSets), label: LABELS.detail.shareSetsLabel },
-          { value: formatVolumeFn(this.sessionTotalVolume), label: LABELS.sessions.volume.toUpperCase() },
-        ];
-
-        stats.forEach((stat, i) => {
-          const x = PAD + i * (cardW + cardGap);
-
-          // Card background
-          ctx.fillStyle = surface;
-          this.drawRoundRect(ctx, x, statsY, cardW, statsH, 14);
-          ctx.fill();
-
-          // Card border
-          ctx.strokeStyle = border;
-          ctx.lineWidth = 1;
-          this.drawRoundRect(ctx, x, statsY, cardW, statsH, 14);
-          ctx.stroke();
-
-          // Value (truncate to fit)
-          ctx.fillStyle = accent;
-          ctx.font = `bold 56px ${fontCond}`;
-          ctx.textAlign = 'center';
-          const value = this.truncateForCanvas(
-            ctx,
-            stat.value,
-            cardW - 32,
-          );
-          ctx.fillText(value, x + cardW / 2, statsY + 78);
-
-          // Label
-          ctx.fillStyle = muted;
-          ctx.font = `600 18px ${fontCond}`;
-          ctx.fillText(stat.label, x + cardW / 2, statsY + 118);
-        });
-
-        ctx.textAlign = 'left';
-
-        // ── Exercise list ──
-        const sectionY = 580;
-
-        ctx.fillStyle = muted;
-        ctx.font = `700 22px ${fontCond}`;
-        ctx.fillText(LABELS.detail.exercises.toUpperCase(), PAD, sectionY);
-
-        // Divider line
-        ctx.fillStyle = border;
-        ctx.fillRect(PAD, sectionY + 16, W - 2 * PAD, 1);
-
-        const listY = sectionY + 64;
-        const rowH = 50;
-        const maxVisible = 7;
-        const visible = session.exercises.slice(0, maxVisible);
-        const remaining = session.exercises.length - visible.length;
-
-        ctx.font = `30px ${fontBody}`;
-
-        visible.forEach((ex, i) => {
-          const y = listY + i * rowH;
-
-          // Name
-          ctx.fillStyle = text;
-          const name = this.truncateForCanvas(
-            ctx,
-            ex.name,
-            W - 2 * PAD - 220,
-          );
-          ctx.fillText(name, PAD, y);
-
-          // Sets count
-          const n = ex.sets.length;
-          ctx.fillStyle = muted;
-          ctx.textAlign = 'right';
-          ctx.fillText(
-            `${n} ${n > 1 ? LABELS.detail.setPlural : LABELS.detail.setSingular}`,
-            W - PAD,
-            y,
-          );
-          ctx.textAlign = 'left';
-        });
-
-        if (remaining > 0) {
-          const y = listY + visible.length * rowH;
-          ctx.fillStyle = muted;
-          ctx.font = `italic 28px ${fontBody}`;
-          ctx.fillText(
-            `+ ${remaining} ${remaining > 1 ? LABELS.detail.morePlural : LABELS.detail.moreSingular}`,
-            PAD,
-            y,
-          );
-        }
-
-        // ── Footer ──
-        ctx.fillStyle = muted;
-        ctx.font = `24px ${fontBody}`;
-        ctx.textAlign = 'center';
-        ctx.fillText(LABELS.detail.shareFooter, W / 2, 1030);
-        ctx.textAlign = 'left';
-
-        // ── Download ──
-        const datePart = (session.date || '').split('T')[0] || 'seance';
+        const datePart = (this.session.date || '').split('T')[0] || 'seance';
         const filename = `muscu-${datePart}.png`;
 
-        canvas.toBlob((blob) => {
-          if (!blob) return;
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          // Release the blob URL once the download has had time to start
-          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-        }, 'image/png');
-      },
-
-      /**
-       * Truncates `text` with an ellipsis until it fits within
-       * `maxWidth` according to the canvas's current font.
-       */
-      truncateForCanvas(
-        ctx: CanvasRenderingContext2D,
-        text: string,
-        maxWidth: number,
-      ): string {
-        if (ctx.measureText(text).width <= maxWidth) return text;
-        let truncated = text;
-        while (
-          truncated.length > 0 &&
-          ctx.measureText(truncated + '\u2026').width > maxWidth
-        ) {
-          truncated = truncated.slice(0, -1);
+        try {
+          const dataUrl = await generateSessionShareCard(this.session, {
+            labels: {
+              exercises: LABELS.detail.exercises,
+              shareSetsLabel: LABELS.detail.shareSetsLabel,
+              volume: LABELS.sessions.volume,
+              setSingular: LABELS.detail.setSingular,
+              setPlural: LABELS.detail.setPlural,
+              moreSingular: LABELS.detail.moreSingular,
+              morePlural: LABELS.detail.morePlural,
+              shareFooter: LABELS.detail.shareFooter,
+              completed: LABELS.detail.completed,
+              inProgress: LABELS.detail.inProgress,
+              planned: LABELS.detail.planned,
+            },
+          });
+          if (dataUrl) downloadDataUrl(dataUrl, filename);
+        } catch {
+          // canvas unsupported or toBlob failed — silently ignore
         }
-        return truncated + '\u2026';
-      },
-
-      /**
-       * Helper that traces a rounded rectangle path on the canvas.
-       * Caller is responsible for fill() / stroke() after the call.
-       */
-      drawRoundRect(
-        ctx: CanvasRenderingContext2D,
-        x: number,
-        y: number,
-        w: number,
-        h: number,
-        r: number,
-      ): void {
-        const radius = Math.min(r, w / 2, h / 2);
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + w - radius, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-        ctx.lineTo(x + w, y + h - radius);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-        ctx.lineTo(x + radius, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
       },
     }));
   });
 </script>
 
-<style>
+<style is:global>
   /* ── Layout ── */
   .detail {
     display: flex;

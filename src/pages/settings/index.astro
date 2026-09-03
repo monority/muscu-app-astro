@@ -17,17 +17,10 @@ import Toggle from '../../components/ui/Toggle.astro';
 import DialogFooter from '../../components/ui/DialogFooter.astro';
 import { t } from '../../i18n';
 import { icons } from '../../lib/icons';
+import { formatRestOptions } from '../../lib/settings-stats';
 
 const L = t();
-const REST_PRESETS = [30, 45, 60, 90, 120, 180, 240, 300] as const;
-const restOptions = REST_PRESETS.map((s) => {
-  const mins = Math.floor(s / 60);
-  const secs = s % 60;
-  const label =
-    secs === 0 ? `${mins} min` : `${mins} min ${secs.toString().padStart(2, '0')} s`;
-  return { value: String(s), label };
-});
-
+const restOptions = formatRestOptions();
 const APP_VERSION = '0.0.1';
 ---
 
@@ -605,10 +598,15 @@ const APP_VERSION = '0.0.1';
     syncPush,
     syncPull,
     syncTest,
-    SyncError,
-    type SyncErrorCode,
   } from '../../lib/sync';
   import { t, getLocale } from '../../i18n';
+  import {
+    formatSyncLastLabel,
+    formatSyncErrorLabel,
+    parseRestTime,
+    clampWeeklyGoal,
+    exportFilename,
+  } from '../../lib/settings-stats';
 
   const LABELS = t();
 
@@ -729,8 +727,8 @@ const APP_VERSION = '0.0.1';
       },
 
       saveRestTime(value: string) {
-        const rest = parseInt(value, 10);
-        if (!Number.isFinite(rest) || rest < 5 || rest > 3600) return;
+        const rest = parseRestTime(value);
+        if (rest === null) return;
         if (this.display.defaultRestTime === rest) return;
         this.display = updateSettings({ defaultRestTime: rest });
         this.toastSaved();
@@ -743,8 +741,8 @@ const APP_VERSION = '0.0.1';
       },
 
       setWeeklyGoal(value: number) {
-        if (!Number.isFinite(value)) return;
-        const next = Math.min(7, Math.max(1, Math.round(value)));
+        const next = clampWeeklyGoal(value);
+        if (next === null) return;
         if (this.display.weeklyGoal === next) return;
         this.display = updateSettings({ weeklyGoal: next });
         window.showToast(this.labels.savedAtPrefix + new Date().toLocaleTimeString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
@@ -758,9 +756,8 @@ const APP_VERSION = '0.0.1';
             window.showToast(this.labels.storageError, 'error');
             return;
           }
-          const date = new Date().toISOString().slice(0, 10);
           downloadBlob(
-            `muscu-backup-${date}.json`,
+            exportFilename('muscu-backup', 'json'),
             JSON.stringify(snapshot, null, 2),
             'application/json',
           );
@@ -779,9 +776,8 @@ const APP_VERSION = '0.0.1';
         this.exportingCsv = true;
         try {
           const csv = exportSessionsAsCSV();
-          const date = new Date().toISOString().slice(0, 10);
           downloadBlob(
-            `muscu-sessions-${date}.csv`,
+            exportFilename('muscu-sessions', 'csv'),
             csv,
             'text/csv;charset=utf-8',
           );
@@ -893,24 +889,15 @@ const APP_VERSION = '0.0.1';
       },
 
       lastSyncLabel(lastSyncAt?: string): string {
-        if (!lastSyncAt) return this.labels.syncNever;
-        const d = new Date(lastSyncAt);
-        if (Number.isNaN(d.getTime())) return this.labels.syncNever;
-        return `${this.labels.syncLastSync} — ${d.toLocaleString()}`;
+        return formatSyncLastLabel(
+          lastSyncAt,
+          this.labels.syncNever,
+          this.labels.syncLastSync,
+        );
       },
 
       syncErrorLabel(err: unknown): string {
-        if (err instanceof SyncError) {
-          const code = err.code as SyncErrorCode;
-          const label = this.labels.syncError[code] ?? this.labels.syncFallback;
-          if (code === 'sync-http' && typeof err.status === 'number') {
-            return `${label} (HTTP ${err.status})`;
-          }
-          return label;
-        }
-        return err instanceof Error && err.message
-          ? err.message
-          : this.labels.syncFallback;
+        return formatSyncErrorLabel(err, this.labels.syncError, this.labels.syncFallback);
       },
 
       async testSync() {

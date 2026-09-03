@@ -1,0 +1,16 @@
+---
+import StatusBadge from '../ui/StatusBadge.astro';
+---
+
+<header class="detail__header">
+  <div class="detail__header-row">
+    <h1 class="detail__title" x-text="session.name"></h1>
+    <div class="detail__badges">
+      <StatusBadge statusExpr="session.status" />
+    </div>
+  </div>
+  <div
+    class="detail__date"
+    x-text="formatDateTime(session.date)"
+  ></div>
+</header>

@@ -138,3 +138,32 @@ export function formatDuration(seconds: number): string {
   if (m > 0) return `${m}min ${s}s`;
   return `${s}s`;
 }
+
+/** Duration with zero-padded segments → "2h 05m", "5m 03s". Returns "—" for invalid. */
+export function formatDurationShort(seconds?: number): string {
+  if (!seconds || seconds <= 0) return '\u2014';
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}h ${m.toString().padStart(2, '0')}m`;
+  if (m > 0) return `${m}m ${s.toString().padStart(2, '0')}s`;
+  return `${s}s`;
+}
+
+/** "12 août 2025 · 14:30" — compact datetime with short month. */
+export function formatDateCompact(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const loc = DATE_LOCALE();
+  const date = d.toLocaleDateString(loc, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  const time = d.toLocaleTimeString(loc, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return date + ' \u00b7 ' + time;
+}

@@ -223,6 +223,8 @@ import { t, localizedPath } from '../../i18n';
     type TimerSnapshot,
   } from '../../lib/timer-widget';
   import { playBeep } from '../../lib/sound';
+  import { formatTime, formatShort, formatStopwatch } from '../../lib/timer-format';
+  import { installTimerKeyboard } from '../../lib/timer-input';
 
   const LABELS = t();
   type TimerMode = 'countdown' | 'stopwatch';
@@ -309,11 +311,14 @@ import { t, localizedPath } from '../../i18n';
       },
 
       // ── Keyboard ──
-      _keyHandler: null as ((e: KeyboardEvent) => void) | null,
+      _cleanupKeyboard: null as (() => void) | null,
 
       init() {
         this.display = this.totalTime;
-        this._installKeyboard();
+        this._cleanupKeyboard = installTimerKeyboard({
+          toggle: () => this.toggle(),
+          resetCurrent: () => this.resetCurrent(),
+        });
         if (!timerBridge.channel) {
           timerBridge.channel = new BroadcastChannel(TIMER_CHANNEL);
           timerBridge.channel.onmessage = (ev: MessageEvent) => this.handleRemote(ev.data);
@@ -695,71 +700,18 @@ import { t, localizedPath } from '../../i18n';
         else this.reset();
       },
 
-      // ═══════════════════════════════════════════════════════
-      // FORMATTING
-      // ═══════════════════════════════════════════════════════
-      formatTime(seconds: number) {
-        const s = Math.max(0, Math.floor(seconds));
-        const mm = Math.floor(s / 60).toString().padStart(2, '0');
-        const ss = (s % 60).toString().padStart(2, '0');
-        return mm + ':' + ss;
-      },
-
-      formatShort(seconds: number) {
-        const mm = Math.floor(seconds / 60);
-        const ss = seconds % 60;
-        if (mm === 0) return ss + 's';
-        if (ss === 0) return mm + ':00';
-        return mm + ':' + ss.toString().padStart(2, '0');
-      },
-
-      formatStopwatch(ms: number) {
-        const totalMs = Math.max(0, Math.floor(ms));
-        const hours = Math.floor(totalMs / 3600000);
-        const minutes = Math.floor((totalMs % 600000) / 60000);
-        const seconds = Math.floor((totalMs % 60000) / 1000);
-        const centis = Math.floor((totalMs % 1000) / 10);
-        const pad = (n: number, w: number) => n.toString().padStart(w, '0');
-
-        if (hours > 0) {
-          return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
-        }
-        return pad(minutes, 2) + ':' + pad(seconds, 2) + '.' + pad(centis, 2);
-      },
+      formatTime,
+      formatShort,
+      formatStopwatch,
 
       beep() {
         playBeep();
       },
 
-      // ── Keyboard shortcuts ──
-      _installKeyboard() {
-        if (this._keyHandler) return;
-        this._keyHandler = (e: KeyboardEvent) => {
-          const target = e.target as HTMLElement | null;
-          if (
-            target &&
-            (target.tagName === 'INPUT' ||
-              target.tagName === 'TEXTAREA' ||
-              target.tagName === 'SELECT' ||
-              target.isContentEditable)
-          ) {
-            return;
-          }
-          if (e.ctrlKey || e.metaKey || e.altKey) return;
-          if (e.key === ' ') {
-            e.preventDefault();
-            this.toggle();
-          } else if (e.key.toLowerCase() === 'r') {
-            this.resetCurrent();
-          }
-        };
-        window.addEventListener('keydown', this._keyHandler);
-      },
-
       destroy() {
-        if (this._keyHandler) {
-          window.removeEventListener('keydown', this._keyHandler);
-          this._keyHandler = null;
+        if (this._cleanupKeyboard) {
+          this._cleanupKeyboard();
+          this._cleanupKeyboard = null;
         }
         if (this.intervalId) clearInterval(this.intervalId);
         if (this.sw.intervalId) clearInterval(this.sw.intervalId);

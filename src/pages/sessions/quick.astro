@@ -379,52 +379,23 @@ const L = t();
   } from "../../lib/storage";
   import { t, localizedPath } from "../../i18n";
   import { undoLastCompletedSet } from "../../lib/session-utils";
+  import {
+    formatWeight,
+    formatDuration,
+    formatRestTime,
+    typeLabel,
+    todayISO,
+    computeAvailableSessions,
+    computeSessionStats,
+    computeProgressPercent,
+    canGoPrev as canGoPrevFn,
+    canGoNext as canGoNextFn,
+    restNextLabel as restNextLabelFn,
+    completionTitle as completionTitleFn,
+    completionMessage as completionMessageFn,
+  } from "../../lib/quick-session-stats";
 
   const LABELS = t();
-
-  // --- Pure helpers (module scope) -----------------------
-  function typeLabelFn(t: SetType): string {
-    switch (t) {
-      case "warmup":
-        return LABELS.rapide.typeWarmup;
-      case "work":
-        return LABELS.rapide.typeWork;
-      case "top":
-        return LABELS.rapide.typeTop;
-      case "drop":
-        return LABELS.rapide.typeDrop;
-      case "failure":
-        return LABELS.rapide.typeFailure;
-      default:
-        return "";
-    }
-  }
-
-  function formatWeightFn(w: number): string {
-    if (!Number.isFinite(w) || w <= 0) return "0";
-    const rounded = Math.round(w * 10) / 10;
-    return Number.isFinite(rounded) && Number.isInteger(rounded)
-      ? String(rounded)
-      : rounded.toFixed(1).replace(/\.0$/, "");
-  }
-
-  function todayISO(): string {
-    return new Date().toISOString().split("T")[0];
-  }
-
-  function formatDurationFn(seconds?: number): string {
-    if (!seconds || seconds <= 0 || !Number.isFinite(seconds))
-      return "0" + LABELS.rapide.minShort;
-    const total = Math.floor(seconds);
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60;
-    if (h > 0)
-      return `${h}${LABELS.rapide.hShort} ${m.toString().padStart(2, "0")}${LABELS.rapide.minShort}`;
-    if (m > 0)
-      return `${m}${LABELS.rapide.minShort} ${s.toString().padStart(2, "0")}${LABELS.rapide.sShort}`;
-    return `${s}${LABELS.rapide.sShort}`;
-  }
 
   document.addEventListener("alpine:init", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -498,32 +469,7 @@ const L = t();
       },
 
       loadSessions() {
-        const all = getSessions();
-        this.availableSessions = all
-          .filter(
-            (s) =>
-              (s.status === "planned" || s.status === "in-progress") &&
-              s.exercises.some((e) => e.sets.length > 0),
-          )
-          .map((s) => {
-            const totalSets = s.exercises.reduce(
-              (sum, ex) => sum + ex.sets.length,
-              0,
-            );
-            const totalVolume = s.exercises.reduce(
-              (sum, ex) =>
-                sum + ex.sets.reduce((v, set) => v + set.weight * set.reps, 0),
-              0,
-            );
-            return {
-              id: s.id,
-              label: s.name,
-              totalSets,
-              totalVolume,
-              status: s.status,
-            };
-          })
-          .sort((a, b) => (a.label < b.label ? 1 : -1));
+        this.availableSessions = computeAvailableSessions(getSessions());
       },
 
       startSession() {
@@ -604,50 +550,26 @@ const L = t();
 
       get totalSets(): number {
         if (!this.session) return 0;
-        return this.session.exercises.reduce(
-          (sum, ex) => sum + ex.sets.length,
-          0,
-        );
+        return computeSessionStats(this.session).totalSets;
       },
 
       get recordedSets(): number {
         if (!this.session) return 0;
-        return this.session.exercises.reduce(
-          (sum, ex) => sum + ex.sets.filter((set) => set.completed).length,
-          0,
-        );
+        return computeSessionStats(this.session).recordedSets;
       },
 
       get progressPercent(): number {
-        const total = this.totalSets;
-        if (total === 0) return 0;
-        let done = 0;
-        if (this.session) {
-          for (let i = 0; i < this.session.exercises.length; i++) {
-            const ex = this.session.exercises[i];
-            if (i < this.currentExerciseIndex) {
-              done += ex.sets.length;
-            } else if (i === this.currentExerciseIndex) {
-              done += this.currentSetIndex;
-            } else {
-              break;
-            }
-          }
-        }
-        return Math.min(100, Math.round((done / total) * 100));
+        if (!this.session) return 0;
+        return computeProgressPercent(
+          this.session,
+          this.currentExerciseIndex,
+          this.currentSetIndex,
+        );
       },
 
       get sessionTotalVolume(): number {
         if (!this.session) return 0;
-        return this.session.exercises.reduce(
-          (sum, ex) =>
-            sum +
-            ex.sets.reduce(
-              (v, set) => (set.completed ? v + set.weight * set.reps : v),
-              0,
-            ),
-          0,
-        );
+        return computeSessionStats(this.session).totalVolume;
       },
 
       get sessionDuration(): number {
@@ -658,36 +580,38 @@ const L = t();
 
       get completedExercises(): number {
         if (!this.session) return 0;
-        return this.session.exercises.filter(
-          (ex) => ex.sets.length > 0 && ex.sets.every((set) => set.completed),
-        ).length;
+        return computeSessionStats(this.session).completedExercises;
       },
 
       get completionTitle(): string {
-        return this.recordedSets >= this.totalSets
-          ? LABELS.rapide.allDone
-          : LABELS.rapide.endedEarly;
+        return completionTitleFn(
+          this.recordedSets,
+          this.totalSets,
+          LABELS.rapide.allDone,
+          LABELS.rapide.endedEarly,
+        );
       },
 
       get completionMessage(): string {
-        if (this.recordedSets >= this.totalSets) {
-          return LABELS.rapide.completionFull;
-        }
-        return `${LABELS.rapide.completionPartial} — ${this.recordedSets}/${this.totalSets} ${LABELS.rapide.setsShort}`;
+        return completionMessageFn(
+          this.recordedSets,
+          this.totalSets,
+          LABELS.rapide.completionFull,
+          LABELS.rapide.completionPartial,
+          LABELS.rapide.setsShort,
+        );
       },
 
       canGoPrev(): boolean {
-        if (!this.session) return false;
-        return this.currentExerciseIndex > 0 || this.currentSetIndex > 0;
+        return canGoPrevFn(this.currentExerciseIndex, this.currentSetIndex);
       },
 
       canGoNext(): boolean {
         if (!this.session) return false;
-        const ex = this.currentExercise;
-        if (!ex) return false;
-        return (
-          this.currentSetIndex < ex.sets.length - 1 ||
-          this.currentExerciseIndex < this.session.exercises.length - 1
+        return canGoNextFn(
+          this.session,
+          this.currentExerciseIndex,
+          this.currentSetIndex,
         );
       },
 
@@ -948,13 +872,13 @@ const L = t();
 
       setsShortLabel: LABELS.rapide.setsShort,
       typeLabel(t: SetType): string {
-        return typeLabelFn(t);
+        return typeLabel(t, LABELS.rapide);
       },
       formatWeight(w: number): string {
-        return formatWeightFn(w);
+        return formatWeight(w);
       },
       formatDuration(s?: number): string {
-        return formatDurationFn(s);
+        return formatDuration(s, LABELS.rapide);
       },
       detailHref(id?: string): string {
         return localizedPath(
@@ -965,18 +889,18 @@ const L = t();
         return getSettings().unit;
       },
       formatRestTime(): string {
-        const s = this.restRemaining;
-        const m = Math.floor(s / 60);
-        const r = s % 60;
-        return `${m}:${r.toString().padStart(2, "0")}`;
+        return formatRestTime(this.restRemaining);
       },
       restNextLabel(): string {
-        if (!this.currentExercise) return "";
-        const set = this.currentSet;
-        if (!set) return "";
-        const weight = this.formatWeight(set.weight);
-        const unit = this.weightUnit();
-        return `${LABELS.rapide.nextUp} ${weight} ${unit} × ${set.reps}`;
+        if (!this.session) return "";
+        return restNextLabelFn(
+          this.session,
+          this.currentExerciseIndex,
+          this.currentSetIndex,
+          formatWeight,
+          this.weightUnit(),
+          LABELS.rapide.nextUp,
+        );
       },
     }));
   });

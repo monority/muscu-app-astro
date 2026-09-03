@@ -524,59 +524,26 @@ const categories = [
       type Session,
       type SessionExercise,
       type SessionSet,
-      type SetType,
     } from "../../lib/storage";
     import { getExerciseTip } from "../../lib/exercise-tips";
     import { icons } from "../../lib/icons";
+    import {
+      resolveForm,
+      computeSetCounts,
+      filterExercises,
+      computeMuscleGroups,
+      muscleOptionsForSelect,
+      buildTrendUrl,
+      hasWorkingWeight,
+      generateWarmupRows,
+      formatCountLabel,
+      CUSTOM_MUSCLE,
+      type FormState,
+      type AddSetRow,
+    } from "../../lib/exercises-stats";
 
     const LABELS = t();
     (window as any).icons = icons;
-
-    // Default muscle groups always surfaced in the filter bar
-    // (mirrors the seed list in src/lib/storage.ts).
-    const EXO_DEFAULT_MUSCLES = [
-      "Pectoraux",
-      "Dos",
-      "Épaules",
-      "Biceps",
-      "Triceps",
-      "Quadriceps",
-      "Ischio-jambiers",
-      "Fessiers",
-      "Abdominaux",
-      "Mollets",
-      "Avant-bras",
-    ];
-
-    // Sentinel value used by the muscle <select> to reveal the
-    // "custom muscle" input.
-    const CUSTOM_MUSCLE = "__custom__";
-
-    interface AlpineFormState {
-      name: string;
-      muscle: string;
-      customMuscle: string;
-      category: string;
-    }
-
-    interface AddSetRow {
-      type: SetType;
-      weight: number;
-      reps: number;
-    }
-
-    function resolveForm(
-      form: AlpineFormState,
-    ): { name: string; muscle: string; category: string } | null {
-      const name = form.name.trim();
-      const muscle =
-        form.muscle === CUSTOM_MUSCLE
-          ? form.customMuscle.trim()
-          : form.muscle.trim();
-      const category = form.category.trim();
-      if (!name || !muscle || !category) return null;
-      return { name, muscle, category };
-    }
 
     document.addEventListener("alpine:init", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -595,7 +562,7 @@ const categories = [
           muscle: "",
           customMuscle: "",
           category: "",
-        } as AlpineFormState,
+        } as FormState,
         formError: "",
         editingId: "" as string,
         deletingExercise: null as Exercise | null,
@@ -643,59 +610,43 @@ const categories = [
         refresh() {
           this.exercises = getExercises();
           this.sessions = getSessions();
-          this.recomputeSetCounts();
-        },
-
-        recomputeSetCounts() {
-          const counts: Record<string, number> = {};
-          for (const session of this.sessions) {
-            for (const ex of session.exercises) {
-              counts[ex.exerciseId] =
-                (counts[ex.exerciseId] ?? 0) + ex.sets.length;
-            }
-          }
-          this.setCounts = counts;
+          this.setCounts = computeSetCounts(this.sessions);
         },
 
         getSetCount(exerciseId: string): number {
           return this.setCounts[exerciseId] ?? 0;
         },
 
-        // Deep-link to the trend chart page, scoped to this exercise.
         trendUrl(ex: Exercise): string {
-          const q = new URLSearchParams({ ex: ex.name });
-          return `${localizedPath("/exercises/trends")}?${q.toString()}`;
+          return buildTrendUrl(ex.name, localizedPath("/exercises/trends"));
         },
 
         // ── Derived ──
         get muscleGroups(): string[] {
-          const fromData = this.exercises.map((e) => e.muscle);
-          const set = new Set<string>([...EXO_DEFAULT_MUSCLES, ...fromData]);
-          return Array.from(set).sort((a, b) => a.localeCompare(b, "fr"));
+          return computeMuscleGroups(this.exercises);
         },
 
-        get muscleOptionsForSelect(): { value: string; label: string }[] {
-          const groups = this.muscleGroups;
-          return [
-            ...groups.map((m) => ({ value: m, label: m })),
-            { value: CUSTOM_MUSCLE, label: LABELS.exercices.categories.autre },
-          ];
+        get muscleOptionsForSelect() {
+          return muscleOptionsForSelect(
+            this.muscleGroups,
+            LABELS.exercices.categories.autre,
+          );
         },
 
         get filtered(): Exercise[] {
-          const q = this.search.trim().toLowerCase();
-          const muscle = this.muscleFilter;
-          return this.exercises.filter((ex) => {
-            if (muscle && ex.muscle !== muscle) return false;
-            if (this.favFilter && !ex.favorite) return false;
-            if (q && !ex.name.toLowerCase().includes(q)) return false;
-            return true;
+          return filterExercises(this.exercises, {
+            search: this.search,
+            muscle: this.muscleFilter,
+            favorites: this.favFilter,
           });
         },
 
         get countLabel(): string {
-          const n = this.filtered.length;
-          return `${n} ${n > 1 ? LABELS.sessions.exoPlural : LABELS.sessions.exoSingular}`;
+          return formatCountLabel(
+            this.filtered.length,
+            LABELS.sessions.exoSingular,
+            LABELS.sessions.exoPlural,
+          );
         },
 
         get hasFilters(): boolean {
@@ -778,7 +729,6 @@ const categories = [
             { type: "work", weight: 0, reps: 0 },
             { type: "work", weight: 0, reps: 0 },
           ];
-          // Refresh the sessions list so the picker is up to date.
           this.sessions = getSessions();
           this.openDialogById("exo-add-to-session-dialog");
         },
@@ -790,7 +740,7 @@ const categories = [
           this.closeDialogById("exo-add-to-session-dialog");
         },
 
-        // ── Tips (added 2026-08-04) ──
+        // ── Tips ──
         hasTip(name: string): boolean {
           return getExerciseTip(name) != null;
         },
@@ -821,33 +771,15 @@ const categories = [
         },
 
         hasWorkingWeight(): boolean {
-          return this.addSets.some(
-            (s) => (s.type === "work" || s.type === "top") && s.weight > 0,
-          );
+          return hasWorkingWeight(this.addSets);
         },
 
         generateWarmup() {
-          // Find the max working weight from existing sets.
-          const workingSets = this.addSets.filter(
-            (s) => s.type === "work" && s.weight > 0,
-          );
-          if (workingSets.length === 0) {
+          const warmups = generateWarmupRows(this.addSets);
+          if (warmups.length === 0) {
             showToast(LABELS.builder.warmupHint);
             return;
           }
-
-          const maxWeight = Math.max(...workingSets.map((s) => s.weight));
-
-          // Generate warmup sets: 40%, 60%, 80% of working weight.
-          const warmupPercents = [0.4, 0.6, 0.8] as const;
-          const warmupReps = [12, 8, 5] as const;
-          const warmups: AddSetRow[] = warmupPercents.map((p, i) => ({
-            type: "warmup",
-            weight: Math.round(maxWeight * p),
-            reps: warmupReps[i],
-          }));
-
-          // Prepend warmups to the working sets.
           this.addSets = [...warmups, ...this.addSets];
         },
 
@@ -857,7 +789,6 @@ const categories = [
 
           let sessionId = this.addToSessionId;
 
-          // Create a new session if requested.
           if (sessionId === "new") {
             const name =
               this.newSessionName.trim() ||
@@ -898,7 +829,7 @@ const categories = [
           showToast(LABELS.exercices.toastAdded);
         },
 
-        // ── Dialog helpers (wrap the global Dialog API) ──
+        // ── Dialog helpers ──
         openDialogById(id: string) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const fn = (window as any).openDialog as

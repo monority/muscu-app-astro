@@ -1,0 +1,38 @@
+---
+---
+
+<div class="detail__status-section">
+  <label class="detail__status-label" x-text="labels.statusLabel"></label>
+  <div class="detail__status-grid" role="group" aria-label="">
+    <button
+      type="button"
+      class="detail__status-btn"
+      :class="{ 'is-active': session.status === 'planned' }"
+      :aria-pressed="session.status === 'planned'"
+      @click="updateStatus('planned')"
+    >
+      <span class="detail__status-dot detail__status-dot--planned" aria-hidden="true"></span>
+      <span x-text="labels.planned"></span>
+    </button>
+    <button
+      type="button"
+      class="detail__status-btn"
+      :class="{ 'is-active': session.status === 'in-progress' }"
+      :aria-pressed="session.status === 'in-progress'"
+      @click="updateStatus('in-progress')"
+    >
+      <span class="detail__status-dot detail__status-dot--in-progress" aria-hidden="true"></span>
+      <span x-text="labels.inProgress"></span>
+    </button>
+    <button
+      type="button"
+      class="detail__status-btn"
+      :class="{ 'is-active': session.status === 'completed' }"
+      :aria-pressed="session.status === 'completed'"
+      @click="updateStatus('completed')"
+    >
+      <span class="detail__status-dot detail__status-dot--completed" aria-hidden="true"></span>
+      <span x-text="labels.completed"></span>
+    </button>
+  </div>
+</div>

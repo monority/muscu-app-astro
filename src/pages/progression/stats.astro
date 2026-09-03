@@ -175,247 +175,23 @@ const L = t();
   } from '../../lib/volume-stats';
 
   import { cssVar, cssVarAlpha } from '../../lib/css-var';
-  import { muscleHue, type MuscleTone } from '../../lib/colors';
+  import { muscleHue } from '../../lib/colors';
+  import {
+    buildWeeks,
+    aggregateByWeek,
+    topExercisesByVolume,
+    type WeekBucket,
+    type TopExercise,
+  } from '../../lib/week-aggregation';
+  import {
+    groupByFamily,
+    familyLabel,
+    svgEscape,
+    muscleToneColor,
+    type FamilySlice,
+  } from '../../lib/stats-helpers';
 
   const LABELS = t();
-
-  // ============================================================================
-  // Types
-  // ============================================================================
-
-  interface WeekBucket {
-    /** Sunday (start) of the week, at 00:00 local. */
-    start: Date;
-    /** ISO YYYY-MM-DD for the bucket's start (stable key). */
-    key: string;
-    /** Sum of weight * reps across completed sets. */
-    volume: number;
-    /** Count of completed sessions. */
-    sessionCount: number;
-    /** Average duration (seconds) across sessions with a recorded duration. */
-    durationSum: number;
-    durationCount: number;
-  }
-
-  interface TopExercise {
-    exerciseId: string;
-    name: string;
-    muscle: string;
-    volume: number;
-  }
-
-  /**
-   * Donut palette — the 6 muscle-category hues from src/styles/tokens.css
-   * (`--color-cat-*`), the SAME families the muscle badges render via
-   * `muscleHue()` (src/lib/colors.ts) + `badge--cat-<tone>`.
-   *
-   * This is the "abandon des 12 couleurs, 6 familles thématiques" decision
-   * (REFONTE §4 residual) : the previous 12-color MUSCLE_PALETTE is gone.
-   * Each slice's color is read live from the theme tokens at render time,
-   * so dark/light is honored and donut arcs + legend swatches match the
-   * category badges exactly. Unknown muscles (`other`/« Autre ») fall back
-   * to the neutral muted tone.
-   */
-  const CAT_TONE_VAR: Record<string, string> = {
-    chest: '--color-cat-chest',
-    back: '--color-cat-back',
-    shoulders: '--color-cat-shoulders',
-    arms: '--color-cat-arms',
-    legs: '--color-cat-legs',
-    core: '--color-cat-core',
-  };
-
-  /** Donut/légende color for a stored muscle key — family token value. */
-  function muscleToneColor(muscle: string): string {
-    const token = CAT_TONE_VAR[muscleHue(muscle)];
-    return cssVar(token || '--color-muted');
-  }
-
-  /** One donut slice after aggregation: a whole muscle FAMILY. */
-  interface FamilySlice {
-    /** Hue family (`muscleHue()` tones chest/back/shoulders/arms/legs/core/other). */
-    tone: MuscleTone;
-    /** Σ volume of every stored muscle in the family, kg. */
-    volume: number;
-    /** Family share of the period's total, 0..100 (recomputed from grouped totals). */
-    pct: number;
-    /** Largest-volume muscle of the family — its translated name labels the arc. */
-    dominant: MuscleVolumeSlice;
-    /** How many distinct stored muscles share this family (label suffix ×N). */
-    count: number;
-  }
-
-  /**
-   * Donut aggregation (REFONTE §4): group per-muscle slices from
-   * `volumeByMuscle()` into the 6 muscle FAMILIES via `muscleHue()`
-   * (+ `other`), so the ring shows one arc per hue family — not one
-   * per stored muscle (e.g. 5 green leg arcs collapse into one « legs »
-   * family arc). pct is recomputed from the grouped totals so the ring
-   * still sums to 100%. Families sort by aggregate volume desc; the
-   * dominant muscle (largest volume within the family) labels it.
-   */
-  function groupByFamily(slices: MuscleVolumeSlice[]): FamilySlice[] {
-    const byTone = new Map<
-      MuscleTone,
-      { volume: number; count: number; dominant: MuscleVolumeSlice }
-    >();
-    for (const sl of slices) {
-      const tone = muscleHue(sl.muscle);
-      const entry = byTone.get(tone) ?? { volume: 0, count: 0, dominant: sl };
-      entry.volume += sl.volume;
-      entry.count += 1;
-      if (sl.volume > entry.dominant.volume) entry.dominant = sl;
-      byTone.set(tone, entry);
-    }
-
-    const grouped = Array.from(byTone.entries()).map(([tone, e]) => ({
-      tone,
-      volume: e.volume,
-      pct: 0,
-      dominant: e.dominant,
-      count: e.count,
-    }));
-    const total = grouped.reduce((s, g) => s + g.volume, 0);
-    for (const g of grouped) {
-      g.pct = total > 0 ? (g.volume / total) * 100 : 0;
-    }
-    return grouped.sort((a, b) => b.volume - a.volume);
-  }
-
-  /**
-   * Donut/légende label for a family slice: the dominant muscle's
-   * translated name (matches the exercise-badge language via `trMuscle`),
-   * suffixed ` ×N` when several stored muscles share the family — honest
-   * about the aggregation without inventing a family-level name.
-   */
-  function familyLabel(g: FamilySlice): string {
-    const name = trMuscle(g.dominant.muscle);
-    return g.count > 1 ? `${name} ×${g.count}` : name;
-  }
-
-  // ============================================================================
-  // Pure helpers (testable, kept small)
-  // ============================================================================
-
-  /** Returns the Sunday (00:00 local) of the week containing `d`. */
-  function startOfWeek(d: Date): Date {
-    const out = new Date(d);
-    out.setDate(d.getDate() - d.getDay()); // getDay(): 0=Sun
-    out.setHours(0, 0, 0, 0);
-    return out;
-  }
-
-  function isoDate(d: Date): string {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
-
-  /**
-   * Build the last `n` week buckets ending with the current week, oldest
-   * first. Each bucket starts on Sunday at 00:00 local time, matching
-   * the codebase's `getSessionsThisWeek` convention.
-   */
-  function buildWeeks(n: number, anchor: Date = new Date()): WeekBucket[] {
-    const end = startOfWeek(anchor);
-    const buckets: WeekBucket[] = [];
-    for (let i = n - 1; i >= 0; i--) {
-      const start = new Date(end);
-      start.setDate(end.getDate() - i * 7);
-      buckets.push({
-        start,
-        key: isoDate(start),
-        volume: 0,
-        sessionCount: 0,
-        durationSum: 0,
-        durationCount: 0,
-      });
-    }
-    return buckets;
-  }
-
-  /**
-   * Aggregate sessions into a pre-built set of week buckets. Sessions
-   * outside the bucket range are ignored. The session's date is parsed
-   * as local time (YYYY-MM-DD), so it always lines up with the Sunday
-   * bucket it belongs to.
-   */
-  function aggregateByWeek(
-    sessions: Session[],
-    buckets: WeekBucket[],
-  ): void {
-    if (buckets.length === 0) return;
-    const minKey = buckets[0].key;
-    const maxKey = buckets[buckets.length - 1].key;
-    const idxByKey = new Map(buckets.map((b, i) => [b.key, i] as const));
-
-    for (const session of sessions) {
-      if (session.status !== 'completed') continue;
-      if (!session.date) continue;
-
-      // Date string YYYY-MM-DD → local Date at midnight (matches bucket keys).
-      const d = new Date(session.date + 'T00:00:00');
-      if (isNaN(d.getTime())) continue;
-      const sessionKey = isoDate(d);
-      if (sessionKey < minKey || sessionKey > maxKey) continue;
-
-      const idx = idxByKey.get(sessionKey);
-      if (idx === undefined) continue;
-      const bucket = buckets[idx];
-      bucket.sessionCount += 1;
-
-      if (typeof session.duration === 'number' && session.duration > 0) {
-        bucket.durationSum += session.duration;
-        bucket.durationCount += 1;
-      }
-
-      for (const ex of session.exercises) {
-        for (const set of ex.sets) {
-          if (!set.completed) continue;
-          bucket.volume += set.weight * set.reps;
-        }
-      }
-    }
-  }
-
-  /** Top N exercises by volume, descending. */
-  function topExercisesByVolume(
-    sessions: Session[],
-    n: number,
-    weekCount: number,
-  ): TopExercise[] {
-    const buckets = buildWeeks(weekCount);
-    const minKey = buckets[0].key;
-    const maxKey = buckets[buckets.length - 1].key;
-    const totals = new Map<string, TopExercise>();
-
-    for (const session of sessions) {
-      if (session.status !== 'completed') continue;
-      if (!session.date) continue;
-      if (session.date < minKey || session.date > maxKey) continue;
-
-      for (const ex of session.exercises) {
-        let total = totals.get(ex.exerciseId)?.volume ?? 0;
-        for (const set of ex.sets) {
-          if (!set.completed) continue;
-          total += set.weight * set.reps;
-        }
-        if (total > 0) {
-          totals.set(ex.exerciseId, {
-            exerciseId: ex.exerciseId,
-            name: ex.name,
-            muscle: ex.muscle,
-            volume: total,
-          });
-        }
-      }
-    }
-
-    return Array.from(totals.values())
-      .sort((a, b) => b.volume - a.volume)
-      .slice(0, n);
-  }
 
 // ============================================================================
 // SVG renderers
@@ -435,14 +211,6 @@ function benchmarkBadge(band: PercentileBand | null): string {
   if (!band || !(band in lower)) return '';
   return `<span class="stats__bench-badge">≥ ${lower[band]}ᵉ</span>`;
 }
-
-  function svgEscape(s: string): string {
-    return s
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
 
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -670,8 +438,8 @@ function benchmarkBadge(band: PercentileBand | null): string {
           const offset = -(C * cursor);
           cursor += frac;
 
-          const color = muscleToneColor(g.dominant.muscle);
-          const tip = `${svgEscape(familyLabel(g))} · ${formatNumber(g.volume)} ${LABELS.common.kg} · ${Math.round(g.pct)}%`;
+          const color = muscleToneColor(g.dominant.muscle, cssVar);
+          const tip = `${svgEscape(familyLabel(g, trMuscle))} · ${formatNumber(g.volume)} ${LABELS.common.kg} · ${Math.round(g.pct)}%`;
           arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${thickness}" stroke-dasharray="${segLen.toFixed(2)} ${gapLen.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"><title>${tip}</title></circle>`;
         }
 
@@ -679,8 +447,8 @@ function benchmarkBadge(band: PercentileBand | null): string {
 
         const legend = groups
           .map((g) => {
-            const color = muscleToneColor(g.dominant.muscle);
-            const name = svgEscape(familyLabel(g));
+            const color = muscleToneColor(g.dominant.muscle, cssVar);
+            const name = svgEscape(familyLabel(g, trMuscle));
             const tip = `${name} · ${formatNumber(g.volume)} ${LABELS.common.kg} · ${Math.round(g.pct)}%`;
             return `
               <li class="stats__legend-row" title="${tip}">

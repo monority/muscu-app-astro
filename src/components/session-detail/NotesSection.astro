@@ -1,0 +1,70 @@
+---
+import Card from '../ui/Card.astro';
+import Icon from '../ui/Icon.astro';
+---
+
+<template x-if="hasNotes">
+  <section class="detail__notes">
+    <h2 class="detail__section-title" x-text="labels.notesTitle"></h2>
+    <Card>
+      <div class="notes">
+        {/* RPE badge */}
+        <div class="notes__item" x-show="session.rpe != null">
+          <div class="notes__label" x-text="labels.rpe"></div>
+          <div class="notes__value">
+            <span
+              class="rpe-value"
+              :class="'tone--' + rpeTone(session.rpe)"
+            >
+              <span x-text="session.rpe"></span>
+              <span class="rpe-value__sep">/10</span>
+            </span>
+            <span
+              class="notes__rpe-label"
+              x-text="rpeLabel(session.rpe)"
+            ></span>
+          </div>
+        </div>
+
+        {/* Fatigue */}
+        <div class="notes__item" x-show="session.fatigue && session.fatigue > 0">
+          <div class="notes__label" x-text="labels.fatigue"></div>
+          <div class="notes__value">
+            <div class="notes__fatigue" aria-label="">
+              <template x-for="i in 5" :key="'d-fat-' + i">
+                  <span
+                    class="notes__fatigue-icon"
+                    :class="{ 'is-active': session.fatigue >= i }"
+                    aria-hidden="true"
+                  >
+                    <Icon name="flame" size={20} />
+                </span>
+              </template>
+            </div>
+            <span class="notes__fatigue-label" x-text="fatigueLabel(session.fatigue)"></span>
+          </div>
+        </div>
+
+        {/* Mood */}
+        <div class="notes__item" x-show="session.mood">
+          <div class="notes__label" x-text="labels.moodLabel"></div>
+          <div class="notes__value">
+            <span
+              class="notes__mood"
+              :class="'notes__mood--' + session.mood"
+            >
+              <span class="notes__mood-emoji" x-html="moodEmoji(session.mood)"></span>
+              <span class="notes__mood-label" x-text="moodLabel(session.mood)"></span>
+            </span>
+          </div>
+        </div>
+
+        {/* Free-text notes */}
+        <div class="notes__item notes__item--text" x-show="session.notes && session.notes.trim() !== ''">
+          <div class="notes__label" x-text="labels.notes"></div>
+          <p class="notes__text" x-text="session.notes"></p>
+        </div>
+      </div>
+    </Card>
+  </section>
+</template>

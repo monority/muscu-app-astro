@@ -263,7 +263,7 @@ const L = t();
 </AppLayout>
 
 <script>
-  import { t, getLocale } from '../../i18n';
+  import { t } from '../../i18n';
   import {
     getExerciseById,
     getSessions,
@@ -272,6 +272,8 @@ const L = t();
     type RpeType,
     type SetType,
   } from '../../lib/storage';
+  import { typeLabel as typeLabelFn } from '../../lib/workout-helpers';
+  import { formatDateMedium, formatDateDayMonth, formatNumber } from '../../lib/format';
 
   const LABELS = t();
 
@@ -302,40 +304,8 @@ const L = t();
   const CHART_W = 800;
   const CHART_H = 300;
 
-  function fmtNum(n: number): string {
-    if (!Number.isFinite(n) || n <= 0) return '0';
-    return Math.round(n).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US');
-  }
-
-  function fmtDate(iso: string): string {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  }
-
-  function fmtDateShort(iso: string): string {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
-      day: 'numeric',
-      month: 'short',
-    });
-  }
-
-  function typeLabelFn(t: SetType): string {
-    switch (t) {
-      case 'warmup':  return LABELS.historique.typeWarmup;
-      case 'work':    return LABELS.historique.typeWork;
-      case 'top':     return LABELS.historique.typeTop;
-      case 'drop':    return LABELS.historique.typeDrop;
-      case 'failure': return LABELS.historique.typeFailure;
-    }
+  function typeLabelLocal(t: SetType): string {
+    return typeLabelFn(t, LABELS.historique);
   }
 
   /**
@@ -570,16 +540,16 @@ const L = t();
 
       // ── Display helpers ──
       formatNumber(n: number): string {
-        return fmtNum(n);
+        return formatNumber(n);
       },
       formatDate(iso: string): string {
-        return fmtDate(iso);
+        return formatDateMedium(iso);
       },
       formatDateShort(iso: string): string {
-        return fmtDateShort(iso);
+        return formatDateDayMonth(iso);
       },
       typeLabel(t: SetType): string {
-        return typeLabelFn(t);
+        return typeLabelLocal(t);
       },
       formatRpe(row: HistoryRow): string {
         return fmtRpe(row.rpe, row.rpeType);

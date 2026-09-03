@@ -191,7 +191,8 @@ const L = t();
     type ProgressRecord,
   } from '../../lib/storage';
 
-  import { t, getLocale, localizedPath } from '../../i18n';
+  import { t, localizedPath } from '../../i18n';
+  import { formatDateShort, formatNumber } from '../../lib/format';
 
   const LABELS = t();
 
@@ -208,22 +209,6 @@ const L = t();
   }
 
   type SortMode = 'rm' | 'name' | 'recent';
-
-  function fmtNum(n: number): string {
-    if (!Number.isFinite(n) || n <= 0) return '0';
-    return Math.round(n).toLocaleString(getLocale() === 'fr' ? 'fr-FR' : 'en-US');
-  }
-
-  function fmtDate(iso: string): string {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString(getLocale() === 'fr' ? 'fr-FR' : 'en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  }
 
   document.addEventListener('alpine:init', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -377,10 +362,10 @@ const L = t();
       },
 
       formatNumber(n: number): string {
-        return fmtNum(n);
+        return formatNumber(n);
       },
       formatDate(iso: string): string {
-        return fmtDate(iso);
+        return formatDateShort(iso);
       },
 
       historyHref(id: string): string {
