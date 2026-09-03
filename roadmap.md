@@ -5,14 +5,14 @@
 | 0 | Baseline Git | `done` | Working tree compris, aucun fichier perdu, Git lisible |
 | 1 | Build + TypeScript | `done` | `pnpm check` et `pnpm build` sans erreur |
 | 2 | Dead Code + Architecture | `done` | Zéro dead code confirmé, architecture conforme AGENTS.md |
-| 3 | Correctness Données | `pending` | Données invalides ne cassent jamais app |
-| 4 | Auth + Sync | `pending` | Modèle sécurité documenté, risques assumés ou corrigés |
-| 5 | Service Worker + Offline | `pending` | Chaque route fonctionne online/offline selon contrat |
-| 6 | CSS + UI Polish | `pending` | UI cohérente, lisible, responsive, accessible |
-| 7 | Performance | `pending` | Budget documenté, aucune optimisation spéculative |
-| 8 | Tests QA | `pending` | Pipeline reproductible, régressions détectées |
-| 9 | Documentation | `pending` | README complet, limites documentées |
-| 10 | GitHub Clean | `pending` | CI verte, working tree propre, aucun secret tracké |
+| 3 | Correctness Données | `done` | Validateurs runtime et tests de données corrompues |
+| 4 | Auth + Sync | `done` | Modèle sécurité documenté, confirmation d’écrasement distante |
+| 5 | Service Worker + Offline | `done` | Routes FR/EN précachées et cache versionné |
+| 6 | CSS + UI Polish | `done` | Thèmes, contrastes et focus corrigés |
+| 7 | Performance | `done` | Build mesuré, double bootstrap écarté |
+| 8 | Tests QA | `done` | 26 fichiers et 457 tests unitaires passants |
+| 9 | Documentation | `done` | README et SECURITY.md complets |
+| 10 | GitHub Clean | `in_progress` | Workflow CI ajouté ; exécution GitHub à confirmer |
 
 ## Dépendances
 
@@ -26,7 +26,7 @@ Phase 0 est prerequisite de tout. Phases 1-5 séquentielles. Phase 6 dépend Pha
 
 ## Blocage connu
 
-**Phase 4 requiert décision**: auth reste gate local OU devient vrai backend. Pas d'implémentation implicite.
+**Phase 10 reste à confirmer sur GitHub** : le workflow est présent et passe les mêmes commandes localement ; la branche distante doit exécuter la CI.
 
 ## Commandes de validation
 
@@ -44,12 +44,12 @@ git status
 Phase  0: [x] Done
 Phase  1: [x] Done
 Phase  2: [x] Done
-Phase  3: [ ] Pending
-Phase  4: [ ] Pending
-Phase  5: [ ] Pending
-Phase  6: [ ] Pending
-Phase  7: [ ] Pending
-Phase  8: [ ] Pending
-Phase  9: [ ] Pending
-Phase 10: [ ] Pending
+Phase  3: [x] Done
+Phase  4: [x] Done
+Phase  5: [x] Done
+Phase  6: [x] Done
+Phase  7: [x] Done
+Phase  8: [x] Done
+Phase  9: [x] Done
+Phase 10: [~] In progress — CI ajoutée, exécution distante à confirmer
 ```

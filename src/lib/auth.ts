@@ -7,6 +7,16 @@
  * gates the UI so the rest of the app can be developed in a
  * "logged in" state.
  *
+ * SECURITY MODEL (v1):
+ * - This app is 100% offline/local-first — no backend exists.
+ * - The "auth" gate is purely cosmetic (UI access control).
+ * - localStorage data is readable by any code on the same origin.
+ * - WebDAV credentials are stored in plain text (deliberate tradeoff
+ *   documented in the UI and sync.ts). They are only sent to the
+ *   user-configured WebDAV server.
+ * - Never present this auth as a security boundary. It exists only
+ *   to support the dev workflow and optional UI gating.
+ *
  * Stored shape: { email: string, name: string }
  */
 

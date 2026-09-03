@@ -156,17 +156,20 @@ const L = t();
       </section>
 
       {/* ── Signup link ── */}
-      <p class="login__signup-text">
-        {L.login.createAccount}
+      <div class="login__signup">
+        <p class="login__signup-text">
+          {L.login.createAccount}
+        </p>
         <Button
-          variant="link"
+          variant="secondary"
           type="button"
+          fullWidth
           @click="showSignupMessage = !showSignupMessage"
-          class="login__signup-link"
+          class="login__signup-btn"
         >
           {L.login.createAccountLink}
         </Button>
-      </p>
+      </div>
 
       <p
         class="login__signup-msg"
@@ -216,7 +219,10 @@ const L = t();
       showSignupMessage: false,
       loading: false,
       theme: 'dark' as 'dark' | 'light',
-      locale: getLocale(),
+      get locale(): string {
+        const l = (window as { __LOCALE__?: string }).__LOCALE__;
+        return l === 'en' ? 'en' : 'fr';
+      },
       switchToLight: LABELS.layout.switchToLight,
       switchToDark: LABELS.layout.switchToDark,
       switchLocaleAria: LABELS.layout.switchLocale,
@@ -603,6 +609,14 @@ const L = t();
   }
 
   /* ── Signup ── */
+  .login__signup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.0rem;
+    margin-top: 0.4rem;
+  }
+
   .login__signup-text {
     text-align: center;
     color: var(--color-muted);
@@ -611,16 +625,13 @@ const L = t();
     margin: 0;
   }
 
-  .login__signup-link {
-    padding: 0 0.4rem;
-    margin-left: 0.4rem;
+  .login__signup-btn {
+    font-size: 1.3rem;
     font-weight: 600;
+    min-height: 4.4rem;
   }
-  .login__signup-link:focus-visible {
-    outline: none;
-    text-decoration: underline;
-    box-shadow: var(--focus-ring);
-    border-radius: 2px;
+  .login__signup-btn:active {
+    transform: scale(0.985);
   }
 
   .login__signup-msg {

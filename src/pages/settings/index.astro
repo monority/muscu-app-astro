@@ -457,7 +457,7 @@ const APP_VERSION = '0.0.1';
               class="set__sync-btn"
               :disabled="syncBusy !== null || !syncForm.url.trim()"
               :loading="syncBusy === 'push'"
-              @click="pushSync()"
+              @click="askPush()"
             >
               <span x-show="syncBusy !== 'push'" x-cloak x-text="labels.syncPush">{L.settings.sync.push}</span>
               <span x-show="syncBusy === 'push'" x-cloak x-text="labels.syncPushing">{L.settings.sync.pushing}</span>
@@ -553,6 +553,35 @@ const APP_VERSION = '0.0.1';
     </Dialog>
 
     {/* ═════════════════════════════════════════════════════
+        WEBDAV PUSH OVERWRITE CONFIRMATION DIALOG
+        ═════════════════════════════════════════════════════ */}
+    <Dialog id="set-push-dialog" title={L.settings.sync.pushTitle}>
+      <p class="set__dialog-text">{L.settings.sync.pushBody}</p>
+      <p class="set__dialog-muted">
+        {L.settings.sync.pushIrreversible}
+      </p>
+
+      <div slot="footer">
+        <Button
+          variant="secondary"
+          data-dialog-close
+          type="button"
+        >
+          {L.common.cancel}
+        </Button>
+        <Button
+          variant="destructive"
+          type="button"
+          x-bind:disabled="syncBusy !== null"
+          @click="confirmPush()"
+        >
+          <span x-show="syncBusy !== 'push'" x-cloak>{L.settings.sync.pushConfirm}</span>
+          <span x-show="syncBusy === 'push'" x-cloak>{L.settings.sync.pushing}</span>
+        </Button>
+      </div>
+    </Dialog>
+
+    {/* ═════════════════════════════════════════════════════
         WEBDAV RESTORE CONFIRMATION DIALOG
         ═════════════════════════════════════════════════════ */}
     <Dialog id="set-restore-dialog" title={L.settings.sync.restoreTitle}>
@@ -637,6 +666,7 @@ const APP_VERSION = '0.0.1';
       syncForm: { url: '', username: '', password: '' },
       syncConfigured: false,
       syncBusy: null as 'test' | 'push' | 'pull' | null,
+      syncHasBackup: false,
       syncLastLabel: '',
       labels: {
         notSet: LABELS.settings.notSet,
@@ -912,6 +942,7 @@ const APP_VERSION = '0.0.1';
             this.syncForm.username,
             this.syncForm.password,
           );
+          this.syncHasBackup = result.hasBackup;
           window.showToast(
             result.hasBackup ? this.labels.syncTestOk : this.labels.syncTestOkNoBackup,
             'success',
@@ -923,11 +954,19 @@ const APP_VERSION = '0.0.1';
         }
       },
 
-      async pushSync() {
+      askPush() {
         if (!this.syncForm.url.trim()) {
           window.showToast(this.labels.syncNotConfigured, 'error');
           return;
         }
+        if (this.syncHasBackup) {
+          this.openDialogById('set-push-dialog');
+        } else {
+          this.doPushSync();
+        }
+      },
+
+      async doPushSync() {
         this.syncBusy = 'push';
         try {
           const snapshot = exportAllData();
@@ -941,6 +980,7 @@ const APP_VERSION = '0.0.1';
             this.syncForm.password,
             snapshot,
           );
+          this.syncHasBackup = true;
           this.persistSyncConfigWithNow();
           window.showToast(this.labels.syncPushed, 'success');
         } catch (err) {
@@ -948,6 +988,11 @@ const APP_VERSION = '0.0.1';
         } finally {
           this.syncBusy = null;
         }
+      },
+
+      async confirmPush() {
+        this.closeDialogById('set-push-dialog');
+        await this.doPushSync();
       },
 
       askRestore() {

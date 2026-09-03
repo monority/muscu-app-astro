@@ -142,7 +142,10 @@ const { title, class: className = "" } = Astro.props as Props;
     const Alpine = (window as any).Alpine;
 
     Alpine.data("localeApp", () => ({
-      locale: getLocale(),
+      get locale(): string {
+        const l = (window as { __LOCALE__?: string }).__LOCALE__;
+        return l === "en" ? "en" : "fr";
+      },
       switchToLight: L.layout.switchToLight,
       switchToDark: L.layout.switchToDark,
       switchLocaleAria: L.layout.switchLocale,

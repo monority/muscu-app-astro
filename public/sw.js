@@ -15,7 +15,7 @@
  * and navigate between cached pages without a connection.
  * ───────────────────────────────────────────────────────────── */
 
-const VERSION = "muscu-app-v6";
+const VERSION = "muscu-app-v7";
 const STATIC_CACHE = `${VERSION}-shell`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 
@@ -29,24 +29,39 @@ const APP_SHELL = [
   "/sessions/create",
   "/sessions/detail",
   "/sessions/quick",
+  "/sessions/print",
+  "/sessions/compare",
   "/exercises",
+  "/exercises/trends",
+  "/exercises/history",
   "/progression",
+  "/progression/stats",
+  "/progression/records",
+  "/progression/poids",
   "/settings",
   "/timer",
+  "/timer/pop",
   "/calendar",
+  "/calculator",
   "/login",
   "/en",
   "/en/sessions",
   "/en/sessions/create",
   "/en/sessions/detail",
   "/en/sessions/quick",
+  "/en/sessions/print",
+  "/en/sessions/compare",
   "/en/exercises",
+  "/en/exercises/trends",
+  "/en/exercises/history",
   "/en/progression",
+  "/en/progression/stats",
+  "/en/progression/records",
+  "/en/progression/poids",
   "/en/settings",
   "/en/timer",
-  "/timer/pop",
-  "/en/timer/pop",
   "/en/calendar",
+  "/en/calculator",
   "/en/login",
   "/manifest.json",
   "/favicon.svg",
