@@ -1,5 +1,7 @@
 # muscu.app
 
+[Open gymempire.vercel.app](https://gymempire.vercel.app)
+
 Offline-first strength training log. 100% client-side — no backend, no accounts, no tracking.
 
 ## Stack
@@ -17,7 +19,7 @@ Offline-first strength training log. 100% client-side — no backend, no account
 pnpm install
 ```
 
-Requires Node.js ≥ 22.12.0.
+Requires Node.js ≥ 22.13.0.
 
 ## Scripts
 
