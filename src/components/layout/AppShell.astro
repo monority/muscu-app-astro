@@ -11,7 +11,7 @@ import Header from "./Header.astro";
 import Icon from "../ui/Icon.astro";
 import { t } from "../../i18n";
 import { renderIcon } from "../../lib/nav";
-import type { NavGroup } from "../../lib/types";
+import type { NavGroup, NavItem } from "../../lib/types";
 
 interface Props {
   groups: NavGroup[];
@@ -30,8 +30,8 @@ const drawerItems = groups.map((group) => ({
   items: group.items.flatMap((item) => {
     const base = { ...item, children: undefined as undefined };
     if (!item.children?.length) return [base];
-    return [base, ...item.children.map((c) => ({ ...c, isChild: true }))];
-  }),
+    return [base, ...item.children.map((c) => ({ ...c, isChild: true as const }))];
+  }) as Array<NavItem & { isChild?: boolean; children: undefined }>,
 }));
 ---
 

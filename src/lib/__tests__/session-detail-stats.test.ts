@@ -180,7 +180,7 @@ describe('hasNotes', () => {
   });
 
   it('returns true when mood is set', () => {
-    expect(hasNotes(makeSession({ mood: 'neutral' }))).toBe(true);
+    expect(hasNotes(makeSession({ mood: 'ok' }))).toBe(true);
   });
 
   it('returns true when notes text exists', () => {

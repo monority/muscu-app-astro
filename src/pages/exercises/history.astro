@@ -305,7 +305,13 @@ const L = t();
   const CHART_H = 300;
 
   function typeLabelLocal(t: SetType): string {
-    return typeLabelFn(t, LABELS.historique);
+    return typeLabelFn(t, {
+      warmup: LABELS.historique.typeWarmup,
+      work: LABELS.historique.typeWork,
+      top: LABELS.historique.typeTop,
+      drop: LABELS.historique.typeDrop,
+      failure: LABELS.historique.typeFailure,
+    });
   }
 
   /**

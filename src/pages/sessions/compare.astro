@@ -478,7 +478,17 @@ const L = t();
   }
 
   function typeLabelLocal(t: SetType): string {
-    return typeLabelFn(t, LABELS.rapide);
+    return typeLabelFn(t, {
+      warmup: LABELS.rapide.typeWarmup,
+      work: LABELS.rapide.typeWork,
+      top: LABELS.rapide.typeTop,
+      drop: LABELS.rapide.typeDrop,
+      failure: LABELS.rapide.typeFailure,
+    });
+  }
+
+  function formatVolumeFn(v: number): string {
+    return formatVolume(v);
   }
 
   function exerciseVolumeFn(ex: SessionExercise | undefined): number {

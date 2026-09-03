@@ -202,7 +202,13 @@ const title = `${L.detail.title} — muscu.app`;
       }
 
       function typeLabelLocal(t: SetType): string {
-        return typeLabelFn(t, LABELS.detail);
+        return typeLabelFn(t, {
+          warmup: LABELS.detail.typeWarmup,
+          work: LABELS.detail.typeWork,
+          top: LABELS.detail.typeTop,
+          drop: LABELS.detail.typeDrop,
+          failure: LABELS.detail.typeFailure,
+        });
       }
 
       function formatDateTimeLocal(iso: string): string {

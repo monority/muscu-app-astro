@@ -59,7 +59,6 @@ function completedSession(
         exerciseId: 'e1',
         name: 'Bench',
         muscle: 'Pectoraux',
-        supersetId: null,
         sets: [
           { exerciseId: 'e1', setNumber: 1, weight: volume, reps: 1, type: 'work', completed: true },
         ],
@@ -101,8 +100,8 @@ describe('topExercisesByVolume', () => {
       {
         ...completedSession('2026-08-23', 100),
         exercises: [
-          { exerciseId: 'a', name: 'A', muscle: 'Pectoraux', supersetId: null, sets: [{ exerciseId: 'a', setNumber: 1, weight: 100, reps: 3, type: 'work', completed: true }] },
-          { exerciseId: 'b', name: 'B', muscle: 'Dos', supersetId: null, sets: [{ exerciseId: 'b', setNumber: 1, weight: 100, reps: 5, type: 'work', completed: true }] },
+          { exerciseId: 'a', name: 'A', muscle: 'Pectoraux', sets: [{ exerciseId: 'a', setNumber: 1, weight: 100, reps: 3, type: 'work', completed: true }] },
+          { exerciseId: 'b', name: 'B', muscle: 'Dos', sets: [{ exerciseId: 'b', setNumber: 1, weight: 100, reps: 5, type: 'work', completed: true }] },
         ],
       } as Session,
     ];

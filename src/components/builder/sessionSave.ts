@@ -13,6 +13,7 @@ import {
   type Exercise,
   type SessionExercise,
   type SessionMood,
+  type SessionStatus,
 } from "../../lib/storage";
 import { type BuilderExercise } from "../../lib/session-builder-stats";
 
@@ -81,7 +82,7 @@ export interface SessionPayload {
   name: string;
   date: string;
   exercises: SessionExercise[];
-  status: string;
+  status: SessionStatus;
   rpe?: number;
   fatigue?: number;
   mood?: SessionMood;

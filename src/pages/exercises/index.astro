@@ -777,7 +777,7 @@ const categories = [
         generateWarmup() {
           const warmups = generateWarmupRows(this.addSets);
           if (warmups.length === 0) {
-            showToast(LABELS.builder.warmupHint);
+            window.showToast(LABELS.builder.warmupHint);
             return;
           }
           this.addSets = [...warmups, ...this.addSets];
@@ -826,7 +826,7 @@ const categories = [
 
           this.closeAddToSession();
           this.refresh();
-          showToast(LABELS.exercices.toastAdded);
+          window.showToast(LABELS.exercices.toastAdded);
         },
 
         // ── Dialog helpers ──

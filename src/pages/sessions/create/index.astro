@@ -670,7 +670,7 @@ const setTypes = [
 
       openTips: [] as string[],
 
-      labels: pickBuilderLabels(LABELS),
+      labels: pickBuilderLabels(LABELS as unknown as { builder: Record<string, string> }),
 
       editSessionId: null as string | null,
 
