@@ -321,6 +321,34 @@ const DEFAULT_EXERCISES: ReadonlyArray<{
 ];
 
 // ============================================================================
+// Runtime validators — guard against corrupted localStorage / bad imports
+// ============================================================================
+
+function isExercise(v: unknown): v is Exercise {
+  if (typeof v !== 'object' || v === null) return false;
+  const o = v as Record<string, unknown>;
+  return typeof o.id === 'string' && typeof o.name === 'string';
+}
+
+function isSessionSet(v: unknown): v is SessionSet {
+  if (typeof v !== 'object' || v === null) return false;
+  const o = v as Record<string, unknown>;
+  return typeof o.exerciseId === 'string';
+}
+
+function isSession(v: unknown): v is Session {
+  if (typeof v !== 'object' || v === null) return false;
+  const o = v as Record<string, unknown>;
+  return typeof o.id === 'string' && typeof o.date === 'string';
+}
+
+function isBodyRecord(v: unknown): v is BodyRecord {
+  if (typeof v !== 'object' || v === null) return false;
+  const o = v as Record<string, unknown>;
+  return typeof o.date === 'string' && o.weight != null;
+}
+
+// ============================================================================
 // Generic helpers
 // ============================================================================
 
@@ -381,11 +409,12 @@ export function calculate1RM(weight: number, reps: number): number {
 
 export function getExercises(): Exercise[] {
   const existing = getStore<Exercise[]>(STORAGE_KEYS.exercises, []);
+  const valid = Array.isArray(existing) ? existing.filter(isExercise) : [];
 
   // Merge: find defaults not yet in the user's list (by name+muscle match)
   const now = new Date().toISOString();
   const existingKeys = new Set(
-    existing.map((e) => `${e.name}|||${e.muscle}`),
+    valid.map((e) => `${e.name}|||${e.muscle}`),
   );
   const missing = DEFAULT_EXERCISES.filter(
     (d) => !existingKeys.has(`${d.name}|||${d.muscle}`),
@@ -393,7 +422,7 @@ export function getExercises(): Exercise[] {
 
   if (missing.length > 0) {
     const merged = [
-      ...existing,
+      ...valid,
       ...missing.map((ex) => ({
         id: generateId(),
         name: ex.name,
@@ -406,7 +435,7 @@ export function getExercises(): Exercise[] {
     return merged;
   }
 
-  if (existing.length > 0) return existing;
+  if (valid.length > 0) return valid;
 
   // First run: seed everything
   const seeded: Exercise[] = DEFAULT_EXERCISES.map((ex) => ({
@@ -479,7 +508,7 @@ function normalizeSession(session: Session): Session {
       ? session.exercises.map((exercise) => ({
           ...exercise,
           sets: Array.isArray(exercise.sets)
-            ? exercise.sets.map((set) => ({
+            ? exercise.sets.filter(isSessionSet).map((set) => ({
                 ...set,
                 setNumber: Number(set.setNumber) || 0,
                 weight: Number(set.weight) || 0,
@@ -494,7 +523,7 @@ function normalizeSession(session: Session): Session {
 
 export function getSessions(): Session[] {
   const raw = getStore<Session[]>(STORAGE_KEYS.sessions, []);
-  return Array.isArray(raw) ? raw.map(normalizeSession) : [];
+  return Array.isArray(raw) ? raw.filter(isSession).map(normalizeSession) : [];
 }
 
 export function saveSession(session: Omit<Session, 'id'>): Session {
@@ -578,7 +607,7 @@ export function getSessionsThisWeek(): Session[] {
 export function getBodyRecords(): BodyRecord[] {
   const raw = getStore<BodyRecord[]>(STORAGE_KEYS.body, []);
   const normalized = Array.isArray(raw)
-    ? raw.map((record) => ({
+    ? raw.filter(isBodyRecord).map((record) => ({
         ...record,
         weight: Number(record.weight) || 0,
         ...(record.arm == null ? {} : { arm: Number(record.arm) || 0 }),
@@ -823,10 +852,10 @@ export function importAllData(snapshot: unknown): void {
     throw new Error('Réglages invalides.');
   }
 
-  if (data.exercises) setStore(STORAGE_KEYS.exercises, data.exercises);
-  if (data.sessions) setStore(STORAGE_KEYS.sessions, data.sessions);
+  if (data.exercises) setStore(STORAGE_KEYS.exercises, data.exercises.filter(isExercise));
+  if (data.sessions) setStore(STORAGE_KEYS.sessions, data.sessions.filter(isSession).map(normalizeSession));
   if (data.progress) setStore(STORAGE_KEYS.progress, data.progress);
-  if (data.body) setStore(STORAGE_KEYS.body, data.body);
+  if (data.body) setStore(STORAGE_KEYS.body, data.body.filter(isBodyRecord));
   if (data.settings) {
     setStore(STORAGE_KEYS.settings, { ...DEFAULT_SETTINGS, ...data.settings });
   }

@@ -4,7 +4,7 @@
 |-------|-------------|------|----------|
 | 0 | Baseline Git | `done` | Working tree compris, aucun fichier perdu, Git lisible |
 | 1 | Build + TypeScript | `done` | `pnpm check` et `pnpm build` sans erreur |
-| 2 | Dead Code + Architecture | `pending` | Zéro dead code confirmé, architecture conforme AGENTS.md |
+| 2 | Dead Code + Architecture | `done` | Zéro dead code confirmé, architecture conforme AGENTS.md |
 | 3 | Correctness Données | `pending` | Données invalides ne cassent jamais app |
 | 4 | Auth + Sync | `pending` | Modèle sécurité documenté, risques assumés ou corrigés |
 | 5 | Service Worker + Offline | `pending` | Chaque route fonctionne online/offline selon contrat |
@@ -43,7 +43,7 @@ git status
 ```
 Phase  0: [x] Done
 Phase  1: [x] Done
-Phase  2: [ ] Pending
+Phase  2: [x] Done
 Phase  3: [ ] Pending
 Phase  4: [ ] Pending
 Phase  5: [ ] Pending
