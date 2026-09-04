@@ -76,7 +76,7 @@ export default {
   suggestionMaintainDetail: 'The perceived effort is high (average RPE > 8 / 10). Keep the same load for one or two more sessions to solidify the plateau, then increase by 2.5 kg.',
   suggestionContinueHeadline: 'Keep up the good work',
   suggestionContinueDetail: 'You are working in the right effort zone (average RPE between 6 and 8 / 10). Keep the same load for one or two more sessions before increasing.',
-  shareFooter: 'muscu.app — Training Log',
+  shareFooter: 'Gym Empire — Training Log',
   shareSetsLabel: 'SETS',
   supersetLabel: 'Superset',
   // ── Session sheet (PDF/CSV) ──
@@ -88,7 +88,7 @@ export default {
   printPdfAria: 'Print the sheet or save it as PDF',
   csvDownloaded: 'Session CSV downloaded.',
   csvDownloadFailed: 'Failed to export the session CSV.',
-  printFooter: 'Generated with Muscu App',
+  printFooter: 'Generated with Gym Empire',
   printNotFoundTitle: 'Sheet unavailable',
   printNotFoundDesc: 'This session could not be found. Go back and try again.',
   printNotFoundBack: 'Back to the session',

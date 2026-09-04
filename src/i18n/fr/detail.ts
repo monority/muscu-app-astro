@@ -76,7 +76,7 @@ export default {
   suggestionMaintainDetail: 'L\'effort perçu est élevé (RPE moyen > 8 / 10). Conserve la même charge une à deux séances de plus pour solidifier le palier, puis augmente de 2,5 kg.',
   suggestionContinueHeadline: 'Continue sur cette lancée',
   suggestionContinueDetail: 'Tu travailles dans la bonne zone d\'effort (RPE moyen entre 6 et 8 / 10). Conserve la même charge encore une ou deux séances avant d\'augmenter.',
-  shareFooter: 'muscu.app — Training Log',
+  shareFooter: 'Gym Empire — Training Log',
   shareSetsLabel: 'SÉRIES',
   supersetLabel: 'Superset',
   // ── Fiche de séance (PDF/CSV) ──
@@ -88,7 +88,7 @@ export default {
   printPdfAria: 'Imprimer la fiche ou l\'enregistrer en PDF',
   csvDownloaded: 'Fiche CSV téléchargée.',
   csvDownloadFailed: 'Échec de l\u2019export de la fiche CSV.',
-  printFooter: 'Généré avec Muscu App',
+  printFooter: 'Généré avec Gym Empire',
   printNotFoundTitle: 'Fiche indisponible',
   printNotFoundDesc: 'Cette séance est introuvable. Revenez en arrière et réessayez.',
   printNotFoundBack: 'Retour à la séance',

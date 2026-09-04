@@ -125,7 +125,7 @@ export function generateSessionShareCard(
   ctx.fillStyle = accent;
   ctx.font = `bold 42px ${fontCond}`;
   ctx.textAlign = 'left';
-  ctx.fillText('muscu.app', PAD, 100);
+  ctx.fillText('Gym Empire', PAD, 100);
 
   ctx.fillStyle = muted;
   ctx.font = `28px ${fontBody}`;

@@ -48,6 +48,17 @@ const setTypes = [
   >
 
     <div class="create__action-bar">
+      <div class="create__summary" x-show="exercises.length > 0" aria-live="polite">
+        <span class="create__summary-item">
+          <strong x-text="exercises.length"></strong>
+          <span>{L.builder.exercisesWord}</span>
+        </span>
+        <span class="create__summary-separator" aria-hidden="true">/</span>
+        <span class="create__summary-item">
+          <strong x-text="exercises.reduce((total, exercise) => total + exercise.sets.length, 0)"></strong>
+          <span>{L.builder.setsPlural}</span>
+        </span>
+      </div>
       <Button variant="secondary" @click="discard()">
         {L.common.cancel}
       </Button>
@@ -1089,6 +1100,34 @@ const setTypes = [
     gap: 0.5rem;
   }
 
+  .create__summary {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-right: auto;
+    color: var(--color-muted);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .create__summary-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .create__summary-item strong {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .create__summary-separator {
+    color: var(--alpha-text-faint);
+  }
+
   .create__info-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1457,15 +1496,15 @@ const setTypes = [
     flex-direction: column;
     gap: 0.4rem;
     padding: 1.2rem;
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     border: 1px solid var(--color-border);
-    background-color: var(--color-surface-2);
+    background-color: transparent;
     text-align: left;
     transition: border-color var(--transition-fast), background-color var(--transition-fast);
   }
   .create__picker-tpl:hover {
     border-color: var(--color-accent);
-    background-color: var(--color-surface-3);
+    background-color: transparent;
   }
 
   .create__picker-tpl-name {
@@ -1589,6 +1628,10 @@ const setTypes = [
   }
 
   @media (max-width: 480px) {
+    .create__summary {
+      display: none;
+    }
+
     .ses-ex-header {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 4.4rem;

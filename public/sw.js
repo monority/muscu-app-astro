@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
- * muscu.app — service worker
+ * Gym Empire — service worker
  *
  * Strategy
  *   • install  : precache the app shell (the main HTML routes)
@@ -74,7 +74,7 @@ const OFFLINE_HTML = `<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hors ligne — muscu.app</title>
+    <title>Hors ligne — Gym Empire</title>
     <style>
       :root { color-scheme: dark; }
       html, body { height: 100%; margin: 0; }

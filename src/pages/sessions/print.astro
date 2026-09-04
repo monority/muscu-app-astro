@@ -17,7 +17,7 @@ const locale = currentPath.startsWith('/en') ? 'en' : 'fr';
 setLocale(locale);
 const L = t();
 const lang = getLocale();
-const title = `${L.detail.title} — muscu.app`;
+const title = `${L.detail.title} — Gym Empire`;
 ---
 
 <html lang={lang}>
@@ -47,7 +47,7 @@ const title = `${L.detail.title} — muscu.app`;
   <body>
     {/* ── Screen-only toolbar (hidden in @media print) ── */}
     <div class="print-toolbar">
-      <span class="print-toolbar__brand">muscu.app</span>
+      <span class="print-toolbar__brand">Gym Empire</span>
       <button type="button" class="print-toolbar__btn" onclick="window.print()">
         {L.detail.printPdf}
       </button>
@@ -67,7 +67,7 @@ const title = `${L.detail.title} — muscu.app`;
         <article class="sheet">
           {/* Header */}
           <header class="sheet__head">
-            <div class="sheet__brand">muscu.app</div>
+            <div class="sheet__brand">Gym Empire</div>
             <div class="sheet__title-row">
               <h1 class="sheet__title" x-text="session.name"></h1>
               <span

@@ -1,101 +1,66 @@
-# Plan Finalisation muscu.app
+# Plan de transformation produit — GymEmpire
 
-## Objectif
+## Ambition
 
-Finaliser, stabiliser, polisher app Astro/Alpine. Livrer GitHub propre, testée, documentée.
+Construire une application de suivi de musculation crédible face aux meilleurs produits fitness : rapide en salle, lisible sous pression, visuellement premium, fiable offline et suffisamment rigoureuse pour inspirer confiance.
 
-## État actuel
+## Principes de produit
 
-| Item | État |
-|------|------|
-| Tests | 457 passants |
-| astro check | Erreurs TS préexistantes |
-| README | Vide |
-| Lint/format | Aucun configuré |
-| E2E/accessibilité | Aucun test |
-| Working tree | 37 paths modifiés, fichiers non suivis |
-| Historique | DB SQLite potentiellement sensible |
-| Auth | Simple gate localStorage |
-| WebDAV | Credentials persistés localement |
-| Service worker | Routes précachées incomplètes |
-| Alpine | Double bootstrap sur debug/print |
-| CSS | Risques light-theme, focus, placeholder, dead selectors |
+- L'utilisateur doit savoir quoi faire dans les 3 secondes suivant l'ouverture d'un écran.
+- Chaque écran possède une action principale clairement dominante.
+- La saisie pendant l'entraînement doit demander le moins de taps possible.
+- Les données importantes sont visibles avant les détails.
+- Toute action destructive est réversible ou confirmée.
+- Une interface professionnelle gère les états vide, chargement, erreur, succès et données longues.
 
-## Phases
+## Priorités
 
-### Phase 0 — Baseline Git
+### 1. Fondations visuelles
 
-Identifier commit de référence. Classer chaque fichier (garder/supprimer/ignorer). Ne jamais `git clean` sans validation. Ajouter `.gitattributes`. Étendre `.gitignore`. Commits cohérents par sujet.
+- Définir une grille, une échelle typographique et des espacements cohérents.
+- Harmoniser cartes, boutons, champs, badges, tableaux, modales et notifications.
+- Construire une identité GymEmpire : contrastée, énergique, sobre et reconnaissable.
+- Garantir dark/light mode, responsive, clavier et contraste.
 
-### Phase 1 — Build + TypeScript
+### 2. Dashboard
 
-Corriger toutes erreurs `astro check`. Ajouter scripts `check`, `test`, `build` dans package.json. Critère: `pnpm check` et `pnpm build` passent sans erreur.
+- Donner une lecture immédiate de la semaine et de la prochaine séance.
+- Mettre en avant les KPI réellement actionnables.
+- Remplacer les zones plates par une hiérarchie de surfaces et de groupes.
+- Ajouter des états utiles : première utilisation, aucune donnée récente, objectif atteint.
 
-### Phase 2 — Dead Code + Architecture
+### 3. Builder de séance
 
-Imports inutilisés, composants orphelins, fonctions jamais appelées. Vérifier Alpine Componentization Rule (AGENTS.md). Supprimer anciennes abstractions. Réconcilier ROADMAP.md.
+- Parcours guidé : nom, modèle, exercices, séries, notes, sauvegarde.
+- Recherche d'exercices rapide avec favoris, muscles et templates visibles.
+- Résumé permanent : exercices, séries, volume prévu et validité de la séance.
+- Saisie dense mais confortable, réordonnable et sans perte de données.
+- Supersets et séries avancées compréhensibles sans explication externe.
 
-### Phase 3 — Correctness Données
+### 4. Session active
 
-Valider JSON importé. Refuser records malformés. Gérer migrations. Normaliser NaN/négatifs/Infinity/champs absents. Tester corruption localStorage, import partiel, migration version.
+- Afficher en priorité exercice courant, série courante, repos et progression.
+- Contrôles tactiles larges et utilisables à une main.
+- Feedback immédiat après validation, undo fiable et prévention des erreurs.
+- Timer persistant et comportement robuste lorsque l'écran est verrouillé ou offline.
 
-### Phase 4 — Auth + Sync
+### 5. Progression et confiance
 
-Décision: gate local OU vrai backend. Ne jamais présenter localStorage auth comme sécurité. Évaluer credentials WebDAV. Ajouter confirmation overwrite distant. Stratégie conflit (last-write-wins ou merge). Tester erreurs réseau.
+- Graphiques lisibles avec unités, périodes, tendances et états sans données.
+- Import/export et synchronisation transparents, avec erreurs explicites.
+- Authentification et stockage documentés sans promesse de sécurité trompeuse.
 
-**État: Terminé.** Auth = fake dev gate (pas de sécurité). Sync = WebDAV Basic auth. Push overwrite confirmation ajoutée. Security model documenté dans auth.ts.
+## Méthode par lot
 
-### Phase 5 — Service Worker + Offline
+Pour chaque écran : audit du parcours, inventaire des états, proposition visuelle, implémentation, tests responsive/accessibilité, puis validation des régressions.
 
-Générer routes depuis build Astro. Inclure FR/EN. Versionner cache. Tester installation, activation, navigation offline, assets obsolètes, routes inconnues.
+## Critères d'exigence
 
-**État: Terminé.** Routes précachées complétées (16 FR + 16 EN). Version bump v6→v7. `/en/timer/pop` retiré (n'existe pas).
-
-### Phase 6 — CSS + UI Polish
-
-Tokens (`color-scheme`, couleurs sémantiques). Corriger placeholder, Dialog, Checkbox, Toggle. Contraste WCAG. Focus rings. Dead CSS selectors. Audit `outline: none`. Labels vides (StatusSection, NotesSection).
-
-**État: Terminé.** `color-scheme` ajouté (dark/light). Placeholder contrast fixé (`Input.astro`, `Pagination.astro`, `TableRow.astro`). Focus rings OK (outline:none + box-shadow). 0 dead CSS selectors.
-
-### Phase 7 — Performance
-
-Supprimer double bootstrap Alpine. Mesurer build. Vérifier scripts inline, fonts, SVG, recalculs Alpine. Optimiser uniquement si mesure justifie.
-
-**État: Terminé.** Pas de double bootstrap (Alpine.start() sur DCL, module scripts). Build: 42 pages, 1.70s, 2.82 MB total. Fonts: Google Fonts avec preconnect. Inline scripts minimaux (locale, theme bootstrap). Tests: 457 ✅
-
-### Phase 8 — Tests QA
-
-Unitaires (stats, storage, sync, timers, builder). DOM (Alpine init, interactions, dialogs, forms). E2E (login, CRUD sessions, import/export, sync, theme, offline, FR/EN). Accessibilité automatisée.
-
-**État: Audit terminé.** 26 fichiers, 457 tests unitaires (Vitest). Couverture: auth, storage, sync, stats (6 modules), builder, calculator, timer, benchmarks, body-chart, calendar-grid, exercises-stats, rest-times, settings-stats, session-utils. **Gaps:** pas de tests i18n, pas de tests DOM/Alpine, pas de framework E2E (Playwright absent). jsdom disponible pour tests DOM futurs.
-
-### Phase 9 — Documentation
-
-README complet (mission, stack, install, architecture, data model, auth, WebDAV, offline, i18n, themes, deployment, backup/restore, limites). CONTRIBUTING.md, SECURITY.md, CHANGELOG.md si utile.
-
-**État: Terminé.** README réécrit (stack, install, architecture, data model, auth, WebDAV, offline, routes, i18n, themes, tests, build, deployment, limits). SECURITY.md créé (auth, localStorage, WebDAV tradeoffs). Plan déplacé dans plan.md existant.
-
-### Phase 10 — GitHub Clean
-
-Historique SQLite sensible. `.gitignore` étendu. CI GitHub Actions (install, test, check, build). Commits atomiques. Vérifier `git diff --check`. Working tree propre.
-
-**État: En cours.** Workflow GitHub Actions ajouté (`.github/workflows/ci.yml`) avec install reproductible, tests, `astro check` et build. Reste à confirmer l’exécution sur GitHub et à finaliser le commit.
-
-## Critères de sortie
-
-```
-pnpm test → vert
-pnpm check → vert
-pnpm build → vert
-git diff --check → vert
+```text
+pnpm test        -> vert
+pnpm check       -> vert
+pnpm build       -> vert
+git diff --check -> vert
 ```
 
-Aucun dead code. Aucune route cassée FR/EN. Thème dark/light validé. Responsive validé. Accessibilité critique corrigée. Offline validé. Auth/sync documentés. README complet. CI verte. Aucun secret tracké.
-
-## Commande d'exécution
-
-```
-Lire AGENTS.md → Lire ce plan → Lire git status → Phase 0 → tester → Phase 1 → tester → ...
-```
-
-Ne pas passer phase suivante si critères phase actuelle non atteints.
+Une fonctionnalité n'est pas terminée si elle fonctionne uniquement dans le cas nominal.

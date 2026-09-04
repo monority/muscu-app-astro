@@ -2,7 +2,7 @@
 
 ## Auth
 
-muscu.app uses a **fake dev gate** — not a real auth system.
+Gym Empire uses a **fake dev gate** — not a real auth system.
 
 - No password check
 - No token

@@ -1,4 +1,4 @@
-# muscu.app
+# Gym Empire
 
 [Open gymempire.vercel.app](https://gymempire.vercel.app)
 
